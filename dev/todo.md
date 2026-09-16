@@ -1,7 +1,7 @@
 # Todo
 
 ## Active
-- [ ]
+- [ ] Project Overwatch: FR-01 (monitoring panel) shipped 2026-08-21 (prompt-19819f2e); FR-02–FR-10 remaining (design-project-overwatch.md §9.2). OQ-09 side-by-side validation vs govwatch TUI still required before any retirement decision.
 
 ## Planned
 - [ ] Live Ralph Loop smoke test of the pytest SHIP gate (change-5bdc2d9b) against a project with an existing tests/ directory
