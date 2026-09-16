@@ -254,9 +254,29 @@ Authoring these protocols is **out of scope for this change** (§6.2).
   `README.md`, `RATIONALE.md`, `CLAUDE.md`.
 - Regeneration of tables of contents, the `primer.md` §5.0 and §8.0 tables and
   the `workflow.md` flowchart node references.
-- Synchronisation of the `dev/smoke/ai/` mirror.
+- Regeneration of the `dev/smoke/ai/` harness copy from the migrated `ai/`
+  tree. This path is gitignored (`.gitignore` line 52) and is a propagated
+  copy, not a maintained corpus; it is regenerated after execution, never
+  migrated in place.
 - The permanent alias appendix (§4.4).
 - Migration and verification scripts.
+
+#### 6.1.1 Migration Set
+
+The migration set is the exact list of paths the script may write to. It is
+closed; anything not named here is out of scope by construction.
+
+| Path | Reason |
+|---|---|
+| `ai/**` | The live framework |
+| `docs/**` | Operator-facing guides; 141 citation tokens |
+| `CLAUDE.md` | Runtime tactical context file for the `claude_code` and `claude_omlx` profiles; 10 tokens |
+| `README.md` | 8 tokens |
+| `RATIONALE.md` | 2 tokens |
+| `dev/backup/**` | Written by the backup step only |
+
+`dev/smoke/ai/**` is regenerated from `ai/` after execution and is therefore
+not in the migration set.
 
 ### 6.2 Out of Scope
 
@@ -301,9 +321,16 @@ pre-migration commit, and the migration is executed on a dedicated branch.
 
 The script aborts before any write if:
 
-- The working tree is dirty at the start of the run, or
+- Any file in the migration set (§6.1.1) has uncommitted modifications, or
+- `HEAD` does not point at a commit, so the `pre-eb782f83` tag would anchor
+  nothing, or
 - The snapshot is incomplete, or
 - Re-reading any snapshot file yields a SHA-256 mismatch against `manifest.csv`.
+
+Uncommitted work elsewhere in the tree does not block the run. It cannot
+enter the migration diff, because the script writes only to the migration
+set, and it is not covered by the snapshot, for the same reason. Files
+outside the migration set remain the operator's responsibility.
 
 ### 7.4 Rollback
 
@@ -388,7 +415,7 @@ convention.
 | R1 | Sequential substitution corrupts fixed points and swaps (`T04`/`T05`, `T08`, `P00`, `P03`/`P04`) | Critical | Single atomic pass with sentinel tokens; V1 |
 | R2 | False positives — identifier patterns occurring in prose, code strings, hashes or dates | High | Word-boundary and context rules; dry run on `dev/smoke/`; full diff review before commit |
 | R3 | Partial application leaving a mixed-scheme corpus | High | Idempotent script; V2; single commit |
-| R4 | `dev/smoke/ai/` mirror drifts from `ai/` | Medium | Mirror migrated in the same run; V5–V7 executed against it |
+| R4 | `dev/smoke/ai/` harness copy left on the retired scheme, so `linter.py` and `protocol_checker.py` validate stale identifiers | Medium | Copy regenerated from the migrated `ai/` tree in the same run; V5–V7 executed against the regenerated copy |
 | R5 | Obsidian anchors break when headings renumber | Medium | V3, V4 |
 | R6 | Historical documents become unreadable | Medium | Permanent alias appendix (§4.4) |
 | R7 | Downstream repositories diverge silently | Medium | Pin recorded at v9.16; propagation tracked as a separate work item (D5) |
@@ -467,6 +494,7 @@ convention.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.1 | 2026-09-16 | §6.1.1 added defining the closed migration set (`ai/`, `docs/`, `CLAUDE.md`, `README.md`, `RATIONALE.md`, `dev/backup/`); `dev/smoke/ai/` reclassified from migrated mirror to regenerated propagated copy, it being gitignored; §7.3 abort gate narrowed from whole-tree cleanliness to migration-set cleanliness plus a valid `HEAD`; R4 restated accordingly. |
 | 1.0 | 2026-09-16 | Initial proposal. Records decisions D1–D6, the banded protocol scheme, template mapping, protocol-relative citation scheme, CI/CD gap assessment with reserved slots, backup and rollback design, nine-phase procedure, twelve verification checks and eight identified risks. |
 
 ---
