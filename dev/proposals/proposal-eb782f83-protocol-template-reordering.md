@@ -178,16 +178,30 @@ single atomic pass is mandatory (§10.0 R1).
 Citations become protocol-relative. The protocol identifier is the stable
 anchor; clause numbers are local to their protocol.
 
+Citations are written in dotted form, fully qualified, with no section sign.
+
 | Old | New |
 |---|---|
-| `§1.10.2` | `P13 §2` |
-| `§1.10.3` | `P13 §3` |
-| `§1.1.14.4` | `P00 §14.4` |
-| `§1.4.12` | `P04 §12` |
+| `§1.10.2` | `P13.2` |
+| `§1.10.3` | `P13.3` |
+| `§1.1.14.4` | `P00.14.4` |
+| `§1.4.12` | `P04.12` |
 
-Mapping rule: `§1.<protocol-ordinal>.<a>[.<b>]` maps to
-`<new protocol id> §<a>[.<b>]`. The rule is total, deterministic and bijective
-given the §4.1 protocol mapping.
+Mapping rule: `§1.<protocol-ordinal>.<a>[.<b>[.<c>]]` maps to
+`<new protocol id>.<a>[.<b>[.<c>]]`. The rule is total, deterministic and
+bijective given the §4.1 protocol mapping.
+
+Consequences:
+
+- The `§` glyph is retired from protocol citations entirely.
+- Every citation is fully qualified, including one made from inside the cited
+  protocol's own section. Bare relative forms such as `§2.3` are not permitted,
+  because they reintroduce a positional dependency on context.
+- `governance.md` headings carry the same identifier, for example
+  `#### P13.2 Prompt Authoring`, so a citation and its heading are textually
+  identical and therefore mechanically checkable.
+- `§` remains valid for sections of ordinary documents that are not protocols,
+  including this proposal's own section references.
 
 `governance.md` restructures so that each protocol is a top-level section
 identified by its protocol identifier, with clauses numbered relative to that
@@ -258,6 +272,18 @@ Authoring these protocols is **out of scope for this change** (§6.2).
   tree. This path is gitignored (`.gitignore` line 52) and is a propagated
   copy, not a maintained corpus; it is regenerated after execution, never
   migrated in place.
+- Canonicalisation of the primer: `ai/primer.md` is canonical, and
+  `docs/claude/primer.md` is overwritten from it after migration. The stale
+  canonical designation in `ai/primer.md` entry 0.7 is corrected. Divergence is
+  catalogued pre-migration in
+  `dev/reports/report-eb782f83-pre-migration-baseline.md` §3.0, which records
+  that the `docs/` copy holds no information absent from `ai/primer.md`.
+- Migration of protocol citations in the five Python files under `ai/` that
+  carry them: `ael/src/linter.py`, `ael/src/orchestrator.py`,
+  `ael/src/protocol_checker.py`, `src/govwatch.py`, `src/overwatch.py`. These
+  are comment and docstring edits only; no control flow depends on either
+  numbering. They are governed as a separate coupled issue-change-prompt triple
+  (§8.0 Phase 4a).
 - The permanent alias appendix (§4.4).
 - Migration and verification scripts.
 
@@ -364,6 +390,7 @@ convention.
 | 2 | Design document — mapping tables, citation rule, alias appendix, backup design | `dev/design/` |
 | 3 | Issue and change documents for the migration tooling | `dev/issue/`, `dev/change/` |
 | 4 | Migration script and verification script | `dev/` tooling; source code, full protocol applies |
+| 4a | Second coupled triple covering the five Python modules under `ai/` | Comment-only edits, governed in full per the P00 source-code rule |
 | 5 | Dry run against `dev/smoke/ai/`; diff review | — |
 | 6 | Backup snapshot, then execution on the live corpus | branch `reorder-eb782f83` |
 | 7 | Automated and manual verification (§9.0) | — |
@@ -403,6 +430,9 @@ convention.
 | V10 | Template filenames match their content | Manual review |
 | V11 | Backup restores cleanly | `--rollback` executed against a scratch copy, checksums verified |
 | V12 | Independent audit | Strategic audit, T08 report |
+| V13 | `docs/claude/primer.md` is identical to `ai/primer.md` | Diff; expect empty. Heading list and table row counts compared, not the byte diff alone |
+| V14 | Broken relative file links number 17 or fewer, and every one appears in the pre-migration baseline | Link scan compared against `report-eb782f83-pre-migration-baseline.md` §4.5 |
+| V15 | The five migrated Python modules import and execute unchanged | `linter.py` and `protocol_checker.py` run clean (V5, V6); `govwatch.py` and `overwatch.py` complete one scan cycle |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -420,6 +450,8 @@ convention.
 | R6 | Historical documents become unreadable | Medium | Permanent alias appendix (§4.4) |
 | R7 | Downstream repositories diverge silently | Medium | Pin recorded at v9.16; propagation tracked as a separate work item (D5) |
 | R8 | Scope creep into CI/CD authoring | Medium | §6.2; reserved slots decided now, content deferred |
+| R9 | Overwriting `docs/claude/primer.md` discards content unique to it | Low | Pre-migration divergence inventory establishes that no unique content exists; git history and the baseline report retain the discarded version-history table; V13 |
+| R10 | Pre-existing broken links mistaken for migration damage | Low | Baseline of 17 links captured before any work; V14 |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -438,6 +470,10 @@ convention.
    state, excepting `dev/smoke/` and `dev/backup/`.
 7. Governance version incremented to v10.0 with a version-history entry, and the
    pre- and post-migration commits tagged.
+8. `docs/claude/primer.md` is identical to `ai/primer.md`, and every divergence
+   listed in the baseline report §3.2 has resolved to the `ai/` form.
+9. The broken-link count is 17 or fewer and introduces no entry absent from the
+   baseline report §4.5.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -466,6 +502,9 @@ convention.
 | OQ-2 | Should the reserved Band A slot for continuous integration be `P05`, or should CI sit in Band B as a lifecycle stage? | Determines slot allocation in §5.3 |
 | OQ-3 | Does the `P16` Execution slot warrant a protocol, or should execution remain distributed across `P00` and `P13`? | Determines whether §5.3 reserves four Band B slots or three |
 | OQ-4 | Should `dev/backup/` be git-tracked or ignored? | §7.5 assumes tracked; awaiting confirmation |
+| OQ-5 | Literal citation format | **Resolved** — dotted and fully qualified, `P13.2.3`; section sign retired (§4.3) |
+| OQ-6 | Treatment of comment-only Python edits | **Resolved** — full protocol, separate coupled triple (§8.0 Phase 4a) |
+| OQ-7 | Category A template links in `governance.md` are broken by a missing `templates/` path segment and are also due for renaming. Rename only, or rename and repair? | Baseline report §6.1 recommends rename only, with the path defect raised as its own issue |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -494,6 +533,7 @@ convention.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.2 | 2026-09-22 | OQ-5 resolved: citations adopt the dotted fully-qualified form `P13.2.3`, the section sign is retired from protocol citations, and governance headings carry the same identifier. OQ-6 resolved: the five Python modules under `ai/` are migrated under a second coupled triple (Phase 4a). Primer canonicalisation added to scope, `ai/primer.md` canonical and `docs/claude/primer.md` regenerated from it. Pre-migration baseline report referenced. V13-V15 and R9-R10 added; acceptance criteria 8 and 9 added; OQ-7 opened on the Category A link defect. |
 | 1.1 | 2026-09-16 | §6.1.1 added defining the closed migration set (`ai/`, `docs/`, `CLAUDE.md`, `README.md`, `RATIONALE.md`, `dev/backup/`); `dev/smoke/ai/` reclassified from migrated mirror to regenerated propagated copy, it being gitignored; §7.3 abort gate narrowed from whole-tree cleanliness to migration-set cleanliness plus a valid `HEAD`; R4 restated accordingly. |
 | 1.0 | 2026-09-16 | Initial proposal. Records decisions D1–D6, the banded protocol scheme, template mapping, protocol-relative citation scheme, CI/CD gap assessment with reserved slots, backup and rollback design, nine-phase procedure, twelve verification checks and eight identified risks. |
 
