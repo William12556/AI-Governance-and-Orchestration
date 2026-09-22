@@ -37,6 +37,15 @@ Pre-existing; found while baselining eb782f83. See `dev/reports/report-eb782f83-
 - [ ] Correct 10 linter enum violations and 2 dangling coupling references in existing `dev/` documents.
 - [ ] Consider a check that validates protocol citations embedded in source comments. Nothing currently does; `linter.py` and `protocol_checker.py` validate documents, not docstrings. Named in `issue-e36a35d3` analysis.
 
+### propagate.sh defects
+
+Found while regenerating `dev/smoke/ai/` after the eb782f83 migration. Both
+gate the downstream propagation item above.
+
+- [ ] `bin/propagate.sh` cannot handle renames. It rsyncs without `--delete`, so a renamed file leaves its old name behind in the target. Propagating v10.0 as it stands would leave every downstream project with fifteen template files: the eight current names plus the seven retired ones. Either add `--delete` with the existing exclude list acting as protection, or enumerate and remove superseded names explicitly.
+- [ ] `bin/propagate.sh` cannot run non-interactively. Line 117 is `read -r -p "Apply changes? [y/N] "`, and under `set -euo pipefail` a non-TTY stdin causes exit 1 *after* the preview and *before* the apply — so it reports what it would do and then silently does nothing. Add a `--yes` flag, or detect a non-TTY and fail loudly rather than exiting as though complete.
+- [ ] Consider whether `propagate.sh` should refuse to run when the target's governance version differs from the source by a major version, since that is exactly when renames occur.
+
 ### Repository hygiene
 
 - [ ] Check `mcp-ripgrep`, `mcp-git` and `mcp-sed-awk` for the JSON Schema draft-07 `outputSchema` declaration that makes the Anthropic Filesystem MCP server unusable in Cowork sessions. Emit `2020-12`, or omit `$schema` entirely.
