@@ -1,0 +1,75 @@
+# eb782f83 — protocol and template identifier mapping
+#
+# Single source of truth (TR-01). Consumed by dev/tools/migrate_identifiers.py
+# and by the generated alias appendix in ai/governance.md. Nothing transcribes
+# this file by hand.
+#
+# See dev/design/design-eb782f83-protocol-template-reordering.md §3.0.
+
+scheme_version: 2
+
+# ── Protocols ────────────────────────────────────────────────────────────────
+# ordinal: position under the old "## 1.0 Protocols" section, which is what the
+#          positional citation prefix §1.<ordinal> resolves through.
+# band:    A = cross-cutting (P00-P09), B = lifecycle (P10-P19)
+protocols:
+  P00: {new: P00, name: "Governance",             band: A, ordinal: 1}
+  P01: {new: P10, name: "Project Initialization", band: B, ordinal: 2}
+  P02: {new: P12, name: "Design",                 band: B, ordinal: 3}
+  P03: {new: P04, name: "Change",                 band: A, ordinal: 4}
+  P04: {new: P03, name: "Issue",                  band: A, ordinal: 5}
+  P05: {new: P01, name: "Trace",                  band: A, ordinal: 6}
+  P06: {new: P15, name: "Test",                   band: B, ordinal: 7}
+  P07: {new: P14, name: "Quality",                band: B, ordinal: 8}
+  P08: {new: P02, name: "Audit",                  band: A, ordinal: 9}
+  P09: {new: P13, name: "Prompt",                 band: B, ordinal: 10}
+  P10: {new: P11, name: "Requirements",           band: B, ordinal: 11}
+
+# ── Reserved identifiers ─────────────────────────────────────────────────────
+# Carry no content (CON-03, FR-06-02). Named slots record an intention only.
+# P05 appears here and as a retired source identifier above; the two namespaces
+# are validated separately.
+reserved:
+  P05: "Continuous Integration"
+  P06: null
+  P07: null
+  P08: null
+  P09: null
+  P16: "Execution"
+  P17: "Release"
+  P18: "Deployment and Propagation"
+  P19: "Observability"
+
+# ── Templates ────────────────────────────────────────────────────────────────
+# Permutation of one eight-element set. Cycles: (T01 T02 T07) and
+# (T03 T06 T05 T04); T08 is a fixed point.
+templates:
+  T01: {new: T02, class: "design"}
+  T02: {new: T07, class: "change"}
+  T03: {new: T06, class: "issue"}
+  T04: {new: T03, class: "prompt"}
+  T05: {new: T04, class: "test"}
+  T06: {new: T05, class: "result"}
+  T07: {new: T01, class: "requirements"}
+  T08: {new: T08, class: "audit"}
+
+# ── Migration set ────────────────────────────────────────────────────────────
+# Closed write-set (TR-04). Paths relative to the repository root.
+migration_set:
+  - "ai"
+  - "docs"
+  - "CLAUDE.md"
+  - "README.md"
+  - "RATIONALE.md"
+
+# Never written by the migration, whatever else matches.
+refuse_paths:
+  - "dev"
+  - "deprecated"
+  - "tests"
+  - ".git"
+
+# Marker proving the corpus has been migrated (TR-03, design §5.5).
+scheme_marker:
+  file: "ai/governance.md"
+  text: "## Appendix A — Identifier Aliases"
