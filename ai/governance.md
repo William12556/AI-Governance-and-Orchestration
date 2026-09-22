@@ -1237,7 +1237,7 @@ See [workflow.md](workflow.md).
 | 9.14    | 2026-08-19 | P09 §1.10.3: corrected heading “presents AEL execution options” → “presents Tactical Domain execution options”, since Option C is not an AEL path (issue raised via GTach ai/task.md) |
 | 9.15    | 2026-08-19 | P06 §1.7.15: corrected stale reference ai/profiles/claude.md → ai/profiles/claude-code.md (claude.md was an obsolete duplicate, identified via GTach ai/profiles/ audit) |
 | 9.16    | 2026-08-21 | Added P00 §1.1.20 Task Register: ai/task.md open-work index, exempt from §1.1.10 naming and §1.1.14 lifecycle; added task.md to §1.2.6 folder structure; concept sourced from GTach ai/task.md |
-| 10.0    | 2026-09-22 | **Breaking.** Protocol and template identifiers renumbered into workflow order, and positional citations replaced by protocol-relative ones. Protocols are now two bands: cross-cutting P00 Governance, P01 Trace (was P05), P02 Audit (was P08), P03 Issue (was P04), P04 Change (was P03); lifecycle P10 Project Initialization (was P01), P11 Requirements (was P10), P12 Design (was P02), P13 Prompt (was P09), P14 Quality (was P07), P15 Test (was P06). P05 and P16-P19 are reserved and carry no content. Templates renumbered into document-creation order and renamed: T01 Requirements (was T07), T02 Design (was T01), T03 Prompt (was T04), T04 Test (was T05), T05 Result (was T06), T06 Issue (was T03), T07 Change (was T02), T08 Audit unchanged. Citations of the form §1.x.y are retired in favour of the dotted fully-qualified form Pnn.x.y; the section sign no longer appears in a protocol citation, and every heading carries its citation string verbatim. This document is restructured so that each protocol is a top-level section keyed by its identifier and clause numbers are local to it, which decouples a citation from a protocol's ordinal position and makes any future reordering a mapping-table edit rather than a corpus-wide substitution. Appendix A carries the permanent old-to-new alias tables; the frozen historical corpus in dev/ and every closed/ directory cites the retired scheme and is read through it. Executed mechanically by dev/tools/migrate_identifiers.py from dev/tools/mapping.yaml; 614 substitutions across 32 files, 10 of 10 verification checks passing, and 1086 clause lines preserved exactly. Downstream projects remain pinned at 9.16 until propagated. See dev/proposals/proposal-eb782f83-protocol-template-reordering.md. |
+| 10.0    | 2026-09-22 | **Breaking.** Protocol and template identifiers renumbered into workflow order, and positional citations replaced by protocol-relative ones. Protocols are now two bands: cross-cutting P00 Governance, P01 Trace (was P05), P02 Audit (was P08), P03 Issue (was P04), P04 Change (was P03); lifecycle P10 Project Initialization (was P01), P11 Requirements (was P10), P12 Design (was P02), P13 Prompt (was P09), P14 Quality (was P07), P15 Test (was P06). P05 and P16-P19 are reserved and carry no content. Templates renumbered into document-creation order and renamed: T01 Requirements (was T07), T02 Design (was T01), T03 Prompt (was T04), T04 Test (was T05), T05 Result (was T06), T06 Issue (was T03), T07 Change (was T02), T08 Audit unchanged. Citations of the form §1.x.y are retired in favour of the dotted fully-qualified form Pnn.x.y; the section sign no longer appears in a protocol citation, and every heading carries its citation string verbatim. This document is restructured so that each protocol is a top-level section keyed by its identifier and clause numbers are local to it, which decouples a citation from a protocol's ordinal position and makes any future reordering a mapping-table edit rather than a corpus-wide substitution. Appendix A carries the permanent old-to-new alias tables; the frozen historical corpus in dev/ and every closed/ directory cites the retired scheme and is read through it. Executed mechanically by dev/tools/migrate_identifiers.py from dev/tools/mapping.yaml; 654 substitutions across 32 files, 10 of 10 verification checks passing, and 1086 clause lines preserved exactly. Downstream projects remain pinned at 9.16 until propagated. See dev/proposals/proposal-eb782f83-protocol-template-reordering.md. |
 
 ---
 [Return to Table of Contents](<#table of contents>)
@@ -1250,9 +1250,39 @@ Copyright (c) 2026 William Watson. MIT License.
 
 ## Appendix A — Identifier Aliases
 
-Permanent and immutable. The frozen historical corpus in `dev/` and every
-`closed/` directory cites the retired scheme and is read through this
-appendix. It is never removed.
+Permanent. It is never removed, and it is corrected only under `P04`.
+
+**Scope.** This appendix resolves identifiers written under the scheme retired
+at governance v10.0. Apply it to:
+
+- every `closed/` directory throughout the repository;
+- the development corpus in `dev/` dated before 2026-09-22, excluding the
+  `eb782f83` document set;
+- version-history sections anywhere in the corpus, including in this document
+  and in files otherwise written in the current scheme.
+
+Do **not** apply it to:
+
+- `dev/smoke/ai/`, which is regenerated from `ai/` and is current-scheme
+  throughout;
+- the `eb782f83` proposal, requirements, design, baseline report, audit brief
+  and audit report, which were written in the current scheme.
+
+**Why the distinction matters.** Five protocol identifiers are valid under
+both schemes and resolve to a *different* protocol under each:
+`P01`, `P02`, `P03`, `P04`, `P10`. Seven of the eight template numbers behave the
+same way. Applied to current-scheme text, this appendix silently resolves them
+to the wrong protocol.
+`P03 Issue` in a current-scheme document means Issue; resolved through A.1 it
+would read as Change.
+
+**Version histories.** A version-history entry records what was done under the
+scheme in force when it was written. Those entries were deliberately excluded
+from the migration, because rewriting them would falsify the record. Ninety-five
+positional citations of the form `§1.x` survive in the live corpus on that
+basis, together with roughly a hundred retired bare identifiers. Read every
+version-history entry under this appendix, whatever scheme the rest of its
+document uses.
 
 ### A.1 Protocol Aliases
 
@@ -1272,16 +1302,19 @@ appendix. It is never removed.
 
 ### A.2 Template Aliases
 
-| Retired | Class | Current |
-|---|---|---|
-| `T01-design.md` | design | `T02-design.md` |
-| `T02-change.md` | change | `T07-change.md` |
-| `T03-issue.md` | issue | `T06-issue.md` |
-| `T04-prompt.md` | prompt | `T03-prompt.md` |
-| `T05-test.md` | test | `T04-test.md` |
-| `T06-result.md` | result | `T05-result.md` |
-| `T07-requirements.md` | requirements | `T01-requirements.md` |
-| `T08-audit.md` | audit | `T08-audit.md` |
+The bare-identifier column resolves a retired `T0n` used without its filename,
+of which the frozen corpus holds several hundred.
+
+| Retired identifier | Retired filename | Class | Current identifier | Current filename |
+|---|---|---|---|---|
+| `T01` | `T01-design.md` | design | `T02` | `T02-design.md` |
+| `T02` | `T02-change.md` | change | `T07` | `T07-change.md` |
+| `T03` | `T03-issue.md` | issue | `T06` | `T06-issue.md` |
+| `T04` | `T04-prompt.md` | prompt | `T03` | `T03-prompt.md` |
+| `T05` | `T05-test.md` | test | `T04` | `T04-test.md` |
+| `T06` | `T06-result.md` | result | `T05` | `T05-result.md` |
+| `T07` | `T07-requirements.md` | requirements | `T01` | `T01-requirements.md` |
+| `T08` | `T08-audit.md` | audit | `T08` | `T08-audit.md` |
 
 ### A.3 Citation Rule
 
@@ -1319,3 +1352,32 @@ citations are dotted and fully qualified: `<identifier>.<a>[.<b>]`.
 
 Reserved identifiers carry no content. A citation resolving to one is a
 defect, not a reference.
+
+### A.5 Unmigrated Namespace — `schema_type`
+
+Template document schemas carry a numeric identifier in their `schema_type`
+field: `t01_design`, `t02_change`, `t03_issue` and so on. **These were not
+migrated and retain the retired numbering.** `T02-design.md` declares
+`schema_type: "t01_design"`.
+
+This is a recorded exception, not an oversight left standing. The numeric
+prefix cannot be migrated in isolation: `linter.py` keys its validation rules,
+enum constraints, identifier patterns and coupling paths on these strings, and
+every document in the frozen corpus carries them. Migrating the namespace would
+require either editing frozen documents or breaking their validation, and
+`CON-04` forecloses both.
+
+| Field value | Template document |
+|---|---|
+| `t01_design` | `T02-design.md` |
+| `t02_change` | `T07-change.md` |
+| `t03_issue` | `T06-issue.md` |
+| `t04_prompt` | `T03-prompt.md` |
+| `t05_test` | `T04-test.md` |
+| `t06_result` | `T05-result.md` |
+| `t07_requirements` | `T01-requirements.md` |
+| `t08_audit` | `T08-audit.md` |
+
+The durable remedy is to retire the numeric prefix in favour of the class word,
+which is scheme-independent — the same correction this migration made to
+protocol citations. That is deferred to its own change.

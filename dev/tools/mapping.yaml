@@ -68,11 +68,21 @@ refuse_paths:
   - "deprecated"
   - "tests"
   - ".git"
+  # bin/ holds executable shell, not corpus. Named here as a decision rather
+  # than left to omission (audit F-10). bin/propagate.sh carries protocol
+  # references in comments; migrating them is deferred to the change that fixes
+  # its rename and non-interactive defects.
+  - "bin"
 
 # Inside the migration set but excluded: ephemeral runtime state and generated
 # output. Rewriting these is meaningless — ralph state is cleared by
-# '--mode reset', dashboard-alerts.md is rewritten by every govwatch scan —
-# and both are gitignored, so git could not restore them if it went wrong.
+# '--mode reset', dashboard-alerts.md is rewritten by every govwatch scan.
+#
+# Audit finding F-11: the gitignore rule is 'ai/state/ralph/', not 'ai/state/',
+# so the original argument from ignore status was narrower than stated. The
+# exclusion stands on its own terms: ai/state/ is the AEL state root, its
+# contents are run artefacts, and no run artefact is part of the governance
+# corpus. bin/propagate.sh independently excludes both paths.
 exclude_paths:
   - "ai/state"
   - "ai/dashboard-alerts.md"

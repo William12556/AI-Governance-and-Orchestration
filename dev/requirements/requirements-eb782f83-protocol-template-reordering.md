@@ -178,7 +178,7 @@ prompt, test, result, issue, change, audit.
 | FR-07-01 | Every table of contents in the migration set is regenerated to match its document's headings after restructuring. |
 | FR-07-02 | The `primer.md` protocol reference table and template table are regenerated from the mapping table. |
 | FR-07-03 | Every `workflow.md` Mermaid flowchart node carrying a citation is updated. Node identifiers, edges and flowchart topology are unchanged. |
-| FR-07-04 | `governance.md` template links in its table of contents are updated to the new filenames. Their missing `templates/` path segment is not repaired (CON-08). |
+| FR-07-04 | `governance.md` template links in its table of contents are regenerated at their correct `templates/` paths. **Amended under change-9b8f1c47, audit finding F-01.** The original text said the missing path segment would not be repaired. Delivery repaired it: the generator derives entries from the headings and emits path-qualified filenames, and emitting a link known to be broken was not defensible. That is a reversal of OQ-7, recorded as a CON-08 exception in the proposal, not a discharge. |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -261,8 +261,8 @@ The migration instrument is source code and is governed accordingly.
 | V-02 | No retired identifier remains in the live corpus outside the alias appendix and version histories | Corpus scan | FR-01, FR-02, FR-04 |
 | V-03 | Every citation resolves to an existing heading | Verification script | FR-03-03, FR-04 |
 | V-04 | Broken internal anchors do not exceed the baseline of 3; the expected result is 1 | Anchor resolution pass against baseline report §7.4 | FR-07-01 |
-| V-05 | `linter.py` output is byte-identical before and after migration | Execution against `dev/` and the regenerated smoke copy, captured immediately before and after. `dev/` is frozen, so any difference is migration damage. Absolute cleanliness is not achievable: the pre-existing count is 102 errors (baseline report §7.0). | FR-09-02, CON-04 |
-| V-06 | `protocol_checker.py` output is byte-identical before and after migration | As V-05. Pre-existing count is 38 errors. | FR-09-02, CON-04 |
+| V-05 | `linter.py` output is byte-identical under the retired and current scripts against the same tree | `dev/tools/compare_migration.py`, retained under audit finding F-13. The earlier method compared two trees, which is unsound: `git archive` omits gitignored files. Comparing the two *scripts* against one tree isolates the variable. Absolute cleanliness is not achievable: the pre-existing count is 102 errors (baseline report §7.0). | FR-09-02, CON-04 |
+| V-06 | `protocol_checker.py` output is byte-identical under the retired and current scripts against the same tree | As V-05, via `compare_migration.py`. Pre-existing count is 38 errors. | FR-09-02, CON-04 |
 | V-07 | pytest suite green | Execution | NFR-07 |
 | V-08 | `primer.md` protocol and template tables are correct | Manual review against the mapping table | FR-07-02 |
 | V-09 | `workflow.md` flowchart references are correct and topology is unchanged | Manual review, node by node | FR-07-03 |
@@ -270,7 +270,7 @@ The migration instrument is source code and is governed accordingly.
 | V-11 | Backup restores cleanly | `--rollback` against a scratch copy, checksums verified | CON-07, TR-08, NFR-04 |
 | V-12 | Independent audit | Strategic audit producing a T08 report | CON-01 |
 | V-13 | `docs/claude/primer.md` is identical to `ai/primer.md` | Diff, expect empty; heading list and table row counts compared, not the byte diff alone | FR-08 |
-| V-14 | Broken file links number 17 or fewer, and every one appears in the baseline; the expected result is 9 | Link scan against baseline report §4.5. The eight Category A links fall away because the regenerated table of contents emits template links at correct paths — generation, not repair. | CON-08 |
+| V-14 | Broken file links number 17 or fewer, and every one appears in the baseline; the expected result is 9 | Link scan against baseline report §4.5. The eight Category A links fall away because the regenerated table of contents emits template links at correct paths. The earlier rationale called this "generation, not repair"; audit finding F-01 records that the distinction is about mechanism and the effect was repair. Retained as a CON-08 exception under FR-07-04. | CON-08 exception |
 | V-15 | The five Python modules carry no executable change; string constants change only as the migration defines | AST skeleton with docstrings removed and string constants blanked must be identical; every differing string must equal the substitution applied to the original. Plus V-05, V-06, and one scan cycle each for `govwatch.py` and `overwatch.py`. | NFR-07, CON-09 |
 | V-16 | Semantic diff review: every hunk is an identifier, a citation or a structural heading change | Manual review of the complete diff | CON-01 |
 | V-17 | Frozen corpus byte-identical across the migration | `git diff pre-eb782f83..<migration commit> -- dev`, excluding `dev/backup/`, `dev/smoke/` and `dev/tools/`. The comparison must be bounded at both ends: unbounded, it compares the tag against the working tree, so any legitimate later edit under `dev/` fails it permanently. | CON-04, NFR-03 |
@@ -359,6 +359,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 0.7 | 2026-09-22 | Amended under change-9b8f1c47 from the strategic audit. FR-07-04 restated to the decision delivery actually took, with the reversal recorded as a CON-08 exception rather than a discharge (F-01). V-14 rationale corrected to match. V-05 and V-06 now name `compare_migration.py` as their method, the earlier ad-hoc commands having been unreproducible (F-13); the earlier two-tree comparison is recorded as unsound. |
 | 0.6 | 2026-09-22 | V-17 restated as a comparison bounded at both ends. As originally written it compared the pre-migration tag against the working tree, which answers a different question and fails permanently once any legitimate edit lands under `dev/`. |
 | 0.5 | 2026-09-22 | V-15 restated after the rehearsal: plain AST equivalence forbade the one string change the migration requires, in the `orchestrator.py` guidance block. Replaced with a blanked-skeleton comparison plus per-string verification. V-04 and V-14 gain their expected post-migration results, 1 and 9. |
 | 0.4 | 2026-09-22 | V-05 and V-06 restated as before-and-after output comparison rather than absolute cleanliness, which is unachievable: `linter.py` reports 102 pre-existing errors and `protocol_checker.py` 38 against `dev/` (baseline report §7.0). TR-02 reworded to match the design: one atomic operation implemented as two sentinel passes. |

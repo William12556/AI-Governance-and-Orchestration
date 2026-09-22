@@ -393,6 +393,18 @@ fails.
 
 #### 5.4.1 Resolutions
 
+**Placement, and the lesson from it.** These five edits landed in `7b47345`,
+one commit *before* the `pre-eb782f83` tag. Two of them are protocol clauses
+whose meaning changed, so every verification window anchored at that tag —
+V-16, V-17, C1, C2, and the strategic audit's own clause comparison — excluded
+them by construction. The audit re-baselined at `9f7fe29` and found exactly
+those two differences (finding F-05).
+
+The rule this yields: **a baseline tag must precede the first edit of any kind,
+not the first mechanical one.** Preparatory edits are still edits, and placing
+the tag after them makes the change unfalsifiable over precisely the range where
+judgement was applied rather than a script.
+
 All five were resolved before execution, on 2026-09-22, by replacement with
 scheme-neutral wording. Scheme-neutral phrasing is correct under both the
 retired and the current scheme, so the resolution does not split correctness
@@ -573,10 +585,29 @@ block the run, because the script writes only within the migration set.
 
 ### 8.5 Rollback
 
-`--rollback <snapshot-dir>` restores every file listed in `manifest.csv`,
-verifies each restored file's digest against the manifest, reverses the template
-renames, and reports any file whose current digest matched neither the original
-nor the migrated form.
+`--rollback <snapshot-dir>` restores every file listed in `manifest.csv` and
+verifies each restored file's digest against the manifest.
+
+**It does not restore the pre-migration state, and the text above claiming it
+reverses the template renames was wrong.** Audit finding F-02: the manifest
+records the pre-migration write set, so the seven files the migration *creates*
+by rename are absent from it. A naive restore therefore leaves fifteen files in
+`ai/templates/` — seven restored originals beside seven unreferenced new ones —
+with a restored table of contents pointing only at the originals.
+
+Under change-9b8f1c47 the function now computes the set of files present under
+the write set but absent from the manifest, refuses to proceed, and lists them.
+Automatic removal is deliberately not implemented: a delete driven by a set
+difference is the wrong operation to get wrong.
+
+**Documented rollback procedure.**
+
+1. `git checkout pre-eb782f83` for everything tracked.
+2. Take `docs/claude/project_information.md` from the snapshot alone. It is
+   gitignored, so the tag cannot restore it, and the snapshot is itself
+   gitignored — the only copy of the only copy (audit finding F-12). The
+   snapshot must therefore survive until this change closes.
+3. Re-run the verification to confirm the restored state.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -688,7 +719,9 @@ Compensating controls, in combination sufficient:
 | Rollback against a modified file matching neither original nor migrated digest | Reported per file; rollback continues and exits non-zero |
 | Empty write set | Error; signals a path or enumeration fault |
 | Ephemeral state and generated output inside the migration set | Excluded by `exclude_paths` in `mapping.yaml`: `ai/state` and `ai/dashboard-alerts.md`. Ralph state is cleared by `--mode reset` and dashboard alerts are rewritten by every scan, so migrating either is meaningless; both are gitignored, so the tag could not restore them. Found on the rehearsal, where they placed seven untracked files in the write set. |
-| An untracked file remains in the write set | Permitted, but reported before the run: the snapshot is its only rollback path, the tag cannot restore it. One file qualifies, `docs/claude/project_information.md`. |
+| An untracked file remains in the write set | Permitted, but reported before the run: the snapshot is its only rollback path, the tag cannot restore it. One file qualifies, `docs/claude/project_information.md`. The snapshot is itself gitignored, so that file's only recovery path is a directory git does not protect (audit F-12). |
+| Marker file absent at its configured path | Exit code 5. An absent marker file is evidence of a wrong `--root`, not of an unmigrated corpus; conflating the two put a mistyped path one keystroke from a destructive pass (audit F-03). A missing `mapping.yaml` fails the same way, with a message rather than a traceback. |
+| A namespace whose tokens are embedded inside identifiers | Not matched, and not matchable by the token patterns: `\b` does not fire between `2` and `_`, so `t02_change` is invisible to C3. The `schema_type` namespace was missed entirely on this account (audit F-04) and is recorded as a permanent exception in Appendix A. Any future survey must enumerate namespaces deliberately rather than by pattern discovery. |
 | `git status --porcelain` first line | The status code occupies columns 1-2, so a clean index leaves a leading space. The raw output must not be stripped as a whole, or the first line shifts by one column and that file escapes the gate 3 dirty check. Found in testing. |
 
 [Return to Table of Contents](<#table of contents>)
@@ -782,6 +815,7 @@ Test traceability is added when the test document exists.
 
 | Version | Date | Description |
 |---|---|---|
+| 0.5 | 2026-09-22 | Amended under change-9b8f1c47 from the strategic audit. §8.5 rewritten: the previous text claimed `--rollback` reverses the template renames, which it never did — the manifest cannot record files the migration creates (F-02). Documented rollback procedure added, anchored on the tag rather than the snapshot. §5.4.1 records that the baseline tag was placed after five preparatory edits, two of which changed clause meaning, making them invisible to every verification window (F-05), and states the rule that follows. §12.0 gains three boundary conditions: the absent marker file (F-03), the untracked file whose only recovery path is itself untracked (F-12), and namespaces whose tokens sit inside identifiers and are therefore invisible to the token patterns (F-04). |
 | 0.4 | 2026-09-22 | Records four defects found on the rehearsal and their fixes. §5.5 added: identifiers appear lowercase inside Obsidian anchors, so C1, C3 and C4 now match case-insensitively with case preserved; this recovered thirteen substitutions that were being silently missed. §12.0 gains the exclusion of ephemeral state and generated output from the write set, and the reporting of untracked files whose only rollback path is the snapshot. §7.0 table-of-contents generation corrected to derive entries from the actual headings rather than compose them from the mapping, and to emit template links; the appendix is now generated before the contents so that it can be listed. V-15 refined — see the requirements document. |
 | 0.3 | 2026-09-22 | §5.4.1 records the resolution of all five live range expressions by scheme-neutral replacement, and notes that three were already factually wrong. Documents a gate 3 defect found in testing: `git status --porcelain` output was being stripped as a whole, shifting the first line by one column and hiding that file from the dirty check. |
 | 0.2 | 2026-09-22 | Added token class C0, the combined `Pnn §1.x.y` form, found while implementing: 191 occurrences, and converting the halves independently doubles the citation. New §4.4 states the hazard and the identifier-versus-ordinal agreement check, which all 191 occurrences satisfy. §5.1 gains the full precedence order C5, C0, C4, C2, C1, C3 and both agreement checks; §5.3 pseudocode updated to match. §5.2 records that protected-region detection is Markdown-only, a leading `#` being a comment in YAML and Python, with the residual limitation stated. §5.1 exclusions record that the dotted target form already occurs informally in the corpus and needs no dedicated rule. §12.0 and §13.0 updated. |

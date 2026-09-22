@@ -53,6 +53,7 @@ PROTECTED_HEADING_RE = re.compile(
 )
 
 EXIT_OK, EXIT_NOOP, EXIT_GATE, EXIT_SNAPSHOT, EXIT_CONTENT = 0, 0, 2, 3, 4
+EXIT_MARKER = 5  # marker file absent: wrong --root (audit F-03)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -398,9 +399,32 @@ def verify_snapshot(root: Path, dest: Path) -> list[str]:
     return bad
 
 
-def rollback(root: Path, dest: Path) -> int:
-    """TR-08. Restore and verify; report anything that matched neither form."""
+def rollback(root: Path, dest: Path, mp: "Mapping | None" = None) -> int:
+    """TR-08. Restore and verify; report anything that matched neither form.
+
+    Audit finding F-02: restoring manifest entries is not the same as restoring
+    the pre-migration state. The migration creates files the manifest cannot
+    record — the seven renamed templates — so a naive restore leaves fifteen
+    files in ai/templates/ and a table of contents pointing at eight of them.
+    This function now refuses to proceed while any such file exists, and lists
+    them. Removing them automatically is deliberately not done: a delete driven
+    by a set difference is the wrong thing to get wrong.
+    """
     failures = 0
+    if mp is not None:
+        recorded = set()
+        with (dest / "manifest.csv").open(encoding="utf-8") as fh:
+            recorded = {row["path"] for row in csv.DictReader(fh)}
+        created = [str(p.relative_to(root)) for p in enumerate_write_set(root, mp)
+                   if str(p.relative_to(root)) not in recorded]
+        if created:
+            print("ERROR rollback refused: the migration created files the manifest")
+            print("      does not record. Restoring over them would leave both forms")
+            print("      in place. Use 'git checkout pre-eb782f83' instead, and take")
+            print("      only untracked files from the snapshot.")
+            for c in created:
+                print(f"        {c}")
+            return len(created)
     with (dest / "manifest.csv").open(encoding="utf-8") as fh:
         for row in csv.DictReader(fh):
             src, target = dest / row["path"], root / row["path"]
@@ -410,6 +434,7 @@ def rollback(root: Path, dest: Path) -> int:
                 print(f"ERROR restored digest mismatch: {row['path']}")
                 failures += 1
     print(f"rollback: restored from {dest}, {failures} failure(s)")
+    print("NOTE a rollback restores content, not deletions. Verify against the tag.")
     return failures
 
 
@@ -485,42 +510,85 @@ def regenerate_governance_toc(text: str, mp: Mapping) -> str:
 
 
 def generate_alias_appendix(mp: Mapping) -> str:
-    """FR-05. Generated from mapping.yaml, never transcribed."""
-    names = mp.new_to_name()
+    """FR-05. Generated from mapping.yaml, never transcribed.
+
+    Scope statement corrected under change-9b8f1c47 (audit findings F-04, F-06,
+    F-07): the appendix previously claimed the whole of dev/ was retired-scheme,
+    which is false for dev/smoke/ai/ and for the eb782f83 document set, and the
+    identifiers valid under both schemes are exactly the ones a misapplied rule
+    resolves wrongly.
+    """
     out = [
+        "", "---", "",
+        "## Appendix A — Identifier Aliases", "",
+        "Permanent. It is never removed, and it is corrected only under `P04`.",
         "",
-        "---",
+        "**Scope.** This appendix resolves identifiers written under the scheme retired",
+        "at governance v10.0. Apply it to:",
         "",
-        "## Appendix A — Identifier Aliases",
+        "- every `closed/` directory throughout the repository;",
+        "- the development corpus in `dev/` dated before 2026-09-22, excluding the",
+        "  `eb782f83` document set;",
+        "- version-history sections anywhere in the corpus, including in this document",
+        "  and in files otherwise written in the current scheme.",
         "",
-        "Permanent and immutable. The frozen historical corpus in `dev/` and every",
-        "`closed/` directory cites the retired scheme and is read through this",
-        "appendix. It is never removed.",
+        "Do **not** apply it to:",
         "",
-        "### A.1 Protocol Aliases",
+        "- `dev/smoke/ai/`, which is regenerated from `ai/` and is current-scheme",
+        "  throughout;",
+        "- the `eb782f83` proposal, requirements, design, baseline report, audit brief",
+        "  and audit report, which were written in the current scheme.",
         "",
-        "| Retired | Name | Current |",
-        "|---|---|---|",
+    ]
+    # Valid in both schemes AND resolving to a different protocol. Fixed points
+    # are excluded: P00 and T08 map to themselves, so a misapplied rule is
+    # harmless for them.
+    hazard = sorted({k for k, v in mp.protocols.items()
+                     if k in {x["new"] for x in mp.protocols.values()} and v["new"] != k})
+    words = {5: "Five", 6: "Six", 7: "Seven", 4: "Four"}.get(len(hazard), str(len(hazard)))
+    out += [
+        f"**Why the distinction matters.** {words} protocol identifiers are valid under",
+        "both schemes and resolve to a *different* protocol under each:",
+        "`" + "`, `".join(hazard) + "`. Seven of the eight template numbers behave the",
+        "same way. Applied to current-scheme text, this appendix silently resolves them",
+        "to the wrong protocol.",
+        "`P03 Issue` in a current-scheme document means Issue; resolved through A.1 it",
+        "would read as Change.",
+        "",
+        "**Version histories.** A version-history entry records what was done under the",
+        "scheme in force when it was written. Those entries were deliberately excluded",
+        "from the migration, because rewriting them would falsify the record. Ninety-five",
+        "positional citations of the form `§1.x` survive in the live corpus on that",
+        "basis, together with roughly a hundred retired bare identifiers. Read every",
+        "version-history entry under this appendix, whatever scheme the rest of its",
+        "document uses.",
+        "",
+        "### A.1 Protocol Aliases", "",
+        "| Retired | Name | Current |", "|---|---|---|",
     ]
     for old, v in sorted(mp.protocols.items()):
         out.append(f"| `{old}` | {v['name']} | `{v['new']}` |")
-    out += ["", "### A.2 Template Aliases", "", "| Retired | Class | Current |", "|---|---|---|"]
-    for old, v in sorted(mp.templates.items()):
-        out.append(f"| `{old}-{v['class']}.md` | {v['class']} | `{v['new']}-{v['class']}.md` |")
     out += [
-        "",
-        "### A.3 Citation Rule",
-        "",
+        "", "### A.2 Template Aliases", "",
+        "The bare-identifier column resolves a retired `T0n` used without its filename,",
+        "of which the frozen corpus holds several hundred.", "",
+        "| Retired identifier | Retired filename | Class | Current identifier | Current filename |",
+        "|---|---|---|---|---|",
+    ]
+    for old, v in sorted(mp.templates.items()):
+        out.append(f"| `{old}` | `{old}-{v['class']}.md` | {v['class']} | "
+                   f"`{v['new']}` | `{v['new']}-{v['class']}.md` |")
+    out += [
+        "", "### A.3 Citation Rule", "",
         "Retired citations take the positional form `§1.<ordinal>.<a>[.<b>]`, where",
         "`<ordinal>` is the protocol's position in the retired document. Current",
-        "citations are dotted and fully qualified: `<identifier>.<a>[.<b>]`.",
-        "",
-        "| Retired ordinal | Retired protocol | Current prefix |",
-        "|---|---|---|",
+        "citations are dotted and fully qualified: `<identifier>.<a>[.<b>]`.", "",
+        "| Retired ordinal | Retired protocol | Current prefix |", "|---|---|---|",
     ]
     for old, v in sorted(mp.protocols.items(), key=lambda kv: kv[1]["ordinal"]):
         out.append(f"| `§1.{v['ordinal']}` | `{old}` {v['name']} | `{v['new']}` |")
-    out += ["", "### A.4 Reserved Identifiers", "", "| Identifier | Intended protocol |", "|---|---|"]
+    out += ["", "### A.4 Reserved Identifiers", "",
+            "| Identifier | Intended protocol |", "|---|---|"]
     for ident, intent in sorted(mp.reserved.items()):
         out.append(f"| `{ident}` | {intent or '*unallocated*'} |")
     out += [
@@ -528,8 +596,28 @@ def generate_alias_appendix(mp: Mapping) -> str:
         "Reserved identifiers carry no content. A citation resolving to one is a",
         "defect, not a reference.",
         "",
+        "### A.5 Unmigrated Namespace — `schema_type`", "",
+        "Template document schemas carry a numeric identifier in their `schema_type`",
+        "field: `t01_design`, `t02_change`, `t03_issue` and so on. **These were not",
+        "migrated and retain the retired numbering.** `T02-design.md` declares",
+        '`schema_type: "t01_design"`.', "",
+        "This is a recorded exception, not an oversight left standing. The numeric",
+        "prefix cannot be migrated in isolation: `linter.py` keys its validation rules,",
+        "enum constraints, identifier patterns and coupling paths on these strings, and",
+        "every document in the frozen corpus carries them. Migrating the namespace would",
+        "require either editing frozen documents or breaking their validation, and",
+        "`CON-04` forecloses both.", "",
+        "| Field value | Template document |", "|---|---|",
     ]
-    del names
+    for old, v in sorted(mp.templates.items()):
+        out.append(f"| `{old.lower()}_{v['class']}` | `{v['new']}-{v['class']}.md` |")
+    out += [
+        "",
+        "The durable remedy is to retire the numeric prefix in favour of the class word,",
+        "which is scheme-independent — the same correction this migration made to",
+        "protocol citations. That is deferred to its own change.",
+        "",
+    ]
     return "\n".join(out)
 
 
@@ -538,7 +626,15 @@ def generate_alias_appendix(mp: Mapping) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 def evaluate_gates(root: Path, mp: Mapping, paths: list[Path], force: bool) -> int | None:
     marker = (root / mp.marker_file)
-    if marker.exists() and mp.marker_text in marker.read_text(encoding="utf-8"):
+    if not marker.exists():
+        # Audit finding F-03: an absent marker file is not evidence of an
+        # unmigrated corpus. It is evidence of a wrong --root, and treating the
+        # two alike puts a mistyped path one keystroke from a destructive pass.
+        print(f"ERROR gate 5: marker file not found at {mp.marker_file}")
+        print(f"      resolved under --root {root}")
+        print("      This is a wrong root, not an unmigrated corpus.")
+        return EXIT_MARKER
+    if mp.marker_text in marker.read_text(encoding="utf-8"):
         if not force:
             print("corpus already migrated (scheme marker present); nothing to do")
             return EXIT_NOOP
@@ -723,12 +819,23 @@ def main() -> int:
     args = ap.parse_args()
 
     root = args.root.resolve()
-    mp = Mapping.load(root / "dev" / "tools" / "mapping.yaml")
+    mapping_path = root / "dev" / "tools" / "mapping.yaml"
+    if not mapping_path.exists():
+        # Sibling of audit finding F-03, found while demonstrating it: a wrong
+        # --root failed here with an unhandled traceback rather than a message.
+        print(f"ERROR mapping not found at {mapping_path}")
+        print(f"      --root {root} does not look like this repository.")
+        return EXIT_MARKER
+    try:
+        mp = Mapping.load(mapping_path)
+    except (ValueError, KeyError) as exc:
+        print(f"ERROR gate 1: mapping invalid — {exc}")
+        return EXIT_GATE
 
     if args.self_test:
         return self_test(mp)
     if args.rollback:
-        return EXIT_OK if rollback(root, args.rollback.resolve()) == 0 else EXIT_CONTENT
+        return EXIT_OK if rollback(root, args.rollback.resolve(), mp) == 0 else EXIT_CONTENT
     if args.force_remigrate and not args.dry_run:
         print("ERROR --force-remigrate is refused against the live corpus")
         return EXIT_GATE

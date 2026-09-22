@@ -17,7 +17,7 @@
 Scope-excluded from the migration; see `dev/proposals/proposal-eb782f83-protocol-template-reordering.md`
 and `dev/reports/report-eb782f83-pre-migration-baseline.md`.
 
-- [x] Repair the 8 `ai/governance.md` template links — discharged by eb782f83: the migration regenerates the table of contents and emits the template links at their correct `templates/` paths. Generation, not repair. Confirmed on the rehearsal; broken links fall from 17 to 9.
+- [x] Repair the 8 `ai/governance.md` template links — **done by eb782f83, not discharged by it.** The migration emits them at their correct `templates/` paths. The strategic audit (F-01) found this reversed OQ-7 and FR-07-04, which said the paths would not be repaired; recorded as CON-08 exception E-3 in the proposal §6.3 rather than closed as a discharge. Broken links fell from 17 to 9.
 - [ ] Repair 9 further pre-existing broken links unrelated to numbering (baseline §4.2–§4.4): `governance.md` → `claude-code.md` missing `profiles/`; `ai/profiles/README.md` → nonexistent `claude-desktop-instructions.md` and stale `claude.md`; 6 profile setup-guide links using `../../../docs/` where `../../docs/` is correct. Independent of eb782f83.
 - [ ] Author the five reserved protocols (Change 2): `P05` Continuous Integration, `P16` Execution, `P17` Release, `P18` Deployment and Propagation, `P19` Observability. Slots reserved by eb782f83; content deliberately deferred (proposal §5.3).
 - [ ] Add `.github/workflows` CI running `linter.py`, `protocol_checker.py` and pytest on push (gap G1). Governed by `P05` once authored.
@@ -45,6 +45,15 @@ gate the downstream propagation item above.
 - [ ] `bin/propagate.sh` cannot handle renames. It rsyncs without `--delete`, so a renamed file leaves its old name behind in the target. Propagating v10.0 as it stands would leave every downstream project with fifteen template files: the eight current names plus the seven retired ones. Either add `--delete` with the existing exclude list acting as protection, or enumerate and remove superseded names explicitly.
 - [ ] `bin/propagate.sh` cannot run non-interactively. Line 117 is `read -r -p "Apply changes? [y/N] "`, and under `set -euo pipefail` a non-TTY stdin causes exit 1 *after* the preview and *before* the apply — so it reports what it would do and then silently does nothing. Add a `--yes` flag, or detect a non-TTY and fail loudly rather than exiting as though complete.
 - [ ] Consider whether `propagate.sh` should refuse to run when the target's governance version differs from the source by a major version, since that is exactly when renames occur.
+
+### Deferred from the eb782f83 strategic audit (change-9b8f1c47)
+
+- [ ] Retire the numeric `schema_type` prefix in favour of the class word — `issue`, `change`, `design` (audit F-04). Recorded as a permanent exception in governance Appendix A A.5 for now. The prefix cannot be migrated in isolation: `linter.py` keys validation rules, enums, id patterns and coupling paths on these strings and every frozen document carries them, so CON-04 forecloses it. Retiring the numeric component removes the coupling altogether, which is the same correction this migration made to protocol citations.
+- [ ] Decide whether `rollback()` should remove files the manifest does not record, or continue to refuse and defer to `git checkout` (audit F-02). It currently refuses, which is safe but leaves the tool unable to do the thing its name claims.
+- [ ] Exercise `--rollback` against a real snapshot on a scratch clone. It has still never been run in anger (brief §5.1.3), and the refusal path added under change-9b8f1c47 is now the only path it takes.
+- [ ] Resolve `bin/propagate.sh`'s two defects together with audit F-03 and F-10 before any D5 propagation. The audit is right that these are one problem seen from three sides: the instrument was built for one repository with a known layout, and propagation is the first use that breaks those assumptions.
+- [ ] Search the corpus for prose that refers to a protocol by position — "the following protocol", "as described above". Never performed; named as untested in the audit brief §5.1.1 and still the most likely place for a genuine CON-01 violation.
+- [ ] Run the AEL once against the migrated corpus. The recipes were in the write set and no Ralph Loop has executed since (brief §5.1.4).
 
 ### Repository hygiene
 

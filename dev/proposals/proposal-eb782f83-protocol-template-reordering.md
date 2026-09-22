@@ -323,6 +323,25 @@ Rationale for the split: merging the renumbering with new CI/CD content would
 make verification impossible, because a migration defect could not be
 distinguished from an intentional edit.
 
+### 6.3 CON-08 Exception Register
+
+CON-08 excludes repairing pre-existing defects. Three exceptions were taken.
+They are recorded here under change-9b8f1c47 because the strategic audit found
+each had been argued away in prose rather than registered as a departure from a
+ratified constraint.
+
+| # | Exception | Commit | Finding |
+|---|---|---|---|
+| E-1 | `Protocol compliance: All protocols P00-P09` became `All protocols`. Not a neutral rewording: a closed enumerated set became an open one, widening audit scope onto Requirements and every future protocol. Ruled intended — the prior text already excluded `P10` Requirements, which existed, because the range was never updated when that protocol was added. | `7b47345` | F-05 |
+| E-2 | `Templates T01-T07 are external documents in ai/templates/` became `All templates are external documents in ai/templates/`. Corrects an omission of `T08`, added at governance v9.9. | `7b47345` | F-05 |
+| E-3 | The eight Category A template links were emitted at their correct `templates/` paths rather than renamed in place, reversing OQ-7 and FR-07-04 as written. | `b3369f5` | F-01 |
+
+E-1 and E-2 landed one commit **before** the `pre-eb782f83` tag, so every
+verification window — V-16, V-17, C1, C2 and the audit's own clause comparison —
+excluded them. CON-01 holds over the range the tag defines and does not hold
+over the change as a whole. The lesson is recorded in the design: a baseline tag
+must precede the first edit of any kind, not the first mechanical one.
+
 [Return to Table of Contents](<#table of contents>)
 
 ---
@@ -514,7 +533,7 @@ convention.
 | OQ-4 | Should `dev/backup/` be git-tracked or ignored? | **Resolved** — ignored (§7.5). `.gitignore` updated. |
 | OQ-5 | Literal citation format | **Resolved** — dotted and fully qualified, `P13.2.3`; section sign retired (§4.3) |
 | OQ-6 | Treatment of comment-only Python edits | **Resolved** — full protocol, separate coupled triple (§8.0 Phase 4a) |
-| OQ-7 | Category A template links in `governance.md` | **Resolved** — rename only. The path defect is deferred to `dev/todo.md` and corrected after this change |
+| OQ-7 | Category A template links in `governance.md` | **Resolved, then reversed in delivery.** Ruled rename-only; delivery emitted the repaired paths. Recorded as CON-08 exception E-3 in §6.3, per audit finding F-01. |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -543,6 +562,7 @@ convention.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.7 | 2026-09-22 | Amended under change-9b8f1c47 from the strategic audit. §6.3 adds a CON-08 exception register recording three departures previously argued in prose rather than registered: the two clause rewrites that landed before the baseline tag (F-05) and the Category A link repair that reversed OQ-7 (F-01). OQ-7 restated as resolved-then-reversed. |
 | 1.6 | 2026-09-22 | §8.0 phase table corrected: the migration tooling is initial implementation from an approved design and requires no issue or change document (primer §7.0). Phase 3 is the `e36a35d3` triple for the five Python modules; Phase 4a is its coupled T04 prompt. |
 | 1.5 | 2026-09-22 | OQ-1, OQ-2 and OQ-3 resolved per the recommendations of 2026-09-22: alias appendix inside `governance.md`; continuous integration reserved in Band A as `P05`; `P16` named as reserved for Execution with authoring deferred. All open questions on this proposal are now closed. |
 | 1.4 | 2026-09-22 | OQ-4 resolved: `dev/backup/` is gitignored. §7.5 rewritten — the previous text claimed independence from git integrity while proposing to track the snapshot inside git, which was contradictory. |
