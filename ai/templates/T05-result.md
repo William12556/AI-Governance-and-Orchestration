@@ -1,4 +1,4 @@
-# T06 Result Template
+# T05 Result Template
 
 Created: 2025-12-12
 
@@ -15,7 +15,7 @@ Created: 2025-12-12
 ## Template
 
 ```yaml
-# T06 Result Template v1.0 - YAML Format
+# T05 Result Template v1.0 - YAML Format
 # Test execution results documentation
 
 result_info:
@@ -101,7 +101,7 @@ metadata:
 ## Schema
 
 ```yaml
-# T06 Result Schema v1.0
+# T05 Result Schema v1.0
 $schema: http://json-schema.org/draft-07/schema#
 type: object
 required:

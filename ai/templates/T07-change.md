@@ -1,4 +1,4 @@
-# T02 Change Template
+# T07 Change Template
 
 Created: 2025-12-12
 
@@ -15,7 +15,7 @@ Created: 2025-12-12
 ## Template
 
 ```yaml
-# T02 Change Template v1.0 - YAML Format
+# T07 Change Template v1.0 - YAML Format
 # Optimized for LM code generation context efficiency
 
 change_info:
@@ -154,7 +154,7 @@ metadata:
 ## Schema
 
 ```yaml
-# T02 Change Schema v1.0
+# T07 Change Schema v1.0
 $schema: http://json-schema.org/draft-07/schema#
 type: object
 required:

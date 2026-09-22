@@ -2,11 +2,11 @@
 Layer 1 Governance Linter — Static validation of workspace documents.
 
 Checks:
-  1. File naming conventions  (P00 §1.1.10)
+  1. File naming conventions  (P00.10)
   2. Markdown structure       (Version History, Created timestamp, copyright)
   3. YAML field validity      (schema_type, id pattern, enum values, iteration)
-  4. UUID coupling integrity  (P03 §1.4.2, P04 §1.5.7, P06 §1.7.12, P09 §1.10.2)
-  5. Obsidian link targets    (P02 §1.3.9)
+  4. UUID coupling integrity  (P04.2, P03.7, P15.12, P13.2)
+  5. Obsidian link targets    (P12.9)
 
 Usage:
     python linter.py <workspace_dir>
@@ -39,7 +39,7 @@ YAML_BLOCK_RE = re.compile(r"```yaml\n(.*?)```", re.DOTALL)
 HEADING_RE   = re.compile(r"^#{1,6}\s+(.+)$", re.MULTILINE)
 LINK_RE      = re.compile(r"\[[^\]]*\]\(<([^>]*)>|\[[^\]]*\]\(([^)]+)\)")
 
-# Enum constraints per schema_type (P00 §1.1.10, template schemas)
+# Enum constraints per schema_type (P00.10, template schemas)
 _ENUMS: dict[str, dict[str, frozenset]] = {
     "t02_change": {
         "change_info.status":   frozenset({"proposed", "approved", "implemented", "verified", "rejected"}),
@@ -152,7 +152,7 @@ def _is_governance_doc(fname: str) -> bool:
     return bool(MASTER_RE.match(fname) or NORMAL_RE.match(fname))
 
 
-# ── Check 1: file naming (P00 §1.1.10) ───────────────────────────────────────
+# ── Check 1: file naming (P00.10) ───────────────────────────────────────
 
 def check_naming(fname: str, path: str) -> list[Finding]:
     """Verify document class is recognised in master and normal naming patterns."""
@@ -289,7 +289,7 @@ def check_coupling(
     return findings
 
 
-# ── Check 5: Obsidian link targets (P02 §1.3.9) ───────────────────────────────
+# ── Check 5: Obsidian link targets (P12.9) ───────────────────────────────
 
 def check_links(path: str, content: str, workspace_dir: str) -> list[Finding]:
     """

@@ -1,4 +1,4 @@
-# T07 Requirements Template
+# T01 Requirements Template
 
 Created: 2025-12-13
 
@@ -15,7 +15,7 @@ Created: 2025-12-13
 ## Template
 
 ```yaml
-# T07 Requirements Template v1.0 - YAML Format
+# T01 Requirements Template v1.0 - YAML Format
 # Optimized for LM code generation context efficiency
 
 project_info:
@@ -112,7 +112,7 @@ metadata:
 ## Schema
 
 ```yaml
-# T07 Requirements Schema v1.0
+# T01 Requirements Schema v1.0
 $schema: http://json-schema.org/draft-07/schema#
 type: object
 required:

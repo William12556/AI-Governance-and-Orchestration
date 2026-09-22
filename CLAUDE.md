@@ -9,7 +9,7 @@ Created: 2026 July 02
 **Technology stack:** Python 3.11+; PyYAML, Rich, Textual (govwatch); MCP Python SDK (AEL orchestrator, ael-mcp)
 **Target platform:** macOS 14+ (Apple Silicon) required for the MLX/oMLX Tactical Domain profile; the framework tooling itself (`ai/src/`, `ai/ael/src/`) is otherwise platform-agnostic Python.
 
-This repository is the framework itself, not a project consuming it. This file governs Claude Code sessions editing `ai/ael/src/`, `ai/src/`, or other framework source, invoked via a `dev/` T04 prompt.
+This repository is the framework itself, not a project consuming it. This file governs Claude Code sessions editing `ai/ael/src/`, `ai/src/`, or other framework source, invoked via a `dev/` T03 prompt.
 
 ## 2.0 Commands
 
@@ -17,7 +17,7 @@ This repository is the framework itself, not a project consuming it. This file g
 |---|---|
 | Install (AEL) | `pip install -r ai/ael/requirements.txt` |
 | Install (govwatch) | `pip install -r ai/src/requirements-govwatch.txt` |
-| Test | No active automated suite. `ai/ael/tests/` was removed from the active tree (retained in `deprecated/skel/ai/ael/tests/`); restore with `cp -r deprecated/skel/ai/ael/tests ai/ael/tests`, then `python3.11 -m pytest ai/ael/tests/ -v`. `ai/src/govwatch.py` has no test directory. Verify changes against the T04 prompt's success criteria and direct source review. |
+| Test | No active automated suite. `ai/ael/tests/` was removed from the active tree (retained in `deprecated/skel/ai/ael/tests/`); restore with `cp -r deprecated/skel/ai/ael/tests ai/ael/tests`, then `python3.11 -m pytest ai/ael/tests/ -v`. `ai/src/govwatch.py` has no test directory. Verify changes against the T03 prompt's success criteria and direct source review. |
 | Lint | None configured |
 | Build | n/a — not a distributed package |
 
@@ -41,7 +41,7 @@ This repository is the framework itself, not a project consuming it. This file g
 | Framework dev artefacts (issues, changes, prompts, design, requirements, proposals, reports) | `dev/` — not `ai/workspace/` (empty skeleton, propagated to downstream projects only) |
 | Templates | `ai/templates/` |
 
-Source-code changes (`ai/ael/src/`, `ai/src/`) require the standard T03 issue → T02 change → T04 prompt workflow (P03 §1.4.1) unless they qualify for the trivial change exemption (P03 §1.4.12). Read `ai/governance.md` and `ai/primer.md` before implementing any T04 prompt.
+Source-code changes (`ai/ael/src/`, `ai/src/`) require the standard T06 issue → T07 change → T03 prompt workflow (P04.1) unless they qualify for the trivial change exemption (P04.12). Read `ai/governance.md` and `ai/primer.md` before implementing any T03 prompt.
 
 ## Version History
 

@@ -37,14 +37,14 @@ Created: 2026 June 18
 
 | File | Signal |
 |---|---|
-| `task.md` | Task description loaded from T04 prompt |
+| `task.md` | Task description loaded from T03 prompt |
 | `iteration.txt` | Current Ralph Loop cycle number |
 | `work-summary.txt` | Worker phase output |
 | `work-complete.txt` | Worker completion signal |
 | `review-result.txt` | `SHIP` or `REVISE` decision |
 | `review-feedback.txt` | Reviewer notes for next worker iteration |
 | `.ralph-complete` | Success marker |
-| `RALPH-BLOCKED.md` | Failure details; seeds T03 Issue |
+| `RALPH-BLOCKED.md` | Failure details; seeds T06 Issue |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -52,7 +52,7 @@ Created: 2026 June 18
 
 ## 3.0 Invocation
 
-Run from project root after human approval of the T04 prompt.
+Run from project root after human approval of the T03 prompt.
 
 ```bash
 # Standard loop
@@ -100,7 +100,7 @@ python ai/ael/src/orchestrator.py --mode loop \
   --duration 12
 ```
 
-Without `--duration` the loop runs until all items in `audit-index.md` are marked complete or `max_iterations` is exhausted. High-severity findings are promoted to T03 issues post-run via the standard P04 workflow.
+Without `--duration` the loop runs until all items in `audit-index.md` are marked complete or `max_iterations` is exhausted. High-severity findings are promoted to T06 issues post-run via the standard P03 workflow.
 
 See `docs/guide-audit-loop.md` for an overview and `ai/doc/guide-audit-loop.md` for operational detail.
 
@@ -131,7 +131,7 @@ See `ai/doc/guide-govwatch.md` for full operational detail.
 
 A standalone MCP server that registers once in Claude Desktop and exposes three tools: `start_ael`, `ael_status`, and `reset_ael`. Enables the Strategic Domain to launch and monitor AEL without human terminal access.
 
-At T04 handoff (P09 §1.10.3), the human selects the execution path:
+At T03 handoff (P13.3), the human selects the execution path:
 
 | Option | Who launches AEL | Status notification |
 |---|---|---|
@@ -139,7 +139,7 @@ At T04 handoff (P09 §1.10.3), the human selects the execution path:
 | B — ael-mcp (Claude Desktop profile only) | Strategic Domain calls `start_ael` | Strategic Domain calls `ael_status` on request |
 
 Repository: `https://github.com/William12556/ael-mcp`
-Setup instructions: P01 §1.2.8 in `ai/governance.md`
+Setup instructions: P10.8 in `ai/governance.md`
 
 [Return to Table of Contents](<#table of contents>)
 

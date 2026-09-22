@@ -1,4 +1,4 @@
-# T01 Design Template
+# T02 Design Template
 
 Created: 2025-12-12
 
@@ -15,7 +15,7 @@ Created: 2025-12-12
 ## Template
 
 ```yaml
-# T01 Design Template v1.0 - YAML Format
+# T02 Design Template v1.0 - YAML Format
 # Optimized for LM code generation context efficiency
 
 project_info:
@@ -245,7 +245,7 @@ metadata:
 ## Schema
 
 ```yaml
-# T01 Design Schema v1.0
+# T02 Design Schema v1.0
 $schema: http://json-schema.org/draft-07/schema#
 type: object
 required:

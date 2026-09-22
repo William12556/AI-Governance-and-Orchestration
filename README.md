@@ -25,7 +25,7 @@ The framework was motivated by a practical observation: language models lose coh
 
 The Autonomous Execution Loop (AEL) implements the Ralph Loop: a worker/reviewer cycle in which the same model fulfills both roles, differentiated by prompt engineering. The loop runs iteratively until the reviewer emits `SHIP` (task complete) or `BLOCKED` (boundary exceeded). Based on Geoffrey Huntley's Ralph Wiggum techniques.
 
-`orchestrator.py` is an AI agent. It perceives its environment by reading state files and tool outputs, reasons via the model inference endpoint, acts by dispatching tool calls and writing state, and maintains persistent state in `ai/state/ralph/` across iterations. The Ralph Loop constitutes a minimal two-agent system: the worker agent produces, the reviewer agent critiques, and the orchestrator arbitrates. Autonomy is constrained by the governance protocols and the T04 tactical brief — the agent cannot redefine its goal mid-run.
+`orchestrator.py` is an AI agent. It perceives its environment by reading state files and tool outputs, reasons via the model inference endpoint, acts by dispatching tool calls and writing state, and maintains persistent state in `ai/state/ralph/` across iterations. The Ralph Loop constitutes a minimal two-agent system: the worker agent produces, the reviewer agent critiques, and the orchestrator arbitrates. Autonomy is constrained by the governance protocols and the T03 tactical brief — the agent cannot redefine its goal mid-run.
 
 `orchestrator.py` is the AEL entry point. It connects to configured MCP servers, sends tool definitions to the inference endpoint, dispatches tool calls, injects results, and iterates until no tool calls remain. It supports four execution modes:
 
@@ -117,7 +117,7 @@ bin/release.sh <version>
 
 1. Install the framework into the project using either path above
 2. Select an implementation profile from `ai/profiles/` and follow its setup instructions
-3. Ask your Strategic Domain model to read `ai/governance.md` and initialize the project per P01 (§1.2 Project Initialization)
+3. Ask your Strategic Domain model to read `ai/governance.md` and initialize the project per P10 (P10 Project Initialization)
 4. Begin with P00 (Governance) and follow the workflow flowchart in section 2.0
 
 ### Implementation Profiles

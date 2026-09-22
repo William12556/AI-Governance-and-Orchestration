@@ -149,7 +149,7 @@ curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 
 ### 5.2 Context budget report
 
-`context-budget.md` is written automatically by the orchestrator at every startup — no separate step is required. Read `ai/state/ralph/context-budget.md` after the first run (and after any model change) before authoring T04 prompts.
+`context-budget.md` is written automatically by the orchestrator at every startup — no separate step is required. Read `ai/state/ralph/context-budget.md` after the first run (and after any model change) before authoring T03 prompts.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -171,14 +171,14 @@ A response of `OK` confirms end-to-end connectivity.
 
 ### 6.2 Read governance.md
 
-Ask the Strategic Domain (Claude Desktop) to read `ai/governance.md` and initialise the project per P01 (§1.2 Project Initialization). The Strategic Domain will guide the workflow from that point.
+Ask the Strategic Domain (Claude Desktop) to read `ai/governance.md` and initialise the project per P10 (P10 Project Initialization). The Strategic Domain will guide the workflow from that point.
 
 ### 6.3 Follow the workflow
 
 The framework workflow is defined in `ai/workflow.md` and governed by `ai/governance.md`. The sequence is:
 
 ```
-P10 Requirements → P02 Design → P09 T04 Prompt → AEL → P06 Test → P00 Close
+P11 Requirements → P12 Design → P13 T03 Prompt → AEL → P15 Test → P00 Close
 ```
 
 The Strategic Domain coordinates each step. Human approval gates are required before requirements baseline, design tier transitions, and code generation.

@@ -67,7 +67,7 @@ No → you must use an MLX profile.
 
 **Profile file:** `ai/profiles/mlx_devstral_small_2_2512_6bit.md`
 
-The primary profile. The orchestrator (`orchestrator.py`) runs a worker/reviewer Ralph Loop autonomously. The Strategic Domain authors a T04 prompt and issues an AEL command; the loop runs to SHIP or BLOCKED without further human involvement per iteration.
+The primary profile. The orchestrator (`orchestrator.py`) runs a worker/reviewer Ralph Loop autonomously. The Strategic Domain authors a T03 prompt and issues an AEL command; the loop runs to SHIP or BLOCKED without further human involvement per iteration.
 
 **Prerequisites:**
 
@@ -99,7 +99,7 @@ python ai/ael/src/orchestrator.py --mode loop \
 
 **Profile file:** `ai/profiles/claude.md`
 
-Manual profile using Claude Code as the Tactical Domain. The Strategic Domain authors a T04 prompt; the human pastes it into Claude Code and directs execution. No automated loop — each iteration is human-initiated.
+Manual profile using Claude Code as the Tactical Domain. The Strategic Domain authors a T03 prompt; the human pastes it into Claude Code and directs execution. No automated loop — each iteration is human-initiated.
 
 **Prerequisites:**
 
@@ -114,7 +114,7 @@ Manual profile using Claude Code as the Tactical Domain. The Strategic Domain au
 
 **State directory:** `.claude/`
 
-**Invocation:** Human pastes T04 prompt into Claude Code session.
+**Invocation:** Human pastes T03 prompt into Claude Code session.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -138,7 +138,7 @@ Manual profile using the Claude Code CLI pointed at a local oMLX endpoint. Combi
 
 **Tactical context file:** `CLAUDE.md` (at project root)
 
-**Invocation:** Human pastes T04 prompt into Claude Code session configured to use the local oMLX endpoint.
+**Invocation:** Human pastes T03 prompt into Claude Code session configured to use the local oMLX endpoint.
 
 [Return to Table of Contents](<#table of contents>)
 

@@ -1,4 +1,4 @@
-# T04 Prompt Template
+# T03 Prompt Template
 
 Created: 2025-12-12
 
@@ -15,7 +15,7 @@ Created: 2025-12-12
 ## Template
 
 ```yaml
-# T04 Prompt Template v1.11 - YAML Format
+# T03 Prompt Template v1.11 - YAML Format
 # Optimized for Strategic Domain → Tactical Domain filesystem communication
 # Designed for minimal token usage while maintaining completeness
 
@@ -29,7 +29,7 @@ prompt_info:
   coupled_docs:
     # Required only when source_ref references a change document. Omit
     # entirely when source_ref references a design document (initial
-    # implementation, governance P03 §1.4.1 exception).
+    # implementation, governance P04.1 exception).
     change_ref: "change-<uuid>"  # Must reference source change UUID
     change_iteration: 1  # Must match change.iteration
 
@@ -159,7 +159,7 @@ notes: ""
 ## Schema
 
 ```yaml
-# T04 Prompt Schema v1.11
+# T03 Prompt Schema v1.11
 $schema: http://json-schema.org/draft-07/schema#
 type: object
 required:

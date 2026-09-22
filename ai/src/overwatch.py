@@ -338,7 +338,7 @@ def parse_document(path: str) -> DocumentRecord:
                     record.missing_fields = missing
                     record.required_fields_present = len(missing) == 0
 
-        # Tactical brief detection for T04 (prompt)
+        # Tactical brief detection for T03 (prompt)
         if cls == "prompt":
             for block in blocks:
                 brief = block.get("tactical_brief")
@@ -657,7 +657,7 @@ class ComplianceEngine:
                     ))
 
             # FR-02-03: prompt with no coupled change sharing UUID → VIOLATION
-            # (skipped for design-sourced prompts — §1.4.1 exception, no change document exists)
+            # (skipped for design-sourced prompts — P04.1 exception, no change document exists)
             for doc in grp_docs:
                 if doc.cls == "prompt" and "change" not in grp_cls and not doc.is_design_sourced:
                     alerts.append(Alert(
@@ -780,7 +780,7 @@ class ComplianceEngine:
 
             # FR-02-10: prompt missing valid tactical_brief → VIOLATION
             # (only when target_profile is ael, or absent — default assumes ael
-            # for prompts predating the target_profile field, §1.10.2)
+            # for prompts predating the target_profile field, P13.2)
             if (
                 doc.cls == "prompt"
                 and not doc.has_tactical_brief

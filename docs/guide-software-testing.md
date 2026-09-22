@@ -23,7 +23,7 @@ Created: 2026 March 05
 
 ## Introduction
 
-This document provides comprehensive guidance for implementing testing within the LLM Orchestration Framework. Testing follows governance protocol P06 and employs systematic validation across multiple test types.
+This document provides comprehensive guidance for implementing testing within the LLM Orchestration Framework. Testing follows governance protocol P15 and employs systematic validation across multiple test types.
 
 ### Purpose
 
@@ -58,12 +58,12 @@ Execution → Results → Issue Creation (if needed) → Closure
 
 ### Workflow Steps
 
-#### 1. Test Documentation Creation (P06.2)
+#### 1. Test Documentation Creation (P15.2)
 
 **Actor:** Strategic Domain
 
 **Process:**
-1. Read template from `ai/templates/T05-test.md`
+1. Read template from `ai/templates/T04-test.md`
 2. Create test document from generated source code
 3. Save to `ai/workspace/test/test-<uuid>-<n>.md`
 4. Couple to source prompt via UUID reference
@@ -75,23 +75,23 @@ Execution → Results → Issue Creation (if needed) → Closure
 - Requirements traceability
 
 **Outputs:**
-- T05 test documentation
+- T04 test documentation
 - Test strategy and approach
 - Test case specifications
 
-#### 2. Test Script Generation (P06.3)
+#### 2. Test Script Generation (P15.3)
 
 **Actor:** Strategic Domain
 
 **Automatic:** Precedes test execution
 
 **Process:**
-1. Generate pytest files from T05 documentation
+1. Generate pytest files from T04 documentation
 2. Create test files with `test_*.py` naming convention
 3. Place in appropriate directory:
    - Component tests: `tests/<component>/test_*.py`
    - Validation scripts: `tests/test_*.py` (root level)
-4. Implement test cases per T05 specifications
+4. Implement test cases per T04 specifications
 5. Use pytest or unittest per `pyproject.toml`
 
 **Outputs:**
@@ -124,7 +124,7 @@ pytest --cov=src tests/
 pytest -v tests/
 ```
 
-#### 4. Progressive Validation (P06.15)
+#### 4. Progressive Validation (P15.15)
 
 **Targeted Validation:**
 - Execute minimal test for specific fix
@@ -144,13 +144,13 @@ pytest -v tests/
 - Required before closure
 - Purpose: Comprehensive verification
 
-#### 5. Result Documentation (P06.13)
+#### 5. Result Documentation (P15.13)
 
 **Actor:** Strategic Domain
 
 **Process:**
 1. Review test execution output
-2. Create result document using T06 template
+2. Create result document using T05 template
 3. Save to `ai/workspace/test/result/result-<uuid>-<n>.md`
 4. Reference parent test UUID
 5. Match parent test iteration number
@@ -171,7 +171,7 @@ pytest -v tests/
 4. Archive to respective `closed/` subfolders
 
 **Tests Fail:**
-1. Create issue document via P04
+1. Create issue document via P03
 2. Assign new UUID to issue
 3. Follow issue → change → debug cycle
 4. Increment iteration numbers
@@ -787,7 +787,7 @@ pytest -n 4 tests/
 - Authentic network conditions
 - Production-equivalent configuration
 
-Specific platform details (OS, hardware, tooling) are defined in project design documents per P06 §1.7.17.
+Specific platform details (OS, hardware, tooling) are defined in project design documents per P15.17.
 
 ### Cross-Platform Testing Strategy
 
@@ -885,7 +885,7 @@ Strategic Domain verifies:
 
 ### Traceability Matrix Updates
 
-After test execution, Strategic Domain updates the traceability matrix (P05) in:
+After test execution, Strategic Domain updates the traceability matrix (P01) in:
 `ai/workspace/trace/trace-<name>-master.md`
 
 ### Required Linkages

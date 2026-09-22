@@ -1,4 +1,4 @@
-# T05 Test Template
+# T04 Test Template
 
 Created: 2025-12-12
 
@@ -15,7 +15,7 @@ Created: 2025-12-12
 ## Template
 
 ```yaml
-# T05 Test Template v1.0 - YAML Format
+# T04 Test Template v1.0 - YAML Format
 # Optimized for LM code generation context efficiency
 
 test_info:
@@ -163,7 +163,7 @@ metadata:
 ## Schema
 
 ```yaml
-# T05 Test Schema v1.0
+# T04 Test Schema v1.0
 $schema: http://json-schema.org/draft-07/schema#
 type: object
 required:

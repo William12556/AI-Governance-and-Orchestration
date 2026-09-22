@@ -1,4 +1,4 @@
-# T03 Issue Template
+# T06 Issue Template
 
 Created: 2025-12-12
 
@@ -15,7 +15,7 @@ Created: 2025-12-12
 ## Template
 
 ```yaml
-# T03 Issue Template v1.0 - YAML Format
+# T06 Issue Template v1.0 - YAML Format
 # Optimized for LM code generation context efficiency
 
 issue_info:
@@ -134,7 +134,7 @@ metadata:
 ## Schema
 
 ```yaml
-# T03 Issue Schema v1.0
+# T06 Issue Schema v1.0
 $schema: http://json-schema.org/draft-07/schema#
 type: object
 required:
