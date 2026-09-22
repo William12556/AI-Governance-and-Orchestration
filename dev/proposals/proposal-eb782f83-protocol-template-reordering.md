@@ -398,9 +398,9 @@ convention.
 | 0 | This proposal | `dev/proposals/` |
 | 1 | Requirements document | `dev/requirements/` |
 | 2 | Design document — mapping tables, citation rule, alias appendix, backup design | `dev/design/` |
-| 3 | Issue and change documents for the migration tooling | `dev/issue/`, `dev/change/` |
+| 3 | Issue and change for the five Python modules (`e36a35d3`) | `dev/issue/`, `dev/change/`. The migration tooling itself is **initial implementation from an approved design** and requires no issue or change document (primer §7.0); its forward path is design → T04 prompt → execution → review. |
 | 4 | Migration script and verification script | `dev/` tooling; source code, full protocol applies |
-| 4a | Second coupled triple covering the five Python modules under `ai/` | Comment-only edits, governed in full per the P00 source-code rule |
+| 4a | T04 prompt coupled to `change-e36a35d3` | Authorises the Python-module portion of the migration run |
 | 5 | Dry run against `dev/smoke/ai/`; diff review | — |
 | 6 | Backup snapshot, then execution on the live corpus | branch `reorder-eb782f83` |
 | 7 | Automated and manual verification (§9.0) | — |
@@ -543,6 +543,7 @@ convention.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.6 | 2026-09-22 | §8.0 phase table corrected: the migration tooling is initial implementation from an approved design and requires no issue or change document (primer §7.0). Phase 3 is the `e36a35d3` triple for the five Python modules; Phase 4a is its coupled T04 prompt. |
 | 1.5 | 2026-09-22 | OQ-1, OQ-2 and OQ-3 resolved per the recommendations of 2026-09-22: alias appendix inside `governance.md`; continuous integration reserved in Band A as `P05`; `P16` named as reserved for Execution with authoring deferred. All open questions on this proposal are now closed. |
 | 1.4 | 2026-09-22 | OQ-4 resolved: `dev/backup/` is gitignored. §7.5 rewritten — the previous text claimed independence from git integrity while proposing to track the snapshot inside git, which was contradictory. |
 | 1.3 | 2026-09-22 | OQ-7 resolved: rename only, link repair deferred to `dev/todo.md`. §6.2 states the exclusion and its reason. |

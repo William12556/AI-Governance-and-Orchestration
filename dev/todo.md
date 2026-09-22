@@ -27,6 +27,16 @@ and `dev/reports/report-eb782f83-pre-migration-baseline.md`.
 - [ ] Rename the three `dev/requirements/` documents to the UUID convention of P00 §1.1.10 — `ael-requirements.md`, `requirements-govwatch.md`, `requirements-project-overwatch.md` — and update every reference to them. Their current names are an oversight.
 - [ ] Record in governance v10.0 that `dev/` documents are authored in prose with FR/NFR/CON tables. The YAML `T07` template applies to downstream project requirements only, where a local model consumes it.
 
+### Compliance tooling defects
+
+Pre-existing; found while baselining eb782f83. See `dev/reports/report-eb782f83-pre-migration-baseline.md` §7.0.
+
+- [ ] Resolve the linter/template contradiction producing 81 of the 102 `dev/` linter errors: `linter.py` requires a markdown `## Version History` heading, while the `T02`, `T03` and `T04` templates are pure YAML carrying a `version_history:` key. Either the linter accepts the YAML key for YAML-schema documents, or the templates gain a markdown section. Every issue, change and prompt document in the repository currently fails this check.
+- [ ] Add `proposal` and `report` to the linter's known document classes (9 errors). Both are established `dev/` classes.
+- [ ] Correct 31 `protocol_checker` lifecycle errors — documents in `closed/` whose status field is non-terminal — and 7 status-consistency errors where an issue and its coupled change disagree.
+- [ ] Correct 10 linter enum violations and 2 dangling coupling references in existing `dev/` documents.
+- [ ] Consider a check that validates protocol citations embedded in source comments. Nothing currently does; `linter.py` and `protocol_checker.py` validate documents, not docstrings. Named in `issue-e36a35d3` analysis.
+
 ### Repository hygiene
 
 - [ ] Check `mcp-ripgrep`, `mcp-git` and `mcp-sed-awk` for the JSON Schema draft-07 `outputSchema` declaration that makes the Anthropic Filesystem MCP server unusable in Cowork sessions. Emit `2020-12`, or omit `$schema` entirely.

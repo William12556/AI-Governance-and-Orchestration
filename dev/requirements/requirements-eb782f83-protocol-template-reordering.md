@@ -223,7 +223,7 @@ The migration instrument is source code and is governed accordingly.
 | ID | Requirement |
 |---|---|
 | TR-01 | A single machine-readable mapping table is the sole source of truth. Both the migration script and the alias appendix consume it. |
-| TR-02 | Substitution is a single atomic pass using sentinel tokens. Sequential replacement is prohibited, because fixed points and swaps in the mapping would corrupt under it. |
+| TR-02 | Substitution is a single atomic operation, implemented as two passes via sentinel tokens. Sequential replacement is prohibited: both namespaces overlap their own images, so a direct source-to-target replacement corrupts. |
 | TR-03 | The script is idempotent. A second run against a migrated tree produces no change. |
 | TR-04 | The script enforces the closed write-set of §2.0 and refuses any path outside it. |
 | TR-05 | A complete backup is written before any modification: every file to be touched, at its original relative path, plus `manifest.csv` recording path, SHA-256, byte count and modification time, plus `MANIFEST.md` recording file count, total bytes, timestamp and the git commit hash at snapshot time. |
@@ -261,8 +261,8 @@ The migration instrument is source code and is governed accordingly.
 | V-02 | No retired identifier remains in the live corpus outside the alias appendix and version histories | Corpus scan | FR-01, FR-02, FR-04 |
 | V-03 | Every citation resolves to an existing heading | Verification script | FR-03-03, FR-04 |
 | V-04 | No Obsidian internal anchor link is broken | Anchor resolution pass | FR-07-01 |
-| V-05 | `linter.py` runs clean | Execution against `ai/` and the regenerated smoke copy | FR-09-02 |
-| V-06 | `protocol_checker.py` runs clean | Execution against `ai/` and the regenerated smoke copy | FR-09-02 |
+| V-05 | `linter.py` output is byte-identical before and after migration | Execution against `dev/` and the regenerated smoke copy, captured immediately before and after. `dev/` is frozen, so any difference is migration damage. Absolute cleanliness is not achievable: the pre-existing count is 102 errors (baseline report §7.0). | FR-09-02, CON-04 |
+| V-06 | `protocol_checker.py` output is byte-identical before and after migration | As V-05. Pre-existing count is 38 errors. | FR-09-02, CON-04 |
 | V-07 | pytest suite green | Execution | NFR-07 |
 | V-08 | `primer.md` protocol and template tables are correct | Manual review against the mapping table | FR-07-02 |
 | V-09 | `workflow.md` flowchart references are correct and topology is unchanged | Manual review, node by node | FR-07-03 |
@@ -359,6 +359,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 0.4 | 2026-09-22 | V-05 and V-06 restated as before-and-after output comparison rather than absolute cleanliness, which is unachievable: `linter.py` reports 102 pre-existing errors and `protocol_checker.py` 38 against `dev/` (baseline report §7.0). TR-02 reworded to match the design: one atomic operation implemented as two sentinel passes. |
 | 0.3 | 2026-09-22 | OQ-01, OQ-02 and OQ-03 resolved: alias appendix inside `governance.md`; continuous integration reserved as Band A `P05`; `P16` reserved and named for Execution with authoring deferred. No requirement text changed — FR-05-01 and FR-06-01 already stated these positions. All open questions closed. |
 | 0.2 | 2026-09-22 | OQ-04 resolved: `dev/backup/` gitignored. Document format and naming confirmed — `dev/` documents are prose, and the UUID naming convention of P00 §1.1.10 applies. |
 | 0.1 | 2026-09-22 | Initial draft. Ten functional requirements, ten tooling requirements, seven non-functional requirements, nine constraints, seventeen verification requirements, four open questions, and traceability to the six ratified decisions and four subsequent rulings. |

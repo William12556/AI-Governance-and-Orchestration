@@ -16,6 +16,7 @@ Created: 2026 September 22
 [4.0 Broken-Link Inventory](<#4.0 broken-link inventory>)
 [5.0 Post-Migration Comparison Procedure](<#5.0 post-migration comparison procedure>)
 [6.0 Findings Requiring a Decision](<#6.0 findings requiring a decision>)
+[7.0 Compliance Tooling Baseline](<#7.0 compliance tooling baseline>)
 [Version History](<#version history>)
 
 ---
@@ -227,10 +228,84 @@ but not within it.
 
 ---
 
+## 7.0 Compliance Tooling Baseline
+
+### 7.1 Finding
+
+`linter.py` and `protocol_checker.py` do not run clean against the framework's
+own development corpus, and have not for some time. Verification requirements
+V-05 and V-06 as originally written — "runs clean" — are therefore
+unachievable, and were written without checking.
+
+### 7.2 Counts
+
+Captured 2026-09-22, with the `e36a35d3` issue and change documents present.
+
+| Workspace | linter errors | linter warnings | protocol_checker errors |
+|---|---|---|---|
+| `dev/` | 102 | 101 | 38 |
+| `ai/workspace/` | 0 | 0 | 0 |
+
+`ai/workspace/` is empty in this repository; the framework's own work lives in
+`dev/`. All `dev/` counts are pre-existing.
+
+### 7.3 Error Classes
+
+| Count | Tool | Class | Nature |
+|---|---|---|---|
+| 81 | linter | `[structure] missing 'Version History' section` | The linter requires a markdown `## Version History` heading. The `T02`, `T03` and `T04` templates are pure YAML carrying a `version_history:` key. Every issue, change and prompt document in the repository therefore fails, including the two `e36a35d3` documents, which match house precedent exactly. |
+| 10 | linter | `[yaml] value not in enum` | Enum violations in existing documents |
+| 9 | linter | `[naming] unknown document class` | The linter's class list omits `proposal` and `report`, both established `dev/` classes |
+| 2 | linter | `[coupling] referenced document not found` | Dangling coupling references |
+| 31 | protocol_checker | `[lifecycle] document in closed/ has non-terminal status` | Closed documents whose status field was never set to a terminal value |
+| 7 | protocol_checker | `[status_consistency]` | Issue and coupled change disagree on status |
+
+The 81-error class is the significant one: it is a contradiction between the
+linter and the templates, not a documentation lapse. Either the linter should
+accept `version_history:` for YAML-schema documents, or the templates should
+carry a markdown section. Both are out of scope here and are deferred to
+`dev/todo.md`.
+
+### 7.4 Anchor Link Baseline
+
+`verify_migration.py` V-04 resolves internal anchors. Three are broken before
+migration:
+
+| Source | Anchor | Note |
+|---|---|---|
+| `ai/governance.md` | `#1.0 protocols` | Heading is "1.0 Protocols (Directives)" |
+| `ai/governance.md` | `#2.0 templates` | No such heading exists |
+| `docs/claude/obsidian_markdown_guidelines.md` | `#header name` | A literal documentation example, not a live link |
+
+The two `governance.md` anchors are removed by the restructuring, which drops
+the `## 1.0 Protocols` wrapper and regenerates the table of contents. The
+post-migration baseline should therefore be 1, not 3.
+
+### 7.5 Independent Confirmation of the Link Baseline
+
+`verify_migration.py`, written from the design and not from this report,
+reports exactly 17 broken file links — the same 17 catalogued in §4.0. The two
+counts were produced by separate code paths and agree.
+
+### 7.6 Consequence for Verification
+
+V-05 and V-06 are restated in the requirements document as a comparison rather
+than an absolute: run both tools immediately before execution and immediately
+after, and require byte-identical output. Since `dev/` is frozen and the
+migration writes nothing to it, any difference is migration damage. This is
+robust to documents added to `dev/` between baseline capture and execution,
+which an absolute count is not.
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
 |---|---|---|
+| 1.2 | 2026-09-22 | Added §7.4 anchor link baseline (3 broken, 2 of which the restructuring removes) and §7.5 recording that `verify_migration.py` independently reproduces the 17-link count. |
+| 1.1 | 2026-09-22 | Added §7.0 Compliance Tooling Baseline: `linter.py` reports 102 errors and `protocol_checker.py` 38 against `dev/`, all pre-existing. Records the six error classes, identifies the 81-error linter/template contradiction, and states the consequence for V-05 and V-06. |
 | 1.0 | 2026-09-22 | Initial baseline. Records the nine-point divergence between `ai/primer.md` v0.14 and `docs/claude/primer.md` v0.11, the finding that the `docs/` copy holds no unique information, and the seventeen pre-existing broken file links in the migration set with their correct targets. |
 
 ---
