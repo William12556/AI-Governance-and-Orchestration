@@ -312,6 +312,12 @@ not in the migration set.
 - Merging, splitting or deleting any existing protocol.
 - Modification of `dev/` or any `closed/` document (D3).
 - Propagation to downstream repositories (D5).
+- Repair of pre-existing broken links. The migration renames link targets where
+  the filename changes and repairs nothing. All 17 broken links catalogued in
+  `report-eb782f83-pre-migration-baseline.md` §4.0 are expected to persist, and
+  are deferred to `dev/todo.md`. Repairing a path inside a mechanical migration
+  would break acceptance criterion 5, under which every diff hunk must be an
+  identifier or a citation — the property that makes verification tractable.
 
 Rationale for the split: merging the renumbering with new CI/CD content would
 make verification impossible, because a migration defect could not be
@@ -504,7 +510,7 @@ convention.
 | OQ-4 | Should `dev/backup/` be git-tracked or ignored? | §7.5 assumes tracked; awaiting confirmation |
 | OQ-5 | Literal citation format | **Resolved** — dotted and fully qualified, `P13.2.3`; section sign retired (§4.3) |
 | OQ-6 | Treatment of comment-only Python edits | **Resolved** — full protocol, separate coupled triple (§8.0 Phase 4a) |
-| OQ-7 | Category A template links in `governance.md` are broken by a missing `templates/` path segment and are also due for renaming. Rename only, or rename and repair? | Baseline report §6.1 recommends rename only, with the path defect raised as its own issue |
+| OQ-7 | Category A template links in `governance.md` | **Resolved** — rename only. The path defect is deferred to `dev/todo.md` and corrected after this change |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -533,6 +539,7 @@ convention.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.3 | 2026-09-22 | OQ-7 resolved: rename only, link repair deferred to `dev/todo.md`. §6.2 states the exclusion and its reason. |
 | 1.2 | 2026-09-22 | OQ-5 resolved: citations adopt the dotted fully-qualified form `P13.2.3`, the section sign is retired from protocol citations, and governance headings carry the same identifier. OQ-6 resolved: the five Python modules under `ai/` are migrated under a second coupled triple (Phase 4a). Primer canonicalisation added to scope, `ai/primer.md` canonical and `docs/claude/primer.md` regenerated from it. Pre-migration baseline report referenced. V13-V15 and R9-R10 added; acceptance criteria 8 and 9 added; OQ-7 opened on the Category A link defect. |
 | 1.1 | 2026-09-16 | §6.1.1 added defining the closed migration set (`ai/`, `docs/`, `CLAUDE.md`, `README.md`, `RATIONALE.md`, `dev/backup/`); `dev/smoke/ai/` reclassified from migrated mirror to regenerated propagated copy, it being gitignored; §7.3 abort gate narrowed from whole-tree cleanliness to migration-set cleanliness plus a valid `HEAD`; R4 restated accordingly. |
 | 1.0 | 2026-09-16 | Initial proposal. Records decisions D1–D6, the banded protocol scheme, template mapping, protocol-relative citation scheme, CI/CD gap assessment with reserved slots, backup and rollback design, nine-phase procedure, twelve verification checks and eight identified risks. |
