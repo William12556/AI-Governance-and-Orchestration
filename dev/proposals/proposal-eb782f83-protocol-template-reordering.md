@@ -508,9 +508,9 @@ convention.
 
 | # | Question | Bearing |
 |---|---|---|
-| OQ-1 | Should the alias appendix live in `governance.md` or as a separate `ai/aliases.md`? | Governance file length; `governance.md` is already 1 233 lines |
-| OQ-2 | Should the reserved Band A slot for continuous integration be `P05`, or should CI sit in Band B as a lifecycle stage? | Determines slot allocation in §5.3 |
-| OQ-3 | Does the `P16` Execution slot warrant a protocol, or should execution remain distributed across `P00` and `P13`? | Determines whether §5.3 reserves four Band B slots or three |
+| OQ-1 | Alias appendix location | **Resolved** — inside `governance.md`. It is normative and must travel with governance; ~80 lines, about 6% growth. Splitting `governance.md` remains a separate question in `dev/todo.md`. |
+| OQ-2 | Band for continuous integration | **Resolved** — Band A, `P05`. CI is a continuous gate running on every push, not a phase passed through once; it groups with `P01` Trace and `P02` Audit as automated conformance. |
+| OQ-3 | Execution as its own protocol | **Resolved** — `P16` is named as reserved for Execution; authoring deferred to Change 2. Naming a reserved slot records an intention and commits nothing. |
 | OQ-4 | Should `dev/backup/` be git-tracked or ignored? | **Resolved** — ignored (§7.5). `.gitignore` updated. |
 | OQ-5 | Literal citation format | **Resolved** — dotted and fully qualified, `P13.2.3`; section sign retired (§4.3) |
 | OQ-6 | Treatment of comment-only Python edits | **Resolved** — full protocol, separate coupled triple (§8.0 Phase 4a) |
@@ -543,6 +543,7 @@ convention.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.5 | 2026-09-22 | OQ-1, OQ-2 and OQ-3 resolved per the recommendations of 2026-09-22: alias appendix inside `governance.md`; continuous integration reserved in Band A as `P05`; `P16` named as reserved for Execution with authoring deferred. All open questions on this proposal are now closed. |
 | 1.4 | 2026-09-22 | OQ-4 resolved: `dev/backup/` is gitignored. §7.5 rewritten — the previous text claimed independence from git integrity while proposing to track the snapshot inside git, which was contradictory. |
 | 1.3 | 2026-09-22 | OQ-7 resolved: rename only, link repair deferred to `dev/todo.md`. §6.2 states the exclusion and its reason. |
 | 1.2 | 2026-09-22 | OQ-5 resolved: citations adopt the dotted fully-qualified form `P13.2.3`, the section sign is retired from protocol citations, and governance headings carry the same identifier. OQ-6 resolved: the five Python modules under `ai/` are migrated under a second coupled triple (Phase 4a). Primer canonicalisation added to scope, `ai/primer.md` canonical and `docs/claude/primer.md` regenerated from it. Pre-migration baseline report referenced. V13-V15 and R9-R10 added; acceptance criteria 8 and 9 added; OQ-7 opened on the Category A link defect. |

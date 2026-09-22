@@ -299,14 +299,14 @@ The migration instrument is source code and is governed accordingly.
 
 | ID | Question | Bearing |
 |---|---|---|
-| OQ-01 | Alias appendix inside `governance.md`, or a separate `ai/aliases.md`? | `governance.md` is 1 233 lines before the appendix. Affects FR-05-01. |
-| OQ-02 | Is continuous integration reserved in Band A as `P05`, or in Band B as a lifecycle stage? | Affects FR-06-01. |
-| OQ-03 | Does `P16` Execution warrant a protocol, or should execution remain distributed across `P00` and `P13`? | Affects FR-06-01. |
+| OQ-01 | Alias appendix location | **Resolved** — inside `governance.md`, as FR-05-01 states. |
+| OQ-02 | Band for continuous integration | **Resolved** — Band A, `P05`, as FR-06-01 states. |
+| OQ-03 | Execution as its own protocol | **Resolved** — `P16` reserved and named; authoring deferred to Change 2, per CON-03 and FR-06-02. |
 | OQ-04 | Is `dev/backup/` git-tracked or ignored? | **Resolved** — ignored. `dev/backup/` added to `.gitignore`; the snapshot is retained until audit closure, then deleted. |
 
-OQ-01 must resolve before the alias appendix is authored, and OQ-02 and OQ-03
-before the reserved-slot table is written. All three gate the design document.
-OQ-04 is resolved.
+All four open questions are resolved as of 2026-09-22. FR-05-01 and FR-06-01
+already state the resolved positions, so no requirement text changes. The
+design document is unblocked.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -359,6 +359,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 0.3 | 2026-09-22 | OQ-01, OQ-02 and OQ-03 resolved: alias appendix inside `governance.md`; continuous integration reserved as Band A `P05`; `P16` reserved and named for Execution with authoring deferred. No requirement text changed — FR-05-01 and FR-06-01 already stated these positions. All open questions closed. |
 | 0.2 | 2026-09-22 | OQ-04 resolved: `dev/backup/` gitignored. Document format and naming confirmed — `dev/` documents are prose, and the UUID naming convention of P00 §1.1.10 applies. |
 | 0.1 | 2026-09-22 | Initial draft. Ten functional requirements, ten tooling requirements, seven non-functional requirements, nine constraints, seventeen verification requirements, four open questions, and traceability to the six ratified decisions and four subsequent rulings. |
 
