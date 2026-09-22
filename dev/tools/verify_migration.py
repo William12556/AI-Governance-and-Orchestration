@@ -153,24 +153,34 @@ def v14_file_links(root: Path, mp: Mapping, r: Results, baseline: int) -> None:
         print(f"       {o}")
 
 
-def v17_frozen_corpus(root: Path, r: Results, since_ref: str) -> None:
+def v17_frozen_corpus(root: Path, r: Results, since_ref: str,
+                      until_ref: str | None = None) -> None:
     """The frozen corpus must be byte-identical across the migration.
 
-    Compared against the pre-migration tag, not the working tree: documents
-    authored in dev/ between tagging and execution are not migration damage.
+    The comparison is bounded at both ends. Without an upper bound it compares
+    the pre-migration tag against the working tree, so any legitimate later edit
+    under dev/ — a todo entry, an audit report — fails the check for good. Pass
+    --until-ref <migration commit> to ask the question the requirement actually
+    poses: did the migration itself touch the frozen corpus?
     """
-    exists = subprocess.run(["git", "rev-parse", "--verify", since_ref], cwd=root,
-                            capture_output=True, text=True, check=False).returncode == 0
-    if not exists:
-        r.check(f"V-17 frozen corpus untouched (vs {since_ref})", True,
-                "SKIPPED — tag absent; run after tagging")
-        return
-    out = subprocess.run(["git", "diff", "--name-only", since_ref, "--", "dev"],
+    for ref in filter(None, (since_ref, until_ref)):
+        if subprocess.run(["git", "rev-parse", "--verify", ref], cwd=root,
+                          capture_output=True, text=True, check=False).returncode != 0:
+            r.check(f"V-17 frozen corpus untouched (vs {since_ref})", True,
+                    f"SKIPPED — ref {ref} absent")
+            return
+    span = f"{since_ref}..{until_ref}" if until_ref else since_ref
+    args = ["git", "diff", "--name-only", since_ref]
+    if until_ref:
+        args.append(until_ref)
+    out = subprocess.run(args + ["--", "dev"],
                          cwd=root, capture_output=True, text=True, check=False).stdout
     touched = [ln.strip() for ln in out.splitlines() if ln.strip()
                and not ln.strip().startswith(("dev/backup/", "dev/smoke/", "dev/tools/"))]
-    r.check(f"V-17 frozen corpus untouched (vs {since_ref})", not touched,
-            f"{len(touched)} modified")
+    detail = f"{len(touched)} modified"
+    if touched and not until_ref:
+        detail += " — unbounded comparison; pass --until-ref <migration commit>"
+    r.check(f"V-17 frozen corpus untouched ({span})", not touched, detail)
     for t in touched[:20]:
         print(f"       {t}")
 
@@ -269,6 +279,8 @@ def main() -> int:
     ap.add_argument("--baseline-links", type=int, default=17)
     ap.add_argument("--baseline-anchors", type=int, default=0)
     ap.add_argument("--since-ref", default="pre-eb782f83")
+    ap.add_argument("--until-ref", default=None,
+                    help="upper bound for V-17; normally the migration commit")
     args = ap.parse_args()
     root = args.root.resolve()
 
@@ -285,7 +297,7 @@ def main() -> int:
     v13_primer(root, r)
     v14_file_links(root, mp, r, args.baseline_links)
     v15_python_modules(root, mp, r, args.since_ref)
-    v17_frozen_corpus(root, r, args.since_ref)
+    v17_frozen_corpus(root, r, args.since_ref, args.until_ref)
 
     print(f"\n{len(r.passes)} passed, {len(r.failures)} failed")
     if r.failures:

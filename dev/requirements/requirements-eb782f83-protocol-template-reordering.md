@@ -273,7 +273,7 @@ The migration instrument is source code and is governed accordingly.
 | V-14 | Broken file links number 17 or fewer, and every one appears in the baseline; the expected result is 9 | Link scan against baseline report §4.5. The eight Category A links fall away because the regenerated table of contents emits template links at correct paths — generation, not repair. | CON-08 |
 | V-15 | The five Python modules carry no executable change; string constants change only as the migration defines | AST skeleton with docstrings removed and string constants blanked must be identical; every differing string must equal the substitution applied to the original. Plus V-05, V-06, and one scan cycle each for `govwatch.py` and `overwatch.py`. | NFR-07, CON-09 |
 | V-16 | Semantic diff review: every hunk is an identifier, a citation or a structural heading change | Manual review of the complete diff | CON-01 |
-| V-17 | Frozen corpus byte-identical | Checksum comparison against the pre-migration commit | CON-04, NFR-03 |
+| V-17 | Frozen corpus byte-identical across the migration | `git diff pre-eb782f83..<migration commit> -- dev`, excluding `dev/backup/`, `dev/smoke/` and `dev/tools/`. The comparison must be bounded at both ends: unbounded, it compares the tag against the working tree, so any legitimate later edit under `dev/` fails it permanently. | CON-04, NFR-03 |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -359,6 +359,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 0.6 | 2026-09-22 | V-17 restated as a comparison bounded at both ends. As originally written it compared the pre-migration tag against the working tree, which answers a different question and fails permanently once any legitimate edit lands under `dev/`. |
 | 0.5 | 2026-09-22 | V-15 restated after the rehearsal: plain AST equivalence forbade the one string change the migration requires, in the `orchestrator.py` guidance block. Replaced with a blanked-skeleton comparison plus per-string verification. V-04 and V-14 gain their expected post-migration results, 1 and 9. |
 | 0.4 | 2026-09-22 | V-05 and V-06 restated as before-and-after output comparison rather than absolute cleanliness, which is unachievable: `linter.py` reports 102 pre-existing errors and `protocol_checker.py` 38 against `dev/` (baseline report §7.0). TR-02 reworded to match the design: one atomic operation implemented as two sentinel passes. |
 | 0.3 | 2026-09-22 | OQ-01, OQ-02 and OQ-03 resolved: alias appendix inside `governance.md`; continuous integration reserved as Band A `P05`; `P16` reserved and named for Execution with authoring deferred. No requirement text changed — FR-05-01 and FR-06-01 already stated these positions. All open questions closed. |
