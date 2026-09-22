@@ -23,6 +23,7 @@ Created: 2026 September 22
 [4.1 Protocol Namespace Overlap](<#4.1 protocol namespace overlap>)
 [4.2 Template Namespace Cycles](<#4.2 template namespace cycles>)
 [4.3 Consequences](<#4.3 consequences>)
+[4.4 The Combined Citation Form](<#4.4 the combined citation form>)
 [5.0 Substitution Algorithm](<#5.0 substitution algorithm>)
 [5.1 Token Classes](<#5.1 token classes>)
 [5.2 Protected Regions](<#5.2 protected regions>)
@@ -124,6 +125,7 @@ Worked examples:
 
 | Old citation | New citation |
 |---|---|
+| `P09 §1.10.2` | `P13.2` (combined form, §4.4) |
 | `§1.10.2` | `P13.2` |
 | `§1.10.3` | `P13.3` |
 | `§1.1.14.4` | `P00.14.4` |
@@ -241,6 +243,24 @@ source and a target. Sequential replacement fails for all seven.
 | Both namespaces overlap sources with targets | Sentinel substitution is mandatory (TR-02), not a precaution |
 | `P00` and `T08` are fixed points | They must still pass through the sentinel stage, or a later rule may rewrite them |
 | The target alphabet contains the source alphabet | Migrated state cannot be detected from token content alone; see §5.5 |
+| A protocol identifier and a positional citation frequently appear as one phrase | Converting the halves independently doubles the citation; see §4.4 |
+
+### 4.4 The Combined Citation Form
+
+The corpus writes a protocol identifier immediately followed by a positional
+citation of the same protocol — `P09 §1.10.2` — in 191 places.
+
+Treating the two halves as independent tokens converts `P09` to `P13` and
+`§1.10.2` to `P13.2`, yielding `P13 P13.2`: the protocol named twice, once
+redundantly. The pair must be recognised as a single token and collapsed to one
+citation.
+
+This also yields a free consistency check. The identifier and the ordinal
+denote the same protocol, so they must agree under the mapping. Measured across
+the live corpus before migration, all 191 occurrences agree and none
+disagree — the corpus is internally consistent on this point, and any
+disagreement encountered during the run is a defect in the source, reported and
+fatal, never silently rewritten.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -252,15 +272,27 @@ source and a target. Sequential replacement fails for all seven.
 
 | Class | Pattern | Replacement |
 |---|---|---|
+| C0 Combined citation | `\bP(0\d|10)(\s+)§1\.(\d+)((?:\.\d+){0,2})\b` | Per §3.2, collapsed to a single citation; see §4.4 |
 | C1 Protocol identifier | `\bP(0\d|10)\b` | Per §3.1 |
 | C2 Positional citation | `§1\.(\d+)((?:\.\d+){0,2})\b` | Per §3.2; the `§` is consumed |
 | C3 Template identifier | `\bT0[1-8]\b` | Per §3.3 |
 | C4 Template filename | `\bT0[1-8]-(design\|change\|issue\|prompt\|test\|result\|requirements\|audit)\.md\b` | Per §3.3, whole token |
 | C5 Range expression | See §5.4 | Manual |
 
-C4 is matched before C3 so that a filename is replaced as a unit. A filename's
-leading identifier and its class word must agree; disagreement is an error, not
-a silent rewrite.
+Precedence is C5, C0, C4, C2, C1, C3.
+
+- **C5 first**, so that a range's endpoints are stashed unchanged and no later
+  rule can rewrite half of one.
+- **C0 before C2 and C1**, so that the combined form is collapsed once rather
+  than having each half converted independently (§4.4).
+- **C4 before C3**, so that a template filename is replaced as a unit.
+
+Two agreement checks are enforced, each fatal rather than a silent rewrite:
+
+| Check | Condition |
+|---|---|
+| C0 | The protocol identifier and the ordinal must denote the same protocol under §3.2 |
+| C4 | A filename's leading identifier and its class word must agree under §3.3 |
 
 Exclusions required by TR-10:
 
@@ -272,6 +304,14 @@ Exclusions required by TR-10:
   code that depends on these tokens (baseline: all Python occurrences are
   comments and docstrings), and `.gitignore` and shell excerpts in
   `governance.md` contain none.
+- The dotted target form already occurs in the corpus, informally: four
+  citations in `docs/guide-software-testing.md` (`P06.2`, `P06.3`, `P06.13`,
+  `P06.15`) and four inside the `governance.md` version history (`P01.2.2`
+  and similar). These are retired-scheme citations written in dotted
+  shorthand. C1 handles them correctly without a dedicated rule, because
+  `\bP06\b` matches before the dot and the clause digits are preserved:
+  `P06.2` becomes `P15.2`. Those inside the version history are protected and
+  untouched.
 
 ### 5.2 Protected Regions
 
@@ -279,9 +319,17 @@ Version-history tables record what was done under the scheme in force at the
 time. Rewriting them would falsify the historical record, and FR-05-04 permits
 retired identifiers there.
 
+Detection applies to Markdown files only. In YAML and Python a leading `#`
+opens a comment, not a heading, so the same pattern there is a false positive
+and the region-end rule — the next heading of equal or lesser depth — has no
+meaning. Four recipe files under `ai/ael/recipes/` carry a `# Version History`
+comment block; none contains a protocol or template token, so nothing is
+affected either way. The residual limitation is recorded: a version-history
+comment block in a non-Markdown file is not protected.
+
 | Region | Detection | Treatment |
 |---|---|---|
-| Version history | From a heading matching `^#{1,6}\s+Version History\s*$` to the next heading of equal or lesser depth, or EOF | No substitution |
+| Version history | Markdown only. From a heading matching `^#{1,6}\s+Version History\s*$` to the next heading of equal or lesser depth, or EOF | No substitution |
 | Alias appendix | From its own heading to the next heading of equal or lesser depth | Generated, not substituted |
 
 The live corpus contains six range expressions inside `governance.md` version
@@ -295,12 +343,13 @@ token is ever replaced directly by a target token.
 
 ```
 substitute(text):
-    regions  = protected_regions(text)
+    regions  = protected_regions(text, markdown = is_markdown(file))
     segments = split_excluding(text, regions)
 
     for each segment:
         # Pass 1 — every matched token becomes a unique sentinel
-        for class in [C4, C2, C1, C3]:          # C4 before C3; C2 before C1
+        #   C5 stashes its match unchanged; the others stash their replacement
+        for class in [C5, C0, C4, C2, C1, C3]:  # precedence per §5.1
             segment = replace_matches(segment, class, allocate_sentinel)
 
         assert no_source_token_remains(segment)
@@ -335,13 +384,38 @@ Five range expressions occur in live text, outside protected regions:
 | `RATIONALE.md` | `P00–P10` | Manual |
 
 A range is not mechanically translatable, because the new protocol set is not
-contiguous: it is `P00`–`P04` and `P10`–`P15`, with reserved gaps. `P00-P09`
-meaning "all protocols" becomes `P00`–`P04` and `P10`–`P15`, or better, the
-phrase "all protocols".
+contiguous: it is `P00`–`P04` and `P10`–`P15`, with reserved gaps.
 
 The script detects C5 matches, refuses to substitute them, and reports each with
 its file and line for manual resolution. A run leaving any C5 match unresolved
 fails.
+
+#### 5.4.1 Resolutions
+
+All five were resolved before execution, on 2026-09-22, by replacement with
+scheme-neutral wording. Scheme-neutral phrasing is correct under both the
+retired and the current scheme, so the resolution does not split correctness
+across the migration boundary, and cannot go stale when a protocol or template
+is added.
+
+| Location | Before | After |
+|---|---|---|
+| `governance.md` audit scope | `Protocol compliance: All protocols P00-P09` | `Protocol compliance: All protocols` |
+| `governance.md` templates clause | `Templates T01-T07 are external documents in ai/templates/` | `All templates are external documents in ai/templates/` |
+| `README.md` | `Eleven protocols (P00–P10) govern` | `Eleven protocols govern` |
+| `README.md` | `Seven YAML templates (T01–T07) for all document classes` | `A YAML template for each document class` |
+| `RATIONALE.md` | `The protocol-driven workflow (P00–P10), UUID-coupled` | `The protocol-driven workflow, UUID-coupled` |
+
+Three of the five were already factually wrong before this change, independently
+of the migration. `P00-P09` omitted `P10` Requirements; both `T01-T07` ranges
+and the count "seven" omitted `T08` Audit, added at governance v9.9. The
+scheme-neutral wording corrects them incidentally. This is noted rather than
+claimed as a repair: CON-08 excludes defect repair from the migration, and these
+edits were required to unblock the run, not undertaken to fix the counts.
+
+Seven further range expressions remain in the `governance.md` version history.
+They are inside a protected region, describe changes made under the retired
+scheme, and are correctly left untouched.
 
 ### 5.5 Idempotence
 
@@ -584,6 +658,7 @@ Compensating controls, in combination sufficient:
 
 | Condition | Handling |
 |---|---|
+| C0 identifier and ordinal denote different protocols | Error; run fails, reporting file, line and both readings |
 | Template filename identifier disagrees with its class word | Error; run fails |
 | A `§1.<ord>` citation with an ordinal outside 1–11 | Error; run fails, reporting file and line |
 | Citation depth greater than three components after `§1` | Error; the corpus contains none, so this signals a parse fault |
@@ -594,6 +669,7 @@ Compensating controls, in combination sufficient:
 | Snapshot directory already exists | Error; the run refuses to overwrite a prior snapshot |
 | Rollback against a modified file matching neither original nor migrated digest | Reported per file; rollback continues and exits non-zero |
 | Empty write set | Error; signals a path or enumeration fault |
+| `git status --porcelain` first line | The status code occupies columns 1-2, so a clean index leaves a leading space. The raw output must not be stripped as a whole, or the first line shifts by one column and that file escapes the gate 3 dirty check. Found in testing. |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -617,6 +693,7 @@ Compensating controls, in combination sufficient:
 | Sentinel allocation | function | `allocate_sentinel` |
 | Sentinel expansion | function | `expand_sentinels` |
 | Range-expression detection | function | `find_range_expressions` |
+| Combined-citation pattern | constant | `C0_RE` |
 | Governance restructuring | function | `restructure_governance` |
 | Appendix generation | function | `generate_alias_appendix` |
 | Table-of-contents regeneration | function | `regenerate_toc` |
@@ -685,6 +762,8 @@ Test traceability is added when the test document exists.
 
 | Version | Date | Description |
 |---|---|---|
+| 0.3 | 2026-09-22 | §5.4.1 records the resolution of all five live range expressions by scheme-neutral replacement, and notes that three were already factually wrong. Documents a gate 3 defect found in testing: `git status --porcelain` output was being stripped as a whole, shifting the first line by one column and hiding that file from the dirty check. |
+| 0.2 | 2026-09-22 | Added token class C0, the combined `Pnn §1.x.y` form, found while implementing: 191 occurrences, and converting the halves independently doubles the citation. New §4.4 states the hazard and the identifier-versus-ordinal agreement check, which all 191 occurrences satisfy. §5.1 gains the full precedence order C5, C0, C4, C2, C1, C3 and both agreement checks; §5.3 pseudocode updated to match. §5.2 records that protected-region detection is Markdown-only, a leading `#` being a comment in YAML and Python, with the residual limitation stated. §5.1 exclusions record that the dotted target form already occurs informally in the corpus and needs no dedicated rule. §12.0 and §13.0 updated. |
 | 0.1 | 2026-09-22 | Initial design. Three mapping tables with machine-readable form; collision analysis establishing that both namespaces overlap sources with targets; two-pass sentinel substitution with protected regions; range expressions identified as requiring manual resolution; idempotence by scheme marker, with the reason content inspection cannot suffice; target structure of `governance.md`; alias appendix layout; backup, abort gates and rollback; write-set enforcement; component and element registry; verification design with its stated completeness limitation and compensating controls. |
 
 ---

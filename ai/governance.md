@@ -214,7 +214,7 @@ python ai/ael/src/orchestrator.py --mode loop \
     - Knowledge documents may contain: problem statements, solutions, examples, rationale
     - Knowledge base prevents repeated problem-solving across development cycles
   - §1.1.17 Templates
-    - Templates T01-T07 are external documents in ai/templates/ directory
+    - All templates are external documents in ai/templates/ directory
     - Template files:
       - ai/templates/T01-design.md
       - ai/templates/T02-change.md
@@ -911,7 +911,7 @@ pip install dist/*.whl
     - Baseline: After initial code generation before production deployment
     - Mode selection: Human-requested audits resolve to one of two modes — strategic (Strategic Domain) or tactical (AEL audit loop) — per §1.9.9
   - §1.9.3 Audit Scope
-    - Protocol compliance: All protocols P00-P09
+    - Protocol compliance: All protocols
     - Document compliance: Naming, formatting, cross-linking, version histories
     - Code quality: Thread safety, error handling, documentation standards
     - Naming consistency: Generated code element names match name registry (modules, classes, functions, constants)

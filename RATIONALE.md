@@ -41,7 +41,7 @@ This framework is a **software development process governance system**. It gover
 
 The distinguishing characteristic is domain separation: a Strategic Domain (planning, coordination, validation) and a Tactical Domain (execution, code generation) communicate exclusively via filesystem-based message passing. Neither domain has direct conversational access to the other. All consequential transitions require explicit human approval.
 
-This is closer to formal engineering process control than to agent orchestration middleware. The protocol-driven workflow (P00–P10), UUID-coupled issue and change documents, immutable document lifecycle, and bidirectional traceability matrix collectively implement a discipline comparable to CMMI Level 2–3 at single-developer scale.
+This is closer to formal engineering process control than to agent orchestration middleware. The protocol-driven workflow, UUID-coupled issue and change documents, immutable document lifecycle, and bidirectional traceability matrix collectively implement a discipline comparable to CMMI Level 2–3 at single-developer scale.
 
 [Return to Table of Contents](<#table of contents>)
 

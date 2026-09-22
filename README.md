@@ -12,14 +12,14 @@ The framework was motivated by a practical observation: language models lose coh
 
 `ai/governance.md` defines a dual-domain architecture separating strategic coordination (Strategic Domain) from tactical implementation (Tactical Domain). Communication between domains uses MCP filesystem-based message passing. The framework is independent of any specific AI model or toolchain; implementation profiles map abstract framework concepts to concrete tooling.
 
-- **Protocol-driven workflow**: Eleven protocols (P00–P10) govern requirements capture, project initialization, three-tier design hierarchy, change management, issue resolution, traceability, testing, quality assurance, audit, prompting, and requirements management
+- **Protocol-driven workflow**: Eleven protocols govern requirements capture, project initialization, three-tier design hierarchy, change management, issue resolution, traceability, testing, quality assurance, audit, prompting, and requirements management
 - **Human approval gates**: Explicit human authorization required before requirements baseline, design tier transitions, code generation, and baseline modifications
 - **Three-tier design decomposition**: Master (system) → Domain (functional) → Component (implementation) with validation gates between tiers
 - **Model-agnostic architecture**: Strategic and Tactical Domain roles fulfilled by any capable LLM; implementation profiles provided for Apple Silicon MLX (primary) and Claude Code (optional)
 - **UUID-based document coupling**: 8-character hex identifiers with iteration synchronization through debug cycles
 - **Document lifecycle management**: Active/closed states with immutable archival and closure criteria across all document classes
 - **Bidirectional traceability**: Requirements ↔ Design ↔ Code ↔ Test linkages
-- **Template-based documentation**: Seven YAML templates (T01–T07) for all document classes
+- **Template-based documentation**: A YAML template for each document class
 
 ## Orchestration
 
