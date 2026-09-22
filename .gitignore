@@ -73,3 +73,7 @@ ai/dashboard-alerts.md
 
 # Claude Code local settings (P01 §1.2.2)
 .claude/settings.local.json
+
+# Migration snapshots — working safety net for the duration of a change.
+# The durable pre-migration record is the git tag, not this directory.
+dev/backup/

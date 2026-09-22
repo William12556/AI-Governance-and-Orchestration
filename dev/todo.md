@@ -24,11 +24,11 @@ and `dev/reports/report-eb782f83-pre-migration-baseline.md`.
 - [ ] Propagate governance v10.0 to downstream repositories — GTach, solax-modbus, e-Paper-IP-Display, pi-netconfig, certmon. All pinned at v9.16 by decision D5 until this is done. Distinct from the orchestrator propagation items above.
 - [ ] Decide whether `docs/claude/primer.md` should continue to exist as a file copy once `ai/primer.md` is canonical, or be replaced by a pointer. A maintained duplicate is how it drifted three revisions behind.
 - [ ] Evaluate splitting `governance.md`. It is 1233 lines before the alias appendix is added (OQ-1).
-- [ ] Decide whether `dev/backup/` is git-tracked or ignored (OQ-4). Proposal §7.5 assumes tracked.
+- [ ] Rename the three `dev/requirements/` documents to the UUID convention of P00 §1.1.10 — `ael-requirements.md`, `requirements-govwatch.md`, `requirements-project-overwatch.md` — and update every reference to them. Their current names are an oversight.
+- [ ] Record in governance v10.0 that `dev/` documents are authored in prose with FR/NFR/CON tables. The YAML `T07` template applies to downstream project requirements only, where a local model consumes it.
 
 ### Repository hygiene
 
-- [ ] Resolve whether `tests/overwatch/test_overwatch.py` and `ai/src/requirements-overwatch.txt` are tracked or ignored. Both were untracked as of 2026-09-16; ignoring them leaves the Overwatch test suite unversioned and its dependencies unreproducible. Decision pending.
 - [ ] Check `mcp-ripgrep`, `mcp-git` and `mcp-sed-awk` for the JSON Schema draft-07 `outputSchema` declaration that makes the Anthropic Filesystem MCP server unusable in Cowork sessions. Emit `2020-12`, or omit `$schema` entirely.
 
 ## Parked

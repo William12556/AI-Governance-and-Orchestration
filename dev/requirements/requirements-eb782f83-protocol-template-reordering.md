@@ -302,11 +302,11 @@ The migration instrument is source code and is governed accordingly.
 | OQ-01 | Alias appendix inside `governance.md`, or a separate `ai/aliases.md`? | `governance.md` is 1 233 lines before the appendix. Affects FR-05-01. |
 | OQ-02 | Is continuous integration reserved in Band A as `P05`, or in Band B as a lifecycle stage? | Affects FR-06-01. |
 | OQ-03 | Does `P16` Execution warrant a protocol, or should execution remain distributed across `P00` and `P13`? | Affects FR-06-01. |
-| OQ-04 | Is `dev/backup/` git-tracked or ignored? | Affects TR-05 retention. |
+| OQ-04 | Is `dev/backup/` git-tracked or ignored? | **Resolved** — ignored. `dev/backup/` added to `.gitignore`; the snapshot is retained until audit closure, then deleted. |
 
-None of the four blocks design. OQ-01 must resolve before the alias appendix is
-authored; OQ-02 and OQ-03 before the reserved-slot table is written; OQ-04
-before execution.
+OQ-01 must resolve before the alias appendix is authored, and OQ-02 and OQ-03
+before the reserved-slot table is written. All three gate the design document.
+OQ-04 is resolved.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -359,6 +359,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 0.2 | 2026-09-22 | OQ-04 resolved: `dev/backup/` gitignored. Document format and naming confirmed — `dev/` documents are prose, and the UUID naming convention of P00 §1.1.10 applies. |
 | 0.1 | 2026-09-22 | Initial draft. Ten functional requirements, ten tooling requirements, seven non-functional requirements, nine constraints, seventeen verification requirements, four open questions, and traceability to the six ratified decisions and four subsequent rulings. |
 
 ---
