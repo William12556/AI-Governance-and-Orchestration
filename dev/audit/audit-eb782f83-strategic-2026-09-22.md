@@ -127,27 +127,36 @@ findings:
         surface. The snapshot itself is sound: see the C8 verdict.
       issue_ref: ""
 
-    - location: "dev/tools/migrate_identifiers.py — evaluate_gates(), scheme marker test"
+  medium:
+    - location: "dev/tools/migrate_identifiers.py — evaluate_gates(), scheme marker test; main(), --root"
       description: >
         F-03. The idempotence gate cannot distinguish a corpus that is already
         migrated from one where the marker file does not exist. The test is
         'marker.exists() and mp.marker_text in marker.read_text(...)'; a false
         result from either conjunct is treated identically, as 'not yet
         migrated', and the run proceeds. The marker is a property of one file,
-        ai/governance.md, not of the corpus. Applied to any root that does not
-        carry that file at that path — and the declared next step, decision D5,
-        is propagation to downstream repositories whose layouts have not been
-        surveyed — the gate passes and the mapping is applied a second time.
-        A second pass is destructive, not inert: P03 and P04 transpose back,
-        P01 to P10 to P11, T01 to T02 to T07, and all eight template targets lie
-        inside the source alphabet. C10's own falsification test — 'a marker
-        that can be absent on a migrated corpus' — is satisfied by construction
-        for any corpus without ai/governance.md. The related hazard, that
-        write_snapshot is anchored at root/dev/backup/, means such a run would
-        also create a dev/ tree in a repository that has none.
+        ai/governance.md, not of the corpus, and --root accepts any path,
+        defaulting to the script's grandparent directory. A second pass is
+        destructive rather than inert: P03 and P04 transpose back, P01 to P10
+        to P11, T01 to T02 to T07, and all eight template targets lie inside
+        the source alphabet. C10's own falsification test — 'a marker that can
+        be absent on a migrated corpus' — is satisfied by construction for any
+        corpus that does not carry ai/governance.md at that path. On exposure,
+        the obvious scenario does not apply: bin/propagate.sh rsyncs ai/ to
+        <project>/ai/, so a propagated downstream repository receives the
+        migrated governance.md complete with Appendix A, and the marker travels
+        with it. The realistic trigger is a mistaken --root. Gate 2 rejects a
+        non-repository root and the empty-write-set check rejects a root with
+        none of the five write-set paths, but a valid repository holding some
+        of ai/, docs/, CLAUDE.md, README.md or RATIONALE.md without
+        ai/governance.md passes every gate and is migrated. The severity is
+        therefore operator error rather than routine use, and the defect is a
+        missing distinction in the one guard whose entire purpose is to make
+        that distinction. A related hazard: write_snapshot is anchored at
+        root/dev/backup/, so such a run would also create a dev/ tree in a
+        repository that has none.
       issue_ref: ""
 
-  medium:
     - location: "ai/templates/*.md schema_type keys; ai/ael/src/linter.py _ENUMS, _ID_PATTERNS, _ITERATION_FIELDS; ai/ael/src/protocol_checker.py _TERMINAL_STATUS"
       description: >
         F-04. A second template namespace exists and was not migrated, and its
@@ -272,7 +281,11 @@ findings:
         rsyncs without --delete and so cannot carry a rename, and the design
         specified template renames from the outset. It was foreseeable, and the
         reason it was not foreseen is structural — no step in the design was
-        ever going to look at a directory that appears in neither list.
+        ever going to look at a directory that appears in neither list. The
+        consequence downstream is the same shape as F-02 upstream: a propagated
+        project would receive the seven new template filenames and keep the
+        seven retired ones beside them, fifteen files in a directory that should
+        hold eight, with no error raised.
       issue_ref: ""
 
     - location: ".gitignore line 47; dev/tools/mapping.yaml exclude_paths"
@@ -442,8 +455,9 @@ claim_adjudication:
       the marker is present and detected here. But the gate conflates a missing
       marker with a missing marker file, so the claim fails for any corpus that
       does not carry ai/governance.md at that path. See F-03. The exposure is
-      not hypothetical: D5 defers propagation to downstream repositories, and
-      that is the next planned use of this mapping.
+      narrower than propagation — a propagated downstream repository carries the
+      marker with governance.md — and rests on a mistaken --root, which is the
+      one condition the gate exists to catch and does not.
   - claim: "C11"
     verdict: "refuted"
     basis: >
@@ -618,8 +632,8 @@ metrics:
   findings_total: 14
   findings_by_severity:
     critical: 0
-    high: 3
-    medium: 4
+    high: 2
+    medium: 5
     low: 7
   claims_confirmed: 5
   claims_refuted: 6
@@ -643,8 +657,10 @@ recommendations:
   - >
     F-03. Raise a T06 issue. evaluate_gates() should fail with a distinct exit
     code when the marker file does not exist at the configured path, rather than
-    treating its absence as evidence of an unmigrated corpus. This is a
-    precondition for D5 propagation, not a post-hoc tidy.
+    treating its absence as evidence of an unmigrated corpus. Propagation does
+    not trigger this — the marker travels with governance.md — so it is not a
+    release blocker, but it is the only guard standing between a mistyped --root
+    and a destructive second pass, and it does not stand.
   - >
     F-04. Raise a T06 issue to decide the schema_type question explicitly. Three
     options: migrate both sides together in one coupled change; leave both and
@@ -707,10 +723,12 @@ notes: >
   itself into question.
 
   The defects cluster in two places, and neither is the corpus. The first is the
-  instrument: the rollback does not prune, and the idempotence gate cannot tell a
-  migrated corpus from a missing file. Both are latent, both are invisible to a
-  rehearsal that never renames files or runs against a second repository, and
-  both become live the moment D5 propagation begins. The second is the record:
+  instrument: the rollback does not prune, the idempotence gate cannot tell a
+  migrated corpus from a missing marker file, and propagate.sh cannot carry a
+  rename. All three are latent, and all three are invisible to a rehearsal that
+  never renames files and never runs against a second repository. The rename
+  residue is the common thread — the same defect appears in the rollback locally
+  and in propagation downstream. The second is the record:
   a ratified decision was reversed and filed as a discharge; two clause edits
   that change meaning sit one commit outside the window where CON-01 was
   measured; a namespace nobody considered now contradicts the scheme it belongs
@@ -736,10 +754,15 @@ notes: >
   different count, though not, on this evidence, a different verdict.
 
 version_history:
+  - version: "1.1"
+    date: "2026-09-22"
+    changes:
+      - "F-03 corrected and reclassified from high to medium. Version 1.0 argued that the scheme-marker gate's exposure was D5 propagation, on the assumption that a downstream repository might not carry ai/governance.md at that path. Re-checking bin/propagate.sh shows it rsyncs ai/ to <project>/ai/, so a propagated repository receives the migrated governance.md with Appendix A and the marker travels with it. The code defect stands — the gate cannot distinguish an absent marker from an absent marker file — but its realistic trigger is a mistaken --root, not routine propagation. Severity counts revised to two high, five medium, seven low; fourteen findings unchanged. The C10 verdict basis and the F-03 recommendation were corrected to match."
+      - "F-10 extended: propagate.sh rsyncing without --delete produces downstream the same rename residue F-02 produces locally — seven new template filenames arriving beside seven retired ones, with no error raised."
   - version: "1.0"
     date: "2026-09-22"
     changes:
-      - "Initial strategic audit of b3369f5 against 9a1767f. Twelve claims adjudicated: five confirmed, six refuted, one unverifiable. Fourteen findings: three high, four medium, seven low. All eleven weak points declared in the brief assessed; six blind spots recorded that the brief does not carry."
+      - "Initial strategic audit of b3369f5 against 9a1767f. Twelve claims adjudicated: five confirmed, six refuted, one unverifiable. Fourteen findings: two high, five medium, seven low. All eleven weak points declared in the brief assessed; six blind spots recorded that the brief does not carry."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
@@ -753,6 +776,7 @@ metadata:
 
 | Version | Date | Description |
 |---|---|---|
+| 1.1 | 2026-09-22 | F-03 corrected and reclassified from high to medium: propagation carries the scheme marker with governance.md, so the exposure is a mistaken `--root` rather than routine propagation. Severity counts revised to two high, five medium, seven low. C10 verdict basis and F-03 recommendation corrected to match. F-10 extended with the downstream rename-residue consequence. |
 | 1.0 | 2026-09-22 | Initial strategic audit report. Claims C1–C12 adjudicated; fourteen findings recorded by severity; brief §5.1–§5.7 assessed; six unlisted blind spots recorded. |
 
 ---
