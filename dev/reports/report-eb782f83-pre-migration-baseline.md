@@ -175,6 +175,14 @@ Post-migration, the broken-link count in the migration set must be **17 or
 fewer**, and every remaining entry must appear in §4.1 to §4.4. Any link not
 listed here is migration damage.
 
+**Expected result: 9.** The eight Category A links fall away, because the
+migration regenerates the `governance.md` table of contents and emits the
+template links at their correct `templates/` paths. This is generation rather
+than repair — there is no sensible way to generate a link already known to be
+wrong — so CON-08 is not breached, but the `dev/todo.md` item covering those
+eight links is discharged by it. Categories B, C and D, nine links, persist and
+remain on the todo list. Confirmed on the rehearsal.
+
 [Return to Table of Contents](<#table of contents>)
 
 ---
@@ -279,7 +287,8 @@ migration:
 
 The two `governance.md` anchors are removed by the restructuring, which drops
 the `## 1.0 Protocols` wrapper and regenerates the table of contents. The
-post-migration baseline should therefore be 1, not 3.
+post-migration baseline is therefore **1**, the literal example in the Obsidian
+guidelines. Confirmed on the rehearsal.
 
 ### 7.5 Independent Confirmation of the Link Baseline
 
@@ -304,6 +313,7 @@ which an absolute count is not.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.3 | 2026-09-22 | Records the expected post-migration results confirmed on the rehearsal: broken file links 17 to 9, broken anchors 3 to 1. Notes that the eight Category A links are discharged by table-of-contents generation rather than repair. |
 | 1.2 | 2026-09-22 | Added §7.4 anchor link baseline (3 broken, 2 of which the restructuring removes) and §7.5 recording that `verify_migration.py` independently reproduces the 17-link count. |
 | 1.1 | 2026-09-22 | Added §7.0 Compliance Tooling Baseline: `linter.py` reports 102 errors and `protocol_checker.py` 38 against `dev/`, all pre-existing. Records the six error classes, identifies the 81-error linter/template contradiction, and states the consequence for V-05 and V-06. |
 | 1.0 | 2026-09-22 | Initial baseline. Records the nine-point divergence between `ai/primer.md` v0.14 and `docs/claude/primer.md` v0.11, the finding that the `docs/` copy holds no unique information, and the seventeen pre-existing broken file links in the migration set with their correct targets. |

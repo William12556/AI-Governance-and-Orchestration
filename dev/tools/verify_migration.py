@@ -15,6 +15,7 @@ reserved-protocol check is the compensating control.
 from __future__ import annotations
 
 import argparse
+import ast
 import re
 import subprocess
 import sys
@@ -22,8 +23,17 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from migrate_identifiers import (  # noqa: E402
-    C2_RE, Mapping, TEXT_SUFFIXES, enumerate_write_set, protected_regions,
+    C2_RE, FileReport, Mapping, TEXT_SUFFIXES, enumerate_write_set,
+    protected_regions, substitute,
 )
+
+PY_MODULES = [
+    "ai/ael/src/protocol_checker.py",
+    "ai/ael/src/linter.py",
+    "ai/ael/src/orchestrator.py",
+    "ai/src/govwatch.py",
+    "ai/src/overwatch.py",
+]
 
 # The house convention is ](<#heading>) with angle brackets, which is what
 # makes headings containing parentheses linkable at all.
@@ -184,6 +194,75 @@ def v13_primer(root: Path, r: Results) -> None:
             "" if same else "docs/claude/primer.md differs from ai/primer.md")
 
 
+def _strip_docstrings(tree: ast.AST) -> ast.AST:
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef,
+                             ast.AsyncFunctionDef)) and node.body:
+            first = node.body[0]
+            if (isinstance(first, ast.Expr) and isinstance(first.value, ast.Constant)
+                    and isinstance(first.value.value, str)):
+                node.body.pop(0)
+    return tree
+
+
+def _skeleton(tree: ast.AST) -> tuple[str, list[str]]:
+    """AST dump with every string constant blanked, plus those strings in order.
+
+    Comparing the skeleton proves the program structure is unchanged. Comparing
+    the strings separately allows a citation inside a string literal to change,
+    which it must: the orchestrator writes guidance text naming the prompt
+    template, and after migration that name is different.
+    """
+    strings: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            strings.append(node.value)
+            node.value = "\x00"
+    return ast.dump(tree), strings
+
+
+def v15_python_modules(root: Path, mp: Mapping, r: Results, since_ref: str) -> None:
+    """V-15. No executable construct changed; string literals changed only where
+    the change is exactly what the migration would produce."""
+    exists = subprocess.run(["git", "rev-parse", "--verify", since_ref], cwd=root,
+                            capture_output=True, text=True, check=False).returncode == 0
+    if not exists:
+        r.check(f"V-15 Python modules unchanged except citations (vs {since_ref})",
+                True, "SKIPPED — tag absent")
+        return
+    problems: list[str] = []
+    for rel in PY_MODULES:
+        path = root / rel
+        if not path.exists():
+            problems.append(f"{rel}: missing")
+            continue
+        before = subprocess.run(["git", "show", f"{since_ref}:{rel}"], cwd=root,
+                                capture_output=True, text=True, check=False).stdout
+        after = path.read_text(encoding="utf-8")
+        try:
+            sk_b, str_b = _skeleton(_strip_docstrings(ast.parse(before)))
+            sk_a, str_a = _skeleton(_strip_docstrings(ast.parse(after)))
+        except SyntaxError as exc:
+            problems.append(f"{rel}: does not parse — {exc}")
+            continue
+        if sk_b != sk_a:
+            problems.append(f"{rel}: executable structure changed")
+            continue
+        if len(str_b) != len(str_a):
+            problems.append(f"{rel}: string constant count changed")
+            continue
+        for b, a in zip(str_b, str_a):
+            if b == a:
+                continue
+            expected = substitute(b, mp, FileReport(rel), markdown=False)
+            if expected != a:
+                problems.append(f"{rel}: string changed beyond migration: {b[:60]!r}")
+    r.check("V-15 Python modules: no executable change, citations only",
+            not problems, f"{len(problems)} problem(s)" if problems else "")
+    for prob in problems[:10]:
+        print(f"       {prob}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="eb782f83 migration verification")
     ap.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[2])
@@ -205,6 +284,7 @@ def main() -> int:
     v10_template_filenames(root, mp, r)
     v13_primer(root, r)
     v14_file_links(root, mp, r, args.baseline_links)
+    v15_python_modules(root, mp, r, args.since_ref)
     v17_frozen_corpus(root, r, args.since_ref)
 
     print(f"\n{len(r.passes)} passed, {len(r.failures)} failed")

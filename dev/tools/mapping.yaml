@@ -69,6 +69,14 @@ refuse_paths:
   - "tests"
   - ".git"
 
+# Inside the migration set but excluded: ephemeral runtime state and generated
+# output. Rewriting these is meaningless — ralph state is cleared by
+# '--mode reset', dashboard-alerts.md is rewritten by every govwatch scan —
+# and both are gitignored, so git could not restore them if it went wrong.
+exclude_paths:
+  - "ai/state"
+  - "ai/dashboard-alerts.md"
+
 # Marker proving the corpus has been migrated (TR-03, design §5.5).
 scheme_marker:
   file: "ai/governance.md"

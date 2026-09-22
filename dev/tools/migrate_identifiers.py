@@ -65,6 +65,7 @@ class Mapping:
     reserved: dict[str, str | None]
     migration_set: list[str]
     refuse_paths: list[str]
+    exclude_paths: list[str]
     marker_file: str
     marker_text: str
     ordinal_to_new: dict[int, str] = field(default_factory=dict)
@@ -78,6 +79,7 @@ class Mapping:
             reserved=raw.get("reserved", {}),
             migration_set=raw["migration_set"],
             refuse_paths=raw["refuse_paths"],
+            exclude_paths=raw.get("exclude_paths", []),
             marker_file=raw["scheme_marker"]["file"],
             marker_text=raw["scheme_marker"]["text"],
         )
@@ -128,11 +130,12 @@ class Mapping:
 # two halves independently would yield "P13 P13.2".
 C0_RE = re.compile(r"\b(P(?:0\d|10))(\s+)§1\.(\d+)((?:\.\d+){0,2})\b")
 C2_RE = re.compile(r"§1\.(\d+)((?:\.\d+){0,2})\b")
-C1_RE = re.compile(r"\bP(?:0\d|10)\b")
+C1_RE = re.compile(r"\b[Pp](?:0\d|10)\b")
 C4_RE = re.compile(
-    r"\bT0[1-8]-(?:design|change|issue|prompt|test|result|requirements|audit)\.md\b"
+    r"\b[Tt]0[1-8]-(?:design|change|issue|prompt|test|result|requirements|audit)\.md\b",
+    re.IGNORECASE,
 )
-C3_RE = re.compile(r"\bT0[1-8]\b")
+C3_RE = re.compile(r"\b[Tt]0[1-8]\b")
 # C5: ranges are not mechanically translatable — the new protocol set is not
 # contiguous. Detected, left untouched, reported; an unresolved one fails the run.
 C5_RE = re.compile(r"\b(P(?:0\d|10)|T0[1-8])\s*[-–—]\s*(P(?:0\d|10)|T0[1-8])\b")
@@ -240,21 +243,28 @@ def _substitute_segment(seg: str, mp: Mapping, report: FileReport) -> str:
         bump("C2")
         return stash(f"{new}{rest}")
 
+    def _match_case(token: str, replacement: str) -> str:
+        """Anchors carry the lowercased heading; preserve whichever case was used."""
+        return replacement.lower() if token[0].islower() else replacement
+
     def on_c4(m: re.Match) -> str:
-        old = m.group(0)[:3]
-        cls = m.group(0)[4:-3]
+        token = m.group(0)
+        old = token[:3].upper()
+        cls = token[4:-3].lower()
         if mp.templates[old]["class"] != cls:
-            raise SubstitutionError(f"template filename {m.group(0)!r} disagrees with its class")
+            raise SubstitutionError(f"template filename {token!r} disagrees with its class")
         bump("C4")
-        return stash(f"{mp.template_new(old)}-{cls}.md")
+        return stash(_match_case(token, f"{mp.template_new(old)}-{cls}.md"))
 
     def on_c1(m: re.Match) -> str:
+        token = m.group(0)
         bump("C1")
-        return stash(mp.protocol_new(m.group(0)))
+        return stash(_match_case(token, mp.protocol_new(token.upper())))
 
     def on_c3(m: re.Match) -> str:
+        token = m.group(0)
         bump("C3")
-        return stash(mp.template_new(m.group(0)))
+        return stash(_match_case(token, mp.template_new(token.upper())))
 
     seg = C0_RE.sub(on_c0, seg)
     seg = C4_RE.sub(on_c4, seg)
@@ -278,6 +288,11 @@ def _substitute_segment(seg: str, mp: Mapping, report: FileReport) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 # Write set
 # ─────────────────────────────────────────────────────────────────────────────
+def _excluded(rel: Path, mp: Mapping) -> bool:
+    text = str(rel)
+    return any(text == e or text.startswith(e.rstrip("/") + "/") for e in mp.exclude_paths)
+
+
 def enumerate_write_set(root: Path, mp: Mapping) -> list[Path]:
     """Deterministic sorted walk of the permitted roots (TR-04, design §9.0)."""
     out: list[Path] = []
@@ -292,6 +307,8 @@ def enumerate_write_set(root: Path, mp: Mapping) -> list[Path]:
             rel = p.relative_to(root)
             if "closed" in rel.parts or ".git" in rel.parts:
                 continue
+            if _excluded(rel, mp):
+                continue
             if p.suffix.lower() not in TEXT_SUFFIXES:
                 continue
             out.append(p)
@@ -303,6 +320,8 @@ def assert_writable(path: Path, root: Path, mp: Mapping) -> None:
     rel = path.resolve().relative_to(root.resolve())
     if rel.parts and rel.parts[0] in mp.refuse_paths:
         raise PermissionError(f"refusing to write outside the migration set: {rel}")
+    if _excluded(rel, mp):
+        raise PermissionError(f"path is explicitly excluded: {rel}")
     allowed = any(
         rel == Path(e) or str(rel).startswith(e.rstrip("/") + "/") for e in mp.migration_set
     )
@@ -432,21 +451,32 @@ def restructure_governance(text: str, mp: Mapping) -> str:
 
 
 def regenerate_governance_toc(text: str, mp: Mapping) -> str:
-    """FR-07-01. Rebuild the table of contents from the headings that exist."""
-    names = mp.new_to_name()
+    """FR-07-01. Rebuild the table of contents from the headings that exist.
+
+    Entries are derived from the actual '## ' headings rather than composed from
+    the mapping, so an anchor cannot disagree with the heading it points at.
+    """
+    heads = [m.group(1).strip() for m in re.finditer(r"^##\s+(.+?)\s*$", text, re.MULTILINE)
+             if m.group(1).strip() != "Table of Contents"]
+    protocols = [h for h in heads if re.match(r"^P\d\d\b", h)]
+    others = [h for h in heads if h not in protocols]
+
     lines = ["## Table of Contents", ""]
     for band, label in (("A", "Cross-cutting"), ("B", "Lifecycle")):
-        lines.append(f"**{label}**")
+        entries = [h for h in protocols if mp.band(h.split()[0]) == band]
+        if not entries:
+            continue
+        lines += [f"**{label}**", ""]
+        lines += [f"- [{h}](<#{h.lower()}>)" for h in entries]
         lines.append("")
-        for ident in mp.ordered_new_ids():
-            if mp.band(ident) != band:
-                continue
-            title = f"{ident} {names[ident]}"
-            lines.append(f"- [{title}](<#{title.lower()}>)")
-        lines.append("")
-    for extra in ("Workflow", "Version History", "Appendix A — Identifier Aliases"):
-        lines.append(f"[{extra}](<#{extra.lower()}>)")
-    block = "\n".join(lines) + "\n"
+    lines += ["**Templates**", ""]
+    for old in sorted(mp.templates, key=lambda k: mp.templates[k]["new"]):
+        v = mp.templates[old]
+        name = f"{v['new']}-{v['class']}.md"
+        lines.append(f"- [{v['new']}: {v['class'].capitalize()}](templates/{name})")
+    lines.append("")
+    lines += [f"[{h}](<#{h.lower()}>)" for h in others]
+    block = "\n".join(lines) + "\n\n"
     s = text.find("## Table of Contents")
     if s < 0:
         return text
@@ -546,6 +576,16 @@ def run(root: Path, mp: Mapping, dry_run: bool, force: bool) -> int:
         return EXIT_GATE
     print(f"write set: {len(paths)} file(s)")
 
+    tracked = set(_git(root, "ls-files").splitlines())
+    untracked = [str(p.relative_to(root)) for p in paths
+                 if str(p.relative_to(root)) not in tracked]
+    if untracked:
+        print(f"\nNOTE {len(untracked)} file(s) in the write set are not tracked by git.")
+        print("     The snapshot is their only rollback path; the tag cannot restore them.")
+        for u in untracked:
+            print(f"       {u}")
+        print()
+
     gate = evaluate_gates(root, mp, paths, force)
     if gate is not None:
         return gate
@@ -575,8 +615,8 @@ def run(root: Path, mp: Mapping, dry_run: bool, force: bool) -> int:
             return EXIT_CONTENT
         if p.name == "governance.md":
             migrated = restructure_governance(migrated, mp)
-            migrated = regenerate_governance_toc(migrated, mp)
             migrated = migrated.rstrip("\n") + "\n" + generate_alias_appendix(mp)
+            migrated = regenerate_governance_toc(migrated, mp)
         if migrated != original:
             pending.append((p, migrated))
         reports.append(rep)

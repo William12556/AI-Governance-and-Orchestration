@@ -97,14 +97,25 @@ implementation:
 
 validation:
   criteria:
-    - "git diff --stat for the five files shows changes confined to comment and docstring lines"
-    - "python -c 'import ast, pathlib; [ast.parse(p.read_text()) for p in paths]' succeeds for all five"
-    - "The abstract syntax tree of each module, with docstrings stripped, is identical before and after"
+    - "All five modules parse"
+    - "The AST skeleton, with docstrings removed and every string constant blanked, is identical before and after"
+    - "Every string constant that differs, differs by exactly what the migration would produce, verified by re-running the substitution on the original"
     - "linter.py and protocol_checker.py produce byte-identical output on the same input corpus state"
     - "govwatch.py and overwatch.py complete one scan cycle with no traceback"
   method: >
-    The AST comparison is the decisive check. It proves mechanically that no
-    executable construct changed, which manual diff review can only assert.
+    Implemented as V-15 in dev/tools/verify_migration.py. The skeleton
+    comparison proves no executable construct changed; the per-string
+    comparison permits a citation inside a string literal to change while
+    proving it changed only in the way the migration defines.
+  criterion_history: >
+    Version 1.0 required plain AST equivalence with docstrings stripped. The
+    rehearsal showed that criterion to be inconsistent with this document's own
+    scope, which permits the citations inside the tactical_brief guidance
+    strings to change. orchestrator.py writes a guidance block into
+    context-budget.md naming the prompt template; after migration that template
+    is T03, so leaving the string at T04 would emit wrong instructions at
+    runtime. One string in one file changes. Plain AST equivalence would have
+    forbidden the only string change the change itself requires.
 
 traceability:
   requirements:
@@ -118,6 +129,11 @@ traceability:
     - "dev/reports/report-eb782f83-pre-migration-baseline.md"
 
 version_history:
+  - version: "1.1"
+    date: "2026-09-22"
+    author: "William Watson"
+    changes:
+      - "Validation criterion replaced: plain AST equivalence was inconsistent with this document's own scope, which permits citations inside the tactical_brief guidance strings to change. Replaced with the blanked-skeleton comparison plus per-string verification, implemented as V-15."
   - version: "1.0"
     date: "2026-09-22"
     author: "William Watson"

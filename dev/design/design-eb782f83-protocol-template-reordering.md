@@ -29,7 +29,8 @@ Created: 2026 September 22
 [5.2 Protected Regions](<#5.2 protected regions>)
 [5.3 Two-Pass Sentinel Substitution](<#5.3 two-pass sentinel substitution>)
 [5.4 Range Expressions](<#5.4 range expressions>)
-[5.5 Idempotence](<#5.5 idempotence>)
+[5.5 Case Sensitivity](<#5.5 case sensitivity>)
+[5.6 Idempotence](<#5.6 idempotence>)
 [6.0 Target Structure of governance.md](<#6.0 target structure of governance.md>)
 [7.0 Alias Appendix](<#7.0 alias appendix>)
 [8.0 Backup Design](<#8.0 backup design>)
@@ -242,7 +243,7 @@ source and a target. Sequential replacement fails for all seven.
 |---|---|
 | Both namespaces overlap sources with targets | Sentinel substitution is mandatory (TR-02), not a precaution |
 | `P00` and `T08` are fixed points | They must still pass through the sentinel stage, or a later rule may rewrite them |
-| The target alphabet contains the source alphabet | Migrated state cannot be detected from token content alone; see §5.5 |
+| The target alphabet contains the source alphabet | Migrated state cannot be detected from token content alone; see §5.6 |
 | A protocol identifier and a positional citation frequently appear as one phrase | Converting the halves independently doubles the citation; see §4.4 |
 
 ### 4.4 The Combined Citation Form
@@ -273,9 +274,9 @@ fatal, never silently rewritten.
 | Class | Pattern | Replacement |
 |---|---|---|
 | C0 Combined citation | `\bP(0\d|10)(\s+)§1\.(\d+)((?:\.\d+){0,2})\b` | Per §3.2, collapsed to a single citation; see §4.4 |
-| C1 Protocol identifier | `\bP(0\d|10)\b` | Per §3.1 |
+| C1 Protocol identifier | `\b[Pp](0\d|10)\b` | Per §3.1, case preserved; see §5.5 |
 | C2 Positional citation | `§1\.(\d+)((?:\.\d+){0,2})\b` | Per §3.2; the `§` is consumed |
-| C3 Template identifier | `\bT0[1-8]\b` | Per §3.3 |
+| C3 Template identifier | `\b[Tt]0[1-8]\b` | Per §3.3, case preserved; see §5.5 |
 | C4 Template filename | `\bT0[1-8]-(design\|change\|issue\|prompt\|test\|result\|requirements\|audit)\.md\b` | Per §3.3, whole token |
 | C5 Range expression | See §5.4 | Manual |
 
@@ -417,7 +418,24 @@ Seven further range expressions remain in the `governance.md` version history.
 They are inside a protected region, describe changes made under the retired
 scheme, and are correctly left untouched.
 
-### 5.5 Idempotence
+### 5.5 Case Sensitivity
+
+Obsidian anchors are the lowercased heading text, so a table-of-contents entry
+reads `[P09: Prompt](<#1.10 p09 prompt>)` — the identifier appears twice, once
+upper and once lower. Case-sensitive patterns migrate the heading and the
+visible label while leaving the anchor pointing at a heading that no longer
+exists.
+
+C1, C3 and C4 therefore match case-insensitively and preserve the case of the
+matched token: `T04` becomes `T03`, `t04` becomes `t03`. Found on the rehearsal,
+where it accounted for eleven C1 and two C3 substitutions that were being
+silently missed, and for two broken anchors in the restructured
+`governance.md`.
+
+C0 and C2 are unaffected: both require a literal `§`, which does not occur in
+an anchor.
+
+### 5.6 Idempotence
 
 TR-03 requires idempotence, and §4.3 shows it cannot be achieved by inspecting
 token content: after migration the corpus contains `P01`, `P02`, `P03`, `P04`
@@ -669,6 +687,8 @@ Compensating controls, in combination sufficient:
 | Snapshot directory already exists | Error; the run refuses to overwrite a prior snapshot |
 | Rollback against a modified file matching neither original nor migrated digest | Reported per file; rollback continues and exits non-zero |
 | Empty write set | Error; signals a path or enumeration fault |
+| Ephemeral state and generated output inside the migration set | Excluded by `exclude_paths` in `mapping.yaml`: `ai/state` and `ai/dashboard-alerts.md`. Ralph state is cleared by `--mode reset` and dashboard alerts are rewritten by every scan, so migrating either is meaningless; both are gitignored, so the tag could not restore them. Found on the rehearsal, where they placed seven untracked files in the write set. |
+| An untracked file remains in the write set | Permitted, but reported before the run: the snapshot is its only rollback path, the tag cannot restore it. One file qualifies, `docs/claude/project_information.md`. |
 | `git status --porcelain` first line | The status code occupies columns 1-2, so a clean index leaves a leading space. The raw output must not be stripped as a whole, or the first line shifts by one column and that file escapes the gate 3 dirty check. Found in testing. |
 
 [Return to Table of Contents](<#table of contents>)
@@ -725,7 +745,7 @@ Compensating controls, in combination sufficient:
 | FR-10 Release | Out of tooling scope; manual |
 | TR-01 Single source of truth | §3.4 |
 | TR-02 Atomic substitution | §4.0, §5.3 |
-| TR-03 Idempotence | §5.5 |
+| TR-03 Idempotence | §5.6 |
 | TR-04 Write-set enforcement | §9.0 |
 | TR-05 Backup | §8.1–§8.3 |
 | TR-06 Abort gates | §8.4 |
@@ -762,6 +782,7 @@ Test traceability is added when the test document exists.
 
 | Version | Date | Description |
 |---|---|---|
+| 0.4 | 2026-09-22 | Records four defects found on the rehearsal and their fixes. §5.5 added: identifiers appear lowercase inside Obsidian anchors, so C1, C3 and C4 now match case-insensitively with case preserved; this recovered thirteen substitutions that were being silently missed. §12.0 gains the exclusion of ephemeral state and generated output from the write set, and the reporting of untracked files whose only rollback path is the snapshot. §7.0 table-of-contents generation corrected to derive entries from the actual headings rather than compose them from the mapping, and to emit template links; the appendix is now generated before the contents so that it can be listed. V-15 refined — see the requirements document. |
 | 0.3 | 2026-09-22 | §5.4.1 records the resolution of all five live range expressions by scheme-neutral replacement, and notes that three were already factually wrong. Documents a gate 3 defect found in testing: `git status --porcelain` output was being stripped as a whole, shifting the first line by one column and hiding that file from the dirty check. |
 | 0.2 | 2026-09-22 | Added token class C0, the combined `Pnn §1.x.y` form, found while implementing: 191 occurrences, and converting the halves independently doubles the citation. New §4.4 states the hazard and the identifier-versus-ordinal agreement check, which all 191 occurrences satisfy. §5.1 gains the full precedence order C5, C0, C4, C2, C1, C3 and both agreement checks; §5.3 pseudocode updated to match. §5.2 records that protected-region detection is Markdown-only, a leading `#` being a comment in YAML and Python, with the residual limitation stated. §5.1 exclusions record that the dotted target form already occurs informally in the corpus and needs no dedicated rule. §12.0 and §13.0 updated. |
 | 0.1 | 2026-09-22 | Initial design. Three mapping tables with machine-readable form; collision analysis establishing that both namespaces overlap sources with targets; two-pass sentinel substitution with protected regions; range expressions identified as requiring manual resolution; idempotence by scheme marker, with the reason content inspection cannot suffice; target structure of `governance.md`; alias appendix layout; backup, abort gates and rollback; write-set enforcement; component and element registry; verification design with its stated completeness limitation and compensating controls. |

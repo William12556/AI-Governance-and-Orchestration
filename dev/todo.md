@@ -17,7 +17,7 @@
 Scope-excluded from the migration; see `dev/proposals/proposal-eb782f83-protocol-template-reordering.md`
 and `dev/reports/report-eb782f83-pre-migration-baseline.md`.
 
-- [ ] Repair the 8 `ai/governance.md` template links — bare filenames missing the `templates/` path segment (baseline §4.1, OQ-7). **After eb782f83**, since the filenames change in it.
+- [x] Repair the 8 `ai/governance.md` template links — discharged by eb782f83: the migration regenerates the table of contents and emits the template links at their correct `templates/` paths. Generation, not repair. Confirmed on the rehearsal; broken links fall from 17 to 9.
 - [ ] Repair 9 further pre-existing broken links unrelated to numbering (baseline §4.2–§4.4): `governance.md` → `claude-code.md` missing `profiles/`; `ai/profiles/README.md` → nonexistent `claude-desktop-instructions.md` and stale `claude.md`; 6 profile setup-guide links using `../../../docs/` where `../../docs/` is correct. Independent of eb782f83.
 - [ ] Author the five reserved protocols (Change 2): `P05` Continuous Integration, `P16` Execution, `P17` Release, `P18` Deployment and Propagation, `P19` Observability. Slots reserved by eb782f83; content deliberately deferred (proposal §5.3).
 - [ ] Add `.github/workflows` CI running `linter.py`, `protocol_checker.py` and pytest on push (gap G1). Governed by `P05` once authored.

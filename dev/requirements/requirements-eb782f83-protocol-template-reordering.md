@@ -260,7 +260,7 @@ The migration instrument is source code and is governed accordingly.
 | V-01 | Mapping is bijective | Assertion at script load | NFR-02, FR-01-05 |
 | V-02 | No retired identifier remains in the live corpus outside the alias appendix and version histories | Corpus scan | FR-01, FR-02, FR-04 |
 | V-03 | Every citation resolves to an existing heading | Verification script | FR-03-03, FR-04 |
-| V-04 | No Obsidian internal anchor link is broken | Anchor resolution pass | FR-07-01 |
+| V-04 | Broken internal anchors do not exceed the baseline of 3; the expected result is 1 | Anchor resolution pass against baseline report §7.4 | FR-07-01 |
 | V-05 | `linter.py` output is byte-identical before and after migration | Execution against `dev/` and the regenerated smoke copy, captured immediately before and after. `dev/` is frozen, so any difference is migration damage. Absolute cleanliness is not achievable: the pre-existing count is 102 errors (baseline report §7.0). | FR-09-02, CON-04 |
 | V-06 | `protocol_checker.py` output is byte-identical before and after migration | As V-05. Pre-existing count is 38 errors. | FR-09-02, CON-04 |
 | V-07 | pytest suite green | Execution | NFR-07 |
@@ -270,8 +270,8 @@ The migration instrument is source code and is governed accordingly.
 | V-11 | Backup restores cleanly | `--rollback` against a scratch copy, checksums verified | CON-07, TR-08, NFR-04 |
 | V-12 | Independent audit | Strategic audit producing a T08 report | CON-01 |
 | V-13 | `docs/claude/primer.md` is identical to `ai/primer.md` | Diff, expect empty; heading list and table row counts compared, not the byte diff alone | FR-08 |
-| V-14 | Broken file links number 17 or fewer, and every one appears in the baseline | Link scan against baseline report §4.5 | CON-08 |
-| V-15 | The five migrated Python modules import and execute unchanged | V-05 and V-06 pass; `govwatch.py` and `overwatch.py` complete one scan cycle | NFR-07, CON-09 |
+| V-14 | Broken file links number 17 or fewer, and every one appears in the baseline; the expected result is 9 | Link scan against baseline report §4.5. The eight Category A links fall away because the regenerated table of contents emits template links at correct paths — generation, not repair. | CON-08 |
+| V-15 | The five Python modules carry no executable change; string constants change only as the migration defines | AST skeleton with docstrings removed and string constants blanked must be identical; every differing string must equal the substitution applied to the original. Plus V-05, V-06, and one scan cycle each for `govwatch.py` and `overwatch.py`. | NFR-07, CON-09 |
 | V-16 | Semantic diff review: every hunk is an identifier, a citation or a structural heading change | Manual review of the complete diff | CON-01 |
 | V-17 | Frozen corpus byte-identical | Checksum comparison against the pre-migration commit | CON-04, NFR-03 |
 
@@ -359,6 +359,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 0.5 | 2026-09-22 | V-15 restated after the rehearsal: plain AST equivalence forbade the one string change the migration requires, in the `orchestrator.py` guidance block. Replaced with a blanked-skeleton comparison plus per-string verification. V-04 and V-14 gain their expected post-migration results, 1 and 9. |
 | 0.4 | 2026-09-22 | V-05 and V-06 restated as before-and-after output comparison rather than absolute cleanliness, which is unachievable: `linter.py` reports 102 pre-existing errors and `protocol_checker.py` 38 against `dev/` (baseline report §7.0). TR-02 reworded to match the design: one atomic operation implemented as two sentinel passes. |
 | 0.3 | 2026-09-22 | OQ-01, OQ-02 and OQ-03 resolved: alias appendix inside `governance.md`; continuous integration reserved as Band A `P05`; `P16` reserved and named for Execution with authoring deferred. No requirement text changed — FR-05-01 and FR-06-01 already stated these positions. All open questions closed. |
 | 0.2 | 2026-09-22 | OQ-04 resolved: `dev/backup/` gitignored. Document format and naming confirmed — `dev/` documents are prose, and the UUID naming convention of P00 §1.1.10 applies. |

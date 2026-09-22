@@ -113,30 +113,18 @@ validation:
     - "No positional citation remains in any of the five files (verify_migration.py V-02)"
   command: |
     python3 dev/tools/verify_migration.py
-  ast_check: |
-    python3 - <<'EOF'
-    import ast, subprocess, pathlib
-    FILES = ["ai/ael/src/protocol_checker.py", "ai/ael/src/linter.py",
-             "ai/ael/src/orchestrator.py", "ai/src/govwatch.py",
-             "ai/src/overwatch.py"]
-    def strip_docstrings(tree):
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef,
-                                 ast.AsyncFunctionDef)) and node.body:
-                first = node.body[0]
-                if (isinstance(first, ast.Expr) and
-                        isinstance(first.value, ast.Constant) and
-                        isinstance(first.value.value, str)):
-                    node.body.pop(0)
-        return tree
-    for f in FILES:
-        before = subprocess.run(["git", "show", f"pre-eb782f83:{f}"],
-                                capture_output=True, text=True).stdout
-        after = pathlib.Path(f).read_text()
-        a = ast.dump(strip_docstrings(ast.parse(before)))
-        b = ast.dump(strip_docstrings(ast.parse(after)))
-        print(("ok  " if a == b else "FAIL"), f)
-    EOF
+  ast_check: >
+    Implemented as V-15 in dev/tools/verify_migration.py, run by the validation
+    command above. For each module it compares the AST skeleton with docstrings
+    removed and every string constant blanked, then compares the string
+    constants pairwise: each difference must equal the result of running the
+    migration substitution on the original string. A structural change, a change
+    in the number of string constants, or a string that changed beyond the
+    migration all fail the check.
+  expected_result: >
+    One string constant changes, in orchestrator.py: the guidance block written
+    into context-budget.md, which names the prompt template. All other changes
+    are docstrings and comments.
 
 traceability:
   requirements:
@@ -150,6 +138,11 @@ traceability:
     - "dev/design/design-eb782f83-protocol-template-reordering.md"
 
 version_history:
+  - version: "1.1"
+    date: "2026-09-22"
+    author: "William Watson"
+    changes:
+      - "ast_check replaced by V-15 in verify_migration.py; expected_result records the single legitimate string-constant change in orchestrator.py"
   - version: "1.0"
     date: "2026-09-22"
     author: "William Watson"
