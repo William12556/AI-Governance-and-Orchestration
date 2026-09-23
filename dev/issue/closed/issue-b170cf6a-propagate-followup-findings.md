@@ -6,7 +6,7 @@ issue_info:
   title: "propagate.sh residual findings N-01 to N-08 from the c5270084 follow-up audit"
   date: "2026-09-23"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "medium"
   type: "defect"
   iteration: 3
@@ -57,10 +57,10 @@ resolution:
   fix_description: "See change-b170cf6a technical_details."
 
 verification:
-  verified_date: ""
-  verified_by: ""
-  test_results: ""
-  closure_notes: ""
+  verified_date: "2026-09-23"
+  verified_by: "dev/audit/audit-b170cf6a-closure-2026-09-23.md; dev/audit/audit-b170cf6a-b5fix-2026-09-23.md"
+  test_results: "See change-b170cf6a verification.test_results and the two audits' experiment tables."
+  closure_notes: "B1-B4 resolved; B5 low, fixed at 90f3a8d and independently verified. Closure approved by William Watson, 2026-09-23."
 
 traceability:
   design_refs:
@@ -90,6 +90,11 @@ version_history:
     author: "William Watson"
     changes:
       - "B5 raised as an open finding by the operator (see change-b170cf6a iteration_3.open_findings); severity to be assigned by the closure check"
+  - version: "3.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Closed: B1-B4 resolved; B5 fixed and verified; approved by William Watson"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

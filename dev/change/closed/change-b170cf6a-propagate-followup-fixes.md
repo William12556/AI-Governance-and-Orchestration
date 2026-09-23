@@ -6,7 +6,7 @@ change_info:
   title: "propagate.sh: back up local modifications; exact names; self-computed preview; re-plan after prompt; exit-contract fixes"
   date: "2026-09-23"
   author: "William Watson"
-  status: "implemented"
+  status: "verified"
   priority: "medium"
   iteration: 3
   coupled_docs:
@@ -166,6 +166,7 @@ iteration_3:
       proposed_severity: "low (safe direction: nothing applied, no content lost; --yes works around it)"
       severity: "low (assigned by dev/audit/audit-b170cf6a-closure-2026-09-23.md)"
       disposition: "fixed"
+      fix_verified_by: "dev/audit/audit-b170cf6a-b5fix-2026-09-23.md"
       fix: >
         Fixed directly at operator instruction (2026-09-23), without a separate
         issue/change/prompt, using the closure audit's minimal form. In
@@ -230,9 +231,17 @@ verification:
   implemented_date: "2026-09-23"
   implemented_by: "Claude (Cowork, Opus 5.5)"
   verification_date: "2026-09-23"
-  verified_by: "Claude (Cowork, Opus 5.5) — implementing session"
+  verified_by: "dev/audit/audit-b170cf6a-closure-2026-09-23.md (B1-B4); dev/audit/audit-b170cf6a-b5fix-2026-09-23.md (B5); independent sessions. Closure approved by William Watson, 2026-09-23."
   test_results: >
-    Iteration 2, Cowork Linux VM (GNU bash 5.1, rsync 3.2.7). bash -n passes.
+    Independent verification. Closure audit (51611db): B1-B4 resolved by own
+    reproductions (P-B1, P-B2d, P-B3a-f, P-B4); A1, A3, A6, up to date,
+    declined and non-TTY regressions pass; audit P-B2 cksum variant
+    acceptable (edit backed up). B5 fix audit (90f3a8d): B5 resolved (E1-E9);
+    --yes output and tree byte-identical to iteration 3; prompt guard intact
+    (28/28 mutations exit 3); declared-content changes exit 0 (6/6); strace
+    and manifest confirm no access to declared directories; P-B1-P-B4, A1, A3,
+    A6 pass. No finding low or higher; 3 information items (I-1 to I-3).
+    Implementing session, iteration 2: Cowork Linux VM (GNU bash 5.1, rsync 3.2.7). bash -n passes.
     Prompt-window mutations via pty: context.md created, declared state file
     created, file created in ai-local/, ai-local symlink created, retired
     candidate edited — each exit 3, nothing applied, mutation intact; no
@@ -311,6 +320,11 @@ version_history:
     author: "William Watson"
     changes:
       - "B5 fix macOS results recorded"
+  - version: "3.5"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Verified and closed: B1-B4 per audit-b170cf6a-closure, B5 per audit-b170cf6a-b5fix; closure approved by William Watson"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
