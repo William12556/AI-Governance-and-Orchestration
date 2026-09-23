@@ -193,6 +193,13 @@ iteration_3:
         exit 3; P-B4, S-A1, up to date, declined: exit 0; non-TTY: exit 2.
         Not covered by the closure audit (which examined 51611db); macOS and
         bash 3.2 not exercised.
+      fix_macos_results: >
+        Operator run on macOS, commit 90f3a8d, throwaway targets under /tmp.
+        (A) Up-to-date target with mode 000 ai/state/x, interactive: "Target is
+        up to date", rc=0 (B5 fixed). (B) Older framework primer.md, ai-local/
+        present, file created in ai-local/ during the prompt: "changed while the
+        prompt was open", rc=3 (ai-local/ guard intact; the empty -path pattern
+        matches nothing on macOS find).
   test_results: >
     Cowork Linux VM (GNU bash 5.1.16, rsync 3.2.7, GNU sort), throwaway targets
     from git archive HEAD ai; iteration 2 (HEAD 1b7f068) run side by side.
@@ -299,6 +306,11 @@ version_history:
     author: "William Watson"
     changes:
       - "B5 severity low (closure audit); fixed directly in snapshot() at operator instruction: declared directories recorded by entry and type only"
+  - version: "3.4"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "B5 fix macOS results recorded"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
