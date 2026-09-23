@@ -6,13 +6,20 @@
 # Clone: https://github.com/William12556/LLM-Governance-and-Orchestration
 #
 # Usage:
-#   bin/propagate.sh <project-root>
+#   bin/propagate.sh [--yes] [--allow-major] <project-root>
+#
+#   --yes          apply without the interactive prompt (required when stdin
+#                  is not a terminal; without it a non-TTY run fails loudly)
+#   --allow-major  permit a run where source and target governance differ by
+#                  a major version (required with --yes in that case)
 #
 # Example:
 #   bin/propagate.sh ~/Documents/GitHub/<project name>
 #
-# The script pushes ai/ into <project-root>/ai/.
-# Project-specific files are never overwritten (see Excludes below).
+# The script mirrors ai/ into <project-root>/ai/ (rsync --delete), so files
+# renamed or retired in the source are removed from the target. Project-specific
+# files are never overwritten or deleted (see Excludes below). Any other file a
+# project has added under ai/ IS deleted; the preview lists every deletion.
 
 set -euo pipefail
 
@@ -21,12 +28,24 @@ AI_SRC="${REPO_ROOT}/ai"
 
 # --- Argument validation ---------------------------------------------------
 
-if [[ $# -ne 1 ]]; then
-    echo "Usage: $0 <project-root>" >&2
+ASSUME_YES="false"
+ALLOW_MAJOR="false"
+POSITIONAL=()
+for arg in "$@"; do
+    case "${arg}" in
+        --yes)         ASSUME_YES="true" ;;
+        --allow-major) ALLOW_MAJOR="true" ;;
+        -*)            echo "Error: unknown option ${arg}" >&2; exit 1 ;;
+        *)             POSITIONAL+=("${arg}") ;;
+    esac
+done
+
+if [[ ${#POSITIONAL[@]} -ne 1 ]]; then
+    echo "Usage: $0 [--yes] [--allow-major] <project-root>" >&2
     exit 1
 fi
 
-PROJECT_ROOT="$(cd "$1" && pwd)"
+PROJECT_ROOT="$(cd "${POSITIONAL[0]}" && pwd)"
 PROJECT_AI="${PROJECT_ROOT}/ai"
 
 if [[ ! -d "${AI_SRC}" ]]; then
@@ -37,6 +56,23 @@ fi
 if [[ ! -d "${PROJECT_AI}" ]]; then
     echo "Error: target ai/ directory not found at ${PROJECT_AI}" >&2
     exit 1
+fi
+
+# --- Governance version check ---------------------------------------------
+# A major version difference is when renames occur (e.g. 9.x -> 10.x renamed
+# seven templates). Such a run is permitted, but never silently.
+
+gov_version() {
+    # Last row of the governance.md Version History table, e.g. "10.2".
+    grep -E '^\| *[0-9]+\.[0-9]+ *\|' "$1" 2>/dev/null | tail -1 \
+        | sed -E 's/^\| *([0-9]+\.[0-9]+).*/\1/'
+}
+
+SRC_VER="$(gov_version "${AI_SRC}/governance.md")"
+DST_VER="$(gov_version "${PROJECT_AI}/governance.md")"
+MAJOR_CHANGE="false"
+if [[ -n "${SRC_VER}" && -n "${DST_VER}" && "${SRC_VER%%.*}" != "${DST_VER%%.*}" ]]; then
+    MAJOR_CHANGE="true"
 fi
 
 # --- Excludes --------------------------------------------------------------
@@ -88,8 +124,9 @@ else
     NEEDS_SEED_TASK="true"
 fi
 
-CHANGES=$(rsync --dry-run -av --itemize-changes "${EXCLUDES[@]}" \
-    "${AI_SRC}/" "${PROJECT_AI}/" | grep '^>f' || true)
+# '*deleting' lines are files removed from the target by --delete.
+CHANGES=$(rsync --dry-run -av --delete --itemize-changes "${EXCLUDES[@]}" \
+    "${AI_SRC}/" "${PROJECT_AI}/" | grep -E '^(>f|\*deleting)' || true)
 
 if [[ -z "${CHANGES}" && "${NEEDS_SEED_CONTEXT}" == "false" && "${NEEDS_SEED_TASK}" == "false" ]]; then
     echo "Target is up to date. No changes to apply."
@@ -111,18 +148,35 @@ if [[ "${NEEDS_SEED_TASK}" == "true" ]]; then
 fi
 
 echo ""
+echo "governance: source ${SRC_VER:-unknown}, target ${DST_VER:-unknown}"
+if [[ "${MAJOR_CHANGE}" == "true" ]]; then
+    echo "WARNING: major governance version change (${DST_VER} -> ${SRC_VER})."
+    echo "         Renamed or retired files will be deleted from the target."
+fi
+echo ""
 
 # --- Confirmation ----------------------------------------------------------
 
-read -r -p "Apply changes? [y/N] " CONFIRM
-if [[ "${CONFIRM}" != "y" && "${CONFIRM}" != "Y" ]]; then
-    echo "Aborted."
-    exit 0
+if [[ "${ASSUME_YES}" == "true" ]]; then
+    if [[ "${MAJOR_CHANGE}" == "true" && "${ALLOW_MAJOR}" != "true" ]]; then
+        echo "Error: major version change requires --allow-major with --yes. Nothing applied." >&2
+        exit 2
+    fi
+    echo "--yes: applying without prompt."
+elif [[ ! -t 0 ]]; then
+    echo "Error: stdin is not a terminal; re-run with --yes to apply. Nothing applied." >&2
+    exit 2
+else
+    read -r -p "Apply changes? [y/N] " CONFIRM
+    if [[ "${CONFIRM}" != "y" && "${CONFIRM}" != "Y" ]]; then
+        echo "Aborted."
+        exit 0
+    fi
 fi
 
 # --- Propagate -------------------------------------------------------------
 
-rsync -av "${EXCLUDES[@]}" \
+rsync -av --delete "${EXCLUDES[@]}" \
     "${AI_SRC}/" "${PROJECT_AI}/"
 
 # --- Seed project-specific context ----------------------------------------

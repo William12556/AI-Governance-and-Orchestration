@@ -70,7 +70,7 @@ bin/propagate.sh /path/to/your/projects/<project-name>
 cd /path/to/your/projects/<project-name>
 ```
 
-`bin/propagate.sh` pushes the `ai/` directory into the downstream project, skipping project-local files (`config.yaml`, `workspace/`, `ael/state/`, `dashboard-alerts.md`). Run from the framework repository root.
+`bin/propagate.sh` mirrors the `ai/` directory into the downstream project, skipping project-local files (`ael/config.yaml`, `context.md`, `task.md`, `workspace/`, `state/`, `dashboard-alerts.md`). Other files under the target `ai/` that are absent from the source are deleted; the preview lists each deletion before confirmation. Run from the framework repository root.
 
 ### 3.3 Create a Python virtual environment
 
@@ -208,6 +208,7 @@ The Strategic Domain coordinates each step. Human approval gates are required be
 | 1.2 | 2026-06-16 | Updated §3.2: replaced skel/ copy workflow with bin/propagate.sh |
 | 1.3 | 2026-06-16 | Updated §4.0 profile filename reference: mlx_devstral_small_2_2512_Q8.md → mlx_devstral_small_2_2512_6bit.md |
 | 1.4 | 2026-07-16 | §2.2 and §5.1: mcp-grep → mcp-ripgrep; §5.1: added reviewer_model and model_context_windows, removed retired models_dir. §5.2: removed standalone budget.py step (context-budget.md is now written automatically). §4.0: added heterogeneous profile |
+| 1.5 | 2026-09-23 | §3.2: propagate.sh mirrors ai/ with deletion; exclude list corrected |
 
 ---
 
