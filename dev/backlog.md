@@ -81,9 +81,9 @@ None open. Completed 2026-09-23: 31 closed documents normalised to terminal stat
 
 ## 6.0 Propagation
 
-1. Propagate the current orchestrator to GTach and e-Paper-IP-Display.
-2. Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display, pi-netconfig and certmon; pinned at v9.16 by decision D5. `bin/propagate.sh` fixed under triple 07087e91; first run requires `--allow-major` (9.16 → 10.x). solax-modbus propagated 2026-09-23 (9.11 → 10.2). Unblocked: change-b170cf6a closed 2026-09-23 (B1–B4 resolved; B5 fixed at 90f3a8d; independently verified). The script never deletes: retired and project files go to `ai-local/`; delete after review (governance P10.6).
-3. `ai/context.md` is unfilled in solax-modbus and e-Paper-IP-Display; fill before any AEL run there.
+1. ~~Propagate the current orchestrator to GTach and e-Paper-IP-Display.~~ Done 2026-09-23 with item 2 (`ai/ael/` is part of the propagated tree).
+2. Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display, pi-netconfig and certmon; pinned at v9.16 by decision D5. `bin/propagate.sh` fixed under triple 07087e91; first run requires `--allow-major` (9.16 → 10.x). solax-modbus propagated 2026-09-23 (9.11 → 10.2). Unblocked: change-b170cf6a closed 2026-09-23 (B1–B4 resolved; B5 fixed at 90f3a8d; independently verified). Propagated to 10.5 on 2026-09-23 from ae5e4df: GTach (9.15; 22 relocated), e-Paper-IP-Display (9.9; 20 relocated, `task.md` seeded) and pi-netconfig (9.9; 11 relocated, `task.md` seeded). Remaining: certmon (location to be confirmed); solax-modbus 10.2 → 10.5 optional. pi-netconfig has no `ai/ael/config.yaml`; configure before any AEL run there. The script never deletes: retired and project files go to `ai-local/`; delete after review (governance P10.6).
+3. `ai/context.md` is unfilled in solax-modbus, e-Paper-IP-Display, GTach and pi-netconfig; fill before any AEL run there.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -125,6 +125,7 @@ None pending. Resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.11 | 2026-09-23 | §6.0: GTach, e-Paper-IP-Display and pi-netconfig propagated to 10.5; item 1 done; context.md list extended |
 | 1.10 | 2026-09-23 | §6.0: change-b170cf6a closed; propagation unblocked |
 | 1.9 | 2026-09-23 | §6.0: macOS procedure passed |
 | 1.8 | 2026-09-23 | §6.0: gate and stop rule for b170cf6a iteration 2 |
