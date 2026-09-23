@@ -6,10 +6,10 @@ prompt_info:
   task_type: "debug"
   source_ref: "change-b170cf6a"
   date: "2026-09-23"
-  iteration: 2
+  iteration: 3
   coupled_docs:
     change_ref: "change-b170cf6a"
-    change_iteration: 2
+    change_iteration: 3
 
 context:
   purpose: "Remediate c5270084 follow-up audit findings N-01 to N-08 in bin/propagate.sh."
@@ -37,6 +37,10 @@ specification:
       - "Iteration 2: no-clobber backup via mktemp and mv -n"
       - "Iteration 2: labels from framework HEAD history only"
       - "Iteration 2: refuse symlinked context.md/task.md and case variants of declared paths; seeding never overwrites"
+      - "Iteration 3: snapshot a symlinked ai/ through the link and record its target (B1)"
+      - "Iteration 3: take the interactive baseline snapshot before plan (B2)"
+      - "Iteration 3: fail closed; exit 3 with nothing applied if a snapshot fails (B3)"
+      - "Iteration 3: refuse a symlink at context.md/task.md only when no regular file is behind it (B4)"
     technical:
       language: "bash"
       version: "3.2+"

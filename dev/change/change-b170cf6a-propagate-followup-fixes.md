@@ -8,10 +8,10 @@ change_info:
   author: "William Watson"
   status: "implemented"
   priority: "medium"
-  iteration: 2
+  iteration: 3
   coupled_docs:
     issue_ref: "issue-b170cf6a"
-    issue_iteration: 2
+    issue_iteration: 3
     prompt_ref: "prompt-b170cf6a"
 
 source:
@@ -136,6 +136,41 @@ iteration_2:
     - "A7 residual: a case-variant framework directory (e.g. ai/Templates/) on a case-insensitive file system causes its framework files to be relocated on every run; no content lost; documented in guide-install"
     - "Performance: ~11 s for 1,500 files in one non-declared directory under bash 5.1 (quadratic exact-name check); acceptable for current projects"
 
+iteration_3:
+  source: "dev/audit/audit-b170cf6a-final-2026-09-23.md (B1 medium, B2-B4 low); scope limited to snapshot(), its call site and the A6 refusal"
+  b1_option: >
+    Snapshot through the link. Every other step (-d guard, list0, rsync,
+    seeding) already follows a symlinked ai/, and iterations 1 and 2 supported
+    that layout; refusing it would remove a supported layout, which is outside
+    the stated scope. The link target is also recorded, so retargeting ai/
+    during the prompt is detected.
+  changes:
+    - "B1: snapshot() records the ai/ link target and then snapshots the linked directory; the -L record-only branch remains for ai-local/ (refused by check_dir_chain)"
+    - "B2: in interactive mode (no --yes, stdin a terminal) SNAP_BEFORE is taken before plan; the non-TTY check uses the same INTERACTIVE flag"
+    - "B3: snapshot() writes to a work file, checks every step (find, sort -z, readlink, cksum) and returns non-zero on failure; both call sites exit 3 via snapshot_failed with nothing applied; errors are no longer discarded"
+    - "B4: context.md or task.md is refused only when it is a symlink with no regular file behind it (dangling, or pointing to a non-regular file); a symlink to an existing regular file is preserved; header comment and guide-install §3.3 updated; exit-code header notes the snapshot failure"
+  behaviour_notes:
+    - "Consequence of B3: an interactive run now exits 3 when any directory under ai/ or ai-local/ cannot be read, including one inside a declared path (audit case F3: mode 000 state/x). --yes runs are unchanged (proceed, exit 0)."
+    - "Audit P-B2 as written (cksum shim editing on the first call) now edits before the baseline and before plan; the edit is backed up as 'local modification', exit 0, no loss."
+  out_of_scope:
+    - "Nested empty-directory exit 4 (P-N3); orphan .propagate-tmp file; accepted residuals (C1 bytes, ai/Templates/, performance)"
+  test_results: >
+    Cowork Linux VM (GNU bash 5.1.16, rsync 3.2.7, GNU sort), throwaway targets
+    from git archive HEAD ai; iteration 2 (HEAD 1b7f068) run side by side.
+    bash -n passes. P-B1 (symlinked ai/, older framework primer.md, edit during
+    prompt): it2 exit 0, edit lost; it3 exit 3, edit intact. ai/ link
+    retargeted during prompt: exit 3. P-B2 (cmp shim edits primer.md after it
+    is planned as update): it2 exit 0, edit lost; it3 exit 3, edit intact.
+    P-B3 (sort shim rejects -z from the start): it2 exit 0; it3 exit 3 before
+    the prompt, target byte-identical. P-B3 (rejects -z after the prompt, edit
+    during prompt): it3 exit 3, edit intact. P-B4 (context.md -> existing file):
+    it2 exit 3; it3 exit 0, link preserved; same for task.md with --yes.
+    Regressions: prompt-race edit on a real ai/ exit 3; P-A1 exit 3 and S-A1
+    not seeded, exit 0; A3 cp shim at the backup destination exit 3, user file
+    intact; A6 dangling symlink exit 3, nothing created; symlink to a directory
+    exit 3; up to date exit 0; declined prompt exit 0; plain apply exit 0;
+    non-TTY without --yes exit 2. macOS and bash 3.2 not exercised.
+
 verification:
   implemented_date: "2026-09-23"
   implemented_by: "Claude (Cowork, Opus 5.5)"
@@ -196,6 +231,11 @@ version_history:
     author: "William Watson"
     changes:
       - "macOS results recorded (bash 3.2, openrsync, APFS)"
+  - version: "3.0"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Iteration 3 after final re-check audit-b170cf6a: B1-B4 remediated in snapshot(), its call site and the A6 refusal (iteration_3 block)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

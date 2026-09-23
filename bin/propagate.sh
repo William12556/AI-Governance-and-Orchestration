@@ -27,7 +27,8 @@
 #
 # Exit codes: 0 done or up to date; 1 usage; 2 confirmation required;
 #   3 refused before the copy (unsafe ai-local/ or declared path, target or
-#   ai-local/ changed during the prompt, enumeration or relocation failed);
+#   ai-local/ changed during the prompt or could not be snapshotted,
+#   enumeration or relocation failed);
 #   4 the copy failed after relocation.
 
 set -euo pipefail
@@ -98,7 +99,9 @@ fi
 
 # --- Excludes ----------------------------------------------------------------
 # Declared project paths (governance P10.6), anchored at ai/. No trailing
-# slash, so a symlink at a declared path is protected too.
+# slash, so a symlink at a declared path is protected too. A symlink at
+# context.md or task.md with no regular file behind it is refused, because
+# seeding would follow it.
 
 EXCLUDES=(
     --exclude='/ael/config.yaml'     # project-specific AEL configuration
@@ -258,25 +261,51 @@ plan() {
 }
 
 # Snapshot of ai/ (declared paths included) and ai-local/: every name, symlink
-# target and regular-file checksum. Compared across the prompt, so any change
-# there refuses the run (audit-b170cf6a A1, A3, A4). Errors are tolerated
-# here: identical failures produce identical snapshots.
+# target and regular-file checksum. Taken before plan and compared after the
+# prompt, so any change there refuses the run (audit-b170cf6a A1, A3, A4, B2).
+# A symlinked ai/ is recorded and followed, as every other step follows it
+# (B1); a symlinked ai-local/ is recorded only (refused by check_dir_chain).
+# Any failure returns non-zero; the caller exits 3 (B3).
+SNAP_FILE="${WORK}/snapshot"
 snapshot() {
-    local d
+    local d l
+    : > "${SNAP_FILE}" || return 1
     for d in "${PROJECT_AI}" "${LOCAL_ROOT}"; do
-        echo "== ${d}"
-        if [[ -L "${d}" ]]; then echo "link $(readlink -- "${d}")"; continue; fi
-        [[ -d "${d}" ]] || { echo "absent-or-file $( [[ -e "${d}" ]] && cksum < "${d}" 2>/dev/null )"; continue; }
-        ( cd "${d}" && {
-            find . -print0 2>/dev/null | LC_ALL=C sort -z
-            printf 'L\0'
-            find . -type l -print0 -exec readlink {} \; 2>/dev/null
-            printf 'F\0'
-            find . -type f -print0 2>/dev/null | LC_ALL=C sort -z | xargs -0 cksum 2>/dev/null
-        } ) || true
-    done | cksum
+        printf '== %s\n' "${d}" >> "${SNAP_FILE}" || return 1
+        if [[ -L "${d}" ]]; then
+            l="$(readlink -- "${d}")" || return 1
+            printf 'link %s\n' "${l}" >> "${SNAP_FILE}" || return 1
+            [[ "${d}" == "${PROJECT_AI}" ]] || continue
+        fi
+        if [[ ! -d "${d}" ]]; then
+            if [[ -e "${d}" ]]; then
+                { printf 'file '; cksum < "${d}"; } >> "${SNAP_FILE}" || return 1
+            else
+                printf 'absent\n' >> "${SNAP_FILE}" || return 1
+            fi
+            continue
+        fi
+        ( cd "${d}" \
+          && find . -print0 | LC_ALL=C sort -z \
+          && printf 'L\0' \
+          && find . -type l -print0 -exec readlink {} \; \
+          && printf 'F\0' \
+          && find . -type f -print0 | LC_ALL=C sort -z | xargs -0 cksum ) >> "${SNAP_FILE}" || return 1
+    done
+    cksum < "${SNAP_FILE}"
+}
+snapshot_failed() {
+    echo "Error: cannot snapshot ai/ or ${LOCAL_DIR}/ for the prompt guard. Nothing applied; fix and re-run." >&2
+    exit 3
 }
 count0() { tr -cd '\0' < "$1" | wc -c | tr -d ' '; }
+
+# Interactive baseline before plan, so no edit can enter it after planning (B2).
+INTERACTIVE="false"
+if [[ "${ASSUME_YES}" != "true" && -t 0 ]]; then
+    INTERACTIVE="true"
+    SNAP_BEFORE="$(snapshot)" && [[ -n "${SNAP_BEFORE}" ]] || snapshot_failed
+fi
 
 mkdir -p "${WORK}/p1"
 plan "${WORK}/p1"
@@ -356,8 +385,10 @@ done < "${WORK}/p1/backups"
 
 LOG="${LOCAL_ROOT}/${LOG_NAME}"
 for f in context.md task.md; do
-    if [[ -L "${PROJECT_AI}/${f}" ]]; then
-        PLAN_ERR+="  ai/${f}: is a symlink; seeding would follow it; resolve manually"$'\n'
+    # A symlink to an existing regular file is preserved; any other symlink
+    # would be followed by seeding (audit-b170cf6a A6, B4).
+    if [[ -L "${PROJECT_AI}/${f}" && ! -f "${PROJECT_AI}/${f}" ]]; then
+        PLAN_ERR+="  ai/${f}: is a symlink with no regular file behind it; seeding would follow it; resolve manually"$'\n'
     fi
 done
 if [[ -e "${LOG}" || -L "${LOG}" ]] && [[ ! -f "${LOG}" || -L "${LOG}" ]]; then
@@ -424,18 +455,18 @@ if [[ "${ASSUME_YES}" == "true" ]]; then
         exit 2
     fi
     echo "--yes: applying without prompt."
-elif [[ ! -t 0 ]]; then
+elif [[ "${INTERACTIVE}" != "true" ]]; then
     echo "Error: stdin is not a terminal; re-run with --yes to apply. Nothing applied." >&2
     exit 2
 else
-    SNAP_BEFORE="$(snapshot)"
     read -r -p "Apply changes? [y/N] " CONFIRM
     if [[ "${CONFIRM}" != "y" && "${CONFIRM}" != "Y" ]]; then
         echo "Aborted."
         exit 0
     fi
-    # Nothing under ai/ or ai-local/ may change while the prompt is open.
-    if [[ "$(snapshot)" != "${SNAP_BEFORE}" ]]; then
+    # Nothing under ai/ or ai-local/ may change between the baseline and here.
+    SNAP_AFTER="$(snapshot)" && [[ -n "${SNAP_AFTER}" ]] || snapshot_failed
+    if [[ "${SNAP_AFTER}" != "${SNAP_BEFORE}" ]]; then
         echo "Error: ai/ or ${LOCAL_DIR}/ changed while the prompt was open. Nothing applied; re-run." >&2
         exit 3
     fi

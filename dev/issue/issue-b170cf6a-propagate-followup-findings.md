@@ -9,10 +9,10 @@ issue_info:
   status: "resolved"
   severity: "medium"
   type: "defect"
-  iteration: 2
+  iteration: 3
   coupled_docs:
     change_ref: "change-b170cf6a"
-    change_iteration: 2
+    change_iteration: 3
 
 source:
   origin: "code_review"
@@ -80,6 +80,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Iteration 2: re-check audit-b170cf6a found A1-A7 (2 medium, 5 low); remediated under change-b170cf6a iteration 2; final re-check pending"
+  - version: "3.0"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Iteration 3: final re-check audit-b170cf6a found B1-B4 (1 medium, 3 low); remediated under change-b170cf6a iteration 3; independent closure check pending"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
