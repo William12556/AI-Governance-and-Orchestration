@@ -9,7 +9,7 @@ change_info:
   title: "AEL Orchestrator — wire phase_max_iterations to run_phase() in all projects"
   date: "2026-03-24"
   author: "William Watson"
-  status: "implemented"
+  status: "verified"
   priority: "high"
   iteration: 1
   coupled_docs:
@@ -180,6 +180,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Initial change document"
+  - version: "1.1"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised implemented -> verified: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction; asserts no verification beyond what this document already records."
 
 metadata:
   copyright: "Copyright (c) 2025 William Watson. This work is licensed under the MIT License."

@@ -6,7 +6,7 @@ issue_info:
   title: "Reviewer REVISE feedback not persisted when reviewer is read-only — worker starved, stall detection inert"
   date: "2026-06-28"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "high"
   type: "defect"
   iteration: 1
@@ -127,6 +127,11 @@ version_history:
     date: "2026-07-09"
     changes:
       - "Closed: status resolved; verification recorded"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised resolved -> closed: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

@@ -6,7 +6,7 @@ issue_info:
   title: "work-summary.txt is never cleared per cycle; exhaustion exit trusts file existence; move/rename deliverables recorded at the source path"
   date: "2026-07-29"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "high"
   type: "defect"
   iteration: 1
@@ -195,6 +195,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Closed at operator instruction (dev/audit review); closure_notes updated to reflect the 2026-07-29 independent live verification and the operator closure decision"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised resolved -> closed: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

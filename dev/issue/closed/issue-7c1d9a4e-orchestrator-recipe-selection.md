@@ -5,7 +5,7 @@ issue_info:
   id: "issue-7c1d9a4e"
   title: "Orchestrator hard-codes Ralph recipe pair; tactical-audit mode unreachable"
   date: "2026-06-28"
-  status: "verified"
+  status: "closed"
   severity: "medium"
   type: "enhancement"
   iteration: 1
@@ -85,6 +85,11 @@ version_history:
     date: "2026-06-28"
     changes:
       - "Implemented and verified against source; issue closed"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised verified -> closed: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

@@ -6,7 +6,7 @@ change_info:
   title: "Per-cycle manifest lifetime; exhaustion return code from phase outcome; move/rename destination recording; reset idempotency; opt-in run-log archive"
   date: "2026-07-29"
   author: "William Watson"
-  status: "closed"
+  status: "verified"
   priority: "high"
   iteration: 1
   coupled_docs:
@@ -387,6 +387,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Closed at operator instruction (dev/audit review); status implemented -> closed; operator_closure_2026_07_29 recorded, naming the test cases still unexercised at closure"
+  - version: "1.3"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised closed -> verified: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction; asserts no verification beyond what this document already records."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

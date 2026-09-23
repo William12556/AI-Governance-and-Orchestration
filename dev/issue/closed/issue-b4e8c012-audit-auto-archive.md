@@ -6,7 +6,7 @@ issue_info:
   title: "AEL audit loop does not auto-archive output artifacts on SHIP"
   date: "2026-06-17"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "medium"
   type: "enhancement"
   iteration: 1
@@ -70,6 +70,11 @@ version_history:
     date: "2026-06-26"
     changes:
       - "Resolved: auto-archive implemented and verified against source; issue closed"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised resolved -> closed: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

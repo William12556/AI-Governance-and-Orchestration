@@ -6,7 +6,7 @@ issue_info:
   title: "Ralph Loop reviewer decision handling is brittle and clobbers work-summary.txt"
   date: "2026-06-26"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "high"
   type: "defect"
   iteration: 1
@@ -102,6 +102,11 @@ version_history:
     date: "2026-06-26"
     changes:
       - "Resolved: fix implemented and verified against source; issue closed"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised resolved -> closed: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

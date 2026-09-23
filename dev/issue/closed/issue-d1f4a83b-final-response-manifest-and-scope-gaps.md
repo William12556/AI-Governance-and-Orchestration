@@ -6,7 +6,7 @@ issue_info:
   title: "Worker final response persisted as a manifest without naming any deliverable; write-scope validation stops at the first path argument; leading-token strip applied to verdict-free feedback; non-interactive continue prompt blocks forever"
   date: "2026-07-29"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "high"
   type: "defect"
   iteration: 1
@@ -245,6 +245,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Closed at operator instruction (dev/audit review); closure_notes updated to record the operator closure decision and the items (N1 live confirmation) still outstanding"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised resolved -> closed: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

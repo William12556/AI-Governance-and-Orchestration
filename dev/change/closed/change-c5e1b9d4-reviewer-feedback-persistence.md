@@ -6,7 +6,7 @@ change_info:
   title: "Persist reviewer REVISE feedback from the final message; reconcile read-only reviewer recipe"
   date: "2026-06-28"
   author: "William Watson"
-  status: "implemented"
+  status: "verified"
   priority: "high"
   iteration: 1
   coupled_docs:
@@ -134,6 +134,11 @@ version_history:
     date: "2026-07-09"
     changes:
       - "Closed: status implemented; verification recorded"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised implemented -> verified: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction; asserts no verification beyond what this document already records."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

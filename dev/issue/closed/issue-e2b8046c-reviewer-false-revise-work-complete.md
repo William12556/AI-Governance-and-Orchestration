@@ -6,7 +6,7 @@ issue_info:
   title: "Ralph Loop reviewer issues false REVISE for the orchestrator-cleared work-complete.txt"
   date: "2026-06-26"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "high"
   type: "defect"
   iteration: 1
@@ -118,6 +118,11 @@ version_history:
     date: "2026-06-26"
     changes:
       - "Resolved: Option B fix implemented (ralph-work.yaml v1.4.0) and verified against source; change/prompt pair authored; issue closed"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised resolved -> closed: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

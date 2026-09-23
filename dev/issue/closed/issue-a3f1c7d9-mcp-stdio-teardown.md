@@ -6,7 +6,7 @@ issue_info:
   title: "AEL MCP stdio teardown raises anyio cancel-scope RuntimeError at shutdown"
   date: "2026-06-26"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "low"
   type: "defect"
   iteration: 1
@@ -96,6 +96,11 @@ version_history:
     date: "2026-06-26"
     changes:
       - "Initial issue"
+  - version: "1.1"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised resolved -> closed: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

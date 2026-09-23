@@ -6,7 +6,7 @@ issue_info:
   title: "Pytest gate resolves no targets for flat src/ layouts; review-feedback.txt is never refreshed across loop iterations"
   date: "2026-07-29"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "high"
   type: "defect"
   iteration: 1
@@ -191,6 +191,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Resolved via change-b7e3d5a9; independently verified by P08 audit audit-p08-20260729 (status: verified, no findings); issue closed"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised resolved -> closed: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

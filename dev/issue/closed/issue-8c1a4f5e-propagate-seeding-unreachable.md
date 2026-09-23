@@ -6,7 +6,7 @@ issue_info:
   title: "propagate.sh context.md seeding pass is unreachable in its own use case; exclude anchoring inconsistent"
   date: "2026-07-29"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "medium"
   type: "defect"
   iteration: 1
@@ -179,6 +179,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Independently verified live in the Cowork remediation session, including the F4 precondition against a reconstructed pre-change script and the anchoring case the implementing session could not demonstrate; no findings; issue closed"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised resolved -> closed: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

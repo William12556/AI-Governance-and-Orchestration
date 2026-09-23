@@ -31,12 +31,15 @@ import yaml
 VALID_CLASSES = frozenset({
     "design", "change", "issue", "prompt",
     "test", "result", "audit", "trace", "requirements",
+    "proposal", "report",
 })
 
 MASTER_RE    = re.compile(r"^([a-z]+)-(.+)-master\.md$")
 NORMAL_RE    = re.compile(r"^([a-z]+)-([0-9a-f]{8})-(.+)\.md$")
 YAML_BLOCK_RE = re.compile(r"```yaml\n(.*?)```", re.DOTALL)
 HEADING_RE   = re.compile(r"^#{1,6}\s+(.+)$", re.MULTILINE)
+VH_HEADING_RE = re.compile(r"^#{1,6}\s+version history\s*$", re.IGNORECASE | re.MULTILINE)
+VH_KEY_RE    = re.compile(r"^\s*version_history:", re.MULTILINE)
 LINK_RE      = re.compile(r"\[[^\]]*\]\(<([^>]*)>|\[[^\]]*\]\(([^)]+)\)")
 
 # Enum constraints per schema_type (P00.10, template schemas)
@@ -48,7 +51,8 @@ _ENUMS: dict[str, dict[str, frozenset]] = {
     "t03_issue": {
         "issue_info.status":   frozenset({"open", "investigating", "resolved", "verified", "closed", "deferred"}),
         "issue_info.severity": frozenset({"critical", "high", "medium", "low"}),
-        "issue_info.type":     frozenset({"bug", "defect", "error", "performance", "security"}),
+        "issue_info.type":     frozenset({"bug", "defect", "error", "performance", "security",
+                                           "enhancement", "requirement_change"}),
     },
     "t04_prompt": {
         "prompt_info.task_type": frozenset({"code_generation", "debug", "refactor", "optimization"}),
@@ -177,12 +181,22 @@ def check_naming(fname: str, path: str) -> list[Finding]:
 
 # ── Check 2: markdown structure ───────────────────────────────────────────────
 
-def check_structure(path: str, content: str) -> list[Finding]:
-    """Verify mandatory markdown sections are present."""
+def check_structure(path: str, content: str, fname: str = "") -> list[Finding]:
+    """
+    Verify mandatory markdown sections are present.
+
+    change-51f1aef0: version history is satisfied by a markdown heading or a
+    YAML version_history key; prompt documents are exempt (single-use,
+    versioned by their iteration field and git).
+    """
     findings = []
     lower = content.lower()
+    m = MASTER_RE.match(fname) or NORMAL_RE.match(fname)
+    doc_class = m.group(1) if m else None
 
-    if "version history" not in lower:
+    if (doc_class != "prompt"
+            and not VH_HEADING_RE.search(content)
+            and not VH_KEY_RE.search(content)):
         findings.append(Finding("ERROR", path, "structure",
             "missing 'Version History' section"))
 
@@ -349,7 +363,13 @@ def run(workspace_dir: str) -> list[Finding]:
             if not _is_governance_doc(fname):
                 continue
 
-            findings.extend(check_structure(path, content))
+            findings.extend(check_structure(path, content, fname))
+
+            # change-51f1aef0: index by filename so prose-format documents
+            # (no YAML id) resolve as coupling targets.
+            _nm = NORMAL_RE.match(fname)
+            if _nm:
+                doc_index.setdefault(f"{_nm.group(1)}-{_nm.group(2)}", {})
             findings.extend(check_links(path, content, workspace_dir))
 
             yaml_findings, data, schema_type = check_yaml(path, content)

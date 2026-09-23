@@ -6,7 +6,7 @@ change_info:
   title: "Own MCP stdio/session contexts in a single AsyncExitStack (a3f1c7d9 Option B)"
   date: "2026-06-27"
   author: "William Watson"
-  status: "implemented"
+  status: "verified"
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -134,6 +134,11 @@ version_history:
     date: "2026-06-27"
     changes:
       - "Initial change document"
+  - version: "1.1"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised implemented -> verified: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction; asserts no verification beyond what this document already records."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

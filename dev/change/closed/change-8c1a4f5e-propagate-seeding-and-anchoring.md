@@ -6,7 +6,7 @@ change_info:
   title: "Evaluate the context.md seed condition before the preview early exit; anchor path-specific excludes; drop redundant --ignore-existing"
   date: "2026-07-29"
   author: "William Watson"
-  status: "closed"
+  status: "verified"
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -227,6 +227,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Independently verified live in the Cowork remediation session; the anchoring criterion recorded as inspection-only at implementation is now demonstrated behaviourally; issues_found cleared; status closed"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised closed -> verified: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction; asserts no verification beyond what this document already records."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

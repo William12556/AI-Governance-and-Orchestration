@@ -6,7 +6,7 @@ issue_info:
   title: "propagate.sh excludes a stale state path and does not protect project-specific ai/context.md"
   date: "2026-07-29"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "high"
   type: "defect"
   iteration: 1
@@ -200,6 +200,11 @@ version_history:
     author: "William Watson"
     changes:
       - "change-8c1a4f5e independently verified live in the Cowork remediation session, closing F4; all three validation criteria of change-e4b1a7c3 re-derived live, including a pre-change/post-change comparison demonstrating the state leak the exclude correction prevents; issue closed"
+  - version: "1.3"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised resolved -> closed: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

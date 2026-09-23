@@ -5,7 +5,7 @@ change_info:
   id: "change-d42e64a9"
   title: "Retire budget.py; tiered live/config context-window resolution in orchestrator.py; project-root-relative paths; live-query Strategic Domain gate"
   date: "2026-07-08"
-  status: "implemented"
+  status: "verified"
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -271,6 +271,11 @@ version_history:
     date: "2026-07-09"
     changes:
       - "Closed: status implemented; verification recorded; test case 4 accepted with waiver"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised implemented -> verified: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction; asserts no verification beyond what this document already records."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

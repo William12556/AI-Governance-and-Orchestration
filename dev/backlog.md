@@ -50,14 +50,12 @@ and `dev/reports/closed/report-eb782f83-pre-migration-baseline.md`.
 
 Each requires a T06 issue → T07 change → T03 prompt triple.
 
-1. `linter.py` requires a markdown `## Version History` heading while the YAML templates carry a `version_history:` key — 81 of 102 `dev/` linter errors.
-2. `linter.py`: add `proposal` and `report` as known document classes (9 errors).
-3. Consider a check that validates protocol citations in source comments (issue-e36a35d3 analysis).
-4. `bin/propagate.sh`: renames leave old names behind (rsync without `--delete`).
-5. `bin/propagate.sh`: cannot run non-interactively; exits 1 after the preview under a non-TTY stdin.
-6. `bin/propagate.sh`: consider refusing when source and target governance differ by a major version.
-7. Resolve items 4–6 together with audit F-03 and F-10 before any downstream governance propagation.
-8. `run_phase`: normalise (abspath) `read_paths` on the F28 wall-clock-cap early return (d7f4a1c8 P08 review; no observed impact).
+1. Consider a check that validates protocol citations in source comments (issue-e36a35d3 analysis).
+2. `bin/propagate.sh`: renames leave old names behind (rsync without `--delete`).
+3. `bin/propagate.sh`: cannot run non-interactively; exits 1 after the preview under a non-TTY stdin.
+4. `bin/propagate.sh`: consider refusing when source and target governance differ by a major version.
+5. Resolve items 2–4 together with audit F-03 and F-10 before any downstream governance propagation.
+6. `run_phase`: normalise (abspath) `read_paths` on the F28 wall-clock-cap early return (d7f4a1c8 P08 review; no observed impact).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -65,11 +63,7 @@ Each requires a T06 issue → T07 change → T03 prompt triple.
 
 ## 4.0 Compliance Corrections
 
-Document data corrections reported by `protocol_checker.py` and `linter.py`.
-
-1. 31 lifecycle errors — documents in `closed/` with a non-terminal status (includes change-a3f1c7d9, status `implemented`).
-2. 7 status-consistency errors where an issue and its coupled change disagree.
-3. 10 linter enum violations and 2 dangling coupling references.
+None open. Completed 2026-09-23: 31 closed documents normalised to terminal status (`protocol_checker.py` 38 → 0); duplicate `issue-d5a8e2f4 … 1.md` removed; linter false errors corrected under triple 51f1aef0 (`linter.py` `dev/` 99 → 8, all on gitignored `dev/eval/results` probes).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -91,7 +85,7 @@ Document data corrections reported by `protocol_checker.py` and `linter.py`.
 ## 6.0 Propagation
 
 1. Propagate the current orchestrator to GTach and e-Paper-IP-Display.
-2. Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display, pi-netconfig and certmon; pinned at v9.16 by decision D5. Gated by §3.0 item 7.
+2. Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display, pi-netconfig and certmon; pinned at v9.16 by decision D5. Gated by §3.0 item 5.
 3. `ai/context.md` is unfilled in solax-modbus and e-Paper-IP-Display; fill before any AEL run there.
 
 [Return to Table of Contents](<#table of contents>)
@@ -134,6 +128,7 @@ None pending. Resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.2 | 2026-09-23 | §4.0 completed; §3.0 linter items 1–2 completed under 51f1aef0 and renumbered |
 | 1.1 | 2026-09-23 | §7.0 decisions resolved and recorded; §5.0 rollback exercise dropped; §2.0 primer identity check added to CI item; OQ-07 moved to §2.0 |
 
 ---

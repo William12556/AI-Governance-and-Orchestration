@@ -6,7 +6,7 @@ change_info:
   title: "Correct propagate.sh state exclude; protect and seed ai/context.md"
   date: "2026-07-29"
   author: "William Watson"
-  status: "closed"
+  status: "verified"
   priority: "high"
   iteration: 1
   coupled_docs:
@@ -213,6 +213,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Independently verified live in the Cowork remediation session; all five test cases and all three validation criteria re-derived, including a pre-change/post-change comparison of the state leak; change-8c1a4f5e closed F4; status closed"
+  - version: "1.3"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status normalised closed -> verified: terminal value required for documents in closed/ (protocol_checker lifecycle rule). Closure-time record correction; asserts no verification beyond what this document already records."
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
