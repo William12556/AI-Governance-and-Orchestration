@@ -164,8 +164,35 @@ iteration_3:
         state/x). Iteration 2 proceeded with exit 0. --yes runs are unchanged
         (proceed, exit 0).
       proposed_severity: "low (safe direction: nothing applied, no content lost; --yes works around it)"
-      severity: "to be assigned by the independent closure check"
-      disposition: "open"
+      severity: "low (assigned by dev/audit/audit-b170cf6a-closure-2026-09-23.md)"
+      disposition: "fixed"
+      fix: >
+        Fixed directly at operator instruction (2026-09-23), without a separate
+        issue/change/prompt, using the closure audit's minimal form. In
+        snapshot(), ai/workspace, ai/state and ai/logs are recorded by entry and
+        type (dir, symlink and target, other, absent) and pruned from the name,
+        symlink and checksum walks, as list0 prunes them; the script never writes
+        them. ai-local/ and the declared files (context.md, task.md,
+        ael/config.yaml, dashboard-alerts.md) remain fully snapshotted.
+        Side effect: P-N4 resolved (a write inside ai/state during the prompt no
+        longer refuses). Residual: unreadable content in ai-local/ still makes an
+        interactive run exit 3 (kept: the A3 guard depends on ai-local/). I1 (FIFO
+        at ai-local) unchanged. guide-install §3.3 prompt-guard wording updated.
+      fix_test_results: >
+        Cowork Linux VM (GNU bash 5.1.16), throwaway targets; iteration 3 as
+        audited run side by side. bash -n passes. Interactive, mode 000:
+        state/x dir (update and up to date), state/f file, workspace/y dir,
+        logs/z file: it3 exit 3, fix exit 0 (up to date: "up to date", exit 0);
+        ai-local/z dir: exit 3 both (residual); framework file: exit 3 both;
+        --yes: unchanged in every case. Guard edges during the prompt: write in
+        state/ exit 0 and applied; state/ replaced by a symlink, workspace/
+        renamed, logs/ created, ael/config.yaml edited, dashboard-alerts.md
+        created: exit 3. Symlinked ai/: edit exit 3, write in real-ai/state
+        exit 0. Regressions: prompt-race edit on a real ai/, P-A1, P-B1, P-B2
+        (cmp shim), P-B3a (target byte-identical), A6 dangling, A3 no-clobber:
+        exit 3; P-B4, S-A1, up to date, declined: exit 0; non-TTY: exit 2.
+        Not covered by the closure audit (which examined 51611db); macOS and
+        bash 3.2 not exercised.
   test_results: >
     Cowork Linux VM (GNU bash 5.1.16, rsync 3.2.7, GNU sort), throwaway targets
     from git archive HEAD ai; iteration 2 (HEAD 1b7f068) run side by side.
@@ -267,6 +294,11 @@ version_history:
     author: "William Watson"
     changes:
       - "B5 raised as an open finding (operator decision): interactive refusal on an unreadable directory under a declared path"
+  - version: "3.3"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "B5 severity low (closure audit); fixed directly in snapshot() at operator instruction: declared directories recorded by entry and type only"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

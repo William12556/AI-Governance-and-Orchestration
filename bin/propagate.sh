@@ -260,15 +260,17 @@ plan() {
     done < "${out}/src.list"
 }
 
-# Snapshot of ai/ (declared paths included) and ai-local/: every name, symlink
-# target and regular-file checksum. Taken before plan and compared after the
-# prompt, so any change there refuses the run (audit-b170cf6a A1, A3, A4, B2).
+# Snapshot of ai/ and ai-local/: every name, symlink target and regular-file
+# checksum. Taken before plan and compared after the prompt, so any change
+# there refuses the run (audit-b170cf6a A1, A3, A4, B2). The declared
+# directories ai/workspace, ai/state and ai/logs are recorded by entry and
+# type only and never read: the script never writes them (B5).
 # A symlinked ai/ is recorded and followed, as every other step follows it
 # (B1); a symlinked ai-local/ is recorded only (refused by check_dir_chain).
 # Any failure returns non-zero; the caller exits 3 (B3).
 SNAP_FILE="${WORK}/snapshot"
 snapshot() {
-    local d l
+    local d l x pw ps pl
     : > "${SNAP_FILE}" || return 1
     for d in "${PROJECT_AI}" "${LOCAL_ROOT}"; do
         printf '== %s\n' "${d}" >> "${SNAP_FILE}" || return 1
@@ -285,12 +287,26 @@ snapshot() {
             fi
             continue
         fi
+        # Prune paths apply to ai/ only; an empty -path pattern matches nothing.
+        pw=""; ps=""; pl=""
+        if [[ "${d}" == "${PROJECT_AI}" ]]; then
+            pw="./workspace"; ps="./state"; pl="./logs"
+            for x in workspace state logs; do
+                if [[ -L "${d}/${x}" ]]; then
+                    l="$(readlink -- "${d}/${x}")" || return 1
+                    printf '%s link %s\n' "${x}" "${l}" >> "${SNAP_FILE}" || return 1
+                elif [[ -d "${d}/${x}" ]]; then printf '%s dir\n' "${x}" >> "${SNAP_FILE}" || return 1
+                elif [[ -e "${d}/${x}" ]]; then printf '%s other\n' "${x}" >> "${SNAP_FILE}" || return 1
+                else printf '%s absent\n' "${x}" >> "${SNAP_FILE}" || return 1
+                fi
+            done
+        fi
         ( cd "${d}" \
-          && find . -print0 | LC_ALL=C sort -z \
+          && find . \( -path "${pw}" -o -path "${ps}" -o -path "${pl}" \) -prune -o -print0 | LC_ALL=C sort -z \
           && printf 'L\0' \
-          && find . -type l -print0 -exec readlink {} \; \
+          && find . \( -path "${pw}" -o -path "${ps}" -o -path "${pl}" \) -prune -o -type l -print0 -exec readlink {} \; \
           && printf 'F\0' \
-          && find . -type f -print0 | LC_ALL=C sort -z | xargs -0 cksum ) >> "${SNAP_FILE}" || return 1
+          && find . \( -path "${pw}" -o -path "${ps}" -o -path "${pl}" \) -prune -o -type f -print0 | LC_ALL=C sort -z | xargs -0 cksum ) >> "${SNAP_FILE}" || return 1
     done
     cksum < "${SNAP_FILE}"
 }

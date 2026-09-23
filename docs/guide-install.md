@@ -82,7 +82,7 @@ bin/propagate.sh <project-root>
 
 Run from the repository root. The target project must already have an `ai/` directory. See `bin/propagate.sh` for excluded files.
 
-The script never deletes a file. Target files absent from the source (or of a different type) are moved to `<project-root>/ai-local/` and logged in `ai-local/RELOCATED.md`, labelled `retired framework file` (safe to delete) or `project content` (governance P10.6). Declared project files (`context.md`, `task.md`, `ael/config.yaml`, `workspace/`, `state/`, `logs/`, `dashboard-alerts.md`) are never overwritten; `context.md` and `task.md` are seeded from the templates only when absent. Use `--yes` for non-interactive runs; a major or unknown governance version additionally requires `--allow-major`. A framework file edited in the project is copied to `ai-local/` (label `local modification`) before it is overwritten. Review `ai-local/` after each run and delete what is not needed. The script refuses (exit 3, nothing applied) if `ai/` or `ai-local/` changes while the confirmation prompt is open, if a directory cannot be listed, if `context.md` or `task.md` is a symlink with no regular file behind it (a symlink to an existing file is preserved), or if a path differs from a declared path only by letter case. On case-insensitive file systems a framework directory with different case (e.g. `Templates/`) causes repeated relocation of its files; rename it to match.
+The script never deletes a file. Target files absent from the source (or of a different type) are moved to `<project-root>/ai-local/` and logged in `ai-local/RELOCATED.md`, labelled `retired framework file` (safe to delete) or `project content` (governance P10.6). Declared project files (`context.md`, `task.md`, `ael/config.yaml`, `workspace/`, `state/`, `logs/`, `dashboard-alerts.md`) are never overwritten; `context.md` and `task.md` are seeded from the templates only when absent. Use `--yes` for non-interactive runs; a major or unknown governance version additionally requires `--allow-major`. A framework file edited in the project is copied to `ai-local/` (label `local modification`) before it is overwritten. Review `ai-local/` after each run and delete what is not needed. The script refuses (exit 3, nothing applied) if `ai/` (outside `workspace/`, `state/` and `logs/`, whose contents are not checked) or `ai-local/` changes while the confirmation prompt is open, if a directory cannot be listed, if `context.md` or `task.md` is a symlink with no regular file behind it (a symlink to an existing file is preserved), or if a path differs from a declared path only by letter case. On case-insensitive file systems a framework directory with different case (e.g. `Templates/`) causes repeated relocation of its files; rename it to match.
 
 ### 3.4 Create a Release
 
@@ -108,6 +108,7 @@ Archives `ai/`, creates a GitHub release, and attaches the tarball as a release 
 | 0.6 | 2026-09-23 | §3.3: local modifications backed up |
 | 0.7 | 2026-09-23 | §3.3: declared-file wording corrected; refusals and exit codes |
 | 0.8 | 2026-09-23 | §3.3: symlinked context.md/task.md refusal listed (change-b170cf6a iteration 3, B4) |
+| 0.9 | 2026-09-23 | §3.3: prompt guard excludes contents of workspace/, state/ and logs/ (change-b170cf6a B5) |
 
 ---
 
