@@ -85,6 +85,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Iteration 3: final re-check audit-b170cf6a found B1-B4 (1 medium, 3 low); remediated under change-b170cf6a iteration 3; independent closure check pending"
+  - version: "3.1"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "B5 raised as an open finding by the operator (see change-b170cf6a iteration_3.open_findings); severity to be assigned by the closure check"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

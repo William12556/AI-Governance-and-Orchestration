@@ -150,10 +150,22 @@ iteration_3:
     - "B3: snapshot() writes to a work file, checks every step (find, sort -z, readlink, cksum) and returns non-zero on failure; both call sites exit 3 via snapshot_failed with nothing applied; errors are no longer discarded"
     - "B4: context.md or task.md is refused only when it is a symlink with no regular file behind it (dangling, or pointing to a non-regular file); a symlink to an existing regular file is preserved; header comment and guide-install §3.3 updated; exit-code header notes the snapshot failure"
   behaviour_notes:
-    - "Consequence of B3: an interactive run now exits 3 when any directory under ai/ or ai-local/ cannot be read, including one inside a declared path (audit case F3: mode 000 state/x). --yes runs are unchanged (proceed, exit 0)."
     - "Audit P-B2 as written (cksum shim editing on the first call) now edits before the baseline and before plan; the edit is backed up as 'local modification', exit 0, no loss."
   out_of_scope:
     - "Nested empty-directory exit 4 (P-N3); orphan .propagate-tmp file; accepted residuals (C1 bytes, ai/Templates/, performance)"
+  open_findings:
+    - id: "B5"
+      raised_by: "Operator decision 2026-09-23 (previously a behaviour note of iteration 3)"
+      location: "bin/propagate.sh snapshot() and its call sites"
+      description: >
+        Consequence of the B3 fail-closed snapshot: an interactive run exits 3
+        before any change when any directory under ai/ or ai-local/ cannot be
+        read, including one inside a declared path (audit case F3: mode 000
+        state/x). Iteration 2 proceeded with exit 0. --yes runs are unchanged
+        (proceed, exit 0).
+      proposed_severity: "low (safe direction: nothing applied, no content lost; --yes works around it)"
+      severity: "to be assigned by the independent closure check"
+      disposition: "open"
   test_results: >
     Cowork Linux VM (GNU bash 5.1.16, rsync 3.2.7, GNU sort), throwaway targets
     from git archive HEAD ai; iteration 2 (HEAD 1b7f068) run side by side.
@@ -250,6 +262,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Iteration 3 macOS results recorded (prompt race on real and symlinked ai/; sort -z)"
+  - version: "3.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "B5 raised as an open finding (operator decision): interactive refusal on an unreadable directory under a declared path"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
