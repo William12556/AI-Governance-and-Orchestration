@@ -82,7 +82,7 @@ bin/propagate.sh <project-root>
 
 Run from the repository root. The target project must already have an `ai/` directory. See `bin/propagate.sh` for excluded files.
 
-The target `ai/` is mirrored: files absent from the source are deleted, except excluded project-local files. Use `--yes` for non-interactive runs; a major governance version change additionally requires `--allow-major`.
+The target `ai/` is mirrored: files absent from the source are deleted, except excluded project-local files, files untracked or gitignored in the target repository, and paths listed in the target's `ai/.propagate-keep` (one path relative to `ai/` per line). Use `--yes` for non-interactive runs; a major governance version change additionally requires `--allow-major`.
 
 ### 3.4 Create a Release
 
@@ -102,6 +102,7 @@ Archives `ai/`, creates a GitHub release, and attaches the tarball as a release 
 |---|---|---|
 | 0.1 | 2026-06-18 | Initial document |
 | 0.2 | 2026-09-23 | §3.3: propagate.sh mirroring, --yes and --allow-major |
+| 0.3 | 2026-09-23 | §3.3: untracked files and ai/.propagate-keep entries are never deleted |
 
 ---
 

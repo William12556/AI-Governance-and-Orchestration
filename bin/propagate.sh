@@ -18,8 +18,10 @@
 #
 # The script mirrors ai/ into <project-root>/ai/ (rsync --delete), so files
 # renamed or retired in the source are removed from the target. Project-specific
-# files are never overwritten or deleted (see Excludes below). Any other file a
-# project has added under ai/ IS deleted; the preview lists every deletion.
+# files are never overwritten or deleted (see Excludes below). Only files that
+# are tracked in the target's git repository are deleted, since git can restore
+# them; untracked and gitignored files are protected (see Protect below). The
+# preview lists every deletion and every protected file.
 
 set -euo pipefail
 
@@ -92,11 +94,46 @@ EXCLUDES=(
     --exclude='/workspace/'         # project-local governance documents
     --exclude='/state/'             # AEL runtime state (post-2026-06-16 path; was ael/state/)
     --exclude='/dashboard-alerts.md' # govwatch write target
+    --exclude='/.propagate-keep'    # project-local keep list (see Protect)
     --exclude='.DS_Store'
     --exclude='__pycache__/'
     --exclude='*.pyc'
     --exclude='*.pyo'
 )
+
+# --- Protect ---------------------------------------------------------------
+# change-c5270084: --delete must never remove a file git cannot restore. Every
+# untracked or gitignored file under the target ai/ is passed to rsync as a
+# protect ('P') rule. If the target is not a git repository, nothing is deleted.
+# Tracked project-local files are protected by listing them, one path relative
+# to ai/ per line, in <project>/ai/.propagate-keep ('#' starts a comment).
+
+PROTECT=()
+PROTECTED_LIST=""
+KEEP_FILE="${PROJECT_AI}/.propagate-keep"
+if [[ -f "${KEEP_FILE}" ]]; then
+    while IFS= read -r rel || [[ -n "${rel}" ]]; do
+        rel="${rel%%#*}"; rel="${rel%"${rel##*[![:space:]]}"}"
+        [[ -z "${rel}" ]] && continue
+        PROTECT+=(--filter="P /${rel}")
+        PROTECTED_LIST+="protect      ${rel} (.propagate-keep)"$'\n'
+    done < "${KEEP_FILE}"
+fi
+if git -C "${PROJECT_ROOT}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    while IFS= read -r rel; do
+        [[ -z "${rel}" ]] && continue
+        PROTECT+=(--filter="P /${rel}")
+        case "${rel}" in
+            workspace/*|state/*|*__pycache__/*|*.pyc|*.pyo|*.DS_Store) continue ;;
+        esac
+        if [[ ! -e "${AI_SRC}/${rel}" ]]; then
+            PROTECTED_LIST+="protect      ${rel} (untracked in target)"$'\n'
+        fi
+    done < <(cd "${PROJECT_AI}" && git ls-files --others -- . )
+else
+    PROTECT+=(--filter="P *")
+    PROTECTED_LIST="protect      * (target is not a git repository; no deletions)"$'\n'
+fi
 
 # --- Preview ---------------------------------------------------------------
 # --itemize-changes lines beginning with '>f' indicate files that would
@@ -125,7 +162,7 @@ else
 fi
 
 # '*deleting' lines are files removed from the target by --delete.
-CHANGES=$(rsync --dry-run -av --delete --itemize-changes "${EXCLUDES[@]}" \
+CHANGES=$(rsync --dry-run -av --delete --itemize-changes "${EXCLUDES[@]}" ${PROTECT[@]+"${PROTECT[@]}"} \
     "${AI_SRC}/" "${PROJECT_AI}/" | grep -E '^(>f|\*deleting)' || true)
 
 if [[ -z "${CHANGES}" && "${NEEDS_SEED_CONTEXT}" == "false" && "${NEEDS_SEED_TASK}" == "false" ]]; then
@@ -137,6 +174,10 @@ if [[ -n "${CHANGES}" ]]; then
     echo "${CHANGES}"
 else
     echo "(no framework files differ)"
+fi
+
+if [[ -n "${PROTECTED_LIST}" ]]; then
+    printf '%s' "${PROTECTED_LIST}"
 fi
 
 if [[ "${NEEDS_SEED_CONTEXT}" == "true" ]]; then
@@ -176,7 +217,7 @@ fi
 
 # --- Propagate -------------------------------------------------------------
 
-rsync -av --delete "${EXCLUDES[@]}" \
+rsync -av --delete "${EXCLUDES[@]}" ${PROTECT[@]+"${PROTECT[@]}"} \
     "${AI_SRC}/" "${PROJECT_AI}/"
 
 # --- Seed project-specific context ----------------------------------------

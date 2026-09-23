@@ -81,7 +81,7 @@ None open. Completed 2026-09-23: 31 closed documents normalised to terminal stat
 ## 6.0 Propagation
 
 1. Propagate the current orchestrator to GTach and e-Paper-IP-Display.
-2. Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display, pi-netconfig and certmon; pinned at v9.16 by decision D5. `bin/propagate.sh` fixed under triple 07087e91; first run requires `--allow-major` (9.16 → 10.x) and is the first macOS exercise of the fix. Review the preview's `*deleting` lines before confirming.
+2. Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display, pi-netconfig and certmon; pinned at v9.16 by decision D5. `bin/propagate.sh` fixed under triple 07087e91; first run requires `--allow-major` (9.16 → 10.x). solax-modbus propagated 2026-09-23 (9.11 → 10.2). Before each remaining project: write `ai/.propagate-keep` for its tracked project-local files under `ai/` (issue-c5270084), then review the preview's `*deleting` and `protect` lines.
 3. `ai/context.md` is unfilled in solax-modbus and e-Paper-IP-Display; fill before any AEL run there.
 
 [Return to Table of Contents](<#table of contents>)
@@ -124,6 +124,7 @@ None pending. Resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.4 | 2026-09-23 | §6.0: solax-modbus propagated; .propagate-keep precondition added (c5270084) |
 | 1.3 | 2026-09-23 | §3.0 propagate.sh items completed under 07087e91 (F-03/F-10 already remediated in 097d6ea); §6.0 gate lifted |
 | 1.2 | 2026-09-23 | §4.0 completed; §3.0 linter items 1–2 completed under 51f1aef0 and renumbered |
 | 1.1 | 2026-09-23 | §7.0 decisions resolved and recorded; §5.0 rollback exercise dropped; §2.0 primer identity check added to CI item; OQ-07 moved to §2.0 |
