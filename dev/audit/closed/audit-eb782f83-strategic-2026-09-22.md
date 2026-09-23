@@ -23,7 +23,7 @@ audit_info:
   title: "Strategic audit — eb782f83 protocol and template renumbering, b3369f5 against 9a1767f"
   date: "2026-09-22"
   mode: "strategic"
-  status: "complete"
+  status: "closed"
   auditor: "Strategic Domain (Claude Desktop, independent session — not the implementing session)"
 
 scope:
@@ -104,7 +104,7 @@ findings:
         emits path-qualified filenames. Functionally the new links are correct
         and no reader is harmed. The defect is in the governance record, which
         is what this framework exists to keep.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
     - location: "dev/tools/migrate_identifiers.py — rollback()"
       description: >
@@ -125,7 +125,7 @@ findings:
         modify the repository. It has also never been executed against the live
         snapshot (brief §5.1.3), so the defect has had no opportunity to
         surface. The snapshot itself is sound: see the C8 verdict.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
   medium:
     - location: "dev/tools/migrate_identifiers.py — evaluate_gates(), scheme marker test; main(), --root"
@@ -155,7 +155,7 @@ findings:
         that distinction. A related hazard: write_snapshot is anchored at
         root/dev/backup/, so such a run would also create a dev/ tree in a
         repository that has none.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
     - location: "ai/templates/*.md schema_type keys; ai/ael/src/linter.py _ENUMS, _ID_PATTERNS, _ITERATION_FIELDS; ai/ael/src/protocol_checker.py _TERMINAL_STATUS"
       description: >
@@ -183,7 +183,7 @@ findings:
         the same file, with nothing in Appendix A or anywhere else recording the
         split. The next maintainer who aligns one side to the other breaks the
         compliance tooling.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
     - location: "commit 7b47345, ancestor of the declared baseline 9a1767f; ai/governance.md P02.3 Audit Scope and P00.17 Templates"
       description: >
@@ -208,7 +208,7 @@ findings:
         commit before the range rewrites, yields exactly two differences and
         they are these two clauses. CON-01 holds over the range the brief
         specifies and does not hold over the change as a whole.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
     - location: "ai/governance.md — Appendix A, preamble"
       description: >
@@ -227,7 +227,7 @@ findings:
         is keyed on filenames only, so a bare T04 in dev/, of which there are
         411 occurrences, requires an inference step through T04-prompt.md that
         the appendix does not state.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
     - location: "ai/governance.md, ai/primer.md, docs/claude/primer.md, ai/workflow.md, ai/doc/guide-audit-loop.md, docs/guide-audit-loop.md, ai/profiles/claude-code.md, ai/skills/validation/run-tests.md — Version History sections"
       description: >
@@ -244,7 +244,7 @@ findings:
         carries no statement that version histories are read under the scheme
         in force at the time. The fix is one sentence in Appendix A, not a
         migration.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
   low:
     - location: "dev/audit/audit-eb782f83-brief.md §3.0 measures table; ai/governance.md version history, entry 10.0"
@@ -259,7 +259,7 @@ findings:
         either. The figure 614 is now in the permanent version-history entry for
         governance v10.0. The run log, if retained, should settle which figure
         is right; the breakdown is the one the evidence supports.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
     - location: "dev/audit/audit-eb782f83-brief.md §3.0 measures table"
       description: >
@@ -267,7 +267,7 @@ findings:
         renamed; T08-audit.md is a fixed point of the permutation and was
         modified in place. git diff --name-status -M shows seven R entries and
         one M.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
     - location: "dev/tools/mapping.yaml — migration_set and refuse_paths"
       description: >
@@ -286,7 +286,7 @@ findings:
         project would receive the seven new template filenames and keep the
         seven retired ones beside them, fifteen files in a directory that should
         hold eight, with no error raised.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
     - location: ".gitignore line 47; dev/tools/mapping.yaml exclude_paths"
       description: >
@@ -295,7 +295,7 @@ findings:
         content that exists — nothing under ai/state is tracked — and false of
         the excluded path as written. A file placed directly in ai/state/ would
         be tracked and permanently outside the write set with no record.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
     - location: "dev/backup/ (gitignored by .gitignore line 79); docs/claude/project_information.md"
       description: >
@@ -306,7 +306,7 @@ findings:
         decision OQ-04. The consequence is that the sole rollback path for that
         file exists on one machine, is not version-controlled and has not been
         pushed. Losing the working tree loses it.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
     - location: "dev/requirements/requirements-eb782f83-protocol-template-reordering.md V-05, V-06"
       description: >
@@ -320,7 +320,7 @@ findings:
         the criterion as restated cannot be re-run by a later auditor, because
         the corpus it measures is a live working directory. It is also largely
         redundant with V-17, which establishes the same fact by digest.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
     - location: "dev/audit/audit-eb782f83-brief.md §4.0 C1 evidence column"
       description: >
@@ -330,7 +330,7 @@ findings:
         content lines on each side. The two are not in conflict; the point is
         that the published figure carries no independent check, and a figure
         offered as evidence should.
-      issue_ref: ""
+      issue_ref: "issue-9b8f1c47"
 
 claim_adjudication:
   - claim: "C1"
@@ -753,7 +753,68 @@ notes: >
   definition of a clause line, given above; a different definition could yield a
   different count, though not, on this evidence, a different verdict.
 
+closure:
+  date: "2026-09-23"
+  approver: "William Watson"
+  recorded_by: >
+    The implementing session, not the auditor. This block records the closure
+    decision and the disposition of findings; no finding, verdict or rationale
+    above has been altered. The only other edits are the fourteen issue_ref
+    fields, which P02.8.3 directs be linked on closure.
+  remediation:
+    issue: "issue-9b8f1c47 (closed)"
+    change: "change-9b8f1c47 (verified)"
+    commits: ["097d6ea", "8a61e8b"]
+  criteria_p02_8_1:
+    - criterion: "All critical findings fully resolved"
+      assessment: "Met. There were none."
+    - criterion: "All high-priority findings addressed or mitigated with documented acceptance"
+      assessment: >
+        Met. F-01 addressed: FR-07-04 and OQ-7 restated to the decision taken,
+        reversal registered as CON-08 exception E-3. F-02 mitigated rather than
+        fixed: rollback() now refuses and lists the files the manifest cannot
+        account for, and the documented rollback procedure is the tag. Automatic
+        removal remains undecided on dev/todo.md; mitigation accepted by the
+        operator.
+    - criterion: "Completion documented in audit report"
+      assessment: "Met by this block."
+    - criterion: "Human approval obtained"
+      assessment: "Met. Operator directed closure on 2026-09-23."
+  waiver:
+    requirement: "P02.8.2 — follow-up audit after remediation"
+    decision: >
+      Waived by the operator. Closure was directed on 2026-09-23 with the
+      requirement stated and no follow-up audit performed. Recorded as a waiver
+      rather than as satisfaction of the requirement.
+    consequence: >
+      The remediation in 097d6ea has been verified only by the implementing
+      session's own checks. The independence this audit provided does not extend
+      to the fixes made in response to it.
+    note: >
+      P00.14.3 requires human approval to close an audit; P02.8.2 additionally
+      requires a follow-up audit. The two protocols disagree. This closure
+      satisfies the first and waives the second.
+  disposition:
+    fixed: ["F-03", "F-06", "F-07", "F-08", "F-10", "F-11", "F-13", "F-14"]
+    record_corrected: ["F-01", "F-05", "F-09"]
+    mitigated: ["F-02"]
+    recorded_as_exception_or_procedure: ["F-04", "F-12"]
+    deferred_follow_on: >
+      schema_type retirement (F-04); rollback removal decision (F-02); rollback
+      exercise against a real snapshot; positional-prose search; AEL run;
+      propagate.sh defects with F-03 and F-10 before D5 propagation. All on
+      dev/todo.md.
+  final_metrics:
+    findings_total: 14
+    addressed: 14
+    fully_fixed: 8
+    claims: "5 confirmed, 6 refuted, 1 unverifiable (unchanged; verdicts are not revisited on closure)"
+
 version_history:
+  - version: "1.2"
+    date: "2026-09-23"
+    changes:
+      - "Closed under P02.8 at operator direction. Closure block added; the fourteen issue_ref fields linked to issue-9b8f1c47. P02.8.2 follow-up audit waived and recorded as such. Findings, verdicts and rationale unaltered. Moved to dev/audit/closed/."
   - version: "1.1"
     date: "2026-09-22"
     changes:
@@ -776,6 +837,7 @@ metadata:
 
 | Version | Date | Description |
 |---|---|---|
+| 1.2 | 2026-09-23 | Closed under P02.8 at operator direction. Closure block records criteria, disposition of all fourteen findings, and the waiver of the P02.8.2 follow-up audit. issue_ref fields linked. Findings, verdicts and rationale unaltered. |
 | 1.1 | 2026-09-22 | F-03 corrected and reclassified from high to medium: propagation carries the scheme marker with governance.md, so the exposure is a mistaken `--root` rather than routine propagation. Severity counts revised to two high, five medium, seven low. C10 verdict basis and F-03 recommendation corrected to match. F-10 extended with the downstream rename-residue consequence. |
 | 1.0 | 2026-09-22 | Initial strategic audit report. Claims C1–C12 adjudicated; fourteen findings recorded by severity; brief §5.1–§5.7 assessed; six unlisted blind spots recorded. |
 

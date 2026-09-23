@@ -2,7 +2,7 @@ Created: 2026 September 22
 
 # Strategic Audit Brief — eb782f83 Protocol and Template Renumbering
 
-**Status:** Brief. This is not an audit report.
+**Status:** Brief. This is not an audit report. Closed 2026-09-23 with `audit-eb782f83-strategic-2026-09-22.md`.
 **UUID:** `eb782f83`
 **Subject commit:** `b3369f5`, tagged `governance-v10.0`
 **Baseline commit:** `9a1767f`, tagged `pre-eb782f83`
@@ -291,6 +291,7 @@ useful than a confirmation reached by re-running the implementer's own checks.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.2 | 2026-09-23 | Closed with the audit it commissioned. Text unaltered. |
 | 1.1 | 2026-09-22 | **Errata, recorded not corrected.** This brief was an input to a completed audit and its text is left as the auditor read it. §3.0 states 654 substitutions as 614 — the components sum to 654 (audit F-08). §3.0 states 'Templates renamed 8'; seven were renamed, T08 being a fixed point (F-09). §3.0's measures were taken at `b3369f5`. |
 | 1.0 | 2026-09-22 | Initial brief. Twelve claims to test, seven categories of known weakness including five untested claims, reproduction commands with their limitations stated, and the deliverable specification. |
 
