@@ -3,10 +3,10 @@ Created: 2026 September 22
 # Protocol and Template Reordering Design
 
 **UUID:** `eb782f83`
-**Status:** Draft — awaiting approval
+**Status:** Approved and implemented. Remains active as the baseline for `dev/tools/`, which persists; requirements and design have no closed/ subfolder under P00.14.5.
 **Requirements:** `dev/requirements/requirements-eb782f83-protocol-template-reordering.md` v0.3
 **Proposal:** `dev/proposals/proposal-eb782f83-protocol-template-reordering.md` v1.5
-**Baseline:** `dev/reports/report-eb782f83-pre-migration-baseline.md` v1.0
+**Baseline:** `dev/reports/closed/report-eb782f83-pre-migration-baseline.md` v1.0
 
 ---
 

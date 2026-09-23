@@ -6,7 +6,7 @@ change_info:
   title: "Remediate the fourteen findings of the eb782f83 strategic audit"
   date: "2026-09-22"
   author: "William Watson"
-  status: "implemented"
+  status: "verified"
   priority: "high"
   iteration: 1
   coupled_docs:
@@ -229,6 +229,11 @@ implementation_record:
       change.
 
 version_history:
+  - version: "1.1"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Verified and closed. Operator accepted the remediation on 2026-09-22 and directed closure on 2026-09-23. Verification per implementation_record: migrated corpus untouched outside Appendix A and the version history; 10 of 10 checks; comparisons reproduce; self-test 13/13."
   - version: "1.0"
     date: "2026-09-22"
     author: "William Watson"

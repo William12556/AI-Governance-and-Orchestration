@@ -15,7 +15,7 @@
 ### Deferred from eb782f83 (protocol/template reordering)
 
 Scope-excluded from the migration; see `dev/proposals/proposal-eb782f83-protocol-template-reordering.md`
-and `dev/reports/report-eb782f83-pre-migration-baseline.md`.
+and `dev/reports/closed/report-eb782f83-pre-migration-baseline.md`.
 
 - [x] Repair the 8 `ai/governance.md` template links — **done by eb782f83, not discharged by it.** The migration emits them at their correct `templates/` paths. The strategic audit (F-01) found this reversed OQ-7 and FR-07-04, which said the paths would not be repaired; recorded as CON-08 exception E-3 in the proposal §6.3 rather than closed as a discharge. Broken links fell from 17 to 9.
 - [ ] Repair 9 further pre-existing broken links unrelated to numbering (baseline §4.2–§4.4): `governance.md` → `claude-code.md` missing `profiles/`; `ai/profiles/README.md` → nonexistent `claude-desktop-instructions.md` and stale `claude.md`; 6 profile setup-guide links using `../../../docs/` where `../../docs/` is correct. Independent of eb782f83.
@@ -29,7 +29,7 @@ and `dev/reports/report-eb782f83-pre-migration-baseline.md`.
 
 ### Compliance tooling defects
 
-Pre-existing; found while baselining eb782f83. See `dev/reports/report-eb782f83-pre-migration-baseline.md` §7.0.
+Pre-existing; found while baselining eb782f83. See `dev/reports/closed/report-eb782f83-pre-migration-baseline.md` §7.0.
 
 - [ ] Resolve the linter/template contradiction producing 81 of the 102 `dev/` linter errors: `linter.py` requires a markdown `## Version History` heading, while the `T02`, `T03` and `T04` templates are pure YAML carrying a `version_history:` key. Either the linter accepts the YAML key for YAML-schema documents, or the templates gain a markdown section. Every issue, change and prompt document in the repository currently fails this check.
 - [ ] Add `proposal` and `report` to the linter's known document classes (9 errors). Both are established `dev/` classes.
@@ -48,6 +48,7 @@ gate the downstream propagation item above.
 
 ### Deferred from the eb782f83 strategic audit (change-9b8f1c47)
 
+- [ ] **Close the eb782f83 audit.** `dev/audit/audit-eb782f83-strategic-2026-09-22.md` and its brief remain active. P02.8.1 criteria are met — no critical findings, both high findings remediated under change-9b8f1c47 — but P02.8.2 requires a follow-up audit after remediation before an audit closes, and none has been run. Either commission a follow-up audit of `097d6ea` against the fourteen findings, or waive P02.8.2 explicitly and record the waiver. Note that P00.14.3 sets a lower bar (human approval) than P02.8.2; the two protocols disagree on what closing an audit requires.
 - [ ] Retire the numeric `schema_type` prefix in favour of the class word — `issue`, `change`, `design` (audit F-04). Recorded as a permanent exception in governance Appendix A A.5 for now. The prefix cannot be migrated in isolation: `linter.py` keys validation rules, enums, id patterns and coupling paths on these strings and every frozen document carries them, so CON-04 forecloses it. Retiring the numeric component removes the coupling altogether, which is the same correction this migration made to protocol citations.
 - [ ] Decide whether `rollback()` should remove files the manifest does not record, or continue to refuse and defer to `git checkout` (audit F-02). It currently refuses, which is safe but leaves the tool unable to do the thing its name claims.
 - [ ] Exercise `--rollback` against a real snapshot on a scratch clone. It has still never been run in anger (brief §5.1.3), and the refusal path added under change-9b8f1c47 is now the only path it takes.

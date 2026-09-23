@@ -6,7 +6,7 @@ issue_info:
   title: "Five Python modules under ai/ cite the retired protocol numbering scheme"
   date: "2026-09-22"
   reporter: "William Watson"
-  status: "open"
+  status: "closed"
   severity: "low"
   type: "defect"
   iteration: 1
@@ -105,6 +105,11 @@ traceability:
     - "V-15 — the five modules import and execute unchanged"
 
 version_history:
+  - version: "1.1"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Closed. Resolved by the eb782f83 migration commit b3369f5; verified by V-15 and independently by the strategic audit, which confirmed claim C5 (no executable construct changed). Moved to closed/ under P00.14.4."
   - version: "1.0"
     date: "2026-09-22"
     author: "William Watson"

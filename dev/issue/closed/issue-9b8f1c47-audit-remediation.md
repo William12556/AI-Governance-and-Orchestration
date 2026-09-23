@@ -6,7 +6,7 @@ issue_info:
   title: "Strategic audit of eb782f83 recorded fourteen findings requiring remediation"
   date: "2026-09-22"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "high"
   type: "defect"
   iteration: 1
@@ -167,6 +167,11 @@ traceability:
     - "dev/design/design-eb782f83-protocol-template-reordering.md"
 
 version_history:
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Closed. All fourteen findings remediated under change-9b8f1c47; verification recorded there. Moved to closed/ under P00.14.4."
   - version: "1.1"
     date: "2026-09-23"
     author: "William Watson"

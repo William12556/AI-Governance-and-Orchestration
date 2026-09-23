@@ -6,7 +6,7 @@ change_info:
   title: "Migrate protocol citations in five Python modules to the eb782f83 scheme"
   date: "2026-09-22"
   author: "William Watson"
-  status: "proposed"
+  status: "verified"
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -126,9 +126,14 @@ traceability:
   related_changes: []
   related_documents:
     - "dev/design/design-eb782f83-protocol-template-reordering.md"
-    - "dev/reports/report-eb782f83-pre-migration-baseline.md"
+    - "dev/reports/closed/report-eb782f83-pre-migration-baseline.md"
 
 version_history:
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Verified and closed. Approved by the operator on 2026-09-22 when the live run was authorised; implemented in b3369f5; verified by V-15 (AST skeleton identical, one string constant changed exactly as the migration defines) and confirmed independently by the strategic audit, claim C5. Status passes directly from proposed to verified because the approval and implementation were recorded in the eb782f83 documents rather than here — noted rather than back-filled."
   - version: "1.1"
     date: "2026-09-22"
     author: "William Watson"

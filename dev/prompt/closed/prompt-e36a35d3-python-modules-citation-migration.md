@@ -133,11 +133,16 @@ traceability:
     - "NFR-07"
     - "V-15"
   documents:
-    - "dev/issue/issue-e36a35d3-python-modules-retired-citations.md"
-    - "dev/change/change-e36a35d3-python-modules-citation-migration.md"
+    - "dev/issue/closed/issue-e36a35d3-python-modules-retired-citations.md"
+    - "dev/change/closed/change-e36a35d3-python-modules-citation-migration.md"
     - "dev/design/design-eb782f83-protocol-template-reordering.md"
 
 version_history:
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Closed with its coupled issue and change. Coupling paths updated to closed/. Prompts carry no terminal status field."
   - version: "1.1"
     date: "2026-09-22"
     author: "William Watson"

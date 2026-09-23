@@ -5,6 +5,7 @@ Created: 2026 September 22
 **Coupled to:** `dev/proposals/proposal-eb782f83-protocol-template-reordering.md`
 **UUID:** `eb782f83`
 **Captured:** 2026-09-22, against the pre-migration working tree
+**Status:** Closed 2026-09-23. Immutable.
 
 ---
 
@@ -313,6 +314,7 @@ which an absolute count is not.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.4 | 2026-09-23 | Closed under P00.14.4 and moved to `dev/reports/closed/`. |
 | 1.3 | 2026-09-22 | Records the expected post-migration results confirmed on the rehearsal: broken file links 17 to 9, broken anchors 3 to 1. Notes that the eight Category A links are discharged by table-of-contents generation rather than repair. |
 | 1.2 | 2026-09-22 | Added §7.4 anchor link baseline (3 broken, 2 of which the restructuring removes) and §7.5 recording that `verify_migration.py` independently reproduces the 17-link count. |
 | 1.1 | 2026-09-22 | Added §7.0 Compliance Tooling Baseline: `linter.py` reports 102 errors and `protocol_checker.py` 38 against `dev/`, all pre-existing. Records the six error classes, identifies the 81-error linter/template contradiction, and states the consequence for V-05 and V-06. |

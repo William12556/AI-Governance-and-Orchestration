@@ -2,7 +2,7 @@ Created: 2026 September 16
 
 # Proposal: Protocol and Template Reordering with Positional Decoupling
 
-**Status:** Draft — awaiting approval
+**Status:** Implemented — governance v10.0, commit `b3369f5`. Remains active: proposals have no closed/ subfolder under P00.14.5, and `ai/governance.md` cites this path.
 **UUID:** `eb782f83`
 **Target:** governance v10.0
 
@@ -276,7 +276,7 @@ Authoring these protocols is **out of scope for this change** (§6.2).
   `docs/claude/primer.md` is overwritten from it after migration. The stale
   canonical designation in `ai/primer.md` entry 0.7 is corrected. Divergence is
   catalogued pre-migration in
-  `dev/reports/report-eb782f83-pre-migration-baseline.md` §3.0, which records
+  `dev/reports/closed/report-eb782f83-pre-migration-baseline.md` §3.0, which records
   that the `docs/` copy holds no information absent from `ai/primer.md`.
 - Migration of protocol citations in the five Python files under `ai/` that
   carry them: `ael/src/linter.py`, `ael/src/orchestrator.py`,
