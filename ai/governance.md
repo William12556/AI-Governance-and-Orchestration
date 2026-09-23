@@ -652,7 +652,7 @@ pip list
       - Create `CLAUDE.md` at project root with project context
       - Create `.claude/` directory structure per P10.6
       - Provision mandatory skill: follow ai/skills/validation/run-tests.md §2.0 to install `.claude/hooks/run-tests.sh` and merge its PostToolUse block into `.claude/settings.json` (P00.18)
-      - Reference: [claude.md](claude-code.md)
+      - Reference: [claude-code.md](profiles/claude-code.md)
     - **claude-omlx profile** (Tactical Domain = Claude Code CLI → oMLX → Devstral):
       - Ensure oMLX is running on `http://127.0.0.1:8000` with Devstral loaded
       - Install Claude Code: `npm install -g @anthropic-ai/claude-code`
@@ -763,6 +763,10 @@ exclude_lines = [
     - Strategic Domain: Performs impact analysis across design/code/test
     - Strategic Domain: Updates traceability matrix
     - Human: Approves changes
+  - P11.7 Framework Development Requirements
+    - Scope: requirements for extending LLM-G&O itself, held in dev/requirements/
+    - Format: prose with FR/NFR/CON tables; the T01 YAML template is not used
+    - T01 applies to downstream project requirements, where a local model consumes them
 
 [Return to Table of Contents](<#table of contents>)
 ## P12 Design
@@ -1238,6 +1242,7 @@ See [workflow.md](workflow.md).
 | 9.15    | 2026-08-19 | P06 §1.7.15: corrected stale reference ai/profiles/claude.md → ai/profiles/claude-code.md (claude.md was an obsolete duplicate, identified via GTach ai/profiles/ audit) |
 | 9.16    | 2026-08-21 | Added P00 §1.1.20 Task Register: ai/task.md open-work index, exempt from §1.1.10 naming and §1.1.14 lifecycle; added task.md to §1.2.6 folder structure; concept sourced from GTach ai/task.md |
 | 10.0    | 2026-09-22 | **Breaking.** Protocol and template identifiers renumbered into workflow order, and positional citations replaced by protocol-relative ones. Protocols are now two bands: cross-cutting P00 Governance, P01 Trace (was P05), P02 Audit (was P08), P03 Issue (was P04), P04 Change (was P03); lifecycle P10 Project Initialization (was P01), P11 Requirements (was P10), P12 Design (was P02), P13 Prompt (was P09), P14 Quality (was P07), P15 Test (was P06). P05 and P16-P19 are reserved and carry no content. Templates renumbered into document-creation order and renamed: T01 Requirements (was T07), T02 Design (was T01), T03 Prompt (was T04), T04 Test (was T05), T05 Result (was T06), T06 Issue (was T03), T07 Change (was T02), T08 Audit unchanged. Citations of the form §1.x.y are retired in favour of the dotted fully-qualified form Pnn.x.y; the section sign no longer appears in a protocol citation, and every heading carries its citation string verbatim. This document is restructured so that each protocol is a top-level section keyed by its identifier and clause numbers are local to it, which decouples a citation from a protocol's ordinal position and makes any future reordering a mapping-table edit rather than a corpus-wide substitution. Appendix A carries the permanent old-to-new alias tables; the frozen historical corpus in dev/ and every closed/ directory cites the retired scheme and is read through it. Executed mechanically by dev/tools/migrate_identifiers.py from dev/tools/mapping.yaml; 654 substitutions across 32 files, 10 of 10 verification checks passing, and 1086 clause lines preserved exactly. Downstream projects remain pinned at 9.16 until propagated. See dev/proposals/proposal-eb782f83-protocol-template-reordering.md. |
+| 10.1    | 2026-09-23 | Added P11.7 Framework Development Requirements: dev/ requirements are prose with FR/NFR/CON tables; T01 applies to downstream projects. P10.8: corrected claude-code.md reference link to profiles/claude-code.md. Non-breaking. |
 
 ---
 [Return to Table of Contents](<#table of contents>)

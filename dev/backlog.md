@@ -1,0 +1,139 @@
+Created: 2026 September 23
+
+# Backlog — Deferred Framework Work
+
+---
+
+## Table of Contents
+
+[1.0 Scope](<#1.0 scope>)
+[2.0 Feature Work](<#2.0 feature work>)
+[3.0 Source and Tooling Fixes](<#3.0 source and tooling fixes>)
+[4.0 Compliance Corrections](<#4.0 compliance corrections>)
+[5.0 Runtime Verification](<#5.0 runtime verification>)
+[6.0 Propagation](<#6.0 propagation>)
+[7.0 Decisions Pending](<#7.0 decisions pending>)
+[8.0 External Repositories](<#8.0 external repositories>)
+[9.0 Parked](<#9.0 parked>)
+[Version History](<#version history>)
+
+---
+
+## 1.0 Scope
+
+Deferred work moved out of `dev/todo.md` on 2026-09-23 to bring `dev/` to a
+stable state: no open triples and no open todo items. Nothing here is in
+progress. An item returns to `dev/todo.md` when work on it starts.
+
+Sources: `dev/todo.md` (pre-2026-09-23), `dev/task.md` §4.0, the eb782f83
+strategic audit (`dev/audit/closed/audit-eb782f83-strategic-2026-09-22.md`)
+and `dev/reports/closed/report-eb782f83-pre-migration-baseline.md`.
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## 2.0 Feature Work
+
+1. Project Overwatch FR-02–FR-10 (`dev/design/design-project-overwatch.md` §9.2). FR-01 shipped 2026-08-21 (prompt-19819f2e).
+2. OQ-09: side-by-side validation of Overwatch against the govwatch TUI before any retirement decision.
+3. Author the five reserved protocols: P05 Continuous Integration, P16 Execution, P17 Release, P18 Deployment and Propagation, P19 Observability (proposal-eb782f83 §5.3).
+4. Add `.github/workflows` CI running `linter.py`, `protocol_checker.py` and pytest on push (gap G1). Governed by P05 once authored.
+5. Retire the numeric `schema_type` prefix in favour of the class word (audit F-04; governance Appendix A A.5).
+6. Evaluate splitting `ai/governance.md` (OQ-1).
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## 3.0 Source and Tooling Fixes
+
+Each requires a T06 issue → T07 change → T03 prompt triple.
+
+1. `linter.py` requires a markdown `## Version History` heading while the YAML templates carry a `version_history:` key — 81 of 102 `dev/` linter errors.
+2. `linter.py`: add `proposal` and `report` as known document classes (9 errors).
+3. Consider a check that validates protocol citations in source comments (issue-e36a35d3 analysis).
+4. `bin/propagate.sh`: renames leave old names behind (rsync without `--delete`).
+5. `bin/propagate.sh`: cannot run non-interactively; exits 1 after the preview under a non-TTY stdin.
+6. `bin/propagate.sh`: consider refusing when source and target governance differ by a major version.
+7. Resolve items 4–6 together with audit F-03 and F-10 before any downstream governance propagation.
+8. `run_phase`: normalise (abspath) `read_paths` on the F28 wall-clock-cap early return (d7f4a1c8 P08 review; no observed impact).
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## 4.0 Compliance Corrections
+
+Document data corrections reported by `protocol_checker.py` and `linter.py`.
+
+1. 31 lifecycle errors — documents in `closed/` with a non-terminal status (includes change-a3f1c7d9, status `implemented`).
+2. 7 status-consistency errors where an issue and its coupled change disagree.
+3. 10 linter enum violations and 2 dangling coupling references.
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## 5.0 Runtime Verification
+
+1. Live Ralph Loop smoke test of the pytest SHIP gate (change-5bdc2d9b) against a project with an existing `tests/` directory. No live SHIP has yet been observed.
+2. Validate the REVISE → fix → SHIP convergence path.
+3. Confirm Magistral reviewer tool-calling on the first real review phase (a7d3f8b1).
+4. Run the AEL once against the eb782f83-migrated corpus.
+5. Exercise `migrate_identifiers.py --rollback` against a real snapshot on a scratch clone.
+6. Unexercised test cases from the closed triples a2f9c4d1, f5c28a04 and d1f4a83b: worker-authored `work-summary.txt` then budget exhaustion; `move_file` deliverable; `log_archive_dir` unset; `_normalize_verdict` pass 1; `BLOCKED` exit; audit-loop recipe pair; pytest gate FAIL branch and SHIP override; stall-detection BLOCK.
+7. Confirm the orphaned process from run 8c2040d3 (PID 22391, July 2026) no longer exists.
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## 6.0 Propagation
+
+1. Propagate the current orchestrator to GTach and e-Paper-IP-Display.
+2. Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display, pi-netconfig and certmon; pinned at v9.16 by decision D5. Gated by §3.0 item 7.
+3. `ai/context.md` is unfilled in solax-modbus and e-Paper-IP-Display; fill before any AEL run there.
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## 7.0 Decisions Pending
+
+1. Whether `docs/claude/primer.md` remains a file copy of `ai/primer.md` or becomes a pointer.
+2. Reconcile P00.14.3 and P02.8.2 on what closing an audit requires.
+3. Rename `ael-requirements.md`, `requirements-govwatch.md` and `requirements-project-overwatch.md` to the UUID convention and update all references.
+4. Whether `rollback()` removes files the manifest does not record, or continues to refuse and defer to `git checkout` (audit F-02).
+5. OQ-07 and OQ-10 (Project Overwatch).
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## 8.0 External Repositories
+
+1. `mcp-ripgrep`, `mcp-git`, `mcp-sed-awk`: check for the JSON Schema draft-07 `outputSchema` declaration that makes MCP tools unusable in Cowork sessions (observed 2026-09-23 on the Filesystem server's `read_text_file` and `directory_tree`). Emit 2020-12 or omit `$schema`.
+2. Redeploy the stale `ael-mcp` build that resolves state to `.ael/ralph` instead of `ai/state/ralph`.
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## 9.0 Parked
+
+1. Live oMLX context-window query enhancement.
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## Version History
+
+| Version | Date | Description |
+|---|---|---|
+| 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+
+---
+
+Copyright (c) 2026 William Watson. MIT License.

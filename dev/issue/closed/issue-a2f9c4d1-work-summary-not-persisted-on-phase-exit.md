@@ -6,7 +6,7 @@ issue_info:
   title: "Worker phase discards work-summary.txt on non-final-response exits; iteration exhaustion aborts the run before review"
   date: "2026-07-29"
   reporter: "William Watson"
-  status: "investigating"
+  status: "closed"
   severity: "high"
   type: "defect"
   iteration: 1
@@ -118,15 +118,31 @@ resolution:
   target_date: "2026-07-29"
   approach: "Orchestrator-side work-summary synthesis at all non-blocked exits; reclassify productive iteration exhaustion as rc=0"
   change_ref: "change-a2f9c4d1"
-  resolved_date: ""
-  resolved_by: ""
-  fix_description: ""
+  resolved_date: "2026-07-29"
+  resolved_by: "Claude Desktop (Opus 5)"
+  fix_description: >
+    Implemented under change-a2f9c4d1 (_synthesize_work_summary; write-target
+    tracking; synthesis at the wall-clock, work-complete and exhaustion exits;
+    conditional exhaustion rc). Completed by change-f5c28a04 (per-cycle
+    manifest clear, phase-own exhaustion rc, move/rename destination) and
+    change-d1f4a83b (observed-write manifest at the final-response exit).
 
 verification:
-  verified_date: ""
-  verified_by: ""
-  test_results: ""
-  closure_notes: ""
+  verified_date: "2026-09-23"
+  verified_by: "Claude (Cowork, Opus 5.5) — static verification only"
+  test_results: >
+    ai/ael/src/orchestrator.py compiles. Source inspection confirms all five
+    implementation steps of change-a2f9c4d1 are present in their corrected
+    form: helper at line 151, _written_paths at 1162, write-target recording
+    at 1384, synthesis at the wall-clock (1192), work-complete (1544) and
+    exhaustion (1563) exits, each guarded by is_worker_phase; the exhaustion
+    rc is derived from this phase's own synthesis or manifest write.
+  closure_notes: >
+    Closed at William Watson's direction on 2026-09-23, consistent with the
+    operator closures of successors f5c28a04 and d1f4a83b on 2026-07-29. Not
+    verified end-to-end: no live SHIP has been observed, and the unexercised
+    test cases carried by change-f5c28a04 remain unexercised. These are
+    recorded in dev/backlog.md, not represented as satisfied.
 
 prevention:
   preventive_measures: >
@@ -185,6 +201,11 @@ version_history:
     author: "William Watson"
     changes:
       - "P08 audit audit-p08-20260729 found change-a2f9c4d1 incompletely closed this issue (stale-manifest and move/rename recording defects); corrective change-f5c28a04 implemented; issue remains open pending that change's end-to-end verification, itself blocked on change-3b9e6d72"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Closed at operator direction after static verification; status investigating -> closed; resolution and verification recorded; end-to-end verification debt carried to dev/backlog.md"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

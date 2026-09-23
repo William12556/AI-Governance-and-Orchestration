@@ -2,6 +2,8 @@ Created: 2026 July 29
 
 # Task List — Unfinished Work from dev/audit (2026-07-29 Session)
 
+**Status: Closed 2026-09-23.** a2f9c4d1 closed at operator direction; §4.0 verification debt moved to `dev/backlog.md` §5.0; §2.0 push completed in subsequent sessions, orphaned-process check moved to `dev/backlog.md` §5.0. Retained at this path because closed triples cite it.
+
 ---
 
 ## Table of Contents
@@ -62,7 +64,7 @@ forward in §4.0 below, not treated as resolved.
 
 | Triple | Status | Note |
 |---|---|---|
-| `a2f9c4d1` | open | Superseded by `f5c28a04`; not itself closed or corrected |
+| `a2f9c4d1` | closed (operator direction, 2026-09-23) | Static verification only; live test cases carried to `dev/backlog.md` |
 | `3b9e6d72` | closed (operator instruction) | Pass 1 and a live SHIP remain unexercised |
 | `f5c28a04` | closed (operator instruction) | 3 of 7 test cases remain unexercised |
 | `d1f4a83b` | closed (operator instruction) | N1 remains unconfirmed live |
@@ -157,6 +159,7 @@ triple's disposition.
 |---|---|---|
 | 1.0 | 2026-07-29 | Initial task list, consolidated from dev/audit outstanding-work sections |
 | 1.1 | 2026-07-29 | 3b9e6d72, f5c28a04 and d1f4a83b closed at operator instruction; §3.0 and §7.0 updated to reflect closure and the items still unverified at closure |
+| 1.2 | 2026-09-23 | Closed: a2f9c4d1 closed at operator direction; remaining items moved to dev/backlog.md |
 
 ---
 

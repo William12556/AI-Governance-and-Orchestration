@@ -6,7 +6,7 @@ change_info:
   title: "Work-summary synthesis at all non-blocked worker exits; productive iteration exhaustion reclassified as non-fatal"
   date: "2026-07-29"
   author: "William Watson"
-  status: "approved"
+  status: "verified"
   priority: "high"
   iteration: 1
   coupled_docs:
@@ -203,10 +203,25 @@ implementation:
 verification:
   implemented_date: "2026-07-29"
   implemented_by: "Claude Desktop (Opus 5)"
-  verification_date: ""
-  verified_by: ""
-  test_results: ""
+  verification_date: "2026-09-23"
+  verified_by: "Claude (Cowork, Opus 5.5) — static verification only"
+  test_results: >
+    orchestrator.py compiles; all five implementation steps present in the
+    form corrected by change-f5c28a04 and change-d1f4a83b. Test cases not
+    exercised live in this verification.
   issues_found: []
+
+operator_closure_2026_09_23:
+  closed_by: "William Watson"
+  basis: >
+    Closed at William Watson's direction on 2026-09-23 to bring dev/ to a
+    stable state. The P08 audit was performed (audit-p08-2026-07-29) and its
+    findings were remediated by change-f5c28a04 and change-d1f4a83b, both
+    closed at operator instruction on 2026-07-29. No live SHIP has been
+    observed and the live test cases in testing_requirements remain
+    unexercised; they are carried in dev/backlog.md. This is an operator
+    closure decision, not a claim that every success criterion was
+    independently re-derived.
 
 traceability:
   design_updates: []
@@ -238,6 +253,11 @@ version_history:
     changes:
       - "Corrected two claims the implemented code did not support, per P08 audit and dev/remediation-2026-07-29.md §1.5: the gate-bypass benefit (narrowed, not closed) and the rc=1 mitigation (did not hold across cycles). Both are delivered by change-f5c28a04."
       - "Added change-f5c28a04 to traceability.related_changes as the corrective successor"
+  - version: "1.2"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Closed at operator direction after static verification; status approved -> verified (terminal status per protocol_checker; verification static only); verification and operator_closure_2026_09_23 recorded"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
