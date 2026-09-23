@@ -6,66 +6,64 @@ prompt_info:
   task_type: "debug"
   source_ref: "change-c5270084"
   date: "2026-09-23"
-  iteration: 2
+  iteration: 3
   coupled_docs:
     change_ref: "change-c5270084"
-    change_iteration: 2
+    change_iteration: 3
 
 context:
-  purpose: "Stop bin/propagate.sh deleting project files; move them out of ai/ instead (governance P10.6)."
-  integration: "bin/propagate.sh — Classify section before Preview; Relocate section before the rsync apply."
+  purpose: "Remediate audit-c5270084 with a design in which bin/propagate.sh never deletes a file."
+  integration: "bin/propagate.sh — rewritten section by section; interface preserved."
   constraints:
-    - "Never delete a file whose content is not a blob in the framework repository"
-    - "Never overwrite in ai-local/"
-    - "Keep change-07087e91 behaviour otherwise unchanged"
+    - "No rsync --delete; no rm of target files anywhere"
+    - "Never overwrite in ai-local/; check destinations before the first move"
+    - "Keep --yes, --allow-major, non-TTY and seeding behaviour"
     - "bash 3.2 compatible; bash -n must pass"
 
 specification:
-  description: "Content classification and relocation."
+  description: "No-delete propagation with labelled relocation."
   requirements:
     functional:
-      - "Obtain the files rsync --delete would remove (dry run, '*deleting' lines; expand directories to files)"
-      - "Delete-class: git hash-object --no-filters of the target file exists in the framework repo (git cat-file -e)"
-      - "Relocate-class: everything else, including symlinks and unreadable files"
-      - "Preview lines: 'delete <path> (unmodified framework file)' and 'relocate <path> -> ai-local/<path> (project content)'"
-      - "Before the apply, move relocate-class files to <project-root>/ai-local/<path>; on collision append .relocated-<timestamp>; exit 3 if a move fails"
-      - "Append a row per move to ai-local/RELOCATED.md, creating it with a header if absent"
-      - "Warn when a file ignored at ai/<path> is not ignored at its new path"
-      - "Remove the iteration-1 protect rules and .propagate-keep handling"
+      - "Enumerate target files and symlinks with find -print0; skip declared paths; candidate when the source lacks an entry of the same type"
+      - "Label: non-empty blob at the same path in git log --all --raw of ai/ (and historic framework/ai/, skel/ai/) -> 'retired framework file'; else 'project content'"
+      - "Record gitignore status of every candidate before any move; warn after all moves; warn when a .gitignore is relocated"
+      - "Pre-check that ai-local/ and each existing destination directory component is a real directory; otherwise exit 3 before any change"
+      - "Relocate before the copy; log each move; any failure exits 3 before the copy"
+      - "Remove only empty directories that block a source file"
+      - "Absent or unparseable target version -> 'unknown', treated as major; accept x.y and x.y.z"
+      - "Excludes without trailing slash; add /logs"
+      - "Set the executable bit"
     technical:
       language: "bash"
       version: "3.2+"
       standards:
-        - "Keep set -euo pipefail"
+        - "set -euo pipefail; NUL-delimited path handling"
 
 design:
-  architecture: "Two new sections; rsync apply unchanged apart from removal of protect rules"
+  architecture: "Enumerate, label, plan, preview, confirm, relocate, copy, seed"
   components:
-    - name: "Classify"
-      type: "script section"
-      purpose: "Split deletion candidates into delete and relocate lists"
+    - name: "Enumerate/Label/Plan"
+      type: "script sections"
+      purpose: "Build a NUL-delimited plan of (path, destination, label, ignored)"
       logic:
-        - "is_framework_blob: regular file, hash-object, cat-file -e in REPO_ROOT"
-    - name: "Relocate"
-      type: "script section"
-      purpose: "Move project content to ai-local/ and log it"
-      logic:
-        - "mv -n; verify source gone; check-ignore before and after; append log row"
+        - "find -print0 over target ai/; is_declared; same_type"
+        - "label_of via hash-object and the reachable blob list"
+        - "check_dir_chain on each destination directory"
   dependencies:
     internal: []
     external:
-      - "git, rsync"
+      - "git, rsync, find"
 
 deliverable:
   format_requirements:
-    - "Edit bin/propagate.sh in place"
+    - "Replace bin/propagate.sh"
   files:
     - path: "bin/propagate.sh"
-      content: "Classify and Relocate sections per specification"
+      content: "No-delete propagation per specification"
 
 success_criteria:
-  - "All change-c5270084 iteration 2 test cases pass"
-  - "bash -n passes"
+  - "All change-c5270084 iteration 3 test cases pass"
+  - "bash -n passes; no deletion code path"
 
 notes: >
   Execution: Claude (Cowork, Opus 5.5), direct implementation at William

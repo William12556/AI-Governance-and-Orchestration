@@ -82,7 +82,7 @@ bin/propagate.sh <project-root>
 
 Run from the repository root. The target project must already have an `ai/` directory. See `bin/propagate.sh` for excluded files.
 
-The target `ai/` is mirrored. A target file absent from the source is deleted only if its content matches a file in the framework's git history; any other file is project content and is moved to `<project-root>/ai-local/`, logged in `ai-local/RELOCATED.md` (governance P10.6). Declared project files (`context.md`, `task.md`, `ael/config.yaml`, `workspace/`, `state/`) are never touched. Use `--yes` for non-interactive runs; a major governance version change additionally requires `--allow-major`.
+The script never deletes a file. Target files absent from the source (or of a different type) are moved to `<project-root>/ai-local/` and logged in `ai-local/RELOCATED.md`, labelled `retired framework file` (safe to delete) or `project content` (governance P10.6). Declared project files (`context.md`, `task.md`, `ael/config.yaml`, `workspace/`, `state/`, `logs/`, `dashboard-alerts.md`) are never touched. Use `--yes` for non-interactive runs; a major or unknown governance version additionally requires `--allow-major`. Review `ai-local/` after each run and delete what is not needed.
 
 ### 3.4 Create a Release
 
@@ -104,6 +104,7 @@ Archives `ai/`, creates a GitHub release, and attaches the tarball as a release 
 | 0.2 | 2026-09-23 | §3.3: propagate.sh mirroring, --yes and --allow-major |
 | 0.3 | 2026-09-23 | §3.3: untracked files and ai/.propagate-keep entries are never deleted |
 | 0.4 | 2026-09-23 | §3.3: project files relocated to ai-local/ instead of protected; .propagate-keep retired |
+| 0.5 | 2026-09-23 | §3.3: propagate.sh never deletes; retired framework files relocated and labelled; logs/ declared |
 
 ---
 

@@ -9,10 +9,10 @@ issue_info:
   status: "resolved"
   severity: "critical"
   type: "defect"
-  iteration: 2
+  iteration: 3
   coupled_docs:
     change_ref: "change-c5270084"
-    change_iteration: 2
+    change_iteration: 3
 
 source:
   origin: "live_execution"
@@ -51,7 +51,7 @@ analysis:
 resolution:
   assigned_to: "Claude (Cowork, Opus 5.5) — direct implementation"
   target_date: "2026-09-23"
-  approach: "Iteration 2: delete only files whose content is a framework blob; relocate all other project content to ai-local/ (governance P10.6)."
+  approach: "Iteration 3: never delete; relocate every non-declared target file absent from the source to ai-local/ with an advisory label (governance P10.6)."
   change_ref: "change-c5270084"
   resolved_date: "2026-09-23"
   resolved_by: "Claude (Cowork, Opus 5.5)"
@@ -85,6 +85,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Iteration 2: resolution approach changed at operator direction (relocate project files to ai-local/)"
+  - version: "3.0"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Iteration 3 after audit-c5270084 refuted iteration 2: no-delete design"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

@@ -82,7 +82,7 @@ None open. Completed 2026-09-23: 31 closed documents normalised to terminal stat
 ## 6.0 Propagation
 
 1. Propagate the current orchestrator to GTach and e-Paper-IP-Display.
-2. Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display, pi-netconfig and certmon; pinned at v9.16 by decision D5. `bin/propagate.sh` fixed under triple 07087e91; first run requires `--allow-major` (9.16 → 10.x). solax-modbus propagated 2026-09-23 (9.11 → 10.2). Blocked until the c5270084 strategic audit (`dev/audit/audit-c5270084-brief.md`) confirms macOS behaviour. Project files found under `ai/` are relocated to `ai-local/` (governance P10.6); review the preview's `delete` and `relocate` lines.
+2. Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display, pi-netconfig and certmon; pinned at v9.16 by decision D5. `bin/propagate.sh` fixed under triple 07087e91; first run requires `--allow-major` (9.16 → 10.x). solax-modbus propagated 2026-09-23 (9.11 → 10.2). Blocked until the P02.8.2 follow-up audit of c5270084 iteration 3 and the macOS check (audit report §8.0 step 2). The script never deletes: retired and project files go to `ai-local/`; delete after review (governance P10.6).
 3. `ai/context.md` is unfilled in solax-modbus and e-Paper-IP-Display; fill before any AEL run there.
 
 [Return to Table of Contents](<#table of contents>)
@@ -125,6 +125,7 @@ None pending. Resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.6 | 2026-09-23 | §6.0: gate updated for c5270084 iteration 3 (no-delete design) |
 | 1.5 | 2026-09-23 | §6.0: propagation blocked on c5270084 audit; relocation replaces .propagate-keep; §2.0 item 7 added |
 | 1.4 | 2026-09-23 | §6.0: solax-modbus propagated; .propagate-keep precondition added (c5270084) |
 | 1.3 | 2026-09-23 | §3.0 propagate.sh items completed under 07087e91 (F-03/F-10 already remediated in 097d6ea); §6.0 gate lifted |

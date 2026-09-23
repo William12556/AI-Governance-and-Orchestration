@@ -582,8 +582,9 @@ test.txt
   - P10.6 Project folder structure
     - Note: This structure applies to projects using the framework, not to the LLM-Governance-and-Orchestration repository itself
     - The governance framework repository contains only ai/, doc/, and templates/ directories
-    - ai/ holds framework files plus only the project files declared in the layout below (context.md, task.md, ael/config.yaml, state/, dashboard-alerts.md, workspace/)
-    - Any other project file belongs outside ai/; bin/propagate.sh relocates such files to ai-local/ and logs them in ai-local/RELOCATED.md
+    - ai/ holds framework files plus only the project files declared in the layout below (context.md, task.md, ael/config.yaml, state/, logs/, dashboard-alerts.md, workspace/)
+    - Any other project file belongs outside ai/; bin/propagate.sh relocates such files, and retired framework files, to ai-local/ and logs them in ai-local/RELOCATED.md
+    - bin/propagate.sh never deletes a file; the human deletes relocated files after review
     - Layout
 ```
     └── <project name>/
@@ -592,6 +593,7 @@ test.txt
         │   ├── context.md            # AEL profile only — Tactical Domain context (team shared)
         │   ├── task.md                # open-work register (git-tracked)
         │   ├── state/                # AEL loop state (ephemeral, excluded from git)
+        │   ├── logs/                 # AEL run-log archive (log_archive_dir)
         │   ├── dashboard-alerts.md   # govwatch output (excluded from git)
         │   └── workspace/            # Framework execution space
         │       ├── report/            # Reports (excluded from git)
@@ -1249,6 +1251,7 @@ See [workflow.md](workflow.md).
 | 10.1    | 2026-09-23 | Added P11.7 Framework Development Requirements: dev/ requirements are prose with FR/NFR/CON tables; T01 applies to downstream projects. P10.8: corrected claude-code.md reference link to profiles/claude-code.md. Non-breaking. |
 | 10.2    | 2026-09-23 | Reconciled audit closure: P00.14.3 defers to P02.8; P02.8.2 follow-up audit required when remediation changed source code, waivable by the human with a recorded waiver otherwise. Non-breaking. |
 | 10.3    | 2026-09-23 | P10.6: ai/ holds framework files and the declared project files only; other project files belong outside ai/ and are relocated to ai-local/ by bin/propagate.sh. Added ai-local/ to the layout. Non-breaking. |
+| 10.4    | 2026-09-23 | P10.6: logs/ added to the declared project set and layout; bin/propagate.sh never deletes — retired framework files are relocated to ai-local/ with project files, labelled, for human deletion. Non-breaking. |
 
 ---
 [Return to Table of Contents](<#table of contents>)
