@@ -83,7 +83,7 @@ None open. Completed 2026-09-23: 31 closed documents normalised to terminal stat
 
 1. ~~Propagate the current orchestrator to GTach and e-Paper-IP-Display.~~ Done 2026-09-23 with item 2 (`ai/ael/` is part of the propagated tree).
 2. Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display and pi-netconfig; pinned at v9.16 by decision D5. `bin/propagate.sh` fixed under triple 07087e91; first run requires `--allow-major` (9.16 → 10.x). solax-modbus propagated 2026-09-23 (9.11 → 10.2). Unblocked: change-b170cf6a closed 2026-09-23 (B1–B4 resolved; B5 fixed at 90f3a8d; independently verified). Propagated to 10.5 on 2026-09-23 from ae5e4df: GTach (9.15; 22 relocated), e-Paper-IP-Display (9.9; 20 relocated, `task.md` seeded) and pi-netconfig (9.9; 11 relocated, `task.md` seeded). solax-modbus 10.4 → 10.5 on 2026-09-23 (`governance.md` only). All downstream projects are at 10.5; no propagation remaining. pi-netconfig has no `ai/ael/config.yaml`; configure before any AEL run there. The script never deletes: retired and project files go to `ai-local/`; delete after review (governance P10.6).
-3. ~~`ai/context.md` is unfilled in solax-modbus, e-Paper-IP-Display, GTach and pi-netconfig.~~ Filled 2026-09-23 (v1.0 in each project). pi-netconfig still lacks `ai/ael/config.yaml`; e-Paper-IP-Display `AGENTS.md` has stale source and design paths.
+3. ~~`ai/context.md` is unfilled in solax-modbus, e-Paper-IP-Display, GTach and pi-netconfig.~~ Filled 2026-09-23 (v1.0 in each project). Follow-ups done 2026-09-23: pi-netconfig `ai/ael/config.yaml` added (framework copy); e-Paper-IP-Display `AGENTS.md` paths corrected; `ai-local/` reviewed, 44 retired framework files and 4 obsolete files deleted. Awaiting operator decision: GTach `ai-local/doc/` (4 files), pi-netconfig and solax-modbus `ai-local/instructions.md`, solax-modbus `obsidian_markdown_guidelines.md` and `ael/config.yaml.bak`.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -125,6 +125,7 @@ None pending. Resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.15 | 2026-09-23 | §6.0: item 3 follow-ups done (pi-netconfig AEL config, e-Paper AGENTS.md, ai-local review) |
 | 1.14 | 2026-09-23 | §6.0: context.md filled in all four downstream projects |
 | 1.13 | 2026-09-23 | §6.0: solax-modbus propagated 10.4 → 10.5; propagation complete |
 | 1.12 | 2026-09-23 | §6.0: certmon removed (no such repository; listed in error since 2026-09-22) |
