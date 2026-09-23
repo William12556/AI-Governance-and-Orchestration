@@ -3,15 +3,15 @@ Created: 2026 September 23
 ```yaml
 change_info:
   id: "change-c5270084"
-  title: "propagate.sh: protect untracked target files and ai/.propagate-keep entries from --delete"
+  title: "propagate.sh: delete only unmodified framework files; relocate project content to ai-local/"
   date: "2026-09-23"
   author: "William Watson"
   status: "implemented"
   priority: "critical"
-  iteration: 1
+  iteration: 2
   coupled_docs:
     issue_ref: "issue-c5270084"
-    issue_iteration: 1
+    issue_iteration: 2
     prompt_ref: "prompt-c5270084"
 
 source:
@@ -20,10 +20,13 @@ source:
   description: "Restrict --delete to files git can restore and the project has not declared its own."
 
 scope:
-  summary: "bin/propagate.sh protect rules; two guides updated."
+  summary: "bin/propagate.sh classify-and-relocate; governance 10.3 P10.6 rule; two guides updated."
   affected_components:
     - name: "propagate"
       file_path: "bin/propagate.sh"
+      change_type: "modify"
+    - name: "governance"
+      file_path: "ai/governance.md"
       change_type: "modify"
     - name: "user guides"
       file_path: "docs/guide-install.md, docs/guide-getting-started.md"
@@ -31,43 +34,50 @@ scope:
   affected_designs: []
   out_of_scope:
     - "Recovery of solax-modbus ai/project_information.md (operator: Time Machine or Claude project knowledge)"
-    - "Keep lists for other downstream projects — to be written before each first v10.x propagation"
+    - "Moving governance-declared project files (context.md, task.md, ael/config.yaml, workspace/, state/) out of ai/ — operator decision 2026-09-23; backlog"
 
 rational:
   problem_statement: "See issue-c5270084."
   proposed_solution: >
-    Before preview and apply, pass every file reported by git ls-files --others
-    in the target ai/ (untracked, including gitignored) to rsync as a protect
-    ('P') rule, and every path in <project>/ai/.propagate-keep likewise. List
-    protected files that are absent from the source in the preview. If the
-    target is not a git repository, protect everything.
+    Operator direction 2026-09-23: project files do not belong in ai/. For each
+    target file that rsync --delete would remove, compute its git blob hash; if
+    that blob exists in the framework repository it is an unmodified framework
+    file and is deleted. Otherwise it is project content, tracked or not, and is
+    moved to <project-root>/ai-local/<same path> before the rsync apply, never
+    overwriting (timestamp suffix on collision), and logged in
+    ai-local/RELOCATED.md. A relocated file that was gitignored in ai/ and is
+    not ignored at its new path is flagged. Governance P10.6 states the rule.
   alternatives_considered:
-    - option: "Revert to additive rsync plus a retired-path list"
-      reason_rejected: "Operator chose protect rules 2026-09-23; renames still propagate automatically."
-    - option: "Protect only via .propagate-keep"
-      reason_rejected: "Relies on foresight; an unlisted untracked file would still be lost irrecoverably."
+    - option: "Iteration 1: protect untracked files; ai/.propagate-keep for tracked project files"
+      reason_rejected: "Leaves legacy project files in ai/ and relies on per-project keep lists; superseded by operator direction."
+    - option: "Classify by path presence in framework history"
+      reason_rejected: "solax-modbus ai/instructions.md shares a historic framework path but holds project-edited content; path alone would delete it."
   benefits:
-    - "No file git cannot restore is ever deleted"
-    - "Projects can declare tracked local files explicitly"
+    - "No file is lost: every deletion is restorable from framework history, every other file is moved"
+    - "Enforces the P10.6 layout; retires .propagate-keep"
   risks:
-    - risk: "A tracked project file not in .propagate-keep is still deleted"
-      mitigation: "Recoverable with git checkout; listed as '*deleting' in the preview"
-    - risk: "An untracked retired framework file survives in the target"
-      mitigation: "Shown as 'protect' in the preview for manual removal"
+    - risk: "A relocated file that was gitignored becomes committable"
+      mitigation: "Warning at run time and in RELOCATED.md"
+    - risk: "An edited framework file (e.g. a locally patched template) is relocated rather than deleted"
+      mitigation: "Intended: edits are project content; listed as 'relocate' in the preview"
+    - risk: "Relocation succeeds but the rsync apply fails"
+      mitigation: "Files are moved, not lost; RELOCATED.md records each move"
 
 technical_details:
-  current_behavior: "rsync --delete removes every target file absent from the source, excluded paths apart."
-  proposed_behavior: "As proposed_solution."
-  implementation_approach: "Protect section before the preview; PROTECT array added to both rsync calls; .propagate-keep excluded from transfer."
+  current_behavior: "Iteration 1: untracked files and .propagate-keep entries protected via rsync P rules."
+  proposed_behavior: "As proposed_solution. P rules and .propagate-keep removed."
+  implementation_approach: "Classify section (rsync --delete dry run, '*deleting' paths expanded to files, git hash-object / cat-file -e); Relocate section before apply."
   code_changes:
     - component: "propagate"
       file: "bin/propagate.sh"
-      change_summary: "Protect section, .propagate-keep support, preview listing"
-      functions_affected: []
+      change_summary: "Classify and Relocate sections; preview lines delete/relocate; protect rules removed"
+      functions_affected:
+        - "is_framework_blob (new)"
       classes_affected: []
   data_changes: []
   interface_changes:
-    - "New optional file <project>/ai/.propagate-keep"
+    - "New directory <project-root>/ai-local/ with RELOCATED.md; exit 3 if a relocation fails"
+    - "ai/.propagate-keep retired (iteration 1 only)"
 
 dependencies:
   internal:
@@ -78,18 +88,22 @@ dependencies:
   required_changes: []
 
 testing_requirements:
-  test_approach: "Scratch git targets in the Cowork VM; re-run against solax-modbus after restoring its tracked files."
+  test_approach: "Scratch targets in the Cowork VM; dry run against solax-modbus."
   test_cases:
-    - scenario: "Target with tracked retired template, untracked gitignored file, untracked file with a space, gitignored tmp dir"
-      expected_result: "Tracked retired files deleted; all untracked files preserved and listed as 'protect'"
-    - scenario: "Tracked project file listed in .propagate-keep"
-      expected_result: "Preserved; listed as protected; .propagate-keep itself not overwritten"
+    - scenario: "Historic unmodified framework template in target"
+      expected_result: "Deleted"
+    - scenario: "Tracked project-edited file at a historic framework path; gitignored file; untracked file with a space; gitignored tmp dir"
+      expected_result: "All relocated to ai-local/ with paths preserved and logged"
+    - scenario: "Destination already exists in ai-local/"
+      expected_result: "Timestamp suffix; existing file untouched"
+    - scenario: "File ignored by an ai/-anchored pattern"
+      expected_result: "Relocated; WARNING printed and recorded"
+    - scenario: "Declared project files (context.md, ael/config.yaml, workspace/, state/)"
+      expected_result: "Untouched"
     - scenario: "Target not a git repository"
-      expected_result: "No deletions"
-    - scenario: "solax-modbus after restore, with its .propagate-keep"
-      expected_result: "Up to date; nothing deleted"
+      expected_result: "Classification still applies; project files relocated"
   regression_scope:
-    - "change-07087e91 behaviour: --yes, non-TTY exit 2, major-version guard, seeding"
+    - "change-07087e91: --yes, non-TTY exit 2, major-version guard, seeding, up-to-date, unknown option"
   validation_criteria:
     - "All test cases pass"
     - "bash -n passes"
@@ -108,14 +122,12 @@ verification:
   verification_date: "2026-09-23"
   verified_by: "Claude (Cowork, Opus 5.5) — implementing session"
   test_results: >
-    bash -n passes. Scratch git targets (Cowork Linux VM): tracked retired
-    files deleted; gitignored project_information.md, gitignored tmp file and
-    an untracked file with a space preserved and listed; a tracked file in
-    .propagate-keep preserved; non-git target deleted nothing. solax-modbus
-    after restore with its keep file: up to date, nothing deleted.
-    change-07087e91 regression (git target): non-TTY exit 2; 9.16 target
-    under --yes exit 2; --allow-major applied and seeded; up to date exit 0;
-    unknown option exit 1. Not exercised under macOS bash 3.2 or macOS rsync.
+    Iteration 2. bash -n passes. All six test cases pass on scratch targets
+    (Cowork Linux VM, GNU bash, rsync 3.2.7); all change-07087e91 regression
+    cases pass. Dry run against solax-modbus classifies instructions.md,
+    obsidian_markdown_guidelines.md, ael/config.yaml.bak and .propagate-keep
+    as project content to relocate, and nothing to delete. Not exercised under
+    macOS bash 3.2 or macOS rsync.
   issues_found: []
 
 traceability:
@@ -143,6 +155,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Implemented; verification by implementing session recorded"
+  - version: "2.0"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Iteration 2 at operator direction: protect rules and .propagate-keep replaced by content classification and relocation to ai-local/; governance 10.3 P10.6 rule"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

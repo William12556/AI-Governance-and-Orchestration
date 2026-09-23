@@ -3,7 +3,7 @@ Created: 2026 September 23
 # Strategic Audit Brief — propagate.sh Deletion Scope (07087e91, c5270084)
 
 **Status:** Brief. This is not an audit report.
-**Subject commits:** `0a3dd27` (change-07087e91), `6b2aebe` (change-c5270084)
+**Subject:** `0a3dd27` (change-07087e91), `6b2aebe` (change-c5270084 iteration 1), and change-c5270084 iteration 2 (the commit following this brief)
 **Baseline commit:** `6f6988b`
 
 ---
@@ -54,9 +54,10 @@ evidence.
 ## 3.0 What Was Done
 
 - 07087e91: `rsync --delete` in preview and apply; `--yes`; non-TTY without `--yes` exits 2; governance major-version guard requiring `--allow-major` with `--yes`.
-- c5270084: every path from `git ls-files --others` in the target `ai/` becomes an rsync protect rule `P /<path>`; each line of `<project>/ai/.propagate-keep` likewise; a non-git target gets `P *`; `.propagate-keep` is excluded from transfer.
+- c5270084 iteration 1 (superseded): rsync protect rules for untracked files and an `ai/.propagate-keep` list.
+- c5270084 iteration 2 (subject): every file `--delete` would remove is classified by content. If `git hash-object` of the file exists as a blob in the framework repository, it is deleted; otherwise it is moved to `<project-root>/ai-local/<path>` before the apply, never overwriting, logged in `ai-local/RELOCATED.md`, with a warning if it loses gitignore coverage. Governance 10.3 P10.6 states that project files other than the declared set do not belong in `ai/`.
 - Tests: scratch targets in a Linux VM with GNU bash and rsync 3.2.7. Not run on macOS.
-- Live: one run against solax-modbus (9.11 → 10.2) under the 07087e91 version only.
+- Live: one run against solax-modbus (9.11 → 10.2) under 07087e91 only, which deleted project files. Iteration 2 has been dry-run against solax-modbus only.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -66,15 +67,15 @@ evidence.
 
 | ID | Claim | Falsified by |
 |---|---|---|
-| C1 | No untracked or gitignored file under the target `ai/` is deleted. | Any such file deleted in any reachable configuration. |
-| C2 | No path listed in `ai/.propagate-keep` is deleted, and the keep file itself is neither overwritten nor deleted. | A listed path or the keep file removed or changed. |
-| C3 | A target that is not a git work tree has no deletions. | Any deletion in a non-git target. |
-| C4 | Tracked files absent from the source are deleted, so renames propagate. | A retired tracked file surviving. |
-| C5 | Excluded paths are never transferred or deleted. | Any change to an excluded path. |
-| C6 | A non-TTY run without `--yes` applies nothing and exits 2. | Any write, or another exit code. |
-| C7 | A major-version difference under `--yes` without `--allow-major` applies nothing and exits 2. | Any write, or another exit code. |
+| C1 | No file is deleted unless its exact content is a blob in the framework repository. | Any deletion of content not recoverable from framework history. |
+| C2 | Every other file `--delete` would remove is relocated to `ai-local/` with its relative path, before the apply. | A project file deleted, left in place, or moved to a wrong path. |
+| C3 | Relocation never overwrites, and every move is logged in `ai-local/RELOCATED.md`. | An overwrite, or a move without a log row. |
+| C4 | A relocated file that loses gitignore coverage is flagged. | A newly committable previously-ignored file without a warning. |
+| C5 | Excluded paths (declared project files) are never transferred, moved or deleted. | Any change to an excluded path. |
+| C6 | Tracked files absent from the source whose content is framework content are deleted, so renames propagate. | A retired unmodified framework file surviving. |
+| C7 | A non-TTY run without `--yes`, or a major-version run under `--yes` without `--allow-major`, applies nothing and exits 2. | Any write, move, or another exit code. |
 | C8 | The script behaves as above under macOS `/bin/bash` 3.2 and macOS `/usr/bin/rsync`. | Any divergence on macOS. |
-| C9 | "Tracked, therefore recoverable" holds for every file the script deletes. | A deletion git cannot restore to its pre-run content. |
+| C9 | The preview is a complete and accurate statement of what the apply does. | Any action not listed, or listed and not taken. |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -84,15 +85,15 @@ evidence.
 
 Suspected, not established. Each is a place to look first.
 
-1. **macOS rsync.** The live run printed `Transfer starting: 47 files`, which suggests macOS ships openrsync rather than rsync 3.x. Support for `--filter`, the `P` rule and `--delete` semantics under openrsync was never checked. If `P` is unsupported or silently ignored, C1–C3 fail on the operator's machine.
-2. **Quoted paths.** `git ls-files --others` quotes paths containing non-ASCII or special characters unless `-z` or `core.quotePath=false` is used. A quoted path produces a protect rule that matches nothing.
-3. **Wildcards.** Protect rules are rsync patterns. A filename containing `*`, `?` or `[` is interpreted as a pattern.
-4. **Uncommitted edits (C9).** A tracked file with uncommitted modifications is deleted; `git checkout HEAD` restores the committed version, not the edit.
-5. **Repository boundaries.** Target `ai/` inside a submodule, a nested repository, or a repository other than `<project-root>`'s; `git` not installed.
-6. **Keep-file parsing.** CRLF line endings, leading `/`, directory entries with trailing `/`, inline comments, trailing whitespace.
-7. **Protected directories.** Behaviour when a directory to be deleted contains protected files.
+1. **macOS rsync.** The live run printed `Transfer starting: 47 files`, which suggests macOS ships openrsync rather than rsync 3.x. The classification parses `*deleting` lines from `--itemize-changes`; their format and completeness under openrsync were never checked. A missing line means a file deleted without classification (C1).
+2. **Directory deletions.** rsync may report a deleted directory as one line. The script expands directory lines with `find`; verify every file inside is classified, including dotfiles and nested directories.
+3. **Blob check scope.** `git cat-file -e` succeeds for any object in the framework repository, including objects from unrelated branches, stashes or unreachable objects. Consider whether that widens "framework file" beyond intent.
+4. **Line-ending and filter effects.** `hash-object --no-filters` hashes raw bytes; a framework file checked out with CRLF or other conversion in the target would not match and would be relocated (safe direction). Confirm no conversion makes project content match a framework blob (unsafe direction).
+5. **Quoting and special characters.** Paths with newlines, leading dashes or non-ASCII characters through the rsync → sed → read pipeline.
+6. **Partial failure.** Relocation happens before the apply. Behaviour if the apply fails, or if the run is interrupted mid-relocation.
+7. **Race.** Target changes between the preview and the apply.
 8. **Version parsing.** `gov_version` takes the last row of any version-history-shaped table in `governance.md`.
-9. **Test circularity.** Every test was designed by the implementer against targets built from the source `ai/`.
+9. **Test circularity.** Every test was designed by the implementer.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -128,6 +129,7 @@ a confirmation reached by re-running the implementer's checks.
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial brief |
+| 1.1 | 2026-09-23 | Rewritten for change-c5270084 iteration 2 (content classification and relocation to ai-local/) |
 
 ---
 

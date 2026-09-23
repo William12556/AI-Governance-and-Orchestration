@@ -70,7 +70,7 @@ bin/propagate.sh /path/to/your/projects/<project-name>
 cd /path/to/your/projects/<project-name>
 ```
 
-`bin/propagate.sh` mirrors the `ai/` directory into the downstream project, skipping project-local files (`ael/config.yaml`, `context.md`, `task.md`, `workspace/`, `state/`, `dashboard-alerts.md`). Other git-tracked files under the target `ai/` that are absent from the source are deleted; untracked files and paths listed in `ai/.propagate-keep` are kept. The preview lists each deletion before confirmation. Run from the framework repository root.
+`bin/propagate.sh` mirrors the `ai/` directory into the downstream project, skipping project-local files (`ael/config.yaml`, `context.md`, `task.md`, `workspace/`, `state/`, `dashboard-alerts.md`). Other target files absent from the source are deleted if they are unmodified framework files, and otherwise moved to `ai-local/` as project content. The preview lists each deletion and relocation before confirmation. Run from the framework repository root.
 
 ### 3.3 Create a Python virtual environment
 
@@ -210,6 +210,7 @@ The Strategic Domain coordinates each step. Human approval gates are required be
 | 1.4 | 2026-07-16 | §2.2 and §5.1: mcp-grep → mcp-ripgrep; §5.1: added reviewer_model and model_context_windows, removed retired models_dir. §5.2: removed standalone budget.py step (context-budget.md is now written automatically). §4.0: added heterogeneous profile |
 | 1.5 | 2026-09-23 | §3.2: propagate.sh mirrors ai/ with deletion; exclude list corrected |
 | 1.6 | 2026-09-23 | §3.2: untracked files and ai/.propagate-keep entries are kept |
+| 1.7 | 2026-09-23 | §3.2: project files relocated to ai-local/ |
 
 ---
 

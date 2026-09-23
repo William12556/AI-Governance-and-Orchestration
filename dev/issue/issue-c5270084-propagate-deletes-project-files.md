@@ -9,10 +9,10 @@ issue_info:
   status: "resolved"
   severity: "critical"
   type: "defect"
-  iteration: 1
+  iteration: 2
   coupled_docs:
     change_ref: "change-c5270084"
-    change_iteration: 1
+    change_iteration: 2
 
 source:
   origin: "live_execution"
@@ -51,11 +51,11 @@ analysis:
 resolution:
   assigned_to: "Claude (Cowork, Opus 5.5) — direct implementation"
   target_date: "2026-09-23"
-  approach: "Protect every untracked or gitignored target file; per-project ai/.propagate-keep for tracked project files; no deletions for a non-git target."
+  approach: "Iteration 2: delete only files whose content is a framework blob; relocate all other project content to ai-local/ (governance P10.6)."
   change_ref: "change-c5270084"
   resolved_date: "2026-09-23"
   resolved_by: "Claude (Cowork, Opus 5.5)"
-  fix_description: "Protect rules for untracked files and ai/.propagate-keep under change-c5270084. solax-modbus tracked files restored from HEAD; ai/.propagate-keep written there."
+  fix_description: "Iteration 1: protect rules and ai/.propagate-keep. Iteration 2: content classification and relocation to ai-local/. solax-modbus tracked files restored from HEAD."
 
 verification:
   verified_date: ""
@@ -80,6 +80,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Resolved under change-c5270084; awaiting audit or waiver"
+  - version: "2.0"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Iteration 2: resolution approach changed at operator direction (relocate project files to ai-local/)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

@@ -6,43 +6,51 @@ prompt_info:
   task_type: "debug"
   source_ref: "change-c5270084"
   date: "2026-09-23"
-  iteration: 1
+  iteration: 2
   coupled_docs:
     change_ref: "change-c5270084"
-    change_iteration: 1
+    change_iteration: 2
 
 context:
-  purpose: "Stop bin/propagate.sh deleting project-local files."
-  integration: "bin/propagate.sh — new Protect section before Preview; both rsync calls."
+  purpose: "Stop bin/propagate.sh deleting project files; move them out of ai/ instead (governance P10.6)."
+  integration: "bin/propagate.sh — Classify section before Preview; Relocate section before the rsync apply."
   constraints:
-    - "Never use --delete-excluded"
+    - "Never delete a file whose content is not a blob in the framework repository"
+    - "Never overwrite in ai-local/"
     - "Keep change-07087e91 behaviour otherwise unchanged"
     - "bash 3.2 compatible; bash -n must pass"
 
 specification:
-  description: "Protect rules for untracked files and a per-project keep list."
+  description: "Content classification and relocation."
   requirements:
     functional:
-      - "If the target is a git work tree, add --filter='P /<rel>' for every path from git ls-files --others run in the target ai/"
-      - "If <project>/ai/.propagate-keep exists, add a P rule per non-comment line; exclude the file from transfer"
-      - "If the target is not a git work tree, add --filter='P *'"
-      - "List protected paths absent from the source in the preview, omitting workspace/, state/ and interpreter droppings"
+      - "Obtain the files rsync --delete would remove (dry run, '*deleting' lines; expand directories to files)"
+      - "Delete-class: git hash-object --no-filters of the target file exists in the framework repo (git cat-file -e)"
+      - "Relocate-class: everything else, including symlinks and unreadable files"
+      - "Preview lines: 'delete <path> (unmodified framework file)' and 'relocate <path> -> ai-local/<path> (project content)'"
+      - "Before the apply, move relocate-class files to <project-root>/ai-local/<path>; on collision append .relocated-<timestamp>; exit 3 if a move fails"
+      - "Append a row per move to ai-local/RELOCATED.md, creating it with a header if absent"
+      - "Warn when a file ignored at ai/<path> is not ignored at its new path"
+      - "Remove the iteration-1 protect rules and .propagate-keep handling"
     technical:
       language: "bash"
       version: "3.2+"
       standards:
-        - "Keep set -euo pipefail; guard empty-array expansion"
+        - "Keep set -euo pipefail"
 
 design:
-  architecture: "One new section; array appended to the two existing rsync invocations"
+  architecture: "Two new sections; rsync apply unchanged apart from removal of protect rules"
   components:
-    - name: "Protect section"
+    - name: "Classify"
       type: "script section"
-      purpose: "Build rsync protect rules before the preview"
+      purpose: "Split deletion candidates into delete and relocate lists"
       logic:
-        - "Read .propagate-keep lines into P rules"
-        - "If git work tree: P rule per git ls-files --others path; else P *"
-        - "Collect preview lines for protected paths absent from the source"
+        - "is_framework_blob: regular file, hash-object, cat-file -e in REPO_ROOT"
+    - name: "Relocate"
+      type: "script section"
+      purpose: "Move project content to ai-local/ and log it"
+      logic:
+        - "mv -n; verify source gone; check-ignore before and after; append log row"
   dependencies:
     internal: []
     external:
@@ -53,10 +61,10 @@ deliverable:
     - "Edit bin/propagate.sh in place"
   files:
     - path: "bin/propagate.sh"
-      content: "Protect section per specification"
+      content: "Classify and Relocate sections per specification"
 
 success_criteria:
-  - "All change-c5270084 test cases pass"
+  - "All change-c5270084 iteration 2 test cases pass"
   - "bash -n passes"
 
 notes: >

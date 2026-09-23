@@ -41,6 +41,7 @@ and `dev/reports/closed/report-eb782f83-pre-migration-baseline.md`.
 4. Add `.github/workflows` CI running `linter.py`, `protocol_checker.py` and pytest on push (gap G1), and a check that `docs/claude/primer.md` is identical to `ai/primer.md` (decision 7.1). Governed by P05 once authored. Until then, sync the primer copy manually.
 5. Retire the numeric `schema_type` prefix in favour of the class word (audit F-04; governance Appendix A A.5).
 6. Evaluate splitting `ai/governance.md` (OQ-1).
+7. Consider moving the declared project files (`context.md`, `task.md`, `ael/config.yaml`, `workspace/`, `state/`) out of `ai/`, so `ai/` holds framework files only. Needs requirements and design first (operator decision 2026-09-23).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -81,7 +82,7 @@ None open. Completed 2026-09-23: 31 closed documents normalised to terminal stat
 ## 6.0 Propagation
 
 1. Propagate the current orchestrator to GTach and e-Paper-IP-Display.
-2. Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display, pi-netconfig and certmon; pinned at v9.16 by decision D5. `bin/propagate.sh` fixed under triple 07087e91; first run requires `--allow-major` (9.16 → 10.x). solax-modbus propagated 2026-09-23 (9.11 → 10.2). Before each remaining project: write `ai/.propagate-keep` for its tracked project-local files under `ai/` (issue-c5270084), then review the preview's `*deleting` and `protect` lines.
+2. Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display, pi-netconfig and certmon; pinned at v9.16 by decision D5. `bin/propagate.sh` fixed under triple 07087e91; first run requires `--allow-major` (9.16 → 10.x). solax-modbus propagated 2026-09-23 (9.11 → 10.2). Blocked until the c5270084 strategic audit (`dev/audit/audit-c5270084-brief.md`) confirms macOS behaviour. Project files found under `ai/` are relocated to `ai-local/` (governance P10.6); review the preview's `delete` and `relocate` lines.
 3. `ai/context.md` is unfilled in solax-modbus and e-Paper-IP-Display; fill before any AEL run there.
 
 [Return to Table of Contents](<#table of contents>)
@@ -124,6 +125,7 @@ None pending. Resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.5 | 2026-09-23 | §6.0: propagation blocked on c5270084 audit; relocation replaces .propagate-keep; §2.0 item 7 added |
 | 1.4 | 2026-09-23 | §6.0: solax-modbus propagated; .propagate-keep precondition added (c5270084) |
 | 1.3 | 2026-09-23 | §3.0 propagate.sh items completed under 07087e91 (F-03/F-10 already remediated in 097d6ea); §6.0 gate lifted |
 | 1.2 | 2026-09-23 | §4.0 completed; §3.0 linter items 1–2 completed under 51f1aef0 and renumbered |

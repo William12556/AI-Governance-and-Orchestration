@@ -17,11 +17,11 @@
 #   bin/propagate.sh ~/Documents/GitHub/<project name>
 #
 # The script mirrors ai/ into <project-root>/ai/ (rsync --delete), so files
-# renamed or retired in the source are removed from the target. Project-specific
-# files are never overwritten or deleted (see Excludes below). Only files that
-# are tracked in the target's git repository are deleted, since git can restore
-# them; untracked and gitignored files are protected (see Protect below). The
-# preview lists every deletion and every protected file.
+# renamed or retired in the source are removed from the target. Governance-
+# declared project files are never touched (see Excludes below). Any other
+# target file absent from the source is classified by content (see Classify):
+# an unmodified framework file is deleted; anything else is project content and
+# is moved to <project-root>/ai-local/ and logged there (governance P10.6).
 
 set -euo pipefail
 
@@ -94,46 +94,51 @@ EXCLUDES=(
     --exclude='/workspace/'         # project-local governance documents
     --exclude='/state/'             # AEL runtime state (post-2026-06-16 path; was ael/state/)
     --exclude='/dashboard-alerts.md' # govwatch write target
-    --exclude='/.propagate-keep'    # project-local keep list (see Protect)
     --exclude='.DS_Store'
     --exclude='__pycache__/'
     --exclude='*.pyc'
     --exclude='*.pyo'
 )
 
-# --- Protect ---------------------------------------------------------------
-# change-c5270084: --delete must never remove a file git cannot restore. Every
-# untracked or gitignored file under the target ai/ is passed to rsync as a
-# protect ('P') rule. If the target is not a git repository, nothing is deleted.
-# Tracked project-local files are protected by listing them, one path relative
-# to ai/ per line, in <project>/ai/.propagate-keep ('#' starts a comment).
+# --- Classify --------------------------------------------------------------
+# change-c5270084 (iteration 2): a target file that --delete would remove is
+# deleted only if its exact content is a blob in this repository's history,
+# i.e. an unmodified framework file git can always restore. Every other such
+# file, tracked or not, is project content: it is relocated to ai-local/,
+# never deleted. Classification errs toward relocation.
 
-PROTECT=()
-PROTECTED_LIST=""
-KEEP_FILE="${PROJECT_AI}/.propagate-keep"
-if [[ -f "${KEEP_FILE}" ]]; then
-    while IFS= read -r rel || [[ -n "${rel}" ]]; do
-        rel="${rel%%#*}"; rel="${rel%"${rel##*[![:space:]]}"}"
-        [[ -z "${rel}" ]] && continue
-        PROTECT+=(--filter="P /${rel}")
-        PROTECTED_LIST+="protect      ${rel} (.propagate-keep)"$'\n'
-    done < "${KEEP_FILE}"
-fi
-if git -C "${PROJECT_ROOT}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    while IFS= read -r rel; do
-        [[ -z "${rel}" ]] && continue
-        PROTECT+=(--filter="P /${rel}")
-        case "${rel}" in
-            workspace/*|state/*|*__pycache__/*|*.pyc|*.pyo|*.DS_Store) continue ;;
-        esac
-        if [[ ! -e "${AI_SRC}/${rel}" ]]; then
-            PROTECTED_LIST+="protect      ${rel} (untracked in target)"$'\n'
+LOCAL_DIR="ai-local"
+LOCAL_ROOT="${PROJECT_ROOT}/${LOCAL_DIR}"
+STAMP="$(date +%Y%m%d-%H%M%S)"
+
+is_framework_blob() {
+    local h
+    [[ -f "$1" && ! -L "$1" ]] || return 1
+    h="$(git hash-object --no-filters -- "$1" 2>/dev/null)" || return 1
+    [[ -n "${h}" ]] && git -C "${REPO_ROOT}" cat-file -e "${h}" 2>/dev/null
+}
+
+DELETE_LIST=""
+RELOCATE_LIST=""
+while IFS= read -r rel; do
+    [[ -z "${rel}" ]] && continue
+    if is_framework_blob "${PROJECT_AI}/${rel}"; then
+        DELETE_LIST+="${rel}"$'\n'
+    else
+        RELOCATE_LIST+="${rel}"$'\n'
+    fi
+done < <(
+    rsync --dry-run -a --delete --itemize-changes "${EXCLUDES[@]}" \
+        "${AI_SRC}/" "${PROJECT_AI}/" \
+    | sed -n 's/^\*deleting  *//p' \
+    | while IFS= read -r d; do
+        if [[ -d "${PROJECT_AI}/${d%/}" && ! -L "${PROJECT_AI}/${d%/}" ]]; then
+            (cd "${PROJECT_AI}" && find "${d%/}" \( -type f -o -type l \))
+        else
+            echo "${d}"
         fi
-    done < <(cd "${PROJECT_AI}" && git ls-files --others -- . )
-else
-    PROTECT+=(--filter="P *")
-    PROTECTED_LIST="protect      * (target is not a git repository; no deletions)"$'\n'
-fi
+    done | sort -u
+)
 
 # --- Preview ---------------------------------------------------------------
 # --itemize-changes lines beginning with '>f' indicate files that would
@@ -162,10 +167,11 @@ else
 fi
 
 # '*deleting' lines are files removed from the target by --delete.
-CHANGES=$(rsync --dry-run -av --delete --itemize-changes "${EXCLUDES[@]}" ${PROTECT[@]+"${PROTECT[@]}"} \
-    "${AI_SRC}/" "${PROJECT_AI}/" | grep -E '^(>f|\*deleting)' || true)
+CHANGES=$(rsync --dry-run -av --itemize-changes "${EXCLUDES[@]}" \
+    "${AI_SRC}/" "${PROJECT_AI}/" | grep '^>f' || true)
 
-if [[ -z "${CHANGES}" && "${NEEDS_SEED_CONTEXT}" == "false" && "${NEEDS_SEED_TASK}" == "false" ]]; then
+if [[ -z "${CHANGES}" && -z "${DELETE_LIST}" && -z "${RELOCATE_LIST}" \
+      && "${NEEDS_SEED_CONTEXT}" == "false" && "${NEEDS_SEED_TASK}" == "false" ]]; then
     echo "Target is up to date. No changes to apply."
     exit 0
 fi
@@ -176,9 +182,13 @@ else
     echo "(no framework files differ)"
 fi
 
-if [[ -n "${PROTECTED_LIST}" ]]; then
-    printf '%s' "${PROTECTED_LIST}"
-fi
+while IFS= read -r rel; do
+    [[ -n "${rel}" ]] && echo "delete       ${rel} (unmodified framework file)"
+done <<< "${DELETE_LIST}"
+
+while IFS= read -r rel; do
+    [[ -n "${rel}" ]] && echo "relocate     ${rel} -> ${LOCAL_DIR}/${rel} (project content)"
+done <<< "${RELOCATE_LIST}"
 
 if [[ "${NEEDS_SEED_CONTEXT}" == "true" ]]; then
     echo "seed         context.md (absent in target)"
@@ -215,9 +225,55 @@ else
     fi
 fi
 
+# --- Relocate --------------------------------------------------------------
+# Runs before the rsync apply, so --delete below only ever removes files
+# classified as unmodified framework files. Never overwrites: an existing
+# destination gets a timestamp suffix. Logged in ai-local/RELOCATED.md.
+
+if [[ -n "${RELOCATE_LIST}" ]]; then
+    LOG="${LOCAL_ROOT}/RELOCATED.md"
+    mkdir -p "${LOCAL_ROOT}"
+    if [[ ! -f "${LOG}" ]]; then
+        {
+            echo "# Relocated from ai/"
+            echo ""
+            echo "Project files moved out of ai/ by LLM-G&O bin/propagate.sh (governance P10.6)."
+            echo "Their content did not match any framework file. Review, then keep, move or delete."
+            echo ""
+            echo "| Date | From | To | Note |"
+            echo "|---|---|---|---|"
+        } > "${LOG}"
+    fi
+    IN_GIT="false"
+    git -C "${PROJECT_ROOT}" rev-parse --is-inside-work-tree >/dev/null 2>&1 && IN_GIT="true"
+    while IFS= read -r rel; do
+        [[ -z "${rel}" ]] && continue
+        src="${PROJECT_AI}/${rel}"
+        dst_rel="${rel}"
+        [[ -e "${LOCAL_ROOT}/${dst_rel}" || -L "${LOCAL_ROOT}/${dst_rel}" ]] && dst_rel="${rel}.relocated-${STAMP}"
+        was_ignored="false"
+        [[ "${IN_GIT}" == "true" ]] && git -C "${PROJECT_ROOT}" check-ignore -q "ai/${rel}" && was_ignored="true"
+        mkdir -p "$(dirname "${LOCAL_ROOT}/${dst_rel}")"
+        mv -n "${src}" "${LOCAL_ROOT}/${dst_rel}"
+        if [[ -e "${src}" || -L "${src}" ]]; then
+            echo "Error: could not relocate ai/${rel}. Nothing further applied." >&2
+            exit 3
+        fi
+        note=""
+        if [[ "${was_ignored}" == "true" ]] \
+           && ! git -C "${PROJECT_ROOT}" check-ignore -q "${LOCAL_DIR}/${dst_rel}"; then
+            note="WAS GITIGNORED, NOW NOT - check before committing"
+            echo "WARNING: ${LOCAL_DIR}/${dst_rel} was gitignored in ai/ and is not ignored now."
+        fi
+        echo "| $(date +%Y-%m-%d) | ai/${rel} | ${LOCAL_DIR}/${dst_rel} | ${note} |" >> "${LOG}"
+        echo "relocated    ai/${rel} -> ${LOCAL_DIR}/${dst_rel}"
+    done <<< "${RELOCATE_LIST}"
+    echo ""
+fi
+
 # --- Propagate -------------------------------------------------------------
 
-rsync -av --delete "${EXCLUDES[@]}" ${PROTECT[@]+"${PROTECT[@]}"} \
+rsync -av --delete "${EXCLUDES[@]}" \
     "${AI_SRC}/" "${PROJECT_AI}/"
 
 # --- Seed project-specific context ----------------------------------------
@@ -244,5 +300,10 @@ else
     echo "task.md: existing project copy preserved."
 fi
 
+echo ""
+if [[ -n "${RELOCATE_LIST}" ]]; then
+    echo ""
+    echo "${LOCAL_DIR}/: project files relocated from ai/; see ${LOCAL_DIR}/RELOCATED.md."
+fi
 echo ""
 echo "Done. Review changes and commit manually."
