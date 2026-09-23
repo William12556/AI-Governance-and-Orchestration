@@ -70,7 +70,7 @@ bin/propagate.sh /path/to/your/projects/<project-name>
 cd /path/to/your/projects/<project-name>
 ```
 
-`bin/propagate.sh` copies the `ai/` directory into the downstream project, skipping project-local files (`ael/config.yaml`, `context.md`, `task.md`, `workspace/`, `state/`, `logs/`, `dashboard-alerts.md`). Other target files absent from the source are moved to `ai-local/` and labelled as retired framework files or project content; the script never deletes. The preview lists each relocation before confirmation. Run from the framework repository root.
+`bin/propagate.sh` copies the `ai/` directory into the downstream project, skipping project-local files (`ael/config.yaml`, `context.md`, `task.md`, `workspace/`, `state/`, `logs/`, `dashboard-alerts.md`). Other target files absent from the source are moved to `ai-local/` and labelled as retired framework files or project content; the script never deletes, and locally edited framework files are backed up to `ai-local/` before being overwritten. The preview lists each relocation and backup before confirmation. Run from the framework repository root.
 
 ### 3.3 Create a Python virtual environment
 
@@ -212,6 +212,7 @@ The Strategic Domain coordinates each step. Human approval gates are required be
 | 1.6 | 2026-09-23 | §3.2: untracked files and ai/.propagate-keep entries are kept |
 | 1.7 | 2026-09-23 | §3.2: project files relocated to ai-local/ |
 | 1.8 | 2026-09-23 | §3.2: propagate.sh never deletes |
+| 1.9 | 2026-09-23 | §3.2: local modifications backed up |
 
 ---
 

@@ -6,7 +6,7 @@ change_info:
   title: "propagate.sh: never delete; relocate all non-framework and retired files to ai-local/ with labels"
   date: "2026-09-23"
   author: "William Watson"
-  status: "implemented"
+  status: "verified"
   priority: "critical"
   iteration: 3
   coupled_docs:
@@ -39,7 +39,7 @@ scope:
 
 rational:
   problem_statement: >
-    Strategic audit dev/audit/audit-c5270084-strategic-2026-09-23.md refuted
+    Strategic audit dev/audit/closed/audit-c5270084-strategic-2026-09-23.md refuted
     C1, C2, C4, C5, C6 and C9 for iteration 2: apply-time rsync --delete was not
     bounded by the classification (F-01, critical), the blob test accepted
     unreachable and path-independent objects (F-02), and change-07087e91's
@@ -140,7 +140,17 @@ verification:
     That run did not cover labelling of retired files or the major-version
     guard on macOS; audit §8.0 step 2 remains outstanding. RELOCATED.md Note
     column printed the raw flag 'false'; corrected to a readable note.
-  issues_found: []
+  issues_found:
+    - "Follow-up audit dev/audit/closed/audit-c5270084-followup-2026-09-23.md: F-01 to F-11 resolved, F-12 partially; new findings N-01 to N-08 (3 medium, 5 low) carried to issue-b170cf6a / change-b170cf6a"
+
+closure_2026_09_23:
+  closed_by: "William Watson"
+  basis: >
+    Closed at William Watson's direction on 2026-09-23 after the independent
+    P02.8.2 follow-up audit, which found every critical and high finding of
+    audit-c5270084 resolved. Unlike iterations 1 and 2 and change-07087e91,
+    verification is independent. Residual findings N-01 to N-08 continue under
+    change-b170cf6a.
 
 traceability:
   design_updates: []
@@ -177,6 +187,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Iteration 3 after audit-c5270084: no-delete design at operator direction; findings F-01 to F-12 remediated; governance 10.4 (logs/ declared)"
+  - version: "3.1"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Closed after independent follow-up audit; status implemented -> verified; N-01 to N-08 carried to change-b170cf6a"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

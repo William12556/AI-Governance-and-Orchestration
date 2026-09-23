@@ -6,7 +6,7 @@ issue_info:
   title: "propagate.sh --delete removes project-local files, including untracked files git cannot restore"
   date: "2026-09-23"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "critical"
   type: "defect"
   iteration: 3
@@ -58,10 +58,10 @@ resolution:
   fix_description: "Iteration 1: protect rules and ai/.propagate-keep. Iteration 2: content classification and relocation to ai-local/. solax-modbus tracked files restored from HEAD."
 
 verification:
-  verified_date: ""
-  verified_by: ""
-  test_results: ""
-  closure_notes: ""
+  verified_date: "2026-09-23"
+  verified_by: "Independent follow-up audit (dev/audit/closed/audit-c5270084-followup-2026-09-23.md)"
+  test_results: "F-01 to F-11 resolved, F-12 partially resolved; no project content absent from the source lost in any case."
+  closure_notes: "Closed at operator direction. Residual findings N-01 to N-08 continue under issue-b170cf6a."
 
 traceability:
   design_refs: []
@@ -90,6 +90,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Iteration 3 after audit-c5270084 refuted iteration 2: no-delete design"
+  - version: "3.1"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Closed after independent follow-up audit; status resolved -> closed"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
