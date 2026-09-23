@@ -6,7 +6,7 @@ issue_info:
   title: "Strategic audit of eb782f83 recorded fourteen findings requiring remediation"
   date: "2026-09-22"
   reporter: "William Watson"
-  status: "open"
+  status: "resolved"
   severity: "high"
   type: "defect"
   iteration: 1
@@ -167,6 +167,11 @@ traceability:
     - "dev/design/design-eb782f83-protocol-template-reordering.md"
 
 version_history:
+  - version: "1.1"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Status open to resolved, following implementation under change-9b8f1c47 (097d6ea). protocol_checker.py flagged the mismatch: change implemented while its coupled issue remained open."
   - version: "1.0"
     date: "2026-09-22"
     author: "William Watson"
