@@ -134,7 +134,12 @@ verification:
     file created during the prompt is outside the plan and there is no
     deletion step. Dry run against solax-modbus relocates .propagate-keep,
     ael/config.yaml.bak, obsidian_markdown_guidelines.md and instructions.md
-    as project content. Not exercised under macOS bash 3.2 or macOS rsync.
+    as project content. Operator live run against solax-modbus on macOS
+    (bash 3.2, openrsync — 'Transfer starting' output), 2026-09-23: four files
+    relocated byte-identical to HEAD, framework files updated, no deletion.
+    That run did not cover labelling of retired files or the major-version
+    guard on macOS; audit §8.0 step 2 remains outstanding. RELOCATED.md Note
+    column printed the raw flag 'false'; corrected to a readable note.
   issues_found: []
 
 traceability:

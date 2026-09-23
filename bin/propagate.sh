@@ -302,7 +302,9 @@ if [[ "${CAND_COUNT}" -gt 0 ]]; then
             exit 3
         fi
         row_rel="${rel//|/\\|}"; row_dst="${dst//|/\\|}"
-        echo "| $(date +%Y-%m-%d) | ai/${row_rel} | ${LOCAL_DIR}/${row_dst} | ${lab} | ${ign} |" >> "${LOG}"
+        note=""
+        [[ "${ign}" == "true" ]] && note="was gitignored in ai/"
+        echo "| $(date +%Y-%m-%d) | ai/${row_rel} | ${LOCAL_DIR}/${row_dst} | ${lab} | ${note} |" >> "${LOG}"
         echo "relocated    ai/${rel} -> ${LOCAL_DIR}/${dst}"
     done < "${PLAN}"
     # Gitignore coverage, evaluated after all moves against the pre-move record
