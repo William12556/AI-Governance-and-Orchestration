@@ -152,7 +152,19 @@ verification:
     Blob only on a non-default framework branch: backed up. Dangling symlink at
     context.md: exit 3. ai/Context.md: exit 3. Regressions (X1, X2, X4, X5,
     X6b, X13, guards, empty ai/, up to date) pass. N-02/A7 not exercisable on a
-    case-sensitive file system; bash 3.2 not run.
+    case-sensitive file system; bash 3.2 not run in the VM.
+  macos_results: >
+    Operator run on macOS 27.0, /bin/bash 3.2.57, /usr/bin/rsync = openrsync
+    (protocol 29), commit 45ac716, throwaway targets under /tmp
+    (/tmp/macos-check.out). (1) openrsync --itemize-changes printed nothing for
+    a changed file: confirms the audit's N-03 concern; the script no longer
+    parses that output. (2) Stale workflow.md: backed up as local
+    modification, updated, rc=0. (3) Primer.md beside a framework primer.md:
+    relocated to ai-local/Primer.md with PROJECT TEXT; ai/primer.md is the
+    framework file; N-02 resolved on APFS. (4) 9.16 -> 10.5: 7 retired, 2
+    project content, rc=0. (5) ai/Context.md: rc=3, file intact (A7).
+    (6) ai/Templates/: 8 framework files relocated as project content, rc=0,
+    directory keeps its case; accepted behaviour as documented.
   issues_found: []
 
 traceability:
@@ -179,6 +191,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Iteration 2 after re-check audit-b170cf6a: A1-A7 remediated or accepted (iteration_2 block)"
+  - version: "2.1"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "macOS results recorded (bash 3.2, openrsync, APFS)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
