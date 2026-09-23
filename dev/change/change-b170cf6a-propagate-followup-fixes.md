@@ -170,6 +170,15 @@ iteration_3:
     intact; A6 dangling symlink exit 3, nothing created; symlink to a directory
     exit 3; up to date exit 0; declined prompt exit 0; plain apply exit 0;
     non-TTY without --yes exit 2. macOS and bash 3.2 not exercised.
+  macos_results: >
+    Operator run on macOS, commit 51611db, throwaway targets under /tmp,
+    script invoked as bin/propagate.sh (interpreter from /usr/bin/env bash;
+    version not captured in this run). (1) Real ai/, older framework
+    primer.md planned as update, EDIT appended to ai/workflow.md during the
+    prompt: "changed while the prompt was open", rc=3, edit intact. (2) ai/
+    symlinked to real-ai/, EDIT appended to real-ai/primer.md during the
+    prompt: rc=3, edit intact (B1). (3) printf 'b\0a\0' | LC_ALL=C
+    /usr/bin/sort -z | od -c printed "a \0 b \0": sort -z supported (B3).
 
 verification:
   implemented_date: "2026-09-23"
@@ -236,6 +245,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Iteration 3 after final re-check audit-b170cf6a: B1-B4 remediated in snapshot(), its call site and the A6 refusal (iteration_3 block)"
+  - version: "3.1"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Iteration 3 macOS results recorded (prompt race on real and symlinked ai/; sort -z)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
