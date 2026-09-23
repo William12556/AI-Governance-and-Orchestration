@@ -609,6 +609,11 @@ difference is the wrong operation to get wrong.
    snapshot must therefore survive until this change closes.
 3. Re-run the verification to confirm the restored state.
 
+**Decision (2026-09-23, audit F-02).** The refusal is retained and the
+procedure above is the rollback mechanism. Pruning is not implemented and
+`--rollback` will not be exercised further: the migration is complete and the
+tool is single-use.
+
 [Return to Table of Contents](<#table of contents>)
 
 ---
@@ -815,6 +820,7 @@ Test traceability is added when the test document exists.
 
 | Version | Date | Description |
 |---|---|---|
+| 0.6 | 2026-09-23 | §8.5: recorded the F-02 decision — refusal retained; the documented procedure (tag plus snapshot) is the rollback mechanism; pruning not implemented |
 | 0.5 | 2026-09-22 | Amended under change-9b8f1c47 from the strategic audit. §8.5 rewritten: the previous text claimed `--rollback` reverses the template renames, which it never did — the manifest cannot record files the migration creates (F-02). Documented rollback procedure added, anchored on the tag rather than the snapshot. §5.4.1 records that the baseline tag was placed after five preparatory edits, two of which changed clause meaning, making them invisible to every verification window (F-05), and states the rule that follows. §12.0 gains three boundary conditions: the absent marker file (F-03), the untracked file whose only recovery path is itself untracked (F-12), and namespaces whose tokens sit inside identifiers and are therefore invisible to the token patterns (F-04). |
 | 0.4 | 2026-09-22 | Records four defects found on the rehearsal and their fixes. §5.5 added: identifiers appear lowercase inside Obsidian anchors, so C1, C3 and C4 now match case-insensitively with case preserved; this recovered thirteen substitutions that were being silently missed. §12.0 gains the exclusion of ephemeral state and generated output from the write set, and the reporting of untracked files whose only rollback path is the snapshot. §7.0 table-of-contents generation corrected to derive entries from the actual headings rather than compose them from the mapping, and to emit template links; the appendix is now generated before the contents so that it can be listed. V-15 refined — see the requirements document. |
 | 0.3 | 2026-09-22 | §5.4.1 records the resolution of all five live range expressions by scheme-neutral replacement, and notes that three were already factually wrong. Documents a gate 3 defect found in testing: `git status --porcelain` output was being stripped as a whole, shifting the first line by one column and hiding that file from the dirty check. |

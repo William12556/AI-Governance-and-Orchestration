@@ -41,7 +41,7 @@ Created: 2026 August 21
 ## 1.0 Purpose
 
 This document specifies the component design for Project Overwatch, derived
-from [requirements-project-overwatch.md](../requirements/requirements-project-overwatch.md)
+from [requirements-0c6aedee-project-overwatch.md](../requirements/requirements-0c6aedee-project-overwatch.md)
 v0.2. Project Overwatch is a read-only, browser-rendered project management
 interface for a single project governed by the LLM-Governance-and-Orchestration
 framework. It reuses `govwatch`'s data layer unmodified for its monitoring
@@ -448,7 +448,7 @@ not an unhandled exception.
 | OQ-07 | Not resolved technically — accepted as a manual-maintenance risk. Explanatory content and decision-tree content are recommended to carry a "current as of governance.md vX.XX" stamp so staleness is at least visible, not silent. |
 | OQ-08 | Two-tier: git history via `subprocess`, falling back to `difflib` direct comparison. Diffs resolved on the next scan cycle, not mid-session. §7.8. |
 | OQ-09 | `govwatch.py` retirement requires: (a) FR-01 shipped in `overwatch.py`, (b) a manual side-by-side validation session against a real project confirming alert/state parity, (c) explicit sign-off. Not automatic on any document's approval. |
-| OQ-10 | Not a design question — disposition of `requirements-govwatch.md` remains open, unactioned. |
+| OQ-10 | Not a design question. Resolved 2026-09-23: `requirements-govwatch.md` archived to `dev/requirements/closed/`. |
 | OQ-11 | Resolved in requirements v0.2 — tool named Project Overwatch. |
 
 [Return to Table of Contents](<#table of contents>)
@@ -495,6 +495,7 @@ bounded interval, not an open-ended dual-maintenance commitment.
 | Version | Date | Description |
 |---|---|---|
 | 0.1 | 2026-08-21 | Initial component design from requirements-project-overwatch.md v0.2. Resolves OQ-01 through OQ-09, OQ-11. OQ-07 and OQ-10 explicitly not resolved (recorded as accepted risk / remaining open). |
+| 0.2 | 2026-09-23 | Requirements link updated to requirements-0c6aedee-project-overwatch.md (P00.10 naming); OQ-10 marked resolved |
 
 ---
 

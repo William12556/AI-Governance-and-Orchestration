@@ -46,7 +46,7 @@ Created: 2026 July 09
 ## 1.0 Purpose
 
 This document specifies the as-built component design of the AEL orchestrator,
-reverse-engineered from [ael-requirements.md](../requirements/ael-requirements.md)
+reverse-engineered from [requirements-1c1f4ef6-ael.md](../requirements/requirements-1c1f4ef6-ael.md)
 v1.1 and `ai/ael/src/orchestrator.py`. The orchestrator is the Tactical Domain's
 reference implementation: a single-process Python tool that runs a worker/reviewer
 Ralph Loop against an oMLX-served local model until `SHIP` or a boundary condition
@@ -611,7 +611,7 @@ underscore denotes module-private.
 
 ## 12.0 Proposed Extensions (Not Implemented)
 
-The following requirements groups from `ael-requirements.md` §Proposed
+The following requirements groups from `requirements-1c1f4ef6-ael.md` §Proposed
 Requirements have no corresponding source in `orchestrator.py` as of this
 document's creation. They are recorded here for traceability only — no design
 decisions are made ahead of implementation.
@@ -627,7 +627,7 @@ decisions are made ahead of implementation.
 
 ## 13.0 Open Issues
 
-Carried from `ael-requirements.md` §Open Issues, annotated against current design.
+Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against current design.
 
 | ID | Description | Design note |
 |---|---|---|
@@ -672,6 +672,7 @@ Carried from `ael-requirements.md` §Open Issues, annotated against current desi
 | 0.1 | 2026-07-09 | Initial design document reverse-engineered from ael-requirements.md v1.1 and ai/ael/src/orchestrator.py (plus mcp_client.py, parser.py); no prior design existed for this component |
 | 0.2 | 2026-07-16 | Updated for c3a7f0d2 (removed §6.2 per-iteration system-prompt countdown), b5e9d240 (added execution.* opt-in controls to §4.2 and §5.3), a7d3f8b1 (default_model → Devstral 8bit; added omlx.worker_model/reviewer_model to §4.2 and §8.1). §11.0 element-registry signatures pending re-sync from source |
 | 0.3 | 2026-07-16 | §3.1 component diagram: corrected mcp-grep → mcp-ripgrep |
+| 0.4 | 2026-09-23 | Requirements reference updated: ael-requirements.md renamed to requirements-1c1f4ef6-ael.md (P00.10 naming) |
 
 ---
 

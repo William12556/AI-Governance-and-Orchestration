@@ -35,10 +35,10 @@ and `dev/reports/closed/report-eb782f83-pre-migration-baseline.md`.
 
 ## 2.0 Feature Work
 
-1. Project Overwatch FR-02–FR-10 (`dev/design/design-project-overwatch.md` §9.2). FR-01 shipped 2026-08-21 (prompt-19819f2e).
+1. Project Overwatch FR-02–FR-10 (`dev/design/design-project-overwatch.md` §9.2). FR-01 shipped 2026-08-21 (prompt-19819f2e). OQ-07 (no automated sync of FR-02/FR-03 content with `governance.md`) remains open by design.
 2. OQ-09: side-by-side validation of Overwatch against the govwatch TUI before any retirement decision.
 3. Author the five reserved protocols: P05 Continuous Integration, P16 Execution, P17 Release, P18 Deployment and Propagation, P19 Observability (proposal-eb782f83 §5.3).
-4. Add `.github/workflows` CI running `linter.py`, `protocol_checker.py` and pytest on push (gap G1). Governed by P05 once authored.
+4. Add `.github/workflows` CI running `linter.py`, `protocol_checker.py` and pytest on push (gap G1), and a check that `docs/claude/primer.md` is identical to `ai/primer.md` (decision 7.1). Governed by P05 once authored. Until then, sync the primer copy manually.
 5. Retire the numeric `schema_type` prefix in favour of the class word (audit F-04; governance Appendix A A.5).
 6. Evaluate splitting `ai/governance.md` (OQ-1).
 
@@ -81,9 +81,8 @@ Document data corrections reported by `protocol_checker.py` and `linter.py`.
 2. Validate the REVISE → fix → SHIP convergence path.
 3. Confirm Magistral reviewer tool-calling on the first real review phase (a7d3f8b1).
 4. Run the AEL once against the eb782f83-migrated corpus.
-5. Exercise `migrate_identifiers.py --rollback` against a real snapshot on a scratch clone.
-6. Unexercised test cases from the closed triples a2f9c4d1, f5c28a04 and d1f4a83b: worker-authored `work-summary.txt` then budget exhaustion; `move_file` deliverable; `log_archive_dir` unset; `_normalize_verdict` pass 1; `BLOCKED` exit; audit-loop recipe pair; pytest gate FAIL branch and SHIP override; stall-detection BLOCK.
-7. Confirm the orphaned process from run 8c2040d3 (PID 22391, July 2026) no longer exists.
+5. Unexercised test cases from the closed triples a2f9c4d1, f5c28a04 and d1f4a83b: worker-authored `work-summary.txt` then budget exhaustion; `move_file` deliverable; `log_archive_dir` unset; `_normalize_verdict` pass 1; `BLOCKED` exit; audit-loop recipe pair; pytest gate FAIL branch and SHIP override; stall-detection BLOCK.
+6. Confirm the orphaned process from run 8c2040d3 (PID 22391, July 2026) no longer exists.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -101,11 +100,13 @@ Document data corrections reported by `protocol_checker.py` and `linter.py`.
 
 ## 7.0 Decisions Pending
 
-1. Whether `docs/claude/primer.md` remains a file copy of `ai/primer.md` or becomes a pointer.
-2. Reconcile P00.14.3 and P02.8.2 on what closing an audit requires.
-3. Rename `ael-requirements.md`, `requirements-govwatch.md` and `requirements-project-overwatch.md` to the UUID convention and update all references.
-4. Whether `rollback()` removes files the manifest does not record, or continues to refuse and defer to `git checkout` (audit F-02).
-5. OQ-07 and OQ-10 (Project Overwatch).
+None pending. Resolved 2026-09-23:
+
+1. `docs/claude/primer.md` is kept as a file copy of `ai/primer.md`; identity to be checked by CI (§2.0 item 4).
+2. Audit closure reconciled in governance v10.2: P00.14.3 defers to P02.8; a follow-up audit is required when remediation changed source code, otherwise waivable with a recorded waiver.
+3. `ael-requirements.md` → `requirements-1c1f4ef6-ael.md`; `requirements-project-overwatch.md` → `requirements-0c6aedee-project-overwatch.md`; `requirements-govwatch.md` archived to `dev/requirements/closed/` (OQ-10 resolved).
+4. Audit F-02: `rollback()` keeps refusing; the pre-eb782f83 tag plus snapshot is the rollback mechanism (design-eb782f83 §8.5). Exercising `--rollback` dropped.
+5. OQ-07 stays open by design; carried in §2.0 item 1.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -133,6 +134,7 @@ Document data corrections reported by `protocol_checker.py` and `linter.py`.
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.1 | 2026-09-23 | §7.0 decisions resolved and recorded; §5.0 rollback exercise dropped; §2.0 primer identity check added to CI item; OQ-07 moved to §2.0 |
 
 ---
 

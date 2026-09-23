@@ -39,7 +39,7 @@ Created: 2026 June 10
 ## 1.0 Purpose
 
 This document specifies the component design for `govwatch`, derived from
-[requirements-govwatch.md](../requirements/requirements-govwatch.md) v0.3. `govwatch`
+[requirements-govwatch.md](../requirements/closed/requirements-govwatch.md) v0.3. `govwatch`
 is a standalone read-only governance monitoring TUI for downstream projects. It
 infers workflow phase, runs a two-tier compliance scan, lists open documents, and
 emits an alert summary to the clipboard and to `dashboard-alerts.md`.
@@ -472,6 +472,7 @@ modification to either script (OQ-05). `config.yaml` excludes are irrelevant to
 |---|---|---|
 | 0.1 | 2026-06-10 | Initial component design from requirements-govwatch.md v0.3; resolves OQ-01, OQ-02, OQ-03, OQ-05 |
 | 0.2 | 2026-07-02 | §7.0: FR-02-03 skipped for design-sourced prompts; FR-02-07/FR-02-10 scoped to AEL-targeted prompts (target_profile, is_design_sourced fields; issue-713437bc). §4.0 DocumentRecord and §2.0/§14.0 legacy framework/ paths not updated — out of scope for this revision. |
+| 0.3 | 2026-09-23 | Requirements link updated: requirements-govwatch.md archived to dev/requirements/closed/ (OQ-10) |
 
 ---
 

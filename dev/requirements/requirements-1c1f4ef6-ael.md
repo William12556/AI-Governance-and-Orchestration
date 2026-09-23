@@ -220,6 +220,7 @@ The tasks directory path shall be configurable via `config.yaml` under `pipeline
 |---|---|---|
 | 1.0 | 2026-03-26 | Initial document — as-built requirements (FR-AEL-001 to FR-AEL-015, NFR-AEL-001 to NFR-AEL-005) and proposed requirements (FR-AEL-P01 to FR-AEL-P12) |
 | 1.1 | 2026-07-08 | FR-AEL-005 and FR-AEL-012 reworded to reflect the tiered context-window resolver replacing the retired standalone budget.py; FR-AEL-012 notes the Strategic Domain's T04 precondition now calls omlx_model_status directly rather than checking file presence (change-d42e64a9) |
+| 1.2 | 2026-09-23 | Renamed from ael-requirements.md to the P00.10 UUID convention |
 
 ---
 

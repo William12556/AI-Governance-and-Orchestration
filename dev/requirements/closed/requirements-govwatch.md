@@ -290,6 +290,7 @@ not prevent the rest of the compliance scan from completing.
 | 0.2 | 2026-06-10 | Relocated tool to `framework/ai/src/`; updated §2.0, FR-05-01, NFR-06; added OQ-05 re sync-skel.sh |
 | 0.3 | 2026-06-10 | Added §9.0 Design Notes: technology selection rationale, panel layout, compliance engine design intent |
 | 0.4 | 2026-07-02 | FR-02-03/FR-02-07/FR-02-10 scoped to design-sourced-prompt exemption and target_profile == ael, matching implemented govwatch.py behaviour (issue-713437bc) |
+| 0.5 | 2026-09-23 | Archived to dev/requirements/closed/; superseded by requirements-0c6aedee-project-overwatch.md (OQ-10) |
 
 ---
 

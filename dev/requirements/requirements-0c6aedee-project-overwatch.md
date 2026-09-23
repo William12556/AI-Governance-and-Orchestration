@@ -40,10 +40,9 @@ surfacing, governed-item lifecycle tracking, task tracking, document
 comparison, and onboarding guidance for the framework itself.
 
 This document supersedes `requirements-govwatch.md` for all functionality
-it covers. `requirements-govwatch.md` is not deleted or edited; it remains
-the historical record of the TUI-era tool. Disposition of that document
-(e.g. relocation to a `closed/` archive) is addressed in §8.0 and is not
-actioned by this document.
+it covers. `requirements-govwatch.md` remains the historical record of the
+TUI-era tool and was archived to `dev/requirements/closed/` on 2026-09-23
+(OQ-10).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -269,7 +268,7 @@ with the same caveat carried in `requirements-govwatch.md` §6.0.
 | OQ-07 | FR-02-03 / FR-03-03: no automated mechanism keeps the explain-this overlay or decision-tree navigator synchronised with `governance.md` changes. Manual-update risk noted, not resolved. |
 | OQ-08 | FR-08-02: diff data source and the tool's access method to git history from its runtime context. |
 | OQ-09 | Retirement trigger for `govwatch.py` (TUI) is stated as "FR-01 shipped and validated" (§4.1); exact validation criteria are not yet defined. |
-| OQ-10 | Disposition of `requirements-govwatch.md`: candidate for relocation to a `dev/requirements/closed/` archive once this document is approved, consistent with the `closed/` convention used elsewhere in `dev/`. `dev/requirements/` currently has no `closed/` subdirectory. Not actioned by this document. |
+| OQ-10 | Disposition of `requirements-govwatch.md`: **Resolved** 2026-09-23 — archived to `dev/requirements/closed/`. |
 | OQ-11 | Tool identity: **Resolved** — named **Project Overwatch**. Chosen for semantic fit with the tool's observe-and-support-without-authoring character (CON-07), over retaining `govwatch`. Trademark note: the name's dominant term is shared with the trademarked video game *Overwatch* (Blizzard/Activision); flagged during naming discussion, accepted as an internal-tool-only risk. |
 
 [Return to Table of Contents](<#table of contents>)
@@ -303,6 +302,7 @@ a single-effort ("Big Bang") delivery.
 |---|---|---|
 | 0.1 | 2026-08-21 | Initial draft, capturing requirements elicitation conducted in Claude Desktop brainstorming session |
 | 0.2 | 2026-08-21 | Renamed tool from `govwatch` (Web) to Project Overwatch throughout; resolved OQ-11; file renamed from `requirements-govwatch-web.md` to `requirements-project-overwatch.md` |
+| 0.3 | 2026-09-23 | Renamed from requirements-project-overwatch.md to the P00.10 UUID convention; OQ-10 resolved (requirements-govwatch.md archived) |
 
 ---
 
