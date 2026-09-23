@@ -6,10 +6,10 @@ prompt_info:
   task_type: "debug"
   source_ref: "change-b170cf6a"
   date: "2026-09-23"
-  iteration: 1
+  iteration: 2
   coupled_docs:
     change_ref: "change-b170cf6a"
-    change_iteration: 1
+    change_iteration: 2
 
 context:
   purpose: "Remediate c5270084 follow-up audit findings N-01 to N-08 in bin/propagate.sh."
@@ -32,6 +32,11 @@ specification:
       - "Label from branches, tags, remotes and HEAD only"
       - "Refuse a candidate symlink that holds a declared path; note relative symlinks"
       - "Enumerate all non-directory entry types; replace control characters in displayed paths"
+      - "Iteration 2: snapshot ai/ and ai-local/ before the prompt; exit 3 on any difference after it"
+      - "Iteration 2: checked find exit status; prune declared directories"
+      - "Iteration 2: no-clobber backup via mktemp and mv -n"
+      - "Iteration 2: labels from framework HEAD history only"
+      - "Iteration 2: refuse symlinked context.md/task.md and case variants of declared paths; seeding never overwrites"
     technical:
       language: "bash"
       version: "3.2+"

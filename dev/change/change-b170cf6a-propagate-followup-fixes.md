@@ -8,10 +8,10 @@ change_info:
   author: "William Watson"
   status: "implemented"
   priority: "medium"
-  iteration: 1
+  iteration: 2
   coupled_docs:
     issue_ref: "issue-b170cf6a"
-    issue_iteration: 1
+    issue_iteration: 2
     prompt_ref: "prompt-b170cf6a"
 
 source:
@@ -120,7 +120,21 @@ implementation:
     - step: "Claude (Cowork) implements directly at William Watson's instruction, 2026-09-23"
       owner: "Claude (Cowork, Opus 5.5)"
   rollback_procedure: "git revert of the implementing commit"
-  deployment_notes: "Independent re-check and macOS procedure (follow-up audit §8.0) before the next downstream propagation."
+  deployment_notes: "Final re-check limited to iteration 2 and the macOS procedure (follow-up audit §8.0 plus ai/Templates/ and ai/Context.md cases) before the next downstream propagation."
+
+iteration_2:
+  source: "dev/audit/audit-b170cf6a-recheck-2026-09-23.md (A1-A7; operator decision 2026-09-23: fix causes, one final re-check limited to iteration 2 plus macOS procedure; close if nothing medium or higher)"
+  changes:
+    - "A1, A3, A4: the path-list re-plan is replaced by a snapshot of ai/ (declared paths included) and ai-local/ — names, symlink targets, file checksums — taken before the prompt and compared after; any difference exits 3 with nothing applied"
+    - "A2: find runs to a file with its exit status checked; any enumeration error exits 3 before any change; declared directories (workspace, state, logs) are pruned and never read"
+    - "A3: backups are written no-clobber (mktemp in the destination directory, cp, mv -n, verified); an existing file or symlink at the destination fails the run with exit 3"
+    - "A5: labels and the local-modification test use only the history of the framework's checked-out HEAD"
+    - "A6: a symlink at ai/context.md or ai/task.md refuses before any change; seeding never overwrites an existing file"
+    - "A7: a candidate whose path differs from a declared path (or ael/) only by letter case refuses before any change"
+  accepted:
+    - "N-08 residual: C1 control bytes (0x80-0x9F) are not masked in displayed paths; effect depends on the terminal"
+    - "A7 residual: a case-variant framework directory (e.g. ai/Templates/) on a case-insensitive file system causes its framework files to be relocated on every run; no content lost; documented in guide-install"
+    - "Performance: ~11 s for 1,500 files in one non-declared directory under bash 5.1 (quadratic exact-name check); acceptable for current projects"
 
 verification:
   implemented_date: "2026-09-23"
@@ -128,10 +142,17 @@ verification:
   verification_date: "2026-09-23"
   verified_by: "Claude (Cowork, Opus 5.5) — implementing session"
   test_results: >
-    bash -n passes. All test cases pass in the Cowork Linux VM (GNU bash 5.1,
-    rsync 3.2.7). N-02 cannot be exercised on this file system (case
-    sensitive); follow-up §8.0 step 3 on macOS remains the test. bash 3.2 not
-    re-run for this change.
+    Iteration 2, Cowork Linux VM (GNU bash 5.1, rsync 3.2.7). bash -n passes.
+    Prompt-window mutations via pty: context.md created, declared state file
+    created, file created in ai-local/, ai-local symlink created, retired
+    candidate edited — each exit 3, nothing applied, mutation intact; no
+    mutation — applied, exit 0. Unlistable ai/templates with an edited file:
+    exit 3, edit intact. Unlistable declared state/ subdirectory: proceeds.
+    Existing file at the backup destination: suffixed, user file intact.
+    Blob only on a non-default framework branch: backed up. Dangling symlink at
+    context.md: exit 3. ai/Context.md: exit 3. Regressions (X1, X2, X4, X5,
+    X6b, X13, guards, empty ai/, up to date) pass. N-02/A7 not exercisable on a
+    case-sensitive file system; bash 3.2 not run.
   issues_found: []
 
 traceability:
@@ -153,6 +174,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Initial change document; implemented"
+  - version: "2.0"
+    date: "2026-09-23"
+    author: "William Watson"
+    changes:
+      - "Iteration 2 after re-check audit-b170cf6a: A1-A7 remediated or accepted (iteration_2 block)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

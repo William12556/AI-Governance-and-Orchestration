@@ -14,7 +14,7 @@
 #                  a major version, or the target version is unknown
 #                  (required with --yes in that case)
 #
-# Behaviour (governance P10.6; change-c5270084, change-b170cf6a):
+# Behaviour (governance P10.6; change-c5270084, change-b170cf6a iteration 2):
 #   - Never deletes a file. rsync copies ai/ into <project-root>/ai/ without
 #     --delete. Declared project paths (see Excludes) are never touched.
 #   - Every other target entry absent from the source, or of a different type,
@@ -26,8 +26,9 @@
 #     modification'. Review ai-local/ and delete what is not needed.
 #
 # Exit codes: 0 done or up to date; 1 usage; 2 confirmation required;
-#   3 refused before the copy (unsafe ai-local/, target changed during the
-#   prompt, relocation failed); 4 the copy failed after relocation.
+#   3 refused before the copy (unsafe ai-local/ or declared path, target or
+#   ai-local/ changed during the prompt, enumeration or relocation failed);
+#   4 the copy failed after relocation.
 
 set -euo pipefail
 
@@ -176,11 +177,11 @@ ancestor_conflict() {
 
 # --- Labels ------------------------------------------------------------------
 # 'retired framework file': non-empty blob committed at the same path under
-# ai/ (or historic framework/ai/, skel/ai/) in history reachable from branches,
-# tags, remotes or HEAD — not stashes or other transient refs (N-06).
+# ai/ (or historic framework/ai/, skel/ai/) in the history of the framework's
+# checked-out HEAD only — not other branches, tags or stashes (N-06; A5).
 
 BLOBS="${WORK}/blobs"
-git -C "${REPO_ROOT}" log --branches --tags --remotes HEAD --format= --raw --no-abbrev --no-renames \
+git -C "${REPO_ROOT}" log HEAD --format= --raw --no-abbrev --no-renames \
     -- ai framework/ai skel/ai 2>/dev/null \
   | awk -F'\t' '{ split($1, m, " "); p = $2; sub(/^(framework|skel)\//, "", p); sub(/^ai\//, "", p);
                    if (m[4] !~ /^0+$/) print m[4] " " p }' \
@@ -195,6 +196,23 @@ is_framework_version() {
     [[ -n "${h}" && "${h}" != "${EMPTY_BLOB}" ]] && grep -Fxq -- "${h} $1" "${BLOBS}"
 }
 
+# --- Enumeration -------------------------------------------------------------
+# find runs to a file and its exit status is checked; any enumeration error
+# stops the run before any change (audit-b170cf6a A2). Declared directories
+# are pruned, so their contents are never read.
+
+list0() {
+    # $1 directory, $2 output file, $3 find type test ("! -type d" or "-type d")
+    local err="${WORK}/find.err"
+    if ! (cd "$1" && find . -mindepth 1 \( -path ./workspace -o -path ./state -o -path ./logs \) -prune \
+            -o $3 -print0) > "$2" 2> "${err}"; then
+        echo "Error: cannot list $(disp "$1"):" >&2
+        sed 's/^/  /' "${err}" >&2
+        echo "Fix permissions and re-run. Nothing applied." >&2
+        exit 3
+    fi
+}
+
 # --- Plan --------------------------------------------------------------------
 # Writes NUL-delimited lists into directory $1:
 #   cands    target entries to relocate (absent from source or other type)
@@ -205,6 +223,8 @@ is_framework_version() {
 plan() {
     local out="$1" p rel s t
     : > "${out}/cands"; : > "${out}/backups"; : > "${out}/updates"
+    list0 "${PROJECT_AI}" "${out}/tgt.list" "! -type d"
+    list0 "${AI_SRC}" "${out}/src.list" "! -type d"
     while IFS= read -r -d '' p; do
         rel="${p#./}"
         is_declared "${rel}" && continue
@@ -220,7 +240,7 @@ plan() {
            && ! is_framework_version "${rel}"; then
             printf '%s\0' "${rel}" >> "${out}/backups"
         fi
-    done < <(cd "${PROJECT_AI}" && find . -mindepth 1 ! -type d -print0)
+    done < "${out}/tgt.list"
     while IFS= read -r -d '' p; do
         rel="${p#./}"
         is_declared "${rel}" && continue
@@ -234,10 +254,28 @@ plan() {
         elif [[ ! -f "${t}" || -L "${t}" ]] || ! cmp -s -- "${s}" "${t}"; then
             printf 'update\0%s\0' "${rel}" >> "${out}/updates"
         fi
-    done < <(cd "${AI_SRC}" && find . -mindepth 1 ! -type d -print0)
+    done < "${out}/src.list"
 }
 
-fingerprint() { cat "$1/cands" "$1/backups" "$1/updates" | cksum; }
+# Snapshot of ai/ (declared paths included) and ai-local/: every name, symlink
+# target and regular-file checksum. Compared across the prompt, so any change
+# there refuses the run (audit-b170cf6a A1, A3, A4). Errors are tolerated
+# here: identical failures produce identical snapshots.
+snapshot() {
+    local d
+    for d in "${PROJECT_AI}" "${LOCAL_ROOT}"; do
+        echo "== ${d}"
+        if [[ -L "${d}" ]]; then echo "link $(readlink -- "${d}")"; continue; fi
+        [[ -d "${d}" ]] || { echo "absent-or-file $( [[ -e "${d}" ]] && cksum < "${d}" 2>/dev/null )"; continue; }
+        ( cd "${d}" && {
+            find . -print0 2>/dev/null | LC_ALL=C sort -z
+            printf 'L\0'
+            find . -type l -print0 -exec readlink {} \; 2>/dev/null
+            printf 'F\0'
+            find . -type f -print0 2>/dev/null | LC_ALL=C sort -z | xargs -0 cksum 2>/dev/null
+        } ) || true
+    done | cksum
+}
 count0() { tr -cd '\0' < "$1" | wc -c | tr -d ' '; }
 
 mkdir -p "${WORK}/p1"
@@ -285,7 +323,7 @@ git -C "${PROJECT_ROOT}" rev-parse --is-inside-work-tree >/dev/null 2>&1 && IN_G
 RECS="${WORK}/recs"
 : > "${RECS}"
 add_rec() {
-    local kind="$1" rel="$2" lab="$3" dst ign="false" note="" d
+    local kind="$1" rel="$2" lab="$3" dst ign="false" note="" d lc
     dst="$(dest_for "${rel}")"
     if ! check_dir_chain "$(dirname -- "${dst}")"; then
         PLAN_ERR+="  $(disp "${LOCAL_DIR}/${dst}"): a path component is a file or symlink"$'\n'
@@ -295,6 +333,10 @@ add_rec() {
             PLAN_ERR+="  ai/$(disp "${rel}"): holds declared ${d}; resolve manually"$'\n'
         fi
     done
+    lc="$(printf '%s' "${rel}" | tr '[:upper:]' '[:lower:]')"
+    if is_declared "${lc}" || [[ "${lc}" == "ael" ]]; then
+        PLAN_ERR+="  ai/$(disp "${rel}"): differs from a declared path only by letter case; rename manually"$'\n'
+    fi
     if [[ "${IN_GIT}" == "true" ]] && git -C "${PROJECT_ROOT}" check-ignore -q -- "ai/${rel}" 2>/dev/null; then
         ign="true"
     fi
@@ -313,6 +355,11 @@ while IFS= read -r -d '' rel; do
 done < "${WORK}/p1/backups"
 
 LOG="${LOCAL_ROOT}/${LOG_NAME}"
+for f in context.md task.md; do
+    if [[ -L "${PROJECT_AI}/${f}" ]]; then
+        PLAN_ERR+="  ai/${f}: is a symlink; seeding would follow it; resolve manually"$'\n'
+    fi
+done
 if [[ -e "${LOG}" || -L "${LOG}" ]] && [[ ! -f "${LOG}" || -L "${LOG}" ]]; then
     PLAN_ERR+="  ${LOCAL_DIR}/${LOG_NAME}: exists but is not a regular file"$'\n'
 fi
@@ -381,16 +428,15 @@ elif [[ ! -t 0 ]]; then
     echo "Error: stdin is not a terminal; re-run with --yes to apply. Nothing applied." >&2
     exit 2
 else
+    SNAP_BEFORE="$(snapshot)"
     read -r -p "Apply changes? [y/N] " CONFIRM
     if [[ "${CONFIRM}" != "y" && "${CONFIRM}" != "Y" ]]; then
         echo "Aborted."
         exit 0
     fi
-    # The target must not have changed while the prompt was open (N-01, N-08).
-    mkdir -p "${WORK}/p2"
-    plan "${WORK}/p2"
-    if [[ "$(fingerprint "${WORK}/p1")" != "$(fingerprint "${WORK}/p2")" ]]; then
-        echo "Error: the target changed while the prompt was open. Nothing applied; re-run." >&2
+    # Nothing under ai/ or ai-local/ may change while the prompt is open.
+    if [[ "$(snapshot)" != "${SNAP_BEFORE}" ]]; then
+        echo "Error: ai/ or ${LOCAL_DIR}/ changed while the prompt was open. Nothing applied; re-run." >&2
         exit 3
     fi
 fi
@@ -426,8 +472,17 @@ if [[ "${CAND_COUNT}" -gt 0 || "${BACKUP_COUNT}" -gt 0 ]]; then
                 mv -n -- "${PROJECT_AI}/${rel}" "${LOCAL_ROOT}/${dst}" || ok="false"
                 [[ -e "${PROJECT_AI}/${rel}" || -L "${PROJECT_AI}/${rel}" ]] && ok="false"
             else
-                cp -p -- "${PROJECT_AI}/${rel}" "${LOCAL_ROOT}/${dst}" || ok="false"
-                cmp -s -- "${PROJECT_AI}/${rel}" "${LOCAL_ROOT}/${dst}" || ok="false"
+                # No-clobber: copy to a fresh temporary name, then mv -n
+                # (audit-b170cf6a A3). A file or symlink at the destination
+                # makes mv -n decline, which is detected below.
+                tmp="$(mktemp "$(dirname -- "${LOCAL_ROOT}/${dst}")/.propagate-tmp.XXXXXX")" || ok="false"
+                if [[ "${ok}" == "true" ]]; then
+                    cp -p -- "${PROJECT_AI}/${rel}" "${tmp}" || ok="false"
+                    [[ "${ok}" == "true" ]] && { mv -n -- "${tmp}" "${LOCAL_ROOT}/${dst}" || ok="false"; }
+                    [[ -e "${tmp}" ]] && ok="false"
+                    [[ -L "${LOCAL_ROOT}/${dst}" ]] && ok="false"
+                    [[ "${ok}" == "true" ]] && { cmp -s -- "${PROJECT_AI}/${rel}" "${LOCAL_ROOT}/${dst}" || ok="false"; }
+                fi
             fi
         fi
         if [[ "${ok}" != "true" ]]; then
@@ -455,7 +510,8 @@ if [[ "${CAND_COUNT}" -gt 0 || "${BACKUP_COUNT}" -gt 0 ]]; then
            || { exact_exists "${AI_SRC}" "${rel}" && [[ ! -d "${AI_SRC}/${rel}" ]]; }; then
             rmdir -- "${PROJECT_AI}/${rel}" 2>/dev/null || true
         fi
-    done < <(cd "${PROJECT_AI}" && find . -mindepth 1 -depth -type d -empty -print0)
+    done < <(cd "${PROJECT_AI}" && find . -mindepth 1 \( -path ./workspace -o -path ./state -o -path ./logs \) -prune \
+                 -o -type d -empty -print0 | LC_ALL=C sort -rz)
     echo ""
 fi
 
@@ -469,7 +525,10 @@ fi
 
 # --- Seed project-specific files ---------------------------------------------
 
-if [[ "${NEEDS_SEED_CONTEXT}" == "true" ]]; then
+if [[ "${NEEDS_SEED_CONTEXT}" == "true" ]] && [[ -e "${PROJECT_AI}/context.md" || -L "${PROJECT_AI}/context.md" ]]; then
+    echo ""
+    echo "context.md: appeared during the run; not seeded, existing file preserved."
+elif [[ "${NEEDS_SEED_CONTEXT}" == "true" ]]; then
     cp "${AI_SRC}/context.md" "${PROJECT_AI}/context.md"
     echo ""
     echo "context.md: template seeded (new project). Fill it in before the first AEL run."
@@ -478,7 +537,10 @@ else
     echo "context.md: existing project copy preserved."
 fi
 
-if [[ "${NEEDS_SEED_TASK}" == "true" ]]; then
+if [[ "${NEEDS_SEED_TASK}" == "true" ]] && [[ -e "${PROJECT_AI}/task.md" || -L "${PROJECT_AI}/task.md" ]]; then
+    echo ""
+    echo "task.md: appeared during the run; not seeded, existing file preserved."
+elif [[ "${NEEDS_SEED_TASK}" == "true" ]]; then
     cp "${AI_SRC}/task.md" "${PROJECT_AI}/task.md"
     echo ""
     echo "task.md: template seeded (new project)."
