@@ -33,6 +33,12 @@ _READONLY_TOOL_PATTERNS = (
 )
 
 
+# change-c37198be (D3): a name that also carries a write verb is never
+# read-only, whatever its prefix (e.g. search_and_replace matched ^search).
+_WRITE_NAME_PATTERNS = (r"replace", r"write", r"edit", r"create", r"delete",
+                        r"remove", r"move", r"rename", r"patch", r"mkdir")
+
+
 class MCPClient:
     """Manages connections to multiple MCP servers."""
 
@@ -75,6 +81,8 @@ class MCPClient:
 
     def _is_readonly_tool(self, name: str) -> bool:
         """Return True if the tool name matches a read-only pattern."""
+        if any(re.search(pattern, name) for pattern in _WRITE_NAME_PATTERNS):
+            return False
         return any(re.match(pattern, name) for pattern in _READONLY_TOOL_PATTERNS)
 
     def get_openai_tools(self, readonly: bool = False) -> list[dict]:

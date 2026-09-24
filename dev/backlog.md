@@ -68,12 +68,15 @@ None open. Completed 2026-09-23: 31 closed documents normalised to terminal stat
 
 ## 5.0 Runtime Verification
 
-1. Live Ralph Loop smoke test of the pytest SHIP gate (change-5bdc2d9b) against a project with an existing `tests/` directory. No live SHIP has yet been observed.
-2. Validate the REVISE → fix → SHIP convergence path.
-3. Confirm Magistral reviewer tool-calling on the first real review phase (a7d3f8b1).
-4. Run the AEL once against the eb782f83-migrated corpus.
-5. Unexercised test cases from the closed triples a2f9c4d1, f5c28a04 and d1f4a83b: worker-authored `work-summary.txt` then budget exhaustion; `move_file` deliverable; `log_archive_dir` unset; `_normalize_verdict` pass 1; `BLOCKED` exit; audit-loop recipe pair; pytest gate FAIL branch and SHIP override; stall-detection BLOCK.
-6. Confirm the orphaned process from run 8c2040d3 (PID 22391, July 2026) no longer exists.
+Verified 2026-09-24 under change-c37198be (dev/smoke harness, AEL venv `~/.venvs/ael`, filesystem-mcp 2.5.0). Live runs required defects D1–D3 to be fixed first (mcp 2.x, missing `--task` file, filesystem-mcp 2.x write tools).
+
+1. ~~Live Ralph Loop smoke test of the pytest SHIP gate (change-5bdc2d9b) against a project with an existing `tests/` directory.~~ Done 2026-09-24: Run A2 (`ael_20260924-141914`), pytest gate PASS on `tests/test_split.py`, read-evidence gate satisfied, SHIP at iteration 3.
+2. Validate the REVISE → fix → SHIP convergence path. **Open.** REVISE and the pytest gate FAIL branch were observed live (Run B2, `ael_20260924-154002`), but no SHIP: Devstral 8-bit did not correct the defective fixture in 10 cycles, and Magistral then repeated one false objection until stall BLOCK. Run B (`ael_20260924-144119`): the fixture's header comment ("Known requirement violations") misled the reviewer despite gate PASS; copy the fixture without its header (`grep -v '^#'`). Next attempt needs a different worker model or a smaller defect.
+3. ~~Confirm Magistral reviewer tool-calling on the first real review phase (a7d3f8b1).~~ Done 2026-09-24: the reviewer read the task, the manifest and the deliverables in every review phase of Runs A, A2, B and B2.
+4. ~~Run the AEL once against the eb782f83-migrated corpus.~~ Done 2026-09-24: `dev/smoke/ai/` at governance 10.5.
+5. ~~Unexercised test cases from the closed triples a2f9c4d1, f5c28a04 and d1f4a83b: worker-authored `work-summary.txt` then budget exhaustion; `move_file` deliverable; `log_archive_dir` unset; `_normalize_verdict` pass 1; `BLOCKED` exit; audit-loop recipe pair; pytest gate FAIL branch and SHIP override; stall-detection BLOCK.~~ Done 2026-09-24: `tests/ael/` (43 tests, change-c37198be) cover all nine; `BLOCKED` exit, stall BLOCK and gate FAIL also observed live.
+6. ~~Confirm the orphaned process from run 8c2040d3 (PID 22391, July 2026) no longer exists.~~ Done 2026-09-24: no process with PID 22391.
+7. Observation (open): in every 2026-09-24 run the worker wrote unrequested helper scripts in `dev/smoke/` and edited tracked files there, despite `context.md` §4.0. Consider restricting worker writes to declared deliverables.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -82,7 +85,7 @@ None open. Completed 2026-09-23: 31 closed documents normalised to terminal stat
 ## 6.0 Propagation
 
 1. ~~Propagate the current orchestrator to GTach and e-Paper-IP-Display.~~ Done 2026-09-23 with item 2 (`ai/ael/` is part of the propagated tree).
-2. Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display and pi-netconfig; pinned at v9.16 by decision D5. `bin/propagate.sh` fixed under triple 07087e91; first run requires `--allow-major` (9.16 → 10.x). solax-modbus propagated 2026-09-23 (9.11 → 10.2). Unblocked: change-b170cf6a closed 2026-09-23 (B1–B4 resolved; B5 fixed at 90f3a8d; independently verified). Propagated to 10.5 on 2026-09-23 from ae5e4df: GTach (9.15; 22 relocated), e-Paper-IP-Display (9.9; 20 relocated, `task.md` seeded) and pi-netconfig (9.9; 11 relocated, `task.md` seeded). solax-modbus 10.4 → 10.5 on 2026-09-23 (`governance.md` only). All downstream projects are at 10.5; no propagation remaining. pi-netconfig has no `ai/ael/config.yaml`; configure before any AEL run there. The script never deletes: retired and project files go to `ai-local/`; delete after review (governance P10.6).
+2. ~~Propagate governance v10.x to GTach, solax-modbus, e-Paper-IP-Display and pi-netconfig; pinned at v9.16 by decision D5.~~ Done 2026-09-23 from ae5e4df: GTach (9.15; 22 relocated), e-Paper-IP-Display (9.9; 20 relocated, `task.md` seeded), pi-netconfig (9.9; 11 relocated, `task.md` seeded) and solax-modbus (10.4, `governance.md` only) at 10.5. Gate lifted by closure of change-b170cf6a. The script never deletes: retired and project files go to `ai-local/` (governance P10.6).
 3. ~~`ai/context.md` is unfilled in solax-modbus, e-Paper-IP-Display, GTach and pi-netconfig.~~ Filled 2026-09-23 (v1.0 in each project). Follow-ups done 2026-09-23: pi-netconfig `ai/ael/config.yaml` added (framework copy); e-Paper-IP-Display `AGENTS.md` paths corrected; `ai-local/` reviewed, 44 retired framework files and 4 obsolete files deleted. Remaining `ai-local/` files resolved 2026-09-23: GTach `doc/CLAUDE.md` merged into the root `CLAUDE.md`; the other seven deleted. Each `ai-local/` now holds only `RELOCATED.md`.
 
 [Return to Table of Contents](<#table of contents>)
@@ -91,13 +94,13 @@ None open. Completed 2026-09-23: 31 closed documents normalised to terminal stat
 
 ## 7.0 Decisions Pending
 
-None pending. Resolved 2026-09-23:
+None pending. All resolved 2026-09-23:
 
-1. `docs/claude/primer.md` is kept as a file copy of `ai/primer.md`; identity to be checked by CI (§2.0 item 4).
-2. Audit closure reconciled in governance v10.2: P00.14.3 defers to P02.8; a follow-up audit is required when remediation changed source code, otherwise waivable with a recorded waiver.
-3. `ael-requirements.md` → `requirements-1c1f4ef6-ael.md`; `requirements-project-overwatch.md` → `requirements-0c6aedee-project-overwatch.md`; `requirements-govwatch.md` archived to `dev/requirements/closed/` (OQ-10 resolved).
-4. Audit F-02: `rollback()` keeps refusing; the pre-eb782f83 tag plus snapshot is the rollback mechanism (design-eb782f83 §8.5). Exercising `--rollback` dropped.
-5. OQ-07 stays open by design; carried in §2.0 item 1.
+1. ~~`docs/claude/primer.md` is kept as a file copy of `ai/primer.md`; identity to be checked by CI (§2.0 item 4).~~
+2. ~~Audit closure reconciled in governance v10.2: P00.14.3 defers to P02.8; a follow-up audit is required when remediation changed source code, otherwise waivable with a recorded waiver.~~
+3. ~~`ael-requirements.md` → `requirements-1c1f4ef6-ael.md`; `requirements-project-overwatch.md` → `requirements-0c6aedee-project-overwatch.md`; `requirements-govwatch.md` archived to `dev/requirements/closed/` (OQ-10 resolved).~~
+4. ~~Audit F-02: `rollback()` keeps refusing; the pre-eb782f83 tag plus snapshot is the rollback mechanism (design-eb782f83 §8.5). Exercising `--rollback` dropped.~~
+5. ~~OQ-07 stays open by design; carried in §2.0 item 1.~~
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -125,6 +128,7 @@ None pending. Resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.17 | 2026-09-24 | §5.0: runtime verification results (items 1, 3–6 done; item 2 open; item 7 observation added); §6.0 item 2 and §7.0 items struck as resolved |
 | 1.16 | 2026-09-23 | §6.0: remaining ai-local/ files resolved |
 | 1.15 | 2026-09-23 | §6.0: item 3 follow-ups done (pi-netconfig AEL config, e-Paper AGENTS.md, ai-local review) |
 | 1.14 | 2026-09-23 | §6.0: context.md filled in all four downstream projects |

@@ -98,7 +98,55 @@ _WRITE_TOOLS = {
     "delete", "remove", "delete_file", "remove_file",
     "move", "rename", "move_file", "rename_file",
     "mkdir", "create_directory", "makedirs",
+    # change-c37198be (D3): @j0hanz/filesystem-mcp 2.x write tools
+    "create", "patch", "replace_text", "search_and_replace",
 }
+
+# change-c37198be (D3): argument keys that carry paths. filesystem-mcp 2.x
+# batches paths in lists (create/edit: files[{path}], delete: paths[],
+# move: moves[{...}]); scalar keys cover the 1.x-style tools.
+_PATH_KEYS = ("path", "file_path", "destination", "new_path", "source",
+              "from", "to", "src", "dst", "target", "newPath")
+_DEST_KEYS = ("destination", "new_path", "newPath", "to", "dst", "target")
+_MOVE_TOOLS = ("move", "rename", "move_file", "rename_file")
+
+
+def _path_values(obj: dict, keys: tuple) -> list[str]:
+    return [obj[k] for k in keys if isinstance(obj.get(k), str) and obj[k]]
+
+
+def _scope_targets(arguments: dict) -> list[str]:
+    """Every path a write call names, including those nested in files/paths/moves/edits."""
+    targets = _path_values(arguments, _PATH_KEYS)
+    for key in ("paths",):
+        targets += [p for p in arguments.get(key) or [] if isinstance(p, str) and p]
+    for key in ("files", "moves", "edits"):
+        for item in arguments.get(key) or []:
+            if isinstance(item, dict):
+                targets += _path_values(item, _PATH_KEYS)
+    return targets
+
+
+def _written_targets(tool_name: str, arguments: dict) -> list[str]:
+    """
+    Paths a successful write call leaves as files: move/rename destinations,
+    otherwise the paths written. Delete calls produce no deliverable.
+    """
+    if tool_name in ("delete", "remove", "delete_file", "remove_file"):
+        return []
+    if tool_name in _MOVE_TOOLS:
+        dests = _path_values(arguments, _DEST_KEYS)
+        for item in arguments.get("moves") or []:
+            if isinstance(item, dict):
+                dests += _path_values(item, _DEST_KEYS)
+        if dests:
+            return dests
+        return _path_values(arguments, ("path", "file_path"))[:1]
+    written = _path_values(arguments, ("path", "file_path", "destination"))[:1]
+    for item in arguments.get("files") or []:
+        if isinstance(item, dict):
+            written += _path_values(item, ("path", "file_path"))[:1]
+    return written
 
 # F12: Stall detection — consecutive identical REVISE feedback threshold
 _DEFAULT_STALL_THRESHOLD = 3
@@ -126,10 +174,8 @@ def _validate_write_scope(tool_name: str, arguments: dict, project_root: str) ->
     # destination was never examined — a call relocating a file out of the
     # project root passed the gate. Each path a call touches is a distinct
     # containment obligation, so each is tested.
-    targets = [
-        arguments.get(key) for key in ("path", "file_path", "destination", "new_path")
-    ]
-    targets = [t for t in targets if isinstance(t, str) and t]
+    # change-c37198be (D3): nested files/paths/moves/edits entries included.
+    targets = _scope_targets(arguments)
     if not targets:
         return None  # Let MCP validate missing required args
 
@@ -146,6 +192,31 @@ def _validate_write_scope(tool_name: str, arguments: dict, project_root: str) ->
             continue  # Let MCP handle malformed paths
 
     return None
+
+
+_TASK_FILE_SUFFIXES = (".md", ".yaml", ".yml", ".txt")
+
+
+def _looks_like_task_path(value: str) -> bool:
+    """
+    change-c37198be (D2): True when a --task value reads as a file path rather
+    than task text: a single token (no whitespace) that ends in a task-file
+    suffix or contains a path separator. A missing file named this way must
+    stop the run; used as text, it becomes an unscoped task.
+    """
+    if not value or any(ch.isspace() for ch in value):
+        return False
+    return value.lower().endswith(_TASK_FILE_SUFFIXES) or "/" in value or os.sep in value
+
+
+def _select_recipe_set(state_dir: str) -> str:
+    """
+    Recipe selection: audit-index.md in the state directory selects the audit
+    recipe pair; otherwise the standard Ralph Loop pair. Same signal the audit
+    scope/SHIP/archive logic keys on — mode detection is single-sourced.
+    Extracted from main_async under change-c37198be so it can be tested.
+    """
+    return "audit" if os.path.exists(os.path.join(state_dir, "audit-index.md")) else "ralph"
 
 
 def _synthesize_work_summary(
@@ -278,16 +349,20 @@ def _validate_audit_report_write(tool_name: str, arguments: dict, state_dir: str
     or existing content is preserved in the new content). Returns an error
     message string otherwise.
     """
-    if tool_name not in ("write", "write_file", "create_file"):
+    if tool_name not in ("write", "write_file", "create_file", "create"):
         return None
-    target = arguments.get("path") or arguments.get("file_path") or ""
-    if os.path.basename(target) != "audit-report.md":
-        return None
+    # change-c37198be (D3): filesystem-mcp 2.x `create` batches files[{path, content}].
+    writes = [(arguments.get("path") or arguments.get("file_path") or "", arguments.get("content"))]
+    writes += [(f.get("path") or f.get("file_path") or "", f.get("content"))
+               for f in arguments.get("files") or [] if isinstance(f, dict)]
     report_path = os.path.join(state_dir, "audit-report.md")
     if not os.path.exists(report_path):
         return None
     existing = open(report_path).read().strip()
-    if not existing or existing in (arguments.get("content") or "").strip():
+    if not existing:
+        return None
+    if all(os.path.basename(t) != "audit-report.md" or existing in (c or "").strip()
+           for t, c in writes):
         return None
     return (
         f"Error: This write would discard {len(existing)} characters of existing "
@@ -1349,8 +1424,12 @@ async def run_phase(
             console.print(f"[cyan]  result ←[/cyan]  [dim]{escape(preview)}[/dim]")
             # P3: duplicate read tracking
             if tc["name"] in ("read", "read_file", "read_text_file"):
-                _path = tc["arguments"].get("path", "")
-                if _path:
+                # change-c37198be (D3): filesystem-mcp 2.x `read` also takes paths[].
+                _rpaths = [tc["arguments"].get("path", "")]
+                _rpaths += [p for p in tc["arguments"].get("paths") or [] if isinstance(p, str)]
+                for _path in _rpaths:
+                    if not _path:
+                        continue
                     _read_counts[_path] = _read_counts.get(_path, 0) + 1
                     if _read_counts[_path] > 1:
                         log.warning("duplicate read (count=%d): %s",
@@ -1370,16 +1449,9 @@ async def run_phase(
                 # construction: a file created by move_file was recorded at its
                 # pre-move path, failed the isfile filter at synthesis, and was
                 # dropped from the manifest entirely.
-                if tc["name"] in ("move", "rename", "move_file", "rename_file"):
-                    _wpath = (tc["arguments"].get("destination")
-                              or tc["arguments"].get("new_path")
-                              or tc["arguments"].get("path")
-                              or tc["arguments"].get("file_path"))
-                else:
-                    _wpath = (tc["arguments"].get("path")
-                              or tc["arguments"].get("file_path")
-                              or tc["arguments"].get("destination"))
-                if _wpath:
+                # change-c37198be (D3): _written_targets also reads the
+                # batched files/moves lists of filesystem-mcp 2.x.
+                for _wpath in _written_targets(tc["name"], tc["arguments"]):
                     _wabs = os.path.abspath(_wpath)
                     _written_paths.add(_wabs)
                     # F1: record that the worker supplied its own manifest.
@@ -1507,9 +1579,11 @@ async def run_phase(
             else:
                 mcp_error_count = 0
                 # P4: post-write Python syntax check
-                if tc["name"] in ("write", "edit", "write_file", "create_file"):
-                    _py_path = tc["arguments"].get("path", "")
-                    if _py_path and _py_path.endswith(".py"):
+                # change-c37198be (D3): every file a write call leaves, incl. 2.x batches.
+                _py_paths = (_written_targets(tc["name"], tc["arguments"])
+                             if tc["name"] in _WRITE_TOOLS else [])
+                for _py_path in _py_paths:
+                    if _py_path.endswith(".py") and os.path.isfile(_py_path):
                         proc = subprocess.run(
                             [sys.executable, "-m", "py_compile", _py_path],
                             capture_output=True,
@@ -1522,7 +1596,7 @@ async def run_phase(
                                 f"[red][ael] syntax error: {escape(_py_path)}: "
                                 f"{escape(err[:200])}[/red]"
                             )
-                            _corrective = (
+                            _corrective += (
                                 f"\n\nSyntax error detected in {_py_path}:\n\n"
                                 f"{err}\n\n"
                                 "Correct the file before continuing."
@@ -2317,6 +2391,13 @@ async def main_async(args: argparse.Namespace) -> int:
     if args.mode == "reset":
         return reset_state(state_dir)
 
+    # change-c37198be (D2): a --task value that names a file must name one that
+    # exists. Checked before any state change so a mistyped path cannot start
+    # an unscoped run with the literal path as its task text.
+    if args.task and not os.path.exists(args.task) and _looks_like_task_path(args.task):
+        console.print(f"[red][ael] error: task file not found: {escape(args.task)} (cwd {escape(os.getcwd())})[/red]")
+        return 1
+
     # Warn if a prior SHIP is present and not yet cleared
     if os.path.exists(os.path.join(state_dir, ".ralph-complete")):
         console.print(f"[yellow][ael] warning: prior SHIP detected in {state_dir}[/yellow]")
@@ -2356,17 +2437,9 @@ async def main_async(args: argparse.Namespace) -> int:
         log.info("log archive dir: %s", _log_archive_dir)
 
     recipe_dir  = os.path.join(os.path.dirname(__file__), "..", "recipes")
-    # Recipe selection: audit-index.md in the state directory selects the audit
-    # recipe pair; otherwise the standard Ralph Loop pair. Same signal the audit
-    # scope/SHIP/archive logic keys on — mode detection is single-sourced.
-    if os.path.exists(os.path.join(state_dir, "audit-index.md")):
-        recipe_set = "audit"
-        work_recipe = load_yaml(os.path.join(recipe_dir, "audit-work.yaml"))
-        rev_recipe  = load_yaml(os.path.join(recipe_dir, "audit-review.yaml"))
-    else:
-        recipe_set = "ralph"
-        work_recipe = load_yaml(os.path.join(recipe_dir, "ralph-work.yaml"))
-        rev_recipe  = load_yaml(os.path.join(recipe_dir, "ralph-review.yaml"))
+    recipe_set  = _select_recipe_set(state_dir)
+    work_recipe = load_yaml(os.path.join(recipe_dir, f"{recipe_set}-work.yaml"))
+    rev_recipe  = load_yaml(os.path.join(recipe_dir, f"{recipe_set}-review.yaml"))
     console.print(f"[blue][ael] recipe set: {recipe_set}[/blue]")
     log.info("recipe set: %s", recipe_set)
 

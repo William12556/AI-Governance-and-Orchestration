@@ -111,7 +111,7 @@ mcp_servers:
     command: "/usr/local/bin/npx"
     args:
       - "-y"
-      - "@j0hanz/filesystem-mcp@latest"
+      - "@j0hanz/filesystem-mcp@2.5.0"
       - "<allowed-path>"
     env:
       PATH: "/opt/homebrew/opt/node@24/bin:/usr/local/bin:/usr/bin:/bin"
