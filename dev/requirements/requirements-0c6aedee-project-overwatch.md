@@ -33,7 +33,7 @@ Created: 2026 August 21
 
 Project Overwatch extends the existing `govwatch` governance-monitoring tool
 into a browser-based project management interface for a single project
-governed by the LLM-Governance-and-Orchestration framework. It retains
+governed by the AI-Governance-and-Orchestration framework. It retains
 `govwatch`'s existing monitoring function as one panel among several, and
 adds panels covering configuration visibility, requirements/design
 surfacing, governed-item lifecycle tracking, task tracking, document
@@ -51,7 +51,7 @@ TUI-era tool and was archived to `dev/requirements/closed/` on 2026-09-23
 ## 2.0 Scope
 
 Project Overwatch operates on a single project's `ai/` directory only — the
-directory canonically sourced from LLM-Governance-and-Orchestration and
+directory canonically sourced from AI-Governance-and-Orchestration and
 propagated via `bin/propagate.sh`. It has no awareness of, and does not
 read, `dev/` (framework-development-only artefacts) or any other project's
 `ai/` directory. Multi-project or portfolio-level views are explicitly out
@@ -303,6 +303,7 @@ a single-effort ("Big Bang") delivery.
 | 0.1 | 2026-08-21 | Initial draft, capturing requirements elicitation conducted in Claude Desktop brainstorming session |
 | 0.2 | 2026-08-21 | Renamed tool from `govwatch` (Web) to Project Overwatch throughout; resolved OQ-11; file renamed from `requirements-govwatch-web.md` to `requirements-project-overwatch.md` |
 | 0.3 | 2026-09-23 | Renamed from requirements-project-overwatch.md to the P00.10 UUID convention; OQ-10 resolved (requirements-govwatch.md archived) |
+| 0.4 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 
 ---
 

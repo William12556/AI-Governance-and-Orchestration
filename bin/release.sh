@@ -101,4 +101,4 @@ rm -rf "${TMPWORK}"
 
 echo ""
 echo "Done. Release ${VERSION} published."
-echo "    https://github.com/William12556/LLM-Governance-and-Orchestration/releases/tag/${VERSION}"
+echo "    https://github.com/William12556/AI-Governance-and-Orchestration/releases/tag/${VERSION}"

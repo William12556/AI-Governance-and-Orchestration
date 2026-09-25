@@ -1,4 +1,4 @@
-# LLM Governance and Orchestration
+# AI Governance and Orchestration
 
 ## Purpose
 
@@ -78,7 +78,7 @@ Two installation paths are provided. See [docs/guide-install.md](docs/guide-inst
 Bootstraps the `ai/` framework into a project without cloning the repository. Always installs the latest release.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/William12556/LLM-Governance-and-Orchestration/main/bin/bootstrap.sh | bash -s -- <project-path>
+curl -fsSL https://raw.githubusercontent.com/William12556/AI-Governance-and-Orchestration/main/bin/bootstrap.sh | bash -s -- <project-path>
 ```
 
 Review `ai/ael/config.yaml` in the target project before first use.
@@ -88,7 +88,7 @@ Review `ai/ael/config.yaml` in the target project before first use.
 For developing or extending the framework.
 
 ```bash
-git clone https://github.com/William12556/LLM-Governance-and-Orchestration.git
+git clone https://github.com/William12556/AI-Governance-and-Orchestration.git
 ```
 
 After changes to `ai/`, propagate to a downstream project:
@@ -174,6 +174,7 @@ HUNTLEY, G., 2026. *Everything is a ralph loop* [online]. Available from: https:
 | 3.5 | 2026-06-18 | Added Installation section (user and developer paths); updated Getting Started; updated Repository Structure with bootstrap.sh, release.sh, guide-install.md |
 | 3.6 | 2026-06-18 | Condensed Orchestration section (detail moved to docs/guide-orchestration.md); removed Repository Structure section; removed Devstral rationale paragraph |
 | 3.7 | 2026-07-16 | mcp-grep → mcp-ripgrep (Requirements, Getting Started); Requirements Model row now notes 6bit/8bit and the optional Magistral reviewer; added heterogeneous profile to Implementation Profiles table |
+| 3.8 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 
 ---
 

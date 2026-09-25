@@ -658,7 +658,7 @@ def generate_unique_uuid(document_class: str, workspace_path: Path) -> str:
 
 ## References
 
-- Governance Framework: `/Users/williamwatson/Documents/GitHub/LLM-Governance-and-Orchestration/governance.md`
+- Governance Framework: `/Users/williamwatson/Documents/GitHub/AI-Governance-and-Orchestration/governance.md`
 - Python UUID module: `uuid.uuid4()` for UUID v4 generation
 - ISO/IEC 9834-8:2014 - UUID specification
 - Regex pattern for 8-char hex: `^[0-9a-f]{8}$`
@@ -672,6 +672,7 @@ def generate_unique_uuid(document_class: str, workspace_path: Path) -> str:
 | Version | Date       | Author         | Changes                              |
 |---------|------------|----------------|--------------------------------------|
 | 1.0     | 2025-12-12 | Claude Desktop | Initial proposal draft               |
+| 1.1 | 2026-09-25 | Claude Desktop | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 
 ---
 

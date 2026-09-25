@@ -58,14 +58,14 @@ Install oMLX and download Devstral before proceeding. See [setup-apple-silicon-m
 ### 3.1 Clone the framework repository
 
 ```bash
-git clone https://github.com/William12556/LLM-Governance-and-Orchestration.git
-cd LLM-Governance-and-Orchestration
+git clone https://github.com/William12556/AI-Governance-and-Orchestration.git
+cd AI-Governance-and-Orchestration
 ```
 
 ### 3.2 Initialise a downstream project
 
 ```bash
-cd /path/to/LLM-Governance-and-Orchestration
+cd /path/to/AI-Governance-and-Orchestration
 bin/propagate.sh /path/to/your/projects/<project-name>
 cd /path/to/your/projects/<project-name>
 ```
@@ -213,6 +213,7 @@ The Strategic Domain coordinates each step. Human approval gates are required be
 | 1.7 | 2026-09-23 | §3.2: project files relocated to ai-local/ |
 | 1.8 | 2026-09-23 | §3.2: propagate.sh never deletes |
 | 1.9 | 2026-09-23 | §3.2: local modifications backed up |
+| 1.10 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 
 ---
 

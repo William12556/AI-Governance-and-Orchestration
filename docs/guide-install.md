@@ -39,7 +39,7 @@ Bootstraps the `ai/` framework directory into an existing project. Does not requ
 ### 2.2 Bootstrap
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/William12556/LLM-Governance-and-Orchestration/main/bin/bootstrap.sh | bash -s -- <project-path>
+curl -fsSL https://raw.githubusercontent.com/William12556/AI-Governance-and-Orchestration/main/bin/bootstrap.sh | bash -s -- <project-path>
 ```
 
 Replace `<project-path>` with the absolute or relative path to the target project root.
@@ -59,7 +59,7 @@ Review `config.yaml` before first use. It contains project-specific settings tha
 
 ## 3.0 Developer Install
 
-For developing or extending the LLM-G&O framework.
+For developing or extending the AI-G&O framework.
 
 ### 3.1 Prerequisites
 
@@ -69,7 +69,7 @@ For developing or extending the LLM-G&O framework.
 ### 3.2 Clone
 
 ```bash
-git clone https://github.com/William12556/LLM-Governance-and-Orchestration.git
+git clone https://github.com/William12556/AI-Governance-and-Orchestration.git
 ```
 
 ### 3.3 Propagate to a Downstream Project
@@ -109,6 +109,7 @@ Archives `ai/`, creates a GitHub release, and attaches the tarball as a release 
 | 0.7 | 2026-09-23 | §3.3: declared-file wording corrected; refusals and exit codes |
 | 0.8 | 2026-09-23 | §3.3: symlinked context.md/task.md refusal listed (change-b170cf6a iteration 3, B4) |
 | 0.9 | 2026-09-23 | §3.3: prompt guard excludes contents of workspace/, state/ and logs/ (change-b170cf6a B5) |
+| 0.10 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 
 ---
 

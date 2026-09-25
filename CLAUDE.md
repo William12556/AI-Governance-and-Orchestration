@@ -4,7 +4,7 @@ Created: 2026 July 02
 
 ## 1.0 Project
 
-**Name:** LLM-Governance-and-Orchestration
+**Name:** AI-Governance-and-Orchestration
 **Description:** Model-agnostic governance framework for AI-assisted software development (Strategic/Tactical Domain protocol).
 **Technology stack:** Python 3.11+; PyYAML, Rich, Textual (govwatch); MCP Python SDK (AEL orchestrator, ael-mcp)
 **Target platform:** macOS 14+ (Apple Silicon) required for the MLX/oMLX Tactical Domain profile; the framework tooling itself (`ai/src/`, `ai/ael/src/`) is otherwise platform-agnostic Python.
@@ -48,6 +48,7 @@ Source-code changes (`ai/ael/src/`, `ai/src/`) require the standard T06 issue â†
 | Version | Date | Description |
 |---|---|---|
 | 0.1 | 2026-07-02 | Initial document |
+| 0.2 | 2026-09-25 | Project rename: LLM-G&O â†’ AI-G&O (report-rename-ai-go-2026-09-25) |
 
 ---
 

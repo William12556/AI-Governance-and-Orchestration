@@ -43,7 +43,7 @@ Created: 2026 August 21
 This document specifies the component design for Project Overwatch, derived
 from [requirements-0c6aedee-project-overwatch.md](../requirements/requirements-0c6aedee-project-overwatch.md)
 v0.2. Project Overwatch is a read-only, browser-rendered project management
-interface for a single project governed by the LLM-Governance-and-Orchestration
+interface for a single project governed by the AI-Governance-and-Orchestration
 framework. It reuses `govwatch`'s data layer unmodified for its monitoring
 function and adds nine further panels.
 
@@ -496,6 +496,7 @@ bounded interval, not an open-ended dual-maintenance commitment.
 |---|---|---|
 | 0.1 | 2026-08-21 | Initial component design from requirements-project-overwatch.md v0.2. Resolves OQ-01 through OQ-09, OQ-11. OQ-07 and OQ-10 explicitly not resolved (recorded as accepted risk / remaining open). |
 | 0.2 | 2026-09-23 | Requirements link updated to requirements-0c6aedee-project-overwatch.md (P00.10 naming); OQ-10 marked resolved |
+| 0.3 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 
 ---
 

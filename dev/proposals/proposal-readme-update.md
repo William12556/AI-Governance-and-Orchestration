@@ -56,7 +56,7 @@ The README contains the following inaccuracies and omissions relative to governa
 ## Proposed Content
 
 ~~~markdown
-# LLM Governance and Orchestration
+# AI Governance and Orchestration
 
 ## Purpose
 
@@ -136,6 +136,7 @@ Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-02-18 | Initial proposal |
+| 1.1 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 
 ---
 

@@ -37,7 +37,7 @@ outstanding action of their own.
    port 22 was refused.
 
    ```bash
-   cd ~/Documents/GitHub/LLM-Governance-and-Orchestration
+   cd ~/Documents/GitHub/AI-Governance-and-Orchestration
    git log --oneline -5
    git push origin main
    ```
@@ -160,6 +160,7 @@ triple's disposition.
 | 1.0 | 2026-07-29 | Initial task list, consolidated from dev/audit outstanding-work sections |
 | 1.1 | 2026-07-29 | 3b9e6d72, f5c28a04 and d1f4a83b closed at operator instruction; §3.0 and §7.0 updated to reflect closure and the items still unverified at closure |
 | 1.2 | 2026-09-23 | Closed: a2f9c4d1 closed at operator direction; remaining items moved to dev/backlog.md |
+| 1.3 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 
 ---
 

@@ -30,7 +30,7 @@ affected_scope:
       file_path: "ai/ael/src/orchestrator.py"
   designs:
     - design_ref: "dev/design/design-ael-orchestrator.md"
-  version: "governance 10.5; LLM-G&O HEAD 2026-09-24"
+  version: "governance 10.5; AI-G&O HEAD 2026-09-24"
 
 reproduction:
   prerequisites: "Fresh virtual environment installed from ai/ael/requirements.txt"
@@ -117,6 +117,11 @@ version_history:
     author: "William Watson"
     changes:
       - "D3 added from dev/smoke Run A"
+  - version: "1.2"
+    date: "2026-09-25"
+    author: "William Watson"
+    changes:
+      - "Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

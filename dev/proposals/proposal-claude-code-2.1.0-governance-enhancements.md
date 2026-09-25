@@ -27,7 +27,7 @@ Created: 2026 January 11
 
 ## Executive Summary
 
-This proposal analyzes Claude Code 2.1.0 capabilities and Anthropic's published best practices to identify logical enhancements for the LLM Governance and Orchestration framework. The analysis identifies seven enhancement opportunities organized into three implementation phases, prioritizing high-value, low-risk additions that maintain the framework's minimalist design principles and human control requirements.
+This proposal analyzes Claude Code 2.1.0 capabilities and Anthropic's published best practices to identify logical enhancements for the AI Governance and Orchestration framework. The analysis identifies seven enhancement opportunities organized into three implementation phases, prioritizing high-value, low-risk additions that maintain the framework's minimalist design principles and human control requirements.
 
 Primary recommendations focus on integrating Claude Code's skills system and CLAUDE.md context optimization to reduce token consumption and improve workflow efficiency while preserving existing governance structures.
 
@@ -39,7 +39,7 @@ Primary recommendations focus on integrating Claude Code's skills system and CLA
 
 Claude Code version 2.1.0 was released January 7, 2026, representing a significant evolution from experimental tool to production infrastructure. The release includes 1,096 commits focused on agent lifecycle management, skills system formalization, and workflow orchestration capabilities.
 
-The LLM Governance and Orchestration framework currently at version 5.6 defines a dual-domain architecture (Claude Desktop for planning, Claude Code for execution) with filesystem-based communication and strict protocol-driven workflows. This proposal examines how Claude Code 2.1.0's new capabilities align with and could enhance the existing governance model.
+The AI Governance and Orchestration framework currently at version 5.6 defines a dual-domain architecture (Claude Desktop for planning, Claude Code for execution) with filesystem-based communication and strict protocol-driven workflows. This proposal examines how Claude Code 2.1.0's new capabilities align with and could enhance the existing governance model.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -569,7 +569,7 @@ Create `/doc/workflow-pattern-mapping.md`:
    - CLAUDE.md integration provides immediate token efficiency gains
    - Skills directory establishes foundation for future automation
 
-2. **Create pilot CLAUDE.md** for LLM-Governance-and-Orchestration repository
+2. **Create pilot CLAUDE.md** for AI-Governance-and-Orchestration repository
    - Validate template structure against real-world usage
    - Iterate based on effectiveness feedback
 
@@ -626,6 +626,7 @@ VentureBeat. (2026). *Claude Code 2.1.0 arrives with smoother workflows and smar
 | Version | Date       | Description                                                    |
 | ------- | ---------- | -------------------------------------------------------------- |
 | 1.0     | 2026-01-11 | Initial proposal: Claude Code 2.1.0 governance enhancements    |
+| 1.1 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 
 ---
 

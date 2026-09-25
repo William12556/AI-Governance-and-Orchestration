@@ -23,7 +23,7 @@ Created: 2026 March 05
 
 ## Introduction
 
-This document provides comprehensive guidance for implementing testing within the LLM Orchestration Framework. Testing follows governance protocol P15 and employs systematic validation across multiple test types.
+This document provides comprehensive guidance for implementing testing within the AI Governance and Orchestration Framework. Testing follows governance protocol P15 and employs systematic validation across multiple test types.
 
 ### Purpose
 
@@ -1039,6 +1039,7 @@ Strategic Domain identifies:
 | 1.0 | 2026-01-08 | Initial testing guidance document |
 | 1.1 | 2026-03-05 | Relocated from issues/ to examples/; replaced project-specific content with generic equivalents; replaced Claude Desktop/Claude Code actor labels with Strategic/Tactical Domain; genericised all code examples, directory structures, and traceability matrix entries; updated Platform Considerations to remove hardcoded platform references |
 | 1.2 | 2026-06-14 | Relocated workspace/ → ai/workspace/ in test, result, and trace path references |
+| 1.3 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 
 ---
 

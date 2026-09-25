@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # propagate.sh — Push ai/ to a downstream project ai/ directory.
 #
-# PREREQUISITE: The LLM-Governance-and-Orchestration repository must be
+# PREREQUISITE: The AI-Governance-and-Orchestration repository must be
 # cloned locally. This script must be run from the repository root.
-# Clone: https://github.com/William12556/LLM-Governance-and-Orchestration
+# Clone: https://github.com/William12556/AI-Governance-and-Orchestration
 #
 # Usage:
 #   bin/propagate.sh [--yes] [--allow-major] <project-root>
@@ -498,7 +498,7 @@ if [[ "${CAND_COUNT}" -gt 0 || "${BACKUP_COUNT}" -gt 0 ]]; then
         {
             echo "# Relocated from ai/"
             echo ""
-            echo "Files moved or copied out of ai/ by LLM-G&O bin/propagate.sh (governance P10.6)."
+            echo "Files moved or copied out of ai/ by AI-G&O bin/propagate.sh (governance P10.6)."
             echo "'retired framework file': content matches framework history at that path; safe to delete."
             echo "'project content': review, then keep elsewhere or delete."
             echo "'local modification': an edited framework file, saved before propagation overwrote it."

@@ -1,6 +1,6 @@
 Created: 2025 October 30
 
-# LLM Orchestration Framework
+# AI Governance and Orchestration Framework
 
 ---
 
@@ -580,7 +580,7 @@ test.txt
   - P10.5 Traceability Matrix
      - Create skeleton trace-traceability-matrix-master.md in ai/workspace/trace/
   - P10.6 Project folder structure
-    - Note: This structure applies to projects using the framework, not to the LLM-Governance-and-Orchestration repository itself
+    - Note: This structure applies to projects using the framework, not to the AI-Governance-and-Orchestration repository itself
     - The governance framework repository contains only ai/, doc/, and templates/ directories
     - ai/ holds framework files plus only the project files declared in the layout below (context.md, task.md, ael/config.yaml, state/, logs/, dashboard-alerts.md, workspace/)
     - Any other project file belongs outside ai/; bin/propagate.sh relocates such files, and retired framework files, to ai-local/ and logs them in ai-local/RELOCATED.md
@@ -770,7 +770,7 @@ exclude_lines = [
     - Strategic Domain: Updates traceability matrix
     - Human: Approves changes
   - P11.7 Framework Development Requirements
-    - Scope: requirements for extending LLM-G&O itself, held in dev/requirements/
+    - Scope: requirements for extending AI-G&O itself, held in dev/requirements/
     - Format: prose with FR/NFR/CON tables; the T01 YAML template is not used
     - T01 applies to downstream project requirements, where a local model consumes them
 
@@ -1253,6 +1253,7 @@ See [workflow.md](workflow.md).
 | 10.3    | 2026-09-23 | P10.6: ai/ holds framework files and the declared project files only; other project files belong outside ai/ and are relocated to ai-local/ by bin/propagate.sh. Added ai-local/ to the layout. Non-breaking. |
 | 10.4    | 2026-09-23 | P10.6: logs/ added to the declared project set and layout; bin/propagate.sh never deletes — retired framework files are relocated to ai-local/ with project files, labelled, for human deletion. Non-breaking. |
 | 10.5    | 2026-09-23 | P10.6: locally edited framework files are backed up to ai-local/ before propagation overwrites them. Non-breaking. |
+| 10.6 | 2026-09-25 | Project rename: title LLM Orchestration Framework → AI Governance and Orchestration Framework; LLM-G&O → AI-G&O in P10 and P11 notes. Historical row 5.4 unchanged. Non-breaking. |
 
 ---
 [Return to Table of Contents](<#table of contents>)

@@ -20,7 +20,7 @@ Created: 2026 July 15
 
 ## 1.0 Scope
 
-Investigation into language-model efficiency (latency and token usage) for the LLM-G&O AEL stack, prompted by review of the Headroom project. Covers `ai/ael/src/orchestrator.py`, the T04 prompt path, oMLX-hosted model behaviour, and an empirical prompt-cache test executed against the running oMLX server. Records findings, recommended optimisations, and artifacts produced.
+Investigation into language-model efficiency (latency and token usage) for the AI-G&O AEL stack, prompted by review of the Headroom project. Covers `ai/ael/src/orchestrator.py`, the T04 prompt path, oMLX-hosted model behaviour, and an empirical prompt-cache test executed against the running oMLX server. Records findings, recommended optimisations, and artifacts produced.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -133,6 +133,7 @@ headroomlabs-ai, 2026. *Headroom* [online]. GitHub. Available at: https://github
 |---|---|---|
 | 0.1 | 2026-07-15 | Initial report |
 | 0.2 | 2026-07-15 | Item 3 (tool-schema dedup) investigated via omlx MCP and rejected — `tools=` is load-bearing; outcome recorded in section 5.0 |
+| 0.3 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 
 ---
 

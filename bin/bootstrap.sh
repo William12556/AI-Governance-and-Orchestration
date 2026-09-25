@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# bootstrap.sh — Install the LLM-G&O ai/ framework into a project directory.
+# bootstrap.sh — Install the AI-G&O ai/ framework into a project directory.
 # Downloads the latest release from GitHub. Does not require cloning the repository.
 #
 # Usage:
 #   bash bootstrap.sh <project-root>
-#   curl -fsSL https://raw.githubusercontent.com/William12556/LLM-Governance-and-Orchestration/main/bin/bootstrap.sh | bash -s -- <project-root>
+#   curl -fsSL https://raw.githubusercontent.com/William12556/AI-Governance-and-Orchestration/main/bin/bootstrap.sh | bash -s -- <project-root>
 #
 # The script creates <project-root>/ai/ from the latest framework release.
 # Review ai/ael/config.yaml before first use.
 
 set -euo pipefail
 
-REPO="William12556/LLM-Governance-and-Orchestration"
+REPO="William12556/AI-Governance-and-Orchestration"
 GITHUB_API="https://api.github.com/repos/${REPO}"
 
 # --- Argument validation ---------------------------------------------------
@@ -31,7 +31,7 @@ PROJECT_AI="${PROJECT_ROOT}/ai"
 
 if [[ -d "${PROJECT_AI}" ]]; then
     echo "Error: ai/ already exists at ${PROJECT_AI}" >&2
-    echo "To update an existing installation use bin/propagate.sh from the LLM-G&O repository." >&2
+    echo "To update an existing installation use bin/propagate.sh from the AI-G&O repository." >&2
     exit 1
 fi
 
