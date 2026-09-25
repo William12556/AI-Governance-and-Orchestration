@@ -8,7 +8,9 @@
 #   Without --apply the script prints the plan and changes nothing.
 #
 # Behaviour:
-#   - ai/ael/config.yaml moves to ai/config.yaml (project-owned).
+#   - ai/ael/config.yaml moves to ai/config.yaml (project-owned); its
+#     loop.state_dir value "ai/state/ralph" is changed to "ai/state", which
+#     engine-mcp expects.
 #   - Retired framework paths (ai/ael/, ai/governance.md, ai/workflow.md,
 #     ai/primer.md, ai/templates/, ai/skills/, ai/doc/, ai/index.md,
 #     ai/src/govwatch.py, ai/src/requirements-govwatch.txt) move to
@@ -57,12 +59,15 @@ RETIRED=(ael governance.md workflow.md primer.md templates skills doc index.md
 # --- Plan ----------------------------------------------------------------------
 
 ERR=""
+STATE_EDIT="false"
 MOVES=()   # pairs: source-relative-to-ai  destination-absolute
 if [[ -e "${AI}/ael/config.yaml" ]]; then
     if [[ -e "${AI}/config.yaml" || -L "${AI}/config.yaml" ]]; then
         ERR+="  ai/config.yaml already exists; resolve ai/ael/config.yaml manually"$'\n'
     else
         MOVES+=("ael/config.yaml" "${AI}/config.yaml")
+        STATE_EDIT="false"
+        grep -q 'state_dir: *"ai/state/ralph"' "${AI}/ael/config.yaml" && STATE_EDIT="true"
     fi
 fi
 for rel in "${RETIRED[@]}"; do
@@ -83,6 +88,7 @@ while [[ ${i} -lt ${#MOVES[@]} ]]; do
     echo "move   ai/${MOVES[i]} -> ${MOVES[i+1]#"${PROJECT_ROOT}/"}"
     i=$((i + 2))
 done
+[[ "${STATE_EDIT}" == "true" ]] && echo "edit   ai/config.yaml: loop.state_dir \"ai/state/ralph\" -> \"ai/state\""
 [[ -d "${AI}/state/ralph" ]] && echo "note   ai/state/ralph/ is runtime state; left in place. Reset or remove it manually."
 
 echo ""
@@ -140,6 +146,11 @@ while [[ ${i} -lt ${#MOVES[@]} ]]; do
     echo "moved  ai/${MOVES[i]}"
     i=$((i + 2))
 done
+
+if [[ "${STATE_EDIT}" == "true" ]]; then
+    perl -pi -e 's{state_dir:(\s*)"ai/state/ralph"}{state_dir:$1"ai/state"}' "${AI}/config.yaml"
+    echo "edited ai/config.yaml: loop.state_dir -> \"ai/state\""
+fi
 
 echo ""
 echo "Done. Next: bin/propagate.sh --allow-major ${PROJECT_ROOT}"

@@ -261,8 +261,15 @@ verification:
     retired paths moved to ai-local/retired-5bcd46ad/ and logged, second
     propagate run up to date; fresh-project seeding of config.yaml,
     context.md and task.md verified; propagate refuses an old-layout target
-    (exit 3). Pending: operator smoke run, engine-mcp exercise,
-    independent review.
+    (exit 3). Downstream pilot solax-modbus 2026-09-25: migrate-layout.sh
+    --apply (config moved, 10 retired paths to ai-local/retired-5bcd46ad/),
+    propagate.sh --allow-major (governance 11.0, 36 files added or
+    updated, no relocations or backups); overwatch scan of the migrated
+    project valid (state dir ai/state, 21 documents, render ok). The pilot
+    exposed a gap: the moved config kept state_dir "ai/state/ralph";
+    migrate-layout.sh now rewrites it to "ai/state" (verified on a
+    synthetic project; solax-modbus corrected by hand). Pending: operator
+    smoke run, engine-mcp exercise, independent review.
   issues_found: []
 
 traceability:
@@ -301,6 +308,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Implemented steps 1–6 (session part); verification results and retained items recorded"
+  - version: "0.3"
+    date: "2026-09-25"
+    author: "William Watson"
+    changes:
+      - "Downstream pilot limited to solax-modbus; pilot results recorded; migrate-layout.sh rewrites loop.state_dir"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
