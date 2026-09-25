@@ -2,7 +2,7 @@ Created: 2026 September 25
 
 # Proposal: AI-G&O Strategic Pivot
 
-**Status:** Proposed
+**Status:** Accepted 2026-09-25. Phase 1 implemented (change-5bcd46ad); verification pending.
 **UUID:** `5bcd46ad`
 **Coupled change:** `dev/change/change-5bcd46ad-layout-migration.md`
 
@@ -190,6 +190,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 | Version | Date | Description |
 |---|---|---|
 | 0.1 | 2026-09-25 | Initial proposal from the 2026-09-25 brainstorming session |
+| 0.2 | 2026-09-25 | Status: accepted; Phase 1 implemented |
 
 ---
 

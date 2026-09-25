@@ -1,9 +1,9 @@
-# Reference AEL configuration for the dev/smoke harness.
+# Reference engine configuration for the dev/smoke harness.
 #
-# Copy to ai/ael/config.yaml after running bin/propagate.sh — propagate
+# Copy to ai/config.yaml after running bin/propagate.sh — propagate
 # excludes config.yaml, so it is never created or overwritten by propagation.
 #
-# Deltas from the canonical ai/ael/config.yaml:
+# Deltas from the canonical ai/engine/config.template.yaml:
 #   - reviewer_model set to the 8-bit Magistral (canonical still names 6-bit)
 #   - explicit context window entry for the 8-bit reviewer, for reproducibility
 #   - mcp-ripgrep omitted: it is declared without path arguments and is the
@@ -46,9 +46,9 @@ loop:
   max_tool_calls_per_iteration: 10
   preflight_check: false
   phase_duration_minutes: 10
-  # Must remain ai/state/ralph: ael-mcp hardcodes this path for status
+  # Must remain ai/state: engine-mcp hardcodes this path for status
   # reporting and log placement.
-  state_dir: "ai/state/ralph"
+  state_dir: "ai/state"
 
 execution:
   max_completion_tokens: null

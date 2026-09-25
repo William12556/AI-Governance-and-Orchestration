@@ -1,6 +1,6 @@
 Created: 2026 March 26
 
-# AEL Requirements
+# Engine Requirements
 
 ---
 
@@ -23,7 +23,7 @@ Created: 2026 March 26
 
 ## Purpose
 
-This document records functional and non-functional requirements for the Autonomous Execution Loop (AEL) orchestrator. It covers the existing as-built system and proposed design extensions under active consideration.
+This document records functional and non-functional requirements for the engine orchestrator. It covers the existing as-built system and proposed design extensions under active consideration.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -31,8 +31,8 @@ This document records functional and non-functional requirements for the Autonom
 
 ## Scope
 
-- AEL orchestrator (`ai/ael/src/orchestrator.py`) and supporting components
-- Ralph Loop worker/reviewer execution pattern
+- Engine orchestrator (`ai/engine/src/orchestrator.py`) and supporting components
+- Loop worker/reviewer execution pattern
 - Task input and decomposition
 - Pipeline execution mode
 - Integration with the Strategic Domain via the filesystem
@@ -47,12 +47,12 @@ Out of scope: inference endpoint implementation (oMLX), MCP server implementatio
 
 | Term | Definition |
 |---|---|
-| AEL | Autonomous Execution Loop — the Python orchestrator implementing the Ralph Loop |
-| Ralph Loop | Worker/reviewer cycle; iterates until SHIP or BLOCKED |
+| Engine | Engine — the Python orchestrator implementing the loop |
+| Loop | Worker/reviewer cycle; iterates until SHIP or BLOCKED |
 | Strategic Domain | Planning and coordination agent (e.g. Claude Desktop) |
-| Tactical Domain | Code execution agent — the AEL |
-| Task file | Plain-text file containing the task to be executed by the Ralph Loop |
-| State directory | `.ael/ralph/` — ephemeral per-task directory holding loop state files |
+| Tactical Domain | Code execution agent — the engine |
+| Task file | Plain-text file containing the task to be executed by the loop |
+| State directory | `ai/state/` — ephemeral per-task directory holding loop state files |
 | Phase | One worker or reviewer pass within a loop iteration |
 | SHIP | Reviewer verdict: work accepted |
 | BLOCKED | Loop exit due to unresolvable condition |
@@ -67,11 +67,11 @@ Out of scope: inference endpoint implementation (oMLX), MCP server implementatio
 
 ### Functional
 
-**FR-AEL-001 — Ralph Loop**
-The orchestrator shall execute a worker/reviewer cycle (Ralph Loop) iterating until the reviewer emits SHIP or a boundary condition is reached.
+**FR-AEL-001 — loop**
+The orchestrator shall execute a worker/reviewer cycle (loop) iterating until the reviewer emits SHIP or a boundary condition is reached.
 
 **FR-AEL-002 — Execution modes**
-The orchestrator shall support four execution modes via `--mode`: `worker` (single work phase), `reviewer` (single review phase), `loop` (full Ralph Loop), `reset` (clear state directory).
+The orchestrator shall support four execution modes via `--mode`: `worker` (single work phase), `reviewer` (single review phase), `loop` (full loop), `reset` (clear state directory).
 
 **FR-AEL-003 — MCP tool dispatch**
 The orchestrator shall connect to one or more MCP servers defined in `config.yaml`, retrieve tool definitions, forward tool calls from the model, and inject results into the message history.
@@ -83,7 +83,7 @@ The orchestrator shall parse Mistral plain-text tool call format (`[TOOL_CALLS].
 The orchestrator shall estimate message token count per iteration and enforce configurable warn and abort thresholds expressed as fractions of the model context window, where the context window is resolved via a tiered chain: config.yaml explicit override → live oMLX query (settings.max_context_window) → config.yaml per-model override → unresolved (warn).
 
 **FR-AEL-006 — State directory management**
-The orchestrator shall read and write loop state files (`task.md`, `iteration.txt`, `work-summary.txt`, `work-complete.txt`, `review-result.txt`, `review-feedback.txt`, `.ralph-complete`, `RALPH-BLOCKED.md`) to the configured state directory.
+The orchestrator shall read and write loop state files (`task.md`, `iteration.txt`, `work-summary.txt`, `work-complete.txt`, `review-result.txt`, `review-feedback.txt`, `.complete`, `BLOCKED.md`) to the configured state directory.
 
 **FR-AEL-007 — Task extraction from T04 document**
 The orchestrator shall extract the `tactical_brief` field from a T04 prompt document passed via `--task`. Pass 1: scan YAML fenced blocks for `tactical_brief` root key. Pass 2 (fallback): extract first fenced block beneath a `## N.N Tactical Brief` section header. If neither pass succeeds, fall back to the raw document.
@@ -95,16 +95,16 @@ The orchestrator shall resolve the model context window by reading `max_position
 The orchestrator shall poll the inference endpoint until the model is listed or the endpoint is reachable, before submitting any completion request. Timeout and interval are configurable.
 
 **FR-AEL-010 — SHIP/BLOCKED outcome signalling**
-On SHIP, the orchestrator shall write `.ralph-complete` to the state directory. On BLOCKED, the orchestrator shall write `RALPH-BLOCKED.md` with failure details and exit with a non-zero return code.
+On SHIP, the orchestrator shall write `.complete` to the state directory. On BLOCKED, the orchestrator shall write `BLOCKED.md` with failure details and exit with a non-zero return code.
 
 **FR-AEL-011 — Structured log output**
-The orchestrator shall write a timestamped log file (`ael_YYYYMMDD-HHMMSS.LOG`) to the state directory. The log shall include INFO, WARNING, DEBUG, and ERROR levels. The final log entry shall be `AEL end rc=N` on all exits including unexpected termination.
+The orchestrator shall write a timestamped log file (`ael_YYYYMMDD-HHMMSS.LOG`) to the state directory. The log shall include INFO, WARNING, DEBUG, and ERROR levels. The final log entry shall be `engine end rc=N` on all exits including unexpected termination.
 
 **FR-AEL-012 — Context budget report**
 At startup, the orchestrator shall write `context-budget.md` to the state directory with context window size (as resolved per FR-AEL-005's tiered chain), thresholds, headroom estimate, and guidance for the Strategic Domain. This file is retained for human/govwatch visibility; the Strategic Domain's T04-authoring precondition instead calls `omlx_model_status` directly rather than checking for this file's presence (P09 §1.10.2).
 
 **FR-AEL-013 — MCP error handling**
-The orchestrator shall detect MCP tool errors, inject a corrective user message, and write `RALPH-BLOCKED.md` after a configurable consecutive error threshold is reached.
+The orchestrator shall detect MCP tool errors, inject a corrective user message, and write `BLOCKED.md` after a configurable consecutive error threshold is reached.
 
 **FR-AEL-014 — Tool call cap**
 The orchestrator shall truncate tool call lists that exceed a configurable per-iteration maximum.
@@ -147,7 +147,7 @@ These requirements replace FR-AEL-007 (task extraction from T04 document).
 The orchestrator shall accept a plain-text task file as its primary task input. The task file shall be read verbatim; no YAML parsing or field extraction shall be performed.
 
 **FR-AEL-P02 — Strategic Domain authors task file**
-The Strategic Domain shall author the task file directly and place it in the state directory prior to AEL invocation. The orchestrator shall read `state_dir/task.md` when no `--task` argument is provided.
+The Strategic Domain shall author the task file directly and place it in the state directory prior to engine invocation. The orchestrator shall read `state_dir/task.md` when no `--task` argument is provided.
 
 **FR-AEL-P03 — Removal of extract_tactical_brief**
 The `extract_tactical_brief()` function and all associated fallback logic shall be removed from the orchestrator. The T04 document parsing responsibility is transferred to the Strategic Domain.
@@ -171,7 +171,7 @@ In pipeline mode, the orchestrator shall scan the specified tasks directory for 
 In pipeline mode, each task shall execute with its own state subdirectory: `state_dir/<task-stem>/` where `<task-stem>` is the task filename without extension. State files shall not be shared between tasks.
 
 **FR-AEL-P08 — Task resumption**
-In pipeline mode, the orchestrator shall skip any task whose state subdirectory contains `.ralph-complete`. This enables resumption after a BLOCKED state without re-executing completed tasks.
+In pipeline mode, the orchestrator shall skip any task whose state subdirectory contains `.complete`. This enables resumption after a BLOCKED state without re-executing completed tasks.
 
 **FR-AEL-P09 — Halt on BLOCKED**
 In pipeline mode, if any task exits BLOCKED, the orchestrator shall halt the pipeline, log which task blocked, and exit with a non-zero return code. Subsequent tasks shall not execute.
@@ -221,6 +221,7 @@ The tasks directory path shall be configurable via `config.yaml` under `pipeline
 | 1.0 | 2026-03-26 | Initial document — as-built requirements (FR-AEL-001 to FR-AEL-015, NFR-AEL-001 to NFR-AEL-005) and proposed requirements (FR-AEL-P01 to FR-AEL-P12) |
 | 1.1 | 2026-07-08 | FR-AEL-005 and FR-AEL-012 reworded to reflect the tiered context-window resolver replacing the retired standalone budget.py; FR-AEL-012 notes the Strategic Domain's T04 precondition now calls omlx_model_status directly rather than checking file presence (change-d42e64a9) |
 | 1.2 | 2026-09-23 | Renamed from ael-requirements.md to the P00.10 UUID convention |
+| 1.3 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 
 ---
 

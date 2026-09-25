@@ -90,7 +90,7 @@ inference, diff generation) are additive.
 
 | ID | Requirement |
 |---|---|
-| FR-01-01 | Render workflow phase, AEL state, and budget state, reusing `PhaseInference` and existing state-reading logic unmodified. |
+| FR-01-01 | Render workflow phase, engine state, and budget state, reusing `PhaseInference` and existing state-reading logic unmodified. |
 | FR-01-02 | Render compliance alerts (tier1/tier2), colour-coded by severity, reusing `ComplianceEngine` unmodified. |
 | FR-01-03 | Render the document registry, grouped by UUID, open documents only, reusing `Scanner` unmodified. |
 | FR-01-04 | This panel constitutes shipped parity with the current TUI. Retirement of `govwatch.py` and its removal from `ai/src/` propagation is gated on this phase shipping and being validated — not on approval of this document. |
@@ -127,8 +127,8 @@ inference, diff generation) are additive.
 
 | ID | Requirement |
 |---|---|
-| FR-04-01 | Render the contents of `ai/ael/config.yaml`, read-only. |
-| FR-04-02 | Render the contents of `ai/ael/recipes/*.yaml`, read-only. |
+| FR-04-01 | Render the contents of `ai/config.yaml`, read-only. |
+| FR-04-02 | Render the contents of `ai/engine/recipes/*.yaml`, read-only. |
 | FR-04-03 | No editing capability of any kind is provided for these files. |
 
 [Return to Table of Contents](<#table of contents>)
@@ -216,7 +216,7 @@ inference, diff generation) are additive.
 | NFR-02 | Single-project scope only (CON-02). |
 | NFR-03 | Scoped to `ai/` folder contents plus `ai/task.md`; `dev/` is out of scope (CON-03). |
 | NFR-04 | The tool must handle missing or malformed documents gracefully, producing a WARNING rather than an unhandled failure — carried forward from `govwatch` NFR-04. |
-| NFR-05 | The tool must handle an absent `ai/state/ralph/` directory gracefully (AEL status: Idle) — carried forward from `govwatch` NFR-05. |
+| NFR-05 | The tool must handle an absent `ai/state/` directory gracefully (engine status: Idle) — carried forward from `govwatch` NFR-05. |
 | NFR-06 | Localhost only; no network exposure (CON-05). |
 | NFR-07 | Dependency footprint is to be stated explicitly once the architecture question (OQ-01) is resolved. This document does not assume a specific web framework or dependency set. |
 
@@ -233,7 +233,7 @@ with the same caveat carried in `requirements-govwatch.md` §6.0.
 |---|---|---|
 | UUID and iteration fields per `govwatch`'s existing parsing logic | T02, T03 | `uuid:`, `iteration:` |
 | `ai/task.md` rows follow the four-column format (`ID`, `Item`, `Status`, `References`) observed in GTach | `ai/task.md` | table columns |
-| `ai/ael/config.yaml` and `ai/ael/recipes/*.yaml` are valid YAML, human-scannable without transformation | config files | — |
+| `ai/config.yaml` and `ai/engine/recipes/*.yaml` are valid YAML, human-scannable without transformation | config files | — |
 | T07 (requirements) and T01 (design) documents are identifiable via `govwatch`'s existing `CLASS_DIRS`/filename regex, which already includes both classes | T01, T07 | filename pattern |
 
 [Return to Table of Contents](<#table of contents>)
@@ -249,7 +249,7 @@ with the same caveat carried in `requirements-govwatch.md` §6.0.
 - Kanban WIP limits or flow-metric discipline
 - Velocity/trend metrics (deferred, not permanently excluded — candidate for a future revision)
 - Any document creation, editing, or templating capability (CON-07, NFR-01)
-- AEL invocation or control
+- Engine invocation or control
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -304,6 +304,7 @@ a single-effort ("Big Bang") delivery.
 | 0.2 | 2026-08-21 | Renamed tool from `govwatch` (Web) to Project Overwatch throughout; resolved OQ-11; file renamed from `requirements-govwatch-web.md` to `requirements-project-overwatch.md` |
 | 0.3 | 2026-09-23 | Renamed from requirements-project-overwatch.md to the P00.10 UUID convention; OQ-10 resolved (requirements-govwatch.md archived) |
 | 0.4 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
+| 0.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 
 ---
 

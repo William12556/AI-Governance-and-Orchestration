@@ -1,0 +1,52 @@
+# change-5bcd46ad — layout and terminology mapping (Phase 1 of proposal-5bcd46ad)
+#
+# Source of truth for the migration and for the residue search.
+# Order matters: more specific entries first.
+# Excluded from rewriting: */closed/*, dev/audit/, dev/reports/, dev/proposals/,
+# dev/tools/ (except this file), change/issue c37198be and 5bcd46ad, Version History rows.
+
+paths:
+  - [ai/ael/config.yaml, ai/config.yaml]                              # project copy
+  - [ai/ael/recipes/ralph-work.yaml, ai/engine/recipes/loop-work.yaml]
+  - [ai/ael/recipes/ralph-review.yaml, ai/engine/recipes/loop-review.yaml]
+  - [ralph-work.yaml, loop-work.yaml]
+  - [ralph-review.yaml, loop-review.yaml]
+  - [ai/ael/, ai/engine/]
+  - [ai/state/ralph/, ai/state/]
+  - [ai/governance.md, ai/governance/software-engineering/governance.md]
+  - [ai/workflow.md, ai/governance/software-engineering/workflow.md]
+  - [ai/primer.md, ai/governance/software-engineering/primer.md]
+  - [ai/templates/, ai/governance/software-engineering/templates/]
+  - [ai/skills/, ai/governance/software-engineering/skills/]
+  - [ai/doc/guide-audit-loop.md, ai/governance/software-engineering/doc/guide-audit-loop.md]
+  - [ai/doc/guide-ael-operations.md, ai/engine/doc/guide-engine-operations.md]
+  - [tests/ael/, tests/engine/]
+
+framework_only:   # framework repository; downstream projects keep these at ai/
+  - [ai/ael/config.yaml, ai/engine/config.template.yaml]
+  - [ai/context.md, ai/governance/software-engineering/seed/context.md]
+  - [ai/task.md, ai/governance/software-engineering/seed/task.md]
+
+retired:
+  - ai/src/govwatch.py
+  - ai/src/requirements-govwatch.txt
+  - ai/doc/guide-govwatch.md
+  - ai/index.md
+  - dev/design/design-govwatch.md   # moved to dev/design/closed/
+
+terms:
+  - [RALPH-BLOCKED.md, BLOCKED.md]
+  - [.ralph-complete, .complete]
+  - [.ralph-timeout, .timeout]
+  - ["ael_*.LOG", "engine_*.LOG"]
+  - [start_ael, start_engine]
+  - [ael_status, engine_status]
+  - [reset_ael, reset_engine]
+  - [ael-mcp, engine-mcp]
+  - ["target_profile: ael", "target_profile: engine"]   # legacy 'ael' accepted on read
+  - ["recipe set 'ralph'", "recipe set 'loop'"]
+  - ["[ael]", "[engine]"]
+  - [RALPH LOOP, LOOP]
+  - [Ralph Loop, loop]
+  - [AEL (Autonomous Execution Loop), engine]
+  - [AEL, engine]

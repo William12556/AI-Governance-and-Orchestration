@@ -7,7 +7,7 @@
 #   curl -fsSL https://raw.githubusercontent.com/William12556/AI-Governance-and-Orchestration/main/bin/bootstrap.sh | bash -s -- <project-root>
 #
 # The script creates <project-root>/ai/ from the latest framework release.
-# Review ai/ael/config.yaml before first use.
+# Review ai/config.yaml before first use.
 
 set -euo pipefail
 
@@ -72,10 +72,18 @@ curl -fsSL --output "${TARBALL}" "${URL}"
 echo "==> Extracting to ${PROJECT_ROOT}/ai/..."
 tar -xz -C "${PROJECT_ROOT}" -f "${TARBALL}"
 
+# --- Seed project files ----------------------------------------------------
+# One governance model per project (proposal-5bcd46ad D-05).
+
+MODEL="software-engineering"
+[[ -e "${PROJECT_AI}/config.yaml" ]] || cp "${PROJECT_AI}/engine/config.template.yaml" "${PROJECT_AI}/config.yaml"
+[[ -e "${PROJECT_AI}/context.md" ]]  || cp "${PROJECT_AI}/governance/${MODEL}/seed/context.md" "${PROJECT_AI}/context.md"
+[[ -e "${PROJECT_AI}/task.md" ]]     || cp "${PROJECT_AI}/governance/${MODEL}/seed/task.md" "${PROJECT_AI}/task.md"
+
 # --- Cleanup ----------------------------------------------------------------
 
 rm -rf "${TMPWORK}"
 
 echo ""
 echo "Done."
-echo "Review ai/ael/config.yaml before first use: ${PROJECT_AI}/ael/config.yaml"
+echo "Review ai/config.yaml and ai/context.md before first use: ${PROJECT_AI}/config.yaml"

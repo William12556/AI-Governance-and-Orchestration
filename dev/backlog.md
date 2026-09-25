@@ -35,13 +35,13 @@ and `dev/reports/closed/report-eb782f83-pre-migration-baseline.md`.
 
 ## 2.0 Feature Work
 
-1. Project Overwatch FR-02–FR-10 (`dev/design/design-project-overwatch.md` §9.2). FR-01 shipped 2026-08-21 (prompt-19819f2e). OQ-07 (no automated sync of FR-02/FR-03 content with `governance.md`) remains open by design.
-2. OQ-09: side-by-side validation of Overwatch against the govwatch TUI before any retirement decision.
+1. ~~Project Overwatch FR-02–FR-10.~~ Parked 2026-09-25 (proposal-5bcd46ad D-12); see §9.0.
+2. ~~OQ-09: side-by-side validation of Overwatch against the govwatch TUI before any retirement decision.~~ Resolved 2026-09-25: govwatch retired (proposal-5bcd46ad D-11, change-5bcd46ad).
 3. Author the five reserved protocols: P05 Continuous Integration, P16 Execution, P17 Release, P18 Deployment and Propagation, P19 Observability (proposal-eb782f83 §5.3).
-4. Add `.github/workflows` CI running `linter.py`, `protocol_checker.py` and pytest on push (gap G1), and a check that `docs/claude/primer.md` is identical to `ai/primer.md` (decision 7.1). Governed by P05 once authored. Until then, sync the primer copy manually.
+4. Add `.github/workflows` CI running `linter.py`, `protocol_checker.py` and pytest on push (gap G1), and a check that `docs/claude/primer.md` is identical to `ai/governance/software-engineering/primer.md` (decision 7.1). Governed by P05 once authored. Until then, sync the primer copy manually.
 5. Retire the numeric `schema_type` prefix in favour of the class word (audit F-04; governance Appendix A A.5).
-6. Evaluate splitting `ai/governance.md` (OQ-1).
-7. Consider moving the declared project files (`context.md`, `task.md`, `ael/config.yaml`, `workspace/`, `state/`) out of `ai/`, so `ai/` holds framework files only. Needs requirements and design first (operator decision 2026-09-23).
+6. Evaluate splitting `ai/governance/software-engineering/governance.md` (OQ-1). Deferred to Phase 2 of the pivot (proposal-5bcd46ad OQ-03).
+7. ~~Consider moving the declared project files (`context.md`, `task.md`, `ael/config.yaml`, `workspace/`, `state/`) out of `ai/`, so `ai/` holds framework files only.~~ Resolved 2026-09-25 by the ownership boundary (proposal-5bcd46ad §5.0): framework-owned folders are `ai/engine/`, `ai/governance/<model>/`, `ai/profiles/`, `ai/src/`; configuration moved to `ai/config.yaml`.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -71,12 +71,12 @@ None open. Completed 2026-09-23: 31 closed documents normalised to terminal stat
 Verified 2026-09-24 under change-c37198be (dev/smoke harness, AEL venv `~/.venvs/ael`, filesystem-mcp 2.5.0). Live runs required defects D1–D3 to be fixed first (mcp 2.x, missing `--task` file, filesystem-mcp 2.x write tools).
 
 1. ~~Live Ralph Loop smoke test of the pytest SHIP gate (change-5bdc2d9b) against a project with an existing `tests/` directory.~~ Done 2026-09-24: Run A2 (`ael_20260924-141914`), pytest gate PASS on `tests/test_split.py`, read-evidence gate satisfied, SHIP at iteration 3.
-2. Validate the REVISE → fix → SHIP convergence path. **Open.** REVISE and the pytest gate FAIL branch were observed live (Run B2, `ael_20260924-154002`), but no SHIP: Devstral 8-bit did not correct the defective fixture in 10 cycles, and Magistral then repeated one false objection until stall BLOCK. Run B (`ael_20260924-144119`): the fixture's header comment ("Known requirement violations") misled the reviewer despite gate PASS; copy the fixture without its header (`grep -v '^#'`). Next attempt needs a different worker model or a smaller defect.
+2. Validate the REVISE → fix → SHIP convergence path. **Open.** REVISE and the pytest gate FAIL branch were observed live (Run B2, `ael_20260924-154002`), but no SHIP: Devstral 8-bit did not correct the defective fixture in 10 cycles, and Magistral then repeated one false objection until stall BLOCK. Run B (`ael_20260924-144119`): the fixture's header comment ("Known requirement violations") misled the reviewer despite gate PASS; copy the fixture without its header (`grep -v '^#'`). Next attempt needs a different worker model or a smaller defect. Retry in the change-5bcd46ad verification run.
 3. ~~Confirm Magistral reviewer tool-calling on the first real review phase (a7d3f8b1).~~ Done 2026-09-24: the reviewer read the task, the manifest and the deliverables in every review phase of Runs A, A2, B and B2.
 4. ~~Run the AEL once against the eb782f83-migrated corpus.~~ Done 2026-09-24: `dev/smoke/ai/` at governance 10.5.
 5. ~~Unexercised test cases from the closed triples a2f9c4d1, f5c28a04 and d1f4a83b: worker-authored `work-summary.txt` then budget exhaustion; `move_file` deliverable; `log_archive_dir` unset; `_normalize_verdict` pass 1; `BLOCKED` exit; audit-loop recipe pair; pytest gate FAIL branch and SHIP override; stall-detection BLOCK.~~ Done 2026-09-24: `tests/ael/` (43 tests, change-c37198be) cover all nine; `BLOCKED` exit, stall BLOCK and gate FAIL also observed live.
 6. ~~Confirm the orphaned process from run 8c2040d3 (PID 22391, July 2026) no longer exists.~~ Done 2026-09-24: no process with PID 22391.
-7. Observation (open): in every 2026-09-24 run the worker wrote unrequested helper scripts in `dev/smoke/` and edited tracked files there, despite `context.md` §4.0. Consider restricting worker writes to declared deliverables.
+7. Observation (open): in every 2026-09-24 run the worker wrote unrequested helper scripts in `dev/smoke/` and edited tracked files there, despite `context.md` §4.0. Consider restricting worker writes to declared deliverables. Moved to Phase 2 of the pivot (manifest write scope, proposal-5bcd46ad §6.0).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -109,7 +109,7 @@ None pending. All resolved 2026-09-23:
 ## 8.0 External Repositories
 
 1. `mcp-ripgrep`, `mcp-git`, `mcp-sed-awk`: check for the JSON Schema draft-07 `outputSchema` declaration that makes MCP tools unusable in Cowork sessions (observed 2026-09-23 on the Filesystem server's `read_text_file` and `directory_tree`). Emit 2020-12 or omit `$schema`.
-2. Redeploy the stale `ael-mcp` build that resolves state to `.ael/ralph` instead of `ai/state/ralph`.
+2. ~~Redeploy the stale `ael-mcp` build that resolves state to `.ael/ralph` instead of `ai/state/ralph`.~~ Resolved 2026-09-25: ael-mcp ported to `ai/engine/mcp/server.py` as engine-mcp (change-5bcd46ad). Operator: repoint the Claude Desktop MCP entry and archive the `ael-mcp` repository and the `~/mcp-ael` install.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -118,6 +118,7 @@ None pending. All resolved 2026-09-23:
 ## 9.0 Parked
 
 1. Live oMLX context-window query enhancement.
+2. Project Overwatch FR-02–FR-10 (`dev/design/design-project-overwatch.md` §9.2), parked 2026-09-25 (proposal-5bcd46ad D-12). Several items are SE-specific and are to be reconsidered in the Phase 4 web GUI design. OQ-07 remains open by design.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -128,6 +129,7 @@ None pending. All resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.18 | 2026-09-25 | Pivot dispositions (proposal-5bcd46ad §6.0): §2.0 items 1, 2 and 7 resolved or parked; §2.0 items 4 and 6 paths updated; §5.0 items 2 and 7 annotated; §8.0 item 2 resolved; §9.0 item 2 added |
 | 1.17 | 2026-09-24 | §5.0: runtime verification results (items 1, 3–6 done; item 2 open; item 7 observation added); §6.0 item 2 and §7.0 items struck as resolved |
 | 1.16 | 2026-09-23 | §6.0: remaining ai-local/ files resolved |
 | 1.15 | 2026-09-23 | §6.0: item 3 follow-ups done (pi-netconfig AEL config, e-Paper AGENTS.md, ai-local review) |

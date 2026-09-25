@@ -17,7 +17,7 @@ Created: 2026 March 05
   - [Devstral Small 2507 BF16](<#devstral small 2507 bf16>)
   - [Devstral Small 2 (2512) 6bit](<#devstral small 2 (2512) 6bit>)
 - [Start oMLX](<#start omlx>)
-- [Configure AEL](<#configure ael>)
+- [Configure engine](<#configure engine>)
 - [Verification](<#verification>)
 - [Version History](<#version history>)
 
@@ -25,7 +25,7 @@ Created: 2026 March 05
 
 ## Overview
 
-This guide covers running Devstral on Apple Silicon using the MLX framework. oMLX exposes an OpenAI-compatible API consumed by the AEL orchestrator as the Tactical Domain inference backend.
+This guide covers running Devstral on Apple Silicon using the MLX framework. oMLX exposes an OpenAI-compatible API consumed by the engine orchestrator as the Tactical Domain inference backend.
 
 Model: **Devstral Small 2507** (Apache 2.0 licence)
 Quantisation: Q8 recommended; BF16 available for systems with sufficient unified memory.
@@ -195,7 +195,7 @@ brew services start omlx
 
 The server exposes an OpenAI-compatible API at `http://localhost:8000/v1`. The admin dashboard is at `http://localhost:8000/admin/dashboard` — enter your API key to authenticate.
 
-AEL config (`ai/ael/config.yaml`):
+Engine config (`ai/config.yaml`):
 
 | Field | Value |
 |---|---|
@@ -207,9 +207,9 @@ AEL config (`ai/ael/config.yaml`):
 
 ---
 
-## Configure AEL
+## Configure engine
 
-With oMLX running, configure `ai/ael/config.yaml` in the project:
+With oMLX running, configure `ai/config.yaml` in the project:
 
 ```yaml
 omlx:
@@ -226,7 +226,7 @@ mcp_servers:
 
 loop:
   max_iterations: 10
-  state_dir: "ai/state/ralph"
+  state_dir: "ai/state"
 ```
 
 Replace `<allowed-path>` with the project root path. Replace `api_key` with your configured oMLX API key if different from `local`.
@@ -245,10 +245,10 @@ curl http://localhost:8000/v1/models -H "Authorization: Bearer local"
 
 A JSON response listing the loaded model confirms the server is operational. Replace `local` with your configured API key if different.
 
-**2. Confirm AEL can reach the model:**
+**2. Confirm engine can reach the model:**
 
 ```bash
-python ai/ael/src/orchestrator.py --mode worker --task "Reply with the single word: OK"
+python ai/engine/src/orchestrator.py --mode worker --task "Reply with the single word: OK"
 ```
 
 A response of `OK` confirms end-to-end connectivity.
@@ -270,6 +270,7 @@ A response of `OK` confirms end-to-end connectivity.
 | 1.6 | 2026-03-12 | Added Devstral Small 2 (2512) download section; restructured Download section with model summary table; renamed Q8/BF16 subsections for clarity |
 | 1.7 | 2026-06-14 | Updated config.yaml state_dir to ai/state/ralph |
 | 1.8 | 2026-06-16 | Updated Devstral 2512 section: Q8 → 6bit; corrected repo MLX-8Bit → MLX-6Bit; updated memory estimate |
+| 1.9 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 
 ---
 

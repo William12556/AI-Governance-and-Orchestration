@@ -73,7 +73,7 @@ def snapshot() -> "overwatch.Snapshot":
                 parse_ok=False,
             ),
         ],
-        ael_state=overwatch.AelState(status="running", iteration=4, task_ref="task"),
+        engine_state=overwatch.EngineState(status="running", iteration=4, task_ref="task"),
         budget=overwatch.BudgetState(present=True, status="warn", initial_pct=61.5),
         phase="Tactical execution",
         alerts=[
@@ -89,7 +89,7 @@ def snapshot() -> "overwatch.Snapshot":
 
 @pytest.fixture
 def empty_snapshot() -> "overwatch.Snapshot":
-    """An empty Snapshot: no documents, no alerts, AEL idle, budget unknown."""
+    """An empty Snapshot: no documents, no alerts, engine idle, budget unknown."""
     return overwatch.Snapshot(scan_time=datetime.datetime(2026, 8, 21, 10, 30, 0))
 
 
@@ -128,7 +128,7 @@ def test_render_document_structure(renderer, snapshot) -> None:
 
 
 def test_render_shows_workflow_state(renderer, snapshot) -> None:
-    """Phase, AEL status/iteration, and budget status all reach the page."""
+    """Phase, engine status/iteration, and budget status all reach the page."""
     out = renderer.render(snapshot)
 
     assert "Tactical execution" in out
@@ -168,7 +168,7 @@ def test_embedded_json_round_trip(renderer, snapshot) -> None:
     assert data["phase"] == "Tactical execution"
     assert data["scan_time"] == "2026-08-21T10:30:00"
     assert len(data["documents"]) == 3
-    assert data["ael_state"]["status"] == "running"
+    assert data["engine_state"]["status"] == "running"
 
 
 def test_to_jsonable_handles_paths_and_dataclasses(tmp_path: Path) -> None:

@@ -68,7 +68,9 @@ TARBALL="${TMPWORK}/${ASSET}"
 echo "==> Archiving ai/ as ${ASSET}..."
 
 tar -cz \
-    --exclude='ai/ael/state' \
+    --exclude='ai/state' \
+    --exclude='ai/logs' \
+    --exclude='ai/config.yaml' \
     --exclude='ai/workspace' \
     --exclude='ai/dashboard-alerts.md' \
     --exclude='__pycache__' \

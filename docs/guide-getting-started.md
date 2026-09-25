@@ -10,7 +10,7 @@ Created: 2026 June 02
 [2.0 Prerequisites](<#2.0 prerequisites>)
 [3.0 Clone and Initialise](<#3.0 clone and initialise>)
 [4.0 Select a Profile](<#4.0 select a profile>)
-[5.0 Configure AEL](<#5.0 configure ael>)
+[5.0 Configure engine](<#5.0 configure engine>)
 [6.0 First Run](<#6.0 first run>)
 [7.0 Next Steps](<#7.0 next steps>)
 [Version History](<#version history>)
@@ -19,7 +19,7 @@ Created: 2026 June 02
 
 ## 1.0 Overview
 
-This guide covers the steps from cloning the repository to running the first AEL loop in a downstream project. It assumes Apple Silicon hardware and the AEL profile. For other profiles see [guide-profile-selection.md](guide-profile-selection.md).
+This guide covers the steps from cloning the repository to running the first engine loop in a downstream project. It assumes Apple Silicon hardware and the engine profile. For other profiles see [guide-profile-selection.md](guide-profile-selection.md).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -70,14 +70,14 @@ bin/propagate.sh /path/to/your/projects/<project-name>
 cd /path/to/your/projects/<project-name>
 ```
 
-`bin/propagate.sh` copies the `ai/` directory into the downstream project, skipping project-local files (`ael/config.yaml`, `context.md`, `task.md`, `workspace/`, `state/`, `logs/`, `dashboard-alerts.md`). Other target files absent from the source are moved to `ai-local/` and labelled as retired framework files or project content; the script never deletes, and locally edited framework files are backed up to `ai-local/` before being overwritten. The preview lists each relocation and backup before confirmation. Run from the framework repository root.
+`bin/propagate.sh` copies the `ai/` directory into the downstream project, skipping project-local files (`config.yaml`, `context.md`, `task.md`, `workspace/`, `state/`, `logs/`, `dashboard-alerts.md`). Other target files absent from the source are moved to `ai-local/` and labelled as retired framework files or project content; the script never deletes, and locally edited framework files are backed up to `ai-local/` before being overwritten. The preview lists each relocation and backup before confirmation. Run from the framework repository root.
 
 ### 3.3 Create a Python virtual environment
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install -r ai/ael/requirements.txt
+pip install -r ai/engine/requirements.txt
 ```
 
 ### 3.4 Initialise git
@@ -98,8 +98,8 @@ Three implementation profiles are available. For a full comparison see [guide-pr
 
 | Profile | Tactical Domain | Best for |
 |---|---|---|
-| `mlx_devstral_small_2_2512_6bit.md` | AEL + Devstral (local) | Automated loops on Apple Silicon |
-| `mlx_devstral_magistral_heterogeneous.md` | AEL + Devstral (worker) / Magistral (reviewer), local | Automated loops with a distinct reviewer model |
+| `mlx_devstral_small_2_2512_6bit.md` | Engine + Devstral (local) | Automated loops on Apple Silicon |
+| `mlx_devstral_magistral_heterogeneous.md` | Engine + Devstral (worker) / Magistral (reviewer), local | Automated loops with a distinct reviewer model |
 | `claude.md` | Claude Code (Anthropic API) | Manual execution, no local GPU required |
 | `claude-omlx.md` | Claude Code CLI + Devstral (local) | Manual execution on Apple Silicon |
 
@@ -109,11 +109,11 @@ Profile documents are in `ai/profiles/`. Read the selected profile before procee
 
 ---
 
-## 5.0 Configure AEL
+## 5.0 Configure engine
 
 ### 5.1 Edit config.yaml
 
-Open `ai/ael/config.yaml` and update:
+Open `ai/config.yaml` and update:
 
 ```yaml
 omlx:
@@ -149,7 +149,7 @@ curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 
 ### 5.2 Context budget report
 
-`context-budget.md` is written automatically by the orchestrator at every startup — no separate step is required. Read `ai/state/ralph/context-budget.md` after the first run (and after any model change) before authoring T03 prompts.
+`context-budget.md` is written automatically by the orchestrator at every startup — no separate step is required. Read `ai/state/context-budget.md` after the first run (and after any model change) before authoring T03 prompts.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -163,22 +163,22 @@ curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 # Confirm oMLX is responding
 curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 
-# Confirm AEL can reach the model
-python ai/ael/src/orchestrator.py --mode worker --task "Reply with the single word: OK"
+# Confirm engine can reach the model
+python ai/engine/src/orchestrator.py --mode worker --task "Reply with the single word: OK"
 ```
 
 A response of `OK` confirms end-to-end connectivity.
 
 ### 6.2 Read governance.md
 
-Ask the Strategic Domain (Claude Desktop) to read `ai/governance.md` and initialise the project per P10 (P10 Project Initialization). The Strategic Domain will guide the workflow from that point.
+Ask the Strategic Domain (Claude Desktop) to read `ai/governance/software-engineering/governance.md` and initialise the project per P10 (P10 Project Initialization). The Strategic Domain will guide the workflow from that point.
 
 ### 6.3 Follow the workflow
 
-The framework workflow is defined in `ai/workflow.md` and governed by `ai/governance.md`. The sequence is:
+The framework workflow is defined in `ai/governance/software-engineering/workflow.md` and governed by `ai/governance/software-engineering/governance.md`. The sequence is:
 
 ```
-P11 Requirements → P12 Design → P13 T03 Prompt → AEL → P15 Test → P00 Close
+P11 Requirements → P12 Design → P13 T03 Prompt → engine → P15 Test → P00 Close
 ```
 
 The Strategic Domain coordinates each step. Human approval gates are required before requirements baseline, design tier transitions, and code generation.
@@ -192,8 +192,8 @@ The Strategic Domain coordinates each step. Human approval gates are required be
 - [guide-profile-selection.md](guide-profile-selection.md) — compare profiles in detail
 - [guide-audit-loop.md](guide-audit-loop.md) — run a codebase quality audit
 - [setup-apple-silicon-mlx.md](setup-apple-silicon-mlx.md) — oMLX and Devstral setup
-- `ai/governance.md` — authoritative protocol reference
-- `ai/workflow.md` — workflow flowchart
+- `ai/governance/software-engineering/governance.md` — authoritative protocol reference
+- `ai/governance/software-engineering/workflow.md` — workflow flowchart
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -214,6 +214,7 @@ The Strategic Domain coordinates each step. Human approval gates are required be
 | 1.8 | 2026-09-23 | §3.2: propagate.sh never deletes |
 | 1.9 | 2026-09-23 | §3.2: local modifications backed up |
 | 1.10 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
+| 1.11 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 
 ---
 

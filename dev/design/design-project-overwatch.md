@@ -111,7 +111,7 @@ a silent inconsistency between the requirements and design documents.
 
 ```mermaid
 graph TD
-    FS["Project filesystem<br/>ai/workspace/ ai/state/ralph/<br/>ai/ael/config.yaml ai/task.md"]
+    FS["Project filesystem<br/>ai/workspace/ ai/state/<br/>ai/config.yaml ai/task.md"]
     SC["Scanner (govwatch, unmodified)"]
     NEW["TaskParser / ConfigReader (new)"]
     SNAP["Snapshot"]
@@ -186,7 +186,7 @@ list[ConfigFile]`, `stages: list[StageToken]`.
 | `PhaseInference` | Reused unmodified for the project-wide phase shown in §7.1; not replaced |
 | `StageInference` | New. Wraps `PhaseInference`'s document-grouping logic per UUID rather than project-wide (§6.0) |
 | `TaskParser` | New. Parses `ai/task.md`'s four-column table into `TaskRow` records (§9.0) |
-| `ConfigReader` | New. Loads `ai/ael/config.yaml` and `ai/ael/recipes/*.yaml` via `yaml.safe_load`, read-only |
+| `ConfigReader` | New. Loads `ai/config.yaml` and `ai/engine/recipes/*.yaml` via `yaml.safe_load`, read-only |
 | `DiffEngine` | New. Produces `DiffResult` on demand, not during routine scans (§7.8) |
 | `HtmlRenderer` | New. Replaces `GovwatchApp`. Serialises `Snapshot` to embedded JSON, renders the single HTML file, writes `overwatch.html` |
 | `AdvisorEngine` | New. Detects governance-state gaps and produces plain-language next-step text (§7.9) |
@@ -376,7 +376,7 @@ elicitation. `ID` is either an 8-hex UUID or the literal `—`.
 
 ### 9.2 Config Files
 
-`ai/ael/config.yaml` and `ai/ael/recipes/*.yaml` — `yaml.safe_load`,
+`ai/config.yaml` and `ai/engine/recipes/*.yaml` — `yaml.safe_load`,
 rendered as-is. Parse failure produces a WARNING alert (NFR-04 pattern),
 not an unhandled exception.
 
@@ -406,7 +406,7 @@ not an unhandled exception.
 | NFR-02 | Single-project scope; `ProjectPaths` unchanged from `govwatch` |
 | NFR-03 | No read outside `ai/` plus `ai/task.md`, enforced by `ProjectPaths` resolution |
 | NFR-04 | Per-document and per-config try/except → WARNING, unchanged pattern |
-| NFR-05 | Absent `ai/state/ralph/` handled as idle, unchanged from `govwatch` |
+| NFR-05 | Absent `ai/state/` handled as idle, unchanged from `govwatch` |
 | NFR-06 | Localhost/file-based only; no network exposure — no server exists to expose (§3.1) |
 | NFR-07 | Dependency footprint: `pyyaml` only. Stated explicitly per requirements' deferral of this to design |
 
@@ -497,6 +497,7 @@ bounded interval, not an open-ended dual-maintenance commitment.
 | 0.1 | 2026-08-21 | Initial component design from requirements-project-overwatch.md v0.2. Resolves OQ-01 through OQ-09, OQ-11. OQ-07 and OQ-10 explicitly not resolved (recorded as accepted risk / remaining open). |
 | 0.2 | 2026-09-23 | Requirements link updated to requirements-0c6aedee-project-overwatch.md (P00.10 naming); OQ-10 marked resolved |
 | 0.3 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
+| 0.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 
 ---
 

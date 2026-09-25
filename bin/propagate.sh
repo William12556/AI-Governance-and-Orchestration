@@ -24,6 +24,10 @@
 #   - ai-local/RELOCATED.md logs every move and copy, labelled 'retired
 #     framework file' (safe to delete), 'project content' or 'local
 #     modification'. Review ai-local/ and delete what is not needed.
+#   - Refuses a target still in the pre-5bcd46ad layout (ai/ael/ or a file
+#     at ai/governance.md); run bin/migrate-layout.sh first (change-5bcd46ad).
+#   - Seeds ai/config.yaml, ai/context.md and ai/task.md when absent, from
+#     ai/engine/config.template.yaml and ai/governance/<model>/seed/.
 #
 # Exit codes: 0 done or up to date; 1 usage; 2 confirmation required;
 #   3 refused before the copy (unsafe ai-local/ or declared path, target or
@@ -35,6 +39,12 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname -- "$0")/.." && pwd)"
 AI_SRC="${REPO_ROOT}/ai"
+# Governance model installed in the target (proposal-5bcd46ad D-05: one per
+# project). Model selection is Phase 2 work; the library holds one model.
+MODEL="software-engineering"
+GOV_SRC="${AI_SRC}/governance/${MODEL}"
+SEED_SRC="${GOV_SRC}/seed"
+CONFIG_SRC="${AI_SRC}/engine/config.template.yaml"
 
 # --- Arguments ---------------------------------------------------------------
 
@@ -71,6 +81,13 @@ if [[ ! -d "${PROJECT_AI}" ]]; then
     exit 1
 fi
 
+if [[ -e "${PROJECT_AI}/ael" || -L "${PROJECT_AI}/ael" \
+      || ( -e "${PROJECT_AI}/governance.md" && ! -d "${PROJECT_AI}/governance.md" ) ]]; then
+    echo "Error: ${PROJECT_AI} uses the pre-5bcd46ad layout (ai/ael/, ai/governance.md)." >&2
+    echo "Run bin/migrate-layout.sh ${PROJECT_ROOT} first. Nothing applied." >&2
+    exit 3
+fi
+
 WORK="$(mktemp -d)"
 trap 'rm -rf "${WORK}"' EXIT
 
@@ -89,8 +106,8 @@ gov_version() {
     echo "${v:-unknown}"
 }
 
-SRC_VER="$(gov_version "${AI_SRC}/governance.md")"
-DST_VER="$(gov_version "${PROJECT_AI}/governance.md")"
+SRC_VER="$(gov_version "${GOV_SRC}/governance.md")"
+DST_VER="$(gov_version "${PROJECT_AI}/governance/${MODEL}/governance.md")"
 MAJOR_CHANGE="false"
 if [[ "${SRC_VER}" == "unknown" || "${DST_VER}" == "unknown" \
       || "${SRC_VER%%.*}" != "${DST_VER%%.*}" ]]; then
@@ -100,17 +117,17 @@ fi
 # --- Excludes ----------------------------------------------------------------
 # Declared project paths (governance P10.6), anchored at ai/. No trailing
 # slash, so a symlink at a declared path is protected too. A symlink at
-# context.md or task.md with no regular file behind it is refused, because
-# seeding would follow it.
+# config.yaml, context.md or task.md with no regular file behind it is
+# refused, because seeding would follow it.
 
 EXCLUDES=(
-    --exclude='/ael/config.yaml'     # project-specific AEL configuration
+    --exclude='/config.yaml'         # project-specific engine configuration; seeded when absent
     --exclude='/context.md'          # project conventions/stack; seeded when absent
     --exclude='/task.md'             # open-work register; seeded when absent
     --exclude='/workspace'           # project governance documents
-    --exclude='/state'               # AEL runtime state
-    --exclude='/logs'                # AEL run-log archive (log_archive_dir)
-    --exclude='/dashboard-alerts.md' # govwatch write target
+    --exclude='/state'               # engine runtime state
+    --exclude='/logs'                # engine run-log archive (log_archive_dir)
+    --exclude='/dashboard-alerts.md' # overwatch write target
     --exclude='.DS_Store'
     --exclude='__pycache__'
     --exclude='*.pyc'
@@ -119,7 +136,7 @@ EXCLUDES=(
 
 is_declared() {
     case "$1" in
-        ael/config.yaml|context.md|task.md|dashboard-alerts.md) return 0 ;;
+        config.yaml|context.md|task.md|dashboard-alerts.md) return 0 ;;
         workspace|workspace/*|state|state/*|logs|logs/*) return 0 ;;
     esac
     return 1
@@ -133,8 +150,6 @@ is_dropping() {
     return 1
 }
 
-# Declared files that live below a non-declared directory (N-07).
-DECLARED_NESTED=("ael/config.yaml")
 
 # --- Exact names -------------------------------------------------------------
 # A path exists in a tree only if every component matches a directory entry
@@ -373,13 +388,8 @@ add_rec() {
     if ! check_dir_chain "$(dirname -- "${dst}")"; then
         PLAN_ERR+="  $(disp "${LOCAL_DIR}/${dst}"): a path component is a file or symlink"$'\n'
     fi
-    for d in "${DECLARED_NESTED[@]}"; do
-        if [[ "${d}" == "${rel}/"* ]]; then
-            PLAN_ERR+="  ai/$(disp "${rel}"): holds declared ${d}; resolve manually"$'\n'
-        fi
-    done
     lc="$(printf '%s' "${rel}" | tr '[:upper:]' '[:lower:]')"
-    if is_declared "${lc}" || [[ "${lc}" == "ael" ]]; then
+    if is_declared "${lc}"; then
         PLAN_ERR+="  ai/$(disp "${rel}"): differs from a declared path only by letter case; rename manually"$'\n'
     fi
     if [[ "${IN_GIT}" == "true" ]] && git -C "${PROJECT_ROOT}" check-ignore -q -- "ai/${rel}" 2>/dev/null; then
@@ -400,7 +410,7 @@ while IFS= read -r -d '' rel; do
 done < "${WORK}/p1/backups"
 
 LOG="${LOCAL_ROOT}/${LOG_NAME}"
-for f in context.md task.md; do
+for f in config.yaml context.md task.md; do
     # A symlink to an existing regular file is preserved; any other symlink
     # would be followed by seeding (audit-b170cf6a A6, B4).
     if [[ -L "${PROJECT_AI}/${f}" && ! -f "${PROJECT_AI}/${f}" ]]; then
@@ -413,6 +423,7 @@ fi
 
 # --- Preview -----------------------------------------------------------------
 
+NEEDS_SEED_CONFIG="false";  [[ -f "${PROJECT_AI}/config.yaml" ]] || NEEDS_SEED_CONFIG="true"
 NEEDS_SEED_CONTEXT="false"; [[ -f "${PROJECT_AI}/context.md" ]] || NEEDS_SEED_CONTEXT="true"
 NEEDS_SEED_TASK="false";    [[ -f "${PROJECT_AI}/task.md" ]]    || NEEDS_SEED_TASK="true"
 
@@ -420,7 +431,8 @@ echo "=== Preview: ai -> ${PROJECT_AI} ==="
 echo ""
 
 if [[ "${UPDATE_COUNT}" -eq 0 && "${CAND_COUNT}" -eq 0 && "${BACKUP_COUNT}" -eq 0 \
-      && "${NEEDS_SEED_CONTEXT}" == "false" && "${NEEDS_SEED_TASK}" == "false" ]]; then
+      && "${NEEDS_SEED_CONFIG}" == "false" && "${NEEDS_SEED_CONTEXT}" == "false" \
+      && "${NEEDS_SEED_TASK}" == "false" ]]; then
     echo "Target is up to date. No changes to apply."
     exit 0
 fi
@@ -440,6 +452,7 @@ while IFS= read -r -d '' kind && IFS= read -r -d '' rel && IFS= read -r -d '' ds
         echo "backup       $(disp "${rel}") -> ${LOCAL_DIR}/$(disp "${dst}") (${lab}; then overwritten)"
     fi
 done < "${RECS}"
+[[ "${NEEDS_SEED_CONFIG}" == "true" ]] && echo "seed         config.yaml (absent in target)"
 [[ "${NEEDS_SEED_CONTEXT}" == "true" ]] && echo "seed         context.md (absent in target)"
 [[ "${NEEDS_SEED_TASK}" == "true" ]] && echo "seed         task.md (absent in target)"
 
@@ -572,13 +585,25 @@ fi
 
 # --- Seed project-specific files ---------------------------------------------
 
+if [[ "${NEEDS_SEED_CONFIG}" == "true" ]] && [[ -e "${PROJECT_AI}/config.yaml" || -L "${PROJECT_AI}/config.yaml" ]]; then
+    echo ""
+    echo "config.yaml: appeared during the run; not seeded, existing file preserved."
+elif [[ "${NEEDS_SEED_CONFIG}" == "true" ]]; then
+    cp "${CONFIG_SRC}" "${PROJECT_AI}/config.yaml"
+    echo ""
+    echo "config.yaml: template seeded (new project). Review it before the first engine run."
+else
+    echo ""
+    echo "config.yaml: existing project copy preserved."
+fi
+
 if [[ "${NEEDS_SEED_CONTEXT}" == "true" ]] && [[ -e "${PROJECT_AI}/context.md" || -L "${PROJECT_AI}/context.md" ]]; then
     echo ""
     echo "context.md: appeared during the run; not seeded, existing file preserved."
 elif [[ "${NEEDS_SEED_CONTEXT}" == "true" ]]; then
-    cp "${AI_SRC}/context.md" "${PROJECT_AI}/context.md"
+    cp "${SEED_SRC}/context.md" "${PROJECT_AI}/context.md"
     echo ""
-    echo "context.md: template seeded (new project). Fill it in before the first AEL run."
+    echo "context.md: template seeded (new project). Fill it in before the first engine run."
 else
     echo ""
     echo "context.md: existing project copy preserved."
@@ -588,7 +613,7 @@ if [[ "${NEEDS_SEED_TASK}" == "true" ]] && [[ -e "${PROJECT_AI}/task.md" || -L "
     echo ""
     echo "task.md: appeared during the run; not seeded, existing file preserved."
 elif [[ "${NEEDS_SEED_TASK}" == "true" ]]; then
-    cp "${AI_SRC}/task.md" "${PROJECT_AI}/task.md"
+    cp "${SEED_SRC}/task.md" "${PROJECT_AI}/task.md"
     echo ""
     echo "task.md: template seeded (new project)."
 else

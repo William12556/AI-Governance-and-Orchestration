@@ -9,7 +9,7 @@ Created: 2026 June 02
 [1.0 Overview](<#1.0 overview>)
 [2.0 Decision Criteria](<#2.0 decision criteria>)
 [3.0 Profile Reference](<#3.0 profile reference>)
-[3.1 AEL — Automated Execution Loop](<#3.1 ael — automated execution loop>)
+[3.1 Engine — Automated Execution Loop](<#3.1 engine — automated execution loop>)
 [3.2 Claude Code](<#3.2 claude code>)
 [3.3 claude-omlx](<#3.3 claude-omlx>)
 [4.0 Trade-offs](<#4.0 trade-offs>)
@@ -25,7 +25,7 @@ Three profiles are available, defined in `ai/profiles/`:
 
 | Profile file | Tactical Domain | Execution |
 |---|---|---|
-| `mlx_devstral_small_2_2512_6bit.md` | AEL + Devstral (local, MLX) | Automated Ralph Loop |
+| `mlx_devstral_small_2_2512_6bit.md` | Engine + Devstral (local, MLX) | Automated loop |
 | `claude.md` | Claude Code (Anthropic API) | Manual, human-directed |
 | `claude-omlx.md` | Claude Code CLI + Devstral (local, MLX) | Manual, human-directed |
 
@@ -41,7 +41,7 @@ Work through the following questions in order:
 No → use `claude.md` (Claude Code). Apple Silicon is required for local MLX inference.
 
 **Do you want automated worker/reviewer cycles without manual terminal invocations?**
-Yes → use `mlx_devstral_small_2_2512_6bit.md` (AEL). The orchestrator runs the full loop autonomously.
+Yes → use `mlx_devstral_small_2_2512_6bit.md` (engine). The orchestrator runs the full loop autonomously.
 No → use `claude-omlx.md` if you have Apple Silicon, or `claude.md` if you have an Anthropic API key.
 
 **Do you have an Anthropic API key?**
@@ -63,11 +63,11 @@ No → you must use an MLX profile.
 
 ## 3.0 Profile Reference
 
-### 3.1 AEL — Automated Execution Loop
+### 3.1 Engine — Automated Execution Loop
 
 **Profile file:** `ai/profiles/mlx_devstral_small_2_2512_6bit.md`
 
-The primary profile. The orchestrator (`orchestrator.py`) runs a worker/reviewer Ralph Loop autonomously. The Strategic Domain authors a T03 prompt and issues an AEL command; the loop runs to SHIP or BLOCKED without further human involvement per iteration.
+The primary profile. The orchestrator (`orchestrator.py`) runs a worker/reviewer loop autonomously. The Strategic Domain authors a T03 prompt and issues an engine command; the loop runs to SHIP or BLOCKED without further human involvement per iteration.
 
 **Prerequisites:**
 
@@ -76,18 +76,18 @@ The primary profile. The orchestrator (`orchestrator.py`) runs a worker/reviewer
 | Hardware | Apple M-series, 24 GB+ unified memory |
 | Inference server | oMLX running on `http://127.0.0.1:8000` |
 | Model | Devstral Small 2 (2512) — download via HuggingFace |
-| Python deps | `pip install -r ai/ael/requirements.txt` |
+| Python deps | `pip install -r ai/engine/requirements.txt` |
 | MCP servers | Filesystem and mcp-ripgrep configured in Claude Desktop |
 
 **Setup:** See [setup-apple-silicon-mlx.md](setup-apple-silicon-mlx.md) for oMLX and model installation.
 
-**Tactical context file:** `config.yaml` (at `ai/ael/config.yaml`)
+**Tactical context file:** `config.yaml` (at `ai/config.yaml`)
 
-**State directory:** `ai/state/ralph/`
+**State directory:** `ai/state/`
 
 **Invocation:**
 ```bash
-python ai/ael/src/orchestrator.py --mode loop \
+python ai/engine/src/orchestrator.py --mode loop \
   --task ai/workspace/prompt/prompt-<uuid>-<n>.md
 ```
 
@@ -146,7 +146,7 @@ Manual profile using the Claude Code CLI pointed at a local oMLX endpoint. Combi
 
 ## 4.0 Trade-offs
 
-| Aspect | AEL | Claude Code | claude-omlx |
+| Aspect | Engine | Claude Code | claude-omlx |
 |---|---|---|---|
 | Automation | Full — loop runs autonomously | None — human-directed | None — human-directed |
 | Inference cost | Zero — local model | Anthropic API billing | Zero — local model |
@@ -156,7 +156,7 @@ Manual profile using the Claude Code CLI pointed at a local oMLX endpoint. Combi
 | Setup complexity | Higher | Lower | Medium |
 | Iteration speed | Model-dependent (~local throughput) | Claude API speed | Model-dependent |
 
-The AEL profile is the only profile that supports the automated audit loop (`audit-work.yaml`, `audit-review.yaml`). See [guide-audit-loop.md](guide-audit-loop.md).
+The engine profile is the only profile that supports the automated audit loop (`audit-work.yaml`, `audit-review.yaml`). See [guide-audit-loop.md](guide-audit-loop.md).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -170,6 +170,7 @@ The AEL profile is the only profile that supports the automated audit loop (`aud
 | 1.1 | 2026-06-14 | Relocated paths under ai/: state → ai/state/ralph/, workspace/ → ai/workspace/ |
 | 1.2 | 2026-06-16 | Updated profile filename references: mlx_devstral_small_2_2512_Q8.md → mlx_devstral_small_2_2512_6bit.md |
 | 1.3 | 2026-07-16 | mcp-grep → mcp-ripgrep in §3.1, §3.2, §3.3 prerequisites tables |
+| 1.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 
 ---
 

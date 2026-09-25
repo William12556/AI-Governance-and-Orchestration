@@ -16,7 +16,7 @@ venv/
 .zsh_history
 
 # Logs and backups
-# Note: on a case-insensitive filesystem '*.log' also matches AEL's 'ael_*.LOG'.
+# Note: on a case-insensitive filesystem '*.log' also matches the engine's 'engine_*.LOG'.
 # That is intended for transient state, but archived run evidence is re-included
 # below (loop.log_archive_dir).
 *.log
@@ -26,7 +26,7 @@ venv/
 *.BAK
 **/*.BAK
 
-# AEL preserved run logs — deliberately retained as run evidence
+# Engine preserved run logs — deliberately retained as run evidence
 !ai/logs/
 !ai/logs/**
 
@@ -43,11 +43,11 @@ workspace/report/
 workspace/proposal/
 workspace/proposal/closed/
 
-# AEL ephemeral state
-ai/state/ralph/
+# Engine ephemeral state
+ai/state/
 
 # dev/smoke harness — propagated framework copy, generated deliverable, and
-# ael-mcp run records. The harness definition (task.md, tests/,
+# engine-mcp run records. The harness definition (task.md, tests/,
 # config.reference.yaml) and dev/smoke-fixtures/ remain tracked.
 dev/smoke/ai/
 dev/smoke/src/

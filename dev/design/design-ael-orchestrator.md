@@ -1,6 +1,6 @@
 Created: 2026 July 09
 
-# AEL Orchestrator Design
+# Engine Orchestrator Design
 
 ---
 
@@ -18,14 +18,14 @@ Created: 2026 July 09
 [5.1 Context Resolution](<#5.1 context resolution>)
 [5.2 Task Resolution](<#5.2 task resolution>)
 [5.3 Phase Runner](<#5.3 phase runner>)
-[5.4 Ralph Loop Controller](<#5.4 ralph loop controller>)
+[5.4 Loop Controller](<#5.4 loop controller>)
 [5.5 MCPClient](<#5.5 mcpclient>)
 [5.6 Tool Call Parser](<#5.6 tool call parser>)
 [5.7 Validation Guards](<#5.7 validation guards>)
 [5.8 Audit Support](<#5.8 audit support>)
 [5.9 Entry Point](<#5.9 entry point>)
 [6.0 Control Flow](<#6.0 control flow>)
-[6.1 Ralph Loop State Diagram](<#6.1 ralph loop state diagram>)
+[6.1 Loop State Diagram](<#6.1 loop state diagram>)
 [6.2 Phase Iteration Flow](<#6.2 phase iteration flow>)
 [7.0 Context Window Resolution](<#7.0 context window resolution>)
 [8.0 Interfaces](<#8.0 interfaces>)
@@ -45,11 +45,11 @@ Created: 2026 July 09
 
 ## 1.0 Purpose
 
-This document specifies the as-built component design of the AEL orchestrator,
+This document specifies the as-built component design of the engine orchestrator,
 reverse-engineered from [requirements-1c1f4ef6-ael.md](../requirements/requirements-1c1f4ef6-ael.md)
-v1.1 and `ai/ael/src/orchestrator.py`. The orchestrator is the Tactical Domain's
+v1.1 and `ai/engine/src/orchestrator.py`. The orchestrator is the Tactical Domain's
 reference implementation: a single-process Python tool that runs a worker/reviewer
-Ralph Loop against an oMLX-served local model until `SHIP` or a boundary condition
+loop against an oMLX-served local model until `SHIP` or a boundary condition
 is reached.
 
 No prior design document existed for this component; this document is derived
@@ -64,9 +64,9 @@ noted explicitly rather than reconciled silently.
 
 | Aspect | Decision |
 |---|---|
-| Deliverable covered | `ai/ael/src/orchestrator.py`, `ai/ael/src/mcp_client.py`, `ai/ael/src/parser.py` |
-| Configuration | `ai/ael/config.yaml` |
-| Recipes | `ai/ael/recipes/*.yaml` (referenced by name; recipe content out of scope per requirements §Scope) |
+| Deliverable covered | `ai/engine/src/orchestrator.py`, `ai/engine/src/mcp_client.py`, `ai/engine/src/parser.py` |
+| Configuration | `ai/config.yaml` |
+| Recipes | `ai/engine/recipes/*.yaml` (referenced by name; recipe content out of scope per requirements §Scope) |
 | Coverage | As-built only (FR-AEL-001–015, NFR-AEL-001–005). Proposed requirements (FR-AEL-P01–P12) are not present in source — see §12.0 |
 | Out of scope | oMLX inference endpoint implementation, MCP server implementations, recipe content |
 
@@ -95,11 +95,11 @@ graph TD
     LLM["oMLX /v1<br/>(AsyncOpenAI client)"]
     MCPC["MCPClient"]
     MCPS["MCP servers<br/>(stdio, e.g. filesystem, mcp-ripgrep)"]
-    RECIPE["Recipe YAML<br/>ralph-work / ralph-review /<br/>audit-work / audit-review"]
+    RECIPE["Recipe YAML<br/>loop-work / loop-review /<br/>audit-work / audit-review"]
     RUNLOOP["run_loop()"]
     RUNPHASE["run_phase()"]
     PARSER["parse_tool_calls()<br/>(parser.py)"]
-    STATE["State directory<br/>ai/state/ralph/"]
+    STATE["State directory<br/>ai/state/"]
     LOG["ael_YYYYMMDD-HHMMSS.LOG"]
 
     T04 --> MAIN
@@ -127,12 +127,12 @@ persist between `worker`/`reviewer`/`loop` invocations).
 ### 3.2 Module Structure
 
 ```
-ai/ael/
+ai/engine/
 ├── config.yaml                  # runtime configuration (§4.2)
 ├── requirements.txt              # openai, mcp, pyyaml, rich
 ├── recipes/
-│   ├── ralph-work.yaml
-│   ├── ralph-review.yaml
+│   ├── loop-work.yaml
+│   ├── loop-review.yaml
 │   ├── audit-work.yaml
 │   └── audit-review.yaml
 └── src/
@@ -152,7 +152,7 @@ No package (`__init__.py` absent); `orchestrator.py` imports `mcp_client` and
 
 ### 4.1 State Files
 
-All paths relative to `state_dir` (`ai/state/ralph/` by default, per `config.yaml`
+All paths relative to `state_dir` (`ai/state/` by default, per `config.yaml`
 `loop.state_dir`). Cleared selectively by `reset_state()` — logs and
 `context-budget.md` are preserved across reset.
 
@@ -164,19 +164,19 @@ All paths relative to `state_dir` (`ai/state/ralph/` by default, per `config.yam
 | `work-complete.txt` | Tactical Domain, via MCP write during worker phase | `run_phase` (completion signal) | Signals worker phase is done |
 | `review-result.txt` | Tactical Domain, via MCP write during review phase | `run_loop` (verdict, precedence source) | Raw `SHIP`/`REVISE` text |
 | `review-feedback.txt` | Tactical Domain, via MCP; or `run_loop` fallback extraction | `run_loop` (next iteration task input) | Reviewer notes for next work phase |
-| `.ralph-complete` | `run_loop` | Strategic Domain / govwatch | Success marker (SHIP) |
-| `.ralph-timeout` | `run_loop` | Strategic Domain / govwatch | Duration-limit exit sentinel |
-| `RALPH-BLOCKED.md` | `run_phase`, `run_loop`, `_completion_with_retry` | Strategic Domain (T03 issue seed) | Failure detail; loop exits non-zero |
+| `.complete` | `run_loop` | Strategic Domain / govwatch | Success marker (SHIP) |
+| `.timeout` | `run_loop` | Strategic Domain / govwatch | Duration-limit exit sentinel |
+| `BLOCKED.md` | `run_phase`, `run_loop`, `_completion_with_retry` | Strategic Domain (T03 issue seed) | Failure detail; loop exits non-zero |
 | `context-budget.md` | `write_context_report` (startup) | Strategic Domain (T04 authoring precondition) | Context window, thresholds, headroom, guidance |
 | `audit-index.md` | Strategic Domain (pre-loop, audit runs only) | `run_phase`, `run_loop` (item injection, scope lock) | Checklist of audit items; presence selects audit recipe pair |
 | `audit-report.md` | Tactical Domain, via MCP append; initialised zero-byte by `main_async` | `_archive_audit_artifacts` | Accumulated audit findings; append-only guarded (§5.7) |
-| `ael_YYYYMMDD-HHMMSS.LOG` | `setup_logging` | Strategic Domain (post-mortem) | Structured DEBUG/INFO/WARNING/ERROR log; final line always `AEL end rc=N` |
+| `ael_YYYYMMDD-HHMMSS.LOG` | `setup_logging` | Strategic Domain (post-mortem) | Structured DEBUG/INFO/WARNING/ERROR log; final line always `engine end rc=N` |
 
-Not cleared by reset: `ael_*.LOG` and `context-budget.md`.
+Not cleared by reset: `engine_*.LOG` and `context-budget.md`.
 
 ### 4.2 Configuration Schema
 
-Derived from `ai/ael/config.yaml`. CLI flags override where noted (§8.1).
+Derived from `ai/config.yaml`. CLI flags override where noted (§8.1).
 
 | Key | Type | Default (repo config) | Purpose |
 |---|---|---|---|
@@ -188,13 +188,13 @@ Derived from `ai/ael/config.yaml`. CLI flags override where noted (§8.1).
 | `mcp_servers.<name>.command` / `.args` / `.env` | dict | — | Per-server stdio launch spec; `{PROJECT_ROOT}` placeholder substituted at runtime |
 | `readiness.timeout_seconds` | float | 60 | `await_model_ready` deadline |
 | `readiness.poll_interval_seconds` | float | 2 | `await_model_ready` poll interval |
-| `loop.max_iterations` | int | 5 | Outer Ralph Loop cycles; overridden by `--max-iterations` |
+| `loop.max_iterations` | int | 5 | Outer loop cycles; overridden by `--max-iterations` |
 | `loop.phase_max_iterations` | int | 20 | Inner tool-call iterations per phase |
 | `loop.mcp_error_threshold` | int | 3 | Consecutive MCP errors before BLOCKED |
 | `loop.max_tool_calls_per_iteration` | int | 10 | Per-iteration tool call truncation cap |
 | `loop.preflight_check` | bool | false | Enable `run_preflight_check` before first worker iteration |
 | `loop.phase_duration_minutes` | float \| null | 30 | Soft wall-clock cap per phase (F28) |
-| `loop.state_dir` | str | `ai/state/ralph` | State directory, resolved to absolute path |
+| `loop.state_dir` | str | `ai/state/` | State directory, resolved to absolute path |
 | `execution.max_completion_tokens` | int \| null | null | Opt-in output cap; passed as `max_tokens` when set (b5e9d240) |
 | `execution.max_tool_result_chars` | int \| null | null | Opt-in head/tail truncation of tool results when set (b5e9d240) |
 | `execution.strict_tactical_brief` | bool | false | When true + `ael` profile, fail fast on a missing brief instead of raw-document fallback (b5e9d240) |
@@ -268,7 +268,7 @@ boundary condition fires. Key behaviours:
   results before append; `execution.strict_tactical_brief` fails fast on a missing
   `ael` brief.
 
-### 5.4 Ralph Loop Controller
+### 5.4 Loop Controller
 
 `run_loop()` — full worker/reviewer cycle:
 
@@ -283,8 +283,8 @@ boundary condition fires. Key behaviours:
 6. On `REVISE`: stall detection via SHA-256 hash of feedback content — N
    (`stall_threshold`, default 3) consecutive identical hashes → BLOCKED.
 7. Boundary exits: max iterations (with interactive human extension prompt),
-   `--duration` deadline (`.ralph-timeout`, return code 2), `RALPH-BLOCKED.md`
-   presence (return code 1), `.ralph-complete` (return code 0).
+   `--duration` deadline (`.timeout`, return code 2), `BLOCKED.md`
+   presence (return code 1), `.complete` (return code 0).
 
 ### 5.5 MCPClient
 
@@ -353,9 +353,9 @@ teardown to avoid MCP stdio subprocess hang). `main_async()`:
    `task.md` and `context-budget.md`.
 5. Dispatches to `run_phase` (`worker`/`reviewer` modes) or `run_loop` (`loop`
    mode, default); on loop `SHIP`, calls `_archive_audit_artifacts()`.
-6. `finally`: logs `AEL end rc=N` unconditionally, closes MCP connections.
+6. `finally`: logs `engine end rc=N` unconditionally, closes MCP connections.
 
-`setup_logging()` — one `FileHandler` per process onto `ael_<timestamp>.LOG`;
+`setup_logging()` — one `FileHandler` per process onto `engine_<timestamp>.LOG`;
 `logger.propagate = False` prevents duplicate console output via the root logger.
 
 [Return to Table of Contents](<#table of contents>)
@@ -364,16 +364,16 @@ teardown to avoid MCP stdio subprocess hang). `main_async()`:
 
 ## 6.0 Control Flow
 
-### 6.1 Ralph Loop State Diagram
+### 6.1 Loop State Diagram
 
 ```mermaid
 stateDiagram-v2
     [*] --> WorkPhase
-    WorkPhase --> Blocked: RALPH-BLOCKED.md written
+    WorkPhase --> Blocked: BLOCKED.md written
     WorkPhase --> ScopeLock: audit item count changed
     ScopeLock --> WorkPhase: corrective feedback injected, retry
     WorkPhase --> ReviewPhase: work-complete.txt / no tool calls
-    ReviewPhase --> Blocked: RALPH-BLOCKED.md written
+    ReviewPhase --> Blocked: BLOCKED.md written
     ReviewPhase --> ShipGate: verdict == SHIP
     ShipGate --> Shipped: scope intact, no unchecked items
     ShipGate --> WorkPhase: scope violation or unchecked items — overridden to REVISE
@@ -416,7 +416,7 @@ check `work-complete.txt`. No tool calls in the response ends the phase.
 This supersedes the retired standalone `budget.py` file-existence gate
 (governance change-d42e64a9): the resolver is fully contained in
 `orchestrator.py`, and `context-budget.md` is written automatically at every
-AEL startup rather than by a separate script.
+engine startup rather than by a separate script.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -440,7 +440,7 @@ AEL startup rather than by a separate script.
 Invocation (governance §1.1.8, primer §4.0):
 
 ```bash
-python ai/ael/src/orchestrator.py --mode loop \
+python ai/engine/src/orchestrator.py --mode loop \
   --task ai/workspace/prompt/prompt-<uuid>-<n>.md
 ```
 
@@ -472,20 +472,20 @@ against the owning stdio server session.
 | Condition | Handling |
 |---|---|
 | Context budget `abort` | `run_phase` returns failure before the completion call |
-| Completion call failure | `_completion_with_retry`: 3 attempts, exponential backoff (2.0s ×2.0); persistent failure writes `RALPH-BLOCKED.md` and raises `RuntimeError` (caught, not propagated) |
-| MCP tool error | Corrective message injected into tool result; `mcp_error_threshold` (default 3) consecutive errors → `RALPH-BLOCKED.md` |
-| Repeated identical failed call | Corrective hint at 2nd occurrence of the same `(tool, arguments)` signature; `RALPH-BLOCKED.md` at 4th |
+| Completion call failure | `_completion_with_retry`: 3 attempts, exponential backoff (2.0s ×2.0); persistent failure writes `BLOCKED.md` and raises `RuntimeError` (caught, not propagated) |
+| MCP tool error | Corrective message injected into tool result; `mcp_error_threshold` (default 3) consecutive errors → `BLOCKED.md` |
+| Repeated identical failed call | Corrective hint at 2nd occurrence of the same `(tool, arguments)` signature; `BLOCKED.md` at 4th |
 | Edit pattern not found | Targeted corrective message instructs a re-read before retry; `.py` targets additionally get a `py_compile` check appended |
 | Tool call count exceeds cap | Truncated to `max_tool_calls_per_iteration` before assistant-message construction |
-| Unparsed `[TOOL_CALLS]` marker in final response | `RALPH-BLOCKED.md` — treated as a malformed response, not a benign summary |
+| Unparsed `[TOOL_CALLS]` marker in final response | `BLOCKED.md` — treated as a malformed response, not a benign summary |
 | Duplicate file read (same path, same phase) | Logged at WARNING; not blocking |
 | Audit scope violation (item count changed) | Corrective feedback injected; loop iteration retried, not blocked immediately |
-| Reviewer stall (N identical feedback hashes) | `RALPH-BLOCKED.md` after `stall_threshold` (default 3) |
+| Reviewer stall (N identical feedback hashes) | `BLOCKED.md` after `stall_threshold` (default 3) |
 | Phase wall-clock cap exceeded | Phase returns success with empty summary; item retried next outer iteration under a fresh cap |
-| `--duration` deadline exceeded | Loop exits with `.ralph-timeout` and return code 2 (distinct from BLOCKED's 1) |
+| `--duration` deadline exceeded | Loop exits with `.timeout` and return code 2 (distinct from BLOCKED's 1) |
 | Max iterations reached | Interactive human prompt to extend; declining exits return code 1 |
 | Model endpoint unreachable at startup | `await_model_ready` raises `TimeoutError` after `readiness.timeout_seconds` |
-| Unexpected exception in `main_async` | `rc` pre-initialised to 1; `finally` block always logs `AEL end rc=N` before exit, so an unclean termination is distinguishable from a clean one by log inspection |
+| Unexpected exception in `main_async` | `rc` pre-initialised to 1; `finally` block always logs `engine end rc=N` before exit, so an unclean termination is distinguishable from a clean one by log inspection |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -644,7 +644,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 
 | Requirement | Design section |
 |---|---|
-| FR-AEL-001 Ralph Loop | §5.4, §6.1 |
+| FR-AEL-001 loop | §5.4, §6.1 |
 | FR-AEL-002 Execution modes | §5.9, §8.1 |
 | FR-AEL-003 MCP tool dispatch | §5.5, §8.4 |
 | FR-AEL-004 Mistral tool call parsing | §5.6 |
@@ -673,6 +673,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | 0.2 | 2026-07-16 | Updated for c3a7f0d2 (removed §6.2 per-iteration system-prompt countdown), b5e9d240 (added execution.* opt-in controls to §4.2 and §5.3), a7d3f8b1 (default_model → Devstral 8bit; added omlx.worker_model/reviewer_model to §4.2 and §8.1). §11.0 element-registry signatures pending re-sync from source |
 | 0.3 | 2026-07-16 | §3.1 component diagram: corrected mcp-grep → mcp-ripgrep |
 | 0.4 | 2026-09-23 | Requirements reference updated: ael-requirements.md renamed to requirements-1c1f4ef6-ael.md (P00.10 naming) |
+| 0.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 
 ---
 

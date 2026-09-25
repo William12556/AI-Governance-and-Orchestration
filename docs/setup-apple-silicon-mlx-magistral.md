@@ -12,7 +12,7 @@ Created: 2026 July 16
 - [4.0 Install oMLX](<#4.0 install omlx>)
 - [5.0 Download Magistral](<#5.0 download magistral>)
 - [6.0 Start oMLX](<#6.0 start omlx>)
-- [7.0 Configure AEL](<#7.0 configure ael>)
+- [7.0 Configure engine](<#7.0 configure engine>)
 - [8.0 Verification](<#8.0 verification>)
 - [9.0 Known Constraints](<#9.0 known constraints>)
 - [Version History](<#version history>)
@@ -21,7 +21,7 @@ Created: 2026 July 16
 
 ## 1.0 Overview
 
-This guide covers running Magistral Small 2509 on Apple Silicon using the MLX framework, for use as the **reviewer** model in a heterogeneous AEL loop (Devstral worker, Magistral reviewer). oMLX exposes an OpenAI-compatible API consumed by the AEL orchestrator as the Tactical Domain inference backend.
+This guide covers running Magistral Small 2509 on Apple Silicon using the MLX framework, for use as the **reviewer** model in a heterogeneous engine loop (Devstral worker, Magistral reviewer). oMLX exposes an OpenAI-compatible API consumed by the engine orchestrator as the Tactical Domain inference backend.
 
 Model: **Magistral Small 2509** (Mistral-family reasoning model; `config_model_type` `mistral3`)
 Licence: **Apache 2.0**.
@@ -118,9 +118,9 @@ The server exposes an OpenAI-compatible API at `http://localhost:8000/v1`; the a
 
 ---
 
-## 7.0 Configure AEL
+## 7.0 Configure engine
 
-With oMLX running, configure `ai/ael/config.yaml` for the heterogeneous loop:
+With oMLX running, configure `ai/config.yaml` for the heterogeneous loop:
 
 ```yaml
 omlx:
@@ -167,9 +167,9 @@ Run one real review phase with the reviewer set to Magistral and confirm it call
 
 | Constraint | Detail |
 |---|---|
-| Tool-call format | Mistral-format (`mistral3`), as Devstral; handled by the AEL parser. Reviewer tool-calling to be confirmed on the first real review phase. |
+| Tool-call format | Mistral-format (`mistral3`), as Devstral; handled by the engine parser. Reviewer tool-calling to be confirmed on the first real review phase. |
 | Thinking output | `enable_thinking: true`. Reasoning is routed to `reasoning_content` / `<think>`, both handled by the orchestrator's reasoning extraction; it did not leak into content in verdict testing. |
-| Engine path | oMLX classifies this model under the `vlm` engine, distinct from Devstral's `batched` llm engine. Full behaviour under AEL load is to be confirmed. |
+| Engine path | oMLX classifies this model under the `vlm` engine, distinct from Devstral's `batched` llm engine. Full behaviour under engine load is to be confirmed. |
 | Context | `max_position_embeddings` 131072 (128K) per the model `config.json`; `sliding_window` null. oMLX does not report `max_context_window`, so the value must be set via `model_context_windows`. |
 | Licence | Apache 2.0. |
 
@@ -182,6 +182,7 @@ Run one real review phase with the reviewer set to Magistral and confirm it call
 | Version | Date | Description |
 |---|---|---|
 | 0.1 | 2026-07-16 | Initial draft; reviewer setup guide for Magistral Small 2509 6bit. Facts verified against oMLX model status and on-disk model config.json |
+| 0.2 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 
 ---
 

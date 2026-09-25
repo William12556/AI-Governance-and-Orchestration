@@ -63,7 +63,7 @@ Execution → Results → Issue Creation (if needed) → Closure
 **Actor:** Strategic Domain
 
 **Process:**
-1. Read template from `ai/templates/T04-test.md`
+1. Read template from `ai/governance/software-engineering/templates/T04-test.md`
 2. Create test document from generated source code
 3. Save to `ai/workspace/test/test-<uuid>-<n>.md`
 4. Couple to source prompt via UUID reference
@@ -1040,6 +1040,7 @@ Strategic Domain identifies:
 | 1.1 | 2026-03-05 | Relocated from issues/ to examples/; replaced project-specific content with generic equivalents; replaced Claude Desktop/Claude Code actor labels with Strategic/Tactical Domain; genericised all code examples, directory structures, and traceability matrix entries; updated Platform Considerations to remove hardcoded platform references |
 | 1.2 | 2026-06-14 | Relocated workspace/ → ai/workspace/ in test, result, and trace path references |
 | 1.3 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
+| 1.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 
 ---
 

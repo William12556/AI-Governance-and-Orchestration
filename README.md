@@ -10,7 +10,7 @@ The framework was motivated by a practical observation: language models lose coh
 
 ## Governance
 
-`ai/governance.md` defines a dual-domain architecture separating strategic coordination (Strategic Domain) from tactical implementation (Tactical Domain). Communication between domains uses MCP filesystem-based message passing. The framework is independent of any specific AI model or toolchain; implementation profiles map abstract framework concepts to concrete tooling.
+`ai/governance/software-engineering/governance.md` defines a dual-domain architecture separating strategic coordination (Strategic Domain) from tactical implementation (Tactical Domain). Communication between domains uses MCP filesystem-based message passing. The framework is independent of any specific AI model or toolchain; implementation profiles map abstract framework concepts to concrete tooling.
 
 - **Protocol-driven workflow**: Eleven protocols govern requirements capture, project initialization, three-tier design hierarchy, change management, issue resolution, traceability, testing, quality assurance, audit, prompting, and requirements management
 - **Human approval gates**: Explicit human authorization required before requirements baseline, design tier transitions, code generation, and baseline modifications
@@ -23,20 +23,20 @@ The framework was motivated by a practical observation: language models lose coh
 
 ## Orchestration
 
-The Autonomous Execution Loop (AEL) implements the Ralph Loop: a worker/reviewer cycle in which the same model fulfills both roles, differentiated by prompt engineering. The loop runs iteratively until the reviewer emits `SHIP` (task complete) or `BLOCKED` (boundary exceeded). Based on Geoffrey Huntley's Ralph Wiggum techniques.
+The engine implements the loop: a worker/reviewer cycle in which the same model fulfills both roles, differentiated by prompt engineering. The loop runs iteratively until the reviewer emits `SHIP` (task complete) or `BLOCKED` (boundary exceeded). Based on Geoffrey Huntley's Ralph Wiggum techniques.
 
-`orchestrator.py` is an AI agent. It perceives its environment by reading state files and tool outputs, reasons via the model inference endpoint, acts by dispatching tool calls and writing state, and maintains persistent state in `ai/state/ralph/` across iterations. The Ralph Loop constitutes a minimal two-agent system: the worker agent produces, the reviewer agent critiques, and the orchestrator arbitrates. Autonomy is constrained by the governance protocols and the T03 tactical brief — the agent cannot redefine its goal mid-run.
+`orchestrator.py` is an AI agent. It perceives its environment by reading state files and tool outputs, reasons via the model inference endpoint, acts by dispatching tool calls and writing state, and maintains persistent state in `ai/state/` across iterations. The loop constitutes a minimal two-agent system: the worker agent produces, the reviewer agent critiques, and the orchestrator arbitrates. Autonomy is constrained by the governance protocols and the T03 tactical brief — the agent cannot redefine its goal mid-run.
 
-`orchestrator.py` is the AEL entry point. It connects to configured MCP servers, sends tool definitions to the inference endpoint, dispatches tool calls, injects results, and iterates until no tool calls remain. It supports four execution modes:
+`orchestrator.py` is the engine entry point. It connects to configured MCP servers, sends tool definitions to the inference endpoint, dispatches tool calls, injects results, and iterates until no tool calls remain. It supports four execution modes:
 
 | Mode | Description |
 |---|---|
-| `loop` | Full worker/reviewer Ralph Loop cycle (standard invocation) |
+| `loop` | Full worker/reviewer loop cycle (standard invocation) |
 | `worker` | Single work phase pass |
 | `reviewer` | Single review phase pass |
 | `reset` | Clear state directory after human acceptance |
 
-For configuration, invocation, audit loop, govwatch, and ael-mcp detail, see [docs/guide-orchestration.md](docs/guide-orchestration.md).
+For configuration, invocation, audit loop, overwatch, and engine-mcp detail, see [docs/guide-orchestration.md](docs/guide-orchestration.md).
 
 ## Requirements
 
@@ -49,9 +49,9 @@ For configuration, invocation, audit loop, govwatch, and ael-mcp detail, see [do
 | Git | Any recent version |
 | Strategic Domain | Claude Desktop (or equivalent frontier LLM with MCP support) |
 | MCP servers | `Filesystem` and `mcp-ripgrep` configured in the Strategic Domain tool |
-| `govwatch` | `pip install -r ai/src/requirements-govwatch.txt` — required for governance monitoring TUI |
-| Python MCP SDK | `pip install -r ai/ael/requirements.txt` — required for AEL orchestrator |
-| `ael-mcp` | Optional — Claude Desktop AEL interface; clone from `https://github.com/William12556/ael-mcp`; requires `mcp` Python package |
+| `overwatch` | `pip install -r ai/src/requirements-overwatch.txt` — required for governance monitoring (browser page) |
+| Python MCP SDK | `pip install -r ai/engine/requirements.txt` — required for engine orchestrator |
+| `engine-mcp` | Optional — Claude Desktop engine interface at `ai/engine/mcp/server.py`; runs in the engine environment (`ai/engine/requirements.txt`) |
 
 ### Apple Silicon + MLX
 
@@ -81,7 +81,7 @@ Bootstraps the `ai/` framework into a project without cloning the repository. Al
 curl -fsSL https://raw.githubusercontent.com/William12556/AI-Governance-and-Orchestration/main/bin/bootstrap.sh | bash -s -- <project-path>
 ```
 
-Review `ai/ael/config.yaml` in the target project before first use.
+Review `ai/config.yaml` in the target project before first use.
 
 ### Developer Install
 
@@ -95,6 +95,13 @@ After changes to `ai/`, propagate to a downstream project:
 
 ```bash
 bin/propagate.sh <project-root>
+```
+
+A project still in the pre-5bcd46ad layout (`ai/ael/`, `ai/governance.md`) is migrated once first:
+
+```bash
+bin/migrate-layout.sh --apply <project-root>
+bin/propagate.sh --allow-major <project-root>
 ```
 
 To publish a release:
@@ -117,16 +124,16 @@ bin/release.sh <version>
 
 1. Install the framework into the project using either path above
 2. Select an implementation profile from `ai/profiles/` and follow its setup instructions
-3. Ask your Strategic Domain model to read `ai/governance.md` and initialize the project per P10 (P10 Project Initialization)
+3. Ask your Strategic Domain model to read `ai/governance/software-engineering/governance.md` and initialize the project per P10 (P10 Project Initialization)
 4. Begin with P00 (Governance) and follow the workflow flowchart in section 2.0
 
 ### Implementation Profiles
 
-| Profile     | Tactical Domain        | AEL                |
+| Profile     | Tactical Domain        | Engine                |
 | ----------- | ---------------------- | ------------------ |
 | `claude.md` | Claude Code (optional) | Manual — human invokes per task |
-| `mlx_devstral_small_2_2512_6bit.md` | MLX + Devstral Small 2 2512 (primary) | AEL / Ralph Loop |
-| `mlx_devstral_magistral_heterogeneous.md` | MLX + Devstral (worker) / Magistral (reviewer) | AEL / Ralph Loop |
+| `mlx_devstral_small_2_2512_6bit.md` | MLX + Devstral Small 2 2512 (primary) | Engine / loop |
+| `mlx_devstral_magistral_heterogeneous.md` | MLX + Devstral (worker) / Magistral (reviewer) | Engine / loop |
 
 ## Important Notice
 
@@ -136,7 +143,7 @@ This framework is experimental, serving as a learning exercise in prompt enginee
 
 ## References
 
-HUNTLEY, G., 2026. *Everything is a ralph loop* [online]. Available from: https://ghuntley.com/loop/ [Accessed 4 March 2026].
+HUNTLEY, G., 2026. *Everything is a loop* [online]. Available from: https://ghuntley.com/loop/ [Accessed 4 March 2026].
 
 [1] FACTORY.AI, 2025. *The Context Window Problem: Scaling Agents Beyond Token Limits* [online]. Available from: https://factory.ai/news/context-window-problem [Accessed 20 March 2026].
 
@@ -175,6 +182,7 @@ HUNTLEY, G., 2026. *Everything is a ralph loop* [online]. Available from: https:
 | 3.6 | 2026-06-18 | Condensed Orchestration section (detail moved to docs/guide-orchestration.md); removed Repository Structure section; removed Devstral rationale paragraph |
 | 3.7 | 2026-07-16 | mcp-grep → mcp-ripgrep (Requirements, Getting Started); Requirements Model row now notes 6bit/8bit and the optional Magistral reviewer; added heterogeneous profile to Implementation Profiles table |
 | 3.8 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
+| 3.9 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 
 ---
 

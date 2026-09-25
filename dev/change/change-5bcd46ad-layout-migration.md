@@ -6,7 +6,7 @@ change_info:
   title: "Layout and terminology migration: ai/engine/, ai/governance/<name>/, ai/config.yaml; retire AEL, Ralph Loop and govwatch"
   date: "2026-09-25"
   author: "William Watson"
-  status: "proposed"
+  status: "implemented"
   priority: "high"
   iteration: 1
   coupled_docs:
@@ -242,11 +242,27 @@ implementation:
   deployment_notes: "One commit per implementation step. governance.md major version 11.0 requires propagate.sh --allow-major."
 
 verification:
-  implemented_date: ""
-  implemented_by: ""
+  implemented_date: "2026-09-25"
+  implemented_by: "Strategic Domain (Claude, Cowork session), operator-approved"
   verification_date: ""
   verified_by: ""
-  test_results: ""
+  test_results: >
+    Session checks 2026-09-25: tests/engine and tests/overwatch 62/62 pass,
+    identical to the pre-migration tree, run with an offline stub harness
+    (pytest, openai and rich not installable in the session; confirm with
+    real pytest in the engine environment). py_compile clean for all
+    modules; bash -n clean for bin/*.sh; recipes and configs parse;
+    linter.py dev/ 0 errors / 93 warnings and protocol_checker.py dev/
+    0 findings, both equal to baseline; no broken relative Markdown links;
+    residue search clean apart from retained identifiers (see notes).
+    bin/migrate-layout.sh dry run and --apply, then bin/propagate.sh
+    --allow-major, verified on a synthetic project built from the
+    pre-migration ai/ tree: project config and context preserved, 11
+    retired paths moved to ai-local/retired-5bcd46ad/ and logged, second
+    propagate run up to date; fresh-project seeding of config.yaml,
+    context.md and task.md verified; propagate refuses an old-layout target
+    (exit 3). Pending: operator smoke run, engine-mcp exercise,
+    independent review.
   issues_found: []
 
 traceability:
@@ -263,8 +279,16 @@ traceability:
 notes: >
   Abbreviated workflow at William Watson's instruction (2026-09-25): no T06
   issue and no T03 prompt; implementation follows approval directly; one
-  independent review after all steps. Open for operator confirmation:
-  ai/index.md is tracked and empty; proposed for removal.
+  independent review after all steps. ai/index.md removal and govwatch
+  deletion confirmed by the operator 2026-09-25.
+  Retained deliberately: requirement identifiers FR-AEL-*/NFR-AEL-* and the
+  file names design-ael-orchestrator.md and requirements-1c1f4ef6-ael.md
+  (traceability); historical records (dev/task.md, eb782f83 design and
+  requirements, struck backlog items, closed documents, Version History
+  rows); the overwatch alert-file heading text (output unchanged).
+  bin/propagate.sh installs one model (MODEL=software-engineering); model
+  selection is Phase 2. Recipes remain in ai/engine/recipes/ (audit recipes
+  move in Phase 2).
 
 version_history:
   - version: "0.1"
@@ -272,6 +296,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Initial change document"
+  - version: "0.2"
+    date: "2026-09-25"
+    author: "William Watson"
+    changes:
+      - "Implemented steps 1–6 (session part); verification results and retained items recorded"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

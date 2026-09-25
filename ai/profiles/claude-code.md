@@ -20,13 +20,13 @@ Created: 2026 March 31
 
 This profile maps governance abstract placeholders to Claude Code tooling. It is an optional alternative to the MLX/Devstral profile, intended for use when the local inference stack is unavailable.
 
-Claude Code fulfils both the worker and reviewer roles in a single manual pass. There is no automated AEL loop; the human operator controls the workflow and performs the review gate.
+Claude Code fulfils both the worker and reviewer roles in a single manual pass. There is no automated engine loop; the human operator controls the workflow and performs the review gate.
 
 | Concern | Implementation |
 |---|---|
 | Strategic Domain | Claude Desktop (preferred) |
 | Tactical Domain | Claude Code |
-| AEL mechanism | Manual — human invokes Claude Code per task |
+| Engine mechanism | Manual — human invokes Claude Code per task |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -93,7 +93,7 @@ ai/workspace/report/report-<uuid>-<name>.md.
 4. Claude Code reads the T03 prompt from disk and implements the task.
 5. The human operator reviews the result and accepts or requests changes.
 
-Reference: `ai/governance.md` P13.3 Option C.
+Reference: `ai/governance/software-engineering/governance.md` P13.3 Option C.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -131,6 +131,7 @@ CLAUDE.local.md
 | 1.2 | 2026-06-16 | Added section numbering throughout |
 | 1.3 | 2026-06-17 | Removed <tactical_config>/ and <skills_dir>/ placeholder rows from §2.0; added note that .claude/ is a native Claude Code directory |
 | 1.4 | 2026-08-19 | §5.0: corrected report path defect (ai/workspace/report-<uuid>-<name>.md → ai/workspace/report/report-<uuid>-<name>.md, aligning with governance §1.2.6 canonical directory); added cross-reference to governance §1.10.3 Option C |
+| 1.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 
 ---
 
