@@ -268,8 +268,20 @@ verification:
     project valid (state dir ai/state, 21 documents, render ok). The pilot
     exposed a gap: the moved config kept state_dir "ai/state/ralph";
     migrate-layout.sh now rewrites it to "ai/state" (verified on a
-    synthetic project; solax-modbus corrected by hand). Pending: operator
-    smoke run, engine-mcp exercise, independent review.
+    synthetic project; solax-modbus corrected by hand).
+    Live runs, dev/smoke, Devstral 8-bit worker / Magistral 8-bit reviewer:
+    CLI run engine_20260925-130030 SHIP at iteration 1 (pytest gate PASS;
+    new state and log names confirmed). engine-mcp run 4870846d
+    (2026-09-29, started by start_engine from Cowork): engine_status
+    reported progress and shipped; REVISE at iteration 1 (reviewer resolved
+    the relative deliverable path against the state directory), SHIP at
+    iteration 2 with syntax and pytest gates PASS; reset_engine cleared
+    state. Findings, not regressions: (a) engine_status keeps reporting
+    pid_alive true after the run ended, most likely because the server does
+    not reap its exited child (zombie); (b) in the CLI run the worker edited
+    tracked dev/smoke/run_test.py and created test_output.txt despite the
+    context.md constraint (backlog §5.0 item 7). Pending: real pytest in the
+    engine environment, independent review.
   issues_found: []
 
 traceability:
@@ -313,6 +325,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Downstream pilot limited to solax-modbus; pilot results recorded; migrate-layout.sh rewrites loop.state_dir"
+  - version: "0.4"
+    date: "2026-09-29"
+    author: "William Watson"
+    changes:
+      - "Live CLI and engine-mcp smoke runs recorded; two findings noted"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

@@ -6,7 +6,7 @@ Deferred work is held in `dev/backlog.md`. Move an item here when work on it sta
 
 change-5bcd46ad (layout and terminology migration; proposal-5bcd46ad Phase 1). Implemented 2026-09-25; folds in change-c37198be.
 
-1. Operator verification on the Mac, engine environment (`~/.venvs/ael`):
+1. Operator verification on the Mac, engine environment (`~/.venvs/ael`). Done: CLI smoke run SHIP (2026-09-25); engine-mcp start/status/reset exercised, SHIP (2026-09-29). Remaining: real pytest.
    - `python -m pytest tests/engine tests/overwatch -v` (62 tests passed offline with a stub harness; confirm with real pytest).
    - Smoke run: `dev/smoke/ai/` is a gitignored propagated copy in the old layout — remove it, create an empty `dev/smoke/ai/`, run `bin/propagate.sh --allow-major dev/smoke`, copy `dev/smoke/config.reference.yaml` to `dev/smoke/ai/config.yaml`, then run `--mode loop` from `dev/smoke` to SHIP. Doubles as the backlog §5.0 item 2 retry.
    - engine-mcp: repoint the Claude Desktop entry to `ai/engine/mcp/server.py` with the engine interpreter; exercise `start_engine`, `engine_status`, `reset_engine` against `dev/smoke`.
