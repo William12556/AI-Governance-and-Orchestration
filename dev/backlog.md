@@ -58,6 +58,7 @@ Each requires a T06 issue → T07 change → T03 prompt triple.
 2. `run_phase`: normalise (abspath) `read_paths` on the F28 wall-clock-cap early return (d7f4a1c8 P08 review; no observed impact).
 3. `bin/bootstrap.sh`: refuse, with a clear message, a release tarball without `ai/engine/` (audit-5bcd46ad H-01 option; H-01 itself resolved by release v0.1.0).
 4. Pre-existing items recorded by audit-5bcd46ad L-12: governance P10.6 says the framework repository "contains only ai/, doc/, and templates/" (inaccurate); `audit-review.yaml` tests for `.complete` containing `DURATION_LIMIT`, which the orchestrator never writes (a timeout writes `.timeout` and returns before review); `ai/profiles/README.md` links to the gitignored `docs/claude/project_information.md`.
+5. `run_phase` crashes with `TypeError: 'NoneType' object is not subscriptable` at `response.choices[0]` when the endpoint returns a completion without `choices` (solax-modbus pilot run `engine_20260929-131033`, first worker call, rc=1, no BLOCKED.md). Treat a response without choices as an endpoint error: log the raw payload, retry through `_completion_with_retry`, then write BLOCKED.md. Needs a T06/T07/T03 triple.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -135,6 +136,7 @@ None pending. All resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.21 | 2026-09-29 | §3.0 item 5: run_phase crash on a completion without choices (solax-modbus pilot) |
 | 1.20 | 2026-09-29 | §2.0 item 10: pytest gate interpreter and per-role context window (solax-modbus pilot preparation) |
 | 1.19 | 2026-09-29 | audit-5bcd46ad dispositions: §2.0 items 8–9 (Phase 2 inputs, tests); §3.0 items 3–4 (bootstrap guard, pre-existing items); §5.0 item 2 outcome, item 7 recurrence, item 8 added; §8.0 item 2 ael-mcp removal |
 | 1.18 | 2026-09-25 | Pivot dispositions (proposal-5bcd46ad §6.0): §2.0 items 1, 2 and 7 resolved or parked; §2.0 items 4 and 6 paths updated; §5.0 items 2 and 7 annotated; §8.0 item 2 resolved; §9.0 item 2 added |
