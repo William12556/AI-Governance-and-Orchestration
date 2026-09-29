@@ -100,7 +100,7 @@ Three implementation profiles are available. For a full comparison see [guide-pr
 |---|---|---|
 | `mlx_devstral_small_2_2512_6bit.md` | Engine + Devstral (local) | Automated loops on Apple Silicon |
 | `mlx_devstral_magistral_heterogeneous.md` | Engine + Devstral (worker) / Magistral (reviewer), local | Automated loops with a distinct reviewer model |
-| `claude.md` | Claude Code (Anthropic API) | Manual execution, no local GPU required |
+| `claude-code.md` | Claude Code (Anthropic API) | Manual execution, no local GPU required |
 | `claude-omlx.md` | Claude Code CLI + Devstral (local) | Manual execution on Apple Silicon |
 
 Profile documents are in `ai/profiles/`. Read the selected profile before proceeding.
@@ -215,6 +215,7 @@ The Strategic Domain coordinates each step. Human approval gates are required be
 | 1.9 | 2026-09-23 | §3.2: local modifications backed up |
 | 1.10 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 | 1.11 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 1.12 | 2026-09-29 | Profile file name corrected: claude.md → claude-code.md |
 
 ---
 

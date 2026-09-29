@@ -41,7 +41,7 @@ Three Tactical Domain profiles are available. Engine is the primary profile; the
 | Loop control | `orchestrator.py` | Human operator | Human operator |
 | Context file | `config.yaml` | `CLAUDE.md` | `CLAUDE.md` |
 | State directory | `ai/state/` | `.claude/` | `.claude/` |
-| Profile | `mlx_devstral_small_2_2512_6bit.md` | `claude.md` | `claude-omlx.md` |
+| Profile | `mlx_devstral_small_2_2512_6bit.md` | `claude-code.md` | `claude-omlx.md` |
 
 See `ai/profiles/` for profile documents.
 
@@ -229,6 +229,7 @@ The tests use stub model and MCP clients; no oMLX endpoint is required.
 | 2.3 | 2026-07-02 | Rescoped §7.0 budget.py usage note to AEL-targeted T04 prompts only (issue-713437bc) |
 | 2.4 | 2026-07-16 | Removed budget.py (retired, change-d42e64a9): §3.0 structure entry removed; §6.0 config example rewritten (reviewer_model, execution.* controls, model_context_windows, removed models_dir); §7.0 invocation and explanatory note replaced with the automatic context-budget.md write. §4.0: noted 8bit and optional reviewer_model |
 | 2.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 2.6 | 2026-09-29 | Profile file name corrected: claude.md → claude-code.md |
 
 ---
 

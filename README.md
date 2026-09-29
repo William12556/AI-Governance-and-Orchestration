@@ -1,153 +1,145 @@
 # AI Governance and Orchestration
 
-## Purpose
+---
 
-This repository provides a model-agnostic governance framework for AI-assisted software development. The framework coordinates requirements capture, design, and code generation through structured protocols and human-in-the-loop approval gates.
+## Table of Contents
 
-For positioning context and design rationale, see [RATIONALE.md](RATIONALE.md).
-
-The framework was motivated by a practical observation: language models lose coherence when navigating large, complex projects — a known consequence of context window constraints [1][2]. Structured documentation provides a compact, navigable project representation that mitigates this. The protocol-driven workflow achieves this by decomposing work into discrete, bounded steps — each providing the model with only the structured context relevant to the current task. Tactical Domain autonomy is explicitly bounded by governance protocols and a human-approved task brief, trading open-ended autonomy for predictability and traceability.
-
-## Governance
-
-`ai/governance/software-engineering/governance.md` defines a dual-domain architecture separating strategic coordination (Strategic Domain) from tactical implementation (Tactical Domain). Communication between domains uses MCP filesystem-based message passing. The framework is independent of any specific AI model or toolchain; implementation profiles map abstract framework concepts to concrete tooling.
-
-- **Protocol-driven workflow**: Eleven protocols govern requirements capture, project initialization, three-tier design hierarchy, change management, issue resolution, traceability, testing, quality assurance, audit, prompting, and requirements management
-- **Human approval gates**: Explicit human authorization required before requirements baseline, design tier transitions, code generation, and baseline modifications
-- **Three-tier design decomposition**: Master (system) → Domain (functional) → Component (implementation) with validation gates between tiers
-- **Model-agnostic architecture**: Strategic and Tactical Domain roles fulfilled by any capable LLM; implementation profiles provided for Apple Silicon MLX (primary) and Claude Code (optional)
-- **UUID-based document coupling**: 8-character hex identifiers with iteration synchronization through debug cycles
-- **Document lifecycle management**: Active/closed states with immutable archival and closure criteria across all document classes
-- **Bidirectional traceability**: Requirements ↔ Design ↔ Code ↔ Test linkages
-- **Template-based documentation**: A YAML template for each document class
-
-## Orchestration
-
-The engine implements the loop: a worker/reviewer cycle in which the same model fulfills both roles, differentiated by prompt engineering. The loop runs iteratively until the reviewer emits `SHIP` (task complete) or `BLOCKED` (boundary exceeded). Based on Geoffrey Huntley's Ralph Wiggum techniques.
-
-`orchestrator.py` is an AI agent. It perceives its environment by reading state files and tool outputs, reasons via the model inference endpoint, acts by dispatching tool calls and writing state, and maintains persistent state in `ai/state/` across iterations. The loop constitutes a minimal two-agent system: the worker agent produces, the reviewer agent critiques, and the orchestrator arbitrates. Autonomy is constrained by the governance protocols and the T03 tactical brief — the agent cannot redefine its goal mid-run.
-
-`orchestrator.py` is the engine entry point. It connects to configured MCP servers, sends tool definitions to the inference endpoint, dispatches tool calls, injects results, and iterates until no tool calls remain. It supports four execution modes:
-
-| Mode | Description |
-|---|---|
-| `loop` | Full worker/reviewer loop cycle (standard invocation) |
-| `worker` | Single work phase pass |
-| `reviewer` | Single review phase pass |
-| `reset` | Clear state directory after human acceptance |
-
-For configuration, invocation, audit loop, overwatch, and engine-mcp detail, see [docs/guide-orchestration.md](docs/guide-orchestration.md).
-
-## Requirements
-
-### Common
-
-| Item | Requirement |
-|---|---|
-| Operating system | macOS 14+ (Sonoma) required (Apple Silicon) |
-| Python | 3.11+ |
-| Git | Any recent version |
-| Strategic Domain | Claude Desktop (or equivalent frontier LLM with MCP support) |
-| MCP servers | `Filesystem` and `mcp-ripgrep` configured in the Strategic Domain tool |
-| `overwatch` | `pip install -r ai/src/requirements-overwatch.txt` — required for governance monitoring (browser page) |
-| Python MCP SDK | `pip install -r ai/engine/requirements.txt` — required for engine orchestrator |
-| `engine-mcp` | Optional — Claude Desktop engine interface at `ai/engine/mcp/server.py`; runs in the engine environment (`ai/engine/requirements.txt`) |
-
-### Apple Silicon + MLX
-
-Required for the MLX inference backend (Tactical Domain on Apple Silicon).
-
-| Item           | Requirement                                                |
-| -------------- | ---------------------------------------------------------- |
-| Chip           | Apple M-series (M1 or later)                               |
-| Unified memory | 24 GB minimum (6bit worker only); 48 GB+ recommended for 8bit or heterogeneous worker+reviewer setups |
-| `mlx_lm`       | 0.21+ — required dependency of oMLX (`pip install mlx_lm`) |
-| `omlx`         | Required inference server (`pip install omlx`)             |
-| Model          | Devstral Small 2 (2512) — 6bit or 8bit; optional Magistral Small 2509 6bit as a heterogeneous reviewer |
-
-Full setup instructions: [Apple Silicon + MLX Setup Guide](docs/setup-apple-silicon-mlx.md)
+[1.0 Overview](<#1.0 overview>)
+[2.0 Status](<#2.0 status>)
+[3.0 Requirements](<#3.0 requirements>)
+[4.0 Installation](<#4.0 installation>)
+[5.0 First Use](<#5.0 first use>)
+[6.0 Documentation](<#6.0 documentation>)
+[7.0 Important Notice](<#7.0 important notice>)
+[References](<#references>)
+[Version History](<#version history>)
 
 ---
 
-## Installation
+## 1.0 Overview
 
-Two installation paths are provided. See [docs/guide-install.md](docs/guide-install.md) for full detail.
+AI Governance and Orchestration (AI-G&O) runs AI agents under a governance model. A governance model defines how work proceeds: stages, document templates, and gates that must pass before work continues. One governance model is loaded per project.
 
-### User Install
+Work is divided among three roles:
 
-Bootstraps the `ai/` framework into a project without cloning the repository. Always installs the latest release.
+| Role | Function |
+|---|---|
+| Planner | Plans work, authors governance documents and task briefs, validates results. Runs in a chat client of your choice. |
+| Worker | Executes an approved task brief. |
+| Reviewer | Checks the worker's output and returns a verdict. |
+
+The engine runs the worker and reviewer in a loop until the reviewer accepts the result (`SHIP`) or the task cannot proceed (`BLOCKED`) [1]. Human approval is required at defined gates.
+
+The main objective is choice: each role can be assigned a frontier model or an open-weight model. Anthropic and Mistral AI are treated equally; neither is preferred. oMLX is the preferred local inference server.
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## 2.0 Status
+
+Items marked *Planned* do not yet exist.
+
+### 2.1 Governance Models
+
+| Model | Status |
+|---|---|
+| Software engineering | Available |
+| Document authoring | *Planned* |
+| User-defined models | *Planned* |
+
+### 2.2 Model Choice per Role
+
+| Role | Anthropic | Mistral AI | Open-weight (local) |
+|---|---|---|---|
+| Planner | Claude Desktop | Mistral Vibe (*Planned*) | MCP-capable client with a local server (*Planned*) |
+| Worker and reviewer (engine) | Anthropic API (*Planned*) | Mistral API (*Planned*) | oMLX; LM Studio or other OpenAI-compatible server (*Planned*) |
+| Worker (manual) | Claude Code | Mistral Vibe (*Planned*) | Claude Code with oMLX |
+
+Today the engine's worker and reviewer may use different models, but both must be served by the same oMLX server. Assigning a role to a frontier provider sends task content to that provider.
+
+### 2.3 Other Planned Items
+
+- Web interface for managing governance models and engines (*Planned*)
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## 3.0 Requirements
+
+| Item | Requirement |
+|---|---|
+| Hardware | Apple Silicon Mac (M1 or later); 24 GB unified memory minimum, 48 GB+ recommended for separate worker and reviewer models |
+| Operating system | macOS 14 (Sonoma) or later |
+| Python | 3.11+ |
+| Git | Any recent version |
+| Planner | Claude Desktop with the `Filesystem` and `mcp-ripgrep` MCP servers |
+| Local inference | oMLX with a supported model |
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## 4.0 Installation
+
+Install the framework into an existing project directory:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/William12556/AI-Governance-and-Orchestration/main/bin/bootstrap.sh | bash -s -- <project-path>
 ```
 
-Review `ai/config.yaml` in the target project before first use.
+This creates `<project-path>/ai/` with the engine and the software engineering governance model. Review `ai/config.yaml` and `ai/context.md` before first use.
 
-### Developer Install
-
-For developing or extending the framework.
-
-```bash
-git clone https://github.com/William12556/AI-Governance-and-Orchestration.git
-```
-
-After changes to `ai/`, propagate to a downstream project:
-
-```bash
-bin/propagate.sh <project-root>
-```
-
-A project still in the pre-5bcd46ad layout (`ai/ael/`, `ai/governance.md`) is migrated once first:
-
-```bash
-bin/migrate-layout.sh --apply <project-root>
-bin/propagate.sh --allow-major <project-root>
-```
-
-To publish a release:
-
-```bash
-bin/release.sh <version>
-```
+[Return to Table of Contents](<#table of contents>)
 
 ---
 
-## Getting Started
+## 5.0 First Use
 
-### Prerequisites
+1. Select a profile: [docs/guide-profile-selection.md](docs/guide-profile-selection.md)
+2. Set up local inference: [docs/setup-apple-silicon-mlx.md](docs/setup-apple-silicon-mlx.md)
+3. Install the engine dependencies in a virtual environment: `pip install -r ai/engine/requirements.txt`
+4. Edit `ai/config.yaml` for your models and MCP servers
+5. Ask the planner to read `ai/governance/software-engineering/governance.md` and initialise the project (P10 Project Initialization)
 
-- MCP servers: Filesystem and mcp-ripgrep configured in your Strategic Domain tool
-- Git and GitHub Desktop (or equivalent)
-- Tooling per selected implementation profile (see `ai/profiles/`)
+Full walkthrough: [docs/guide-getting-started.md](docs/guide-getting-started.md)
 
-### Initialization
+[Return to Table of Contents](<#table of contents>)
 
-1. Install the framework into the project using either path above
-2. Select an implementation profile from `ai/profiles/` and follow its setup instructions
-3. Ask your Strategic Domain model to read `ai/governance/software-engineering/governance.md` and initialize the project per P10 (P10 Project Initialization)
-4. Begin with P00 (Governance) and follow the workflow flowchart in section 2.0
+---
 
-### Implementation Profiles
+## 6.0 Documentation
 
-| Profile     | Tactical Domain        | Engine                |
-| ----------- | ---------------------- | ------------------ |
-| `claude.md` | Claude Code (optional) | Manual — human invokes per task |
-| `mlx_devstral_small_2_2512_6bit.md` | MLX + Devstral Small 2 2512 (primary) | Engine / loop |
-| `mlx_devstral_magistral_heterogeneous.md` | MLX + Devstral (worker) / Magistral (reviewer) | Engine / loop |
+| Topic | Document |
+|---|---|
+| Getting started | [docs/guide-getting-started.md](docs/guide-getting-started.md) |
+| Installation | [docs/guide-install.md](docs/guide-install.md) |
+| Profile selection | [docs/guide-profile-selection.md](docs/guide-profile-selection.md) |
+| Local inference setup | [Devstral](docs/setup-apple-silicon-mlx.md), [Magistral reviewer](docs/setup-apple-silicon-mlx-magistral.md), [North Mini Code](docs/setup-apple-silicon-mlx-north-mini-code.md) |
+| Engine orchestration | [docs/guide-orchestration.md](docs/guide-orchestration.md) |
+| Software engineering governance | [ai/governance/software-engineering/governance.md](ai/governance/software-engineering/governance.md) |
+| Developers | [docs/guide-install.md](docs/guide-install.md) §3.0 (developer install, propagation, migration, release); [CLAUDE.md](CLAUDE.md); `dev/` |
 
-## Important Notice
+[Return to Table of Contents](<#table of contents>)
 
-This framework is experimental, serving as a learning exercise in prompt engineering, AI-assisted development workflows, and protocol-driven project management. **Actual fitness for purpose is not guaranteed.**
+---
+
+## 7.0 Important Notice
+
+This framework is experimental, serving as a learning exercise in AI agent governance and orchestration. **Actual fitness for purpose is not guaranteed.**
+
+[Return to Table of Contents](<#table of contents>)
 
 ---
 
 ## References
 
-HUNTLEY, G., 2026. *Everything is a loop* [online]. Available from: https://ghuntley.com/loop/ [Accessed 4 March 2026].
+[1] HUNTLEY, G., 2026. *Everything is a loop* [online]. Available from: https://ghuntley.com/loop/ [Accessed 4 March 2026].
 
-[1] FACTORY.AI, 2025. *The Context Window Problem: Scaling Agents Beyond Token Limits* [online]. Available from: https://factory.ai/news/context-window-problem [Accessed 20 March 2026].
+[Return to Table of Contents](<#table of contents>)
 
-[2] REDIS, 2026. *LLM context windows: what they are & how they work* [online]. Available from: https://redis.io/blog/llm-context-windows/ [Accessed 20 March 2026].
+---
 
 ## Version History
 
@@ -183,6 +175,7 @@ HUNTLEY, G., 2026. *Everything is a loop* [online]. Available from: https://ghun
 | 3.7 | 2026-07-16 | mcp-grep → mcp-ripgrep (Requirements, Getting Started); Requirements Model row now notes 6bit/8bit and the optional Magistral reviewer; added heterogeneous profile to Implementation Profiles table |
 | 3.8 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 | 3.9 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 4.0 | 2026-09-29 | Simplified to user content; reframed for AI-G&O pivot (governance models, planner/worker/reviewer roles, provider choice per D-16); Status section marks planned items; developer content moved to docs/guide-install.md §3.0; RATIONALE.md link and motivation paragraph removed; profile table and requirements condensed |
 
 ---
 

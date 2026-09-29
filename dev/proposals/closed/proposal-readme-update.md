@@ -2,6 +2,8 @@
 
 Created: 2026 February 18
 
+**Status:** Superseded 2026-09-29 by README.md v4.0 (proposal-5bcd46ad D-16).
+
 ---
 
 ## Table of Contents
@@ -137,6 +139,7 @@ Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
 |---|---|---|
 | 1.0 | 2026-02-18 | Initial proposal |
 | 1.1 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
+| 1.2 | 2026-09-29 | Status: superseded; moved to closed/ |
 
 ---
 

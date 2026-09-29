@@ -84,10 +84,22 @@ Run from the repository root. The target project must already have an `ai/` dire
 
 The script never deletes a file. Target files absent from the source (or of a different type) are moved to `<project-root>/ai-local/` and logged in `ai-local/RELOCATED.md`, labelled `retired framework file` (safe to delete) or `project content` (governance P10.6). Declared project files (`context.md`, `task.md`, `config.yaml`, `workspace/`, `state/`, `logs/`, `dashboard-alerts.md`) are never overwritten; `context.md` and `task.md` are seeded from the templates only when absent. Use `--yes` for non-interactive runs; a major or unknown governance version additionally requires `--allow-major`. A framework file edited in the project is copied to `ai-local/` (label `local modification`) before it is overwritten. Review `ai-local/` after each run and delete what is not needed. The script refuses (exit 3, nothing applied) if `ai/` (outside `workspace/`, `state/` and `logs/`, whose contents are not checked) or `ai-local/` changes while the confirmation prompt is open, if a directory cannot be listed, if `context.md` or `task.md` is a symlink with no regular file behind it (a symlink to an existing file is preserved), or if a path differs from a declared path only by letter case. On case-insensitive file systems a framework directory with different case (e.g. `Templates/`) causes repeated relocation of its files; rename it to match.
 
-### 3.4 Create a Release
+### 3.4 Migrate a Project from the Pre-5bcd46ad Layout
+
+A downstream project still in the old layout (`ai/ael/`, `ai/governance.md`) is migrated once before propagation:
 
 ```bash
-bin/release.sh
+bin/migrate-layout.sh <project-root>            # dry run: prints the plan, changes nothing
+bin/migrate-layout.sh --apply <project-root>
+bin/propagate.sh --allow-major <project-root>
+```
+
+The script moves `ai/ael/config.yaml` to `ai/config.yaml` and relocates retired framework paths to `ai-local/retired-5bcd46ad/` (logged in `ai-local/RELOCATED.md`). It never deletes or overwrites, and it refuses uncommitted changes under `ai/` in a git work tree. Afterwards, update old paths reported in `CLAUDE.md`, `AGENTS.md` or `.gitignore`.
+
+### 3.5 Create a Release
+
+```bash
+bin/release.sh <version>    # e.g. v0.1.0
 ```
 
 Archives `ai/`, creates a GitHub release, and attaches the tarball as a release asset. Requires `gh` authenticated to GitHub.
@@ -111,6 +123,7 @@ Archives `ai/`, creates a GitHub release, and attaches the tarball as a release 
 | 0.9 | 2026-09-23 | §3.3: prompt guard excludes contents of workspace/, state/ and logs/ (change-b170cf6a B5) |
 | 0.10 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 | 0.11 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 0.12 | 2026-09-29 | §3.4 added: bin/migrate-layout.sh (moved from README); release renumbered §3.5 and its version argument shown |
 
 ---
 

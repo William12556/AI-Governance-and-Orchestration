@@ -26,7 +26,7 @@ Three profiles are available, defined in `ai/profiles/`:
 | Profile file | Tactical Domain | Execution |
 |---|---|---|
 | `mlx_devstral_small_2_2512_6bit.md` | Engine + Devstral (local, MLX) | Automated loop |
-| `claude.md` | Claude Code (Anthropic API) | Manual, human-directed |
+| `claude-code.md` | Claude Code (Anthropic API) | Manual, human-directed |
 | `claude-omlx.md` | Claude Code CLI + Devstral (local, MLX) | Manual, human-directed |
 
 [Return to Table of Contents](<#table of contents>)
@@ -38,14 +38,14 @@ Three profiles are available, defined in `ai/profiles/`:
 Work through the following questions in order:
 
 **Do you have Apple Silicon with at least 24 GB unified memory?**
-No → use `claude.md` (Claude Code). Apple Silicon is required for local MLX inference.
+No → use `claude-code.md` (Claude Code). Apple Silicon is required for local MLX inference.
 
 **Do you want automated worker/reviewer cycles without manual terminal invocations?**
 Yes → use `mlx_devstral_small_2_2512_6bit.md` (engine). The orchestrator runs the full loop autonomously.
-No → use `claude-omlx.md` if you have Apple Silicon, or `claude.md` if you have an Anthropic API key.
+No → use `claude-omlx.md` if you have Apple Silicon, or `claude-code.md` if you have an Anthropic API key.
 
 **Do you have an Anthropic API key?**
-Yes → `claude.md` is available regardless of hardware.
+Yes → `claude-code.md` is available regardless of hardware.
 No → you must use an MLX profile.
 
 **Summary:**
@@ -54,8 +54,8 @@ No → you must use an MLX profile.
 |---|---|
 | Apple Silicon 24 GB+, want automation | `mlx_devstral_small_2_2512_6bit.md` |
 | Apple Silicon 24 GB+, prefer manual control | `claude-omlx.md` |
-| Anthropic API key available, no Apple Silicon | `claude.md` |
-| Anthropic API key available, Apple Silicon | `claude.md` or either MLX profile |
+| Anthropic API key available, no Apple Silicon | `claude-code.md` |
+| Anthropic API key available, Apple Silicon | `claude-code.md` or either MLX profile |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -97,7 +97,7 @@ python ai/engine/src/orchestrator.py --mode loop \
 
 ### 3.2 Claude Code
 
-**Profile file:** `ai/profiles/claude.md`
+**Profile file:** `ai/profiles/claude-code.md`
 
 Manual profile using Claude Code as the Tactical Domain. The Strategic Domain authors a T03 prompt; the human pastes it into Claude Code and directs execution. No automated loop — each iteration is human-initiated.
 
@@ -171,6 +171,7 @@ The engine profile is the only profile that supports the automated audit loop (`
 | 1.2 | 2026-06-16 | Updated profile filename references: mlx_devstral_small_2_2512_Q8.md → mlx_devstral_small_2_2512_6bit.md |
 | 1.3 | 2026-07-16 | mcp-grep → mcp-ripgrep in §3.1, §3.2, §3.3 prerequisites tables |
 | 1.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 1.5 | 2026-09-29 | Profile file name corrected: claude.md → claude-code.md |
 
 ---
 

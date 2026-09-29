@@ -2,7 +2,7 @@ Created: 2026 September 25
 
 # Proposal: AI-G&O Strategic Pivot
 
-**Status:** Accepted 2026-09-25. Phase 1 implemented (change-5bcd46ad); verification pending.
+**Status:** Accepted 2026-09-25. Phase 1 implemented (change-5bcd46ad); verification pending. Amended 2026-09-29 (D-16).
 **UUID:** `5bcd46ad`
 **Coupled change:** `dev/change/change-5bcd46ad-layout-migration.md`
 
@@ -18,6 +18,7 @@ Created: 2026 September 25
 [6.0 Backlog Disposition](<#6.0 backlog disposition>)
 [7.0 Phases](<#7.0 phases>)
 [8.0 Open Questions](<#8.0 open questions>)
+[References](<#references>)
 [Version History](<#version history>)
 
 ---
@@ -42,7 +43,7 @@ This document records the decisions of the 2026-09-25 brainstorming session and 
 | D-04 | A governance model is a loadable package: narrative `governance.md`, templates, and a machine-readable `manifest.yaml`. The SE `governance.md` is retained; only paths and terms change. |
 | D-05 | One governance model per project, installed at `ai/governance/<name>/`. |
 | D-06 | Stage flow is linear, plus one rule: on BLOCKED, return to a named stage. |
-| D-07 | Any agent role, including the planner, may be bound to any model, frontier or open-weight. |
+| D-07 | Any agent role, including the planner, may be bound to any model, frontier or open-weight. The planner runs in a chat client, not in the engine (D-16). |
 | D-08 | `ai/ael/` is renamed `ai/engine/`. The term AEL is retired. |
 | D-09 | Terms per [3.0 Terminology](<#3.0 terminology>). The term Ralph Loop is retired. |
 | D-10 | Project configuration moves from `ai/ael/config.yaml` to `ai/config.yaml`. |
@@ -51,6 +52,7 @@ This document records the decisions of the 2026-09-25 brainstorming session and 
 | D-13 | Paused work (`dev/todo.md`, change-c37198be) is folded into the migration. |
 | D-14 | The migration uses one abbreviated change record (no issue or prompt document) and one independent review at the end. |
 | D-15 | ael-mcp is adapted as engine-mcp and moved into this repository. A rebuild is deferred to Phase 2. |
+| D-16 | Provider choice at every level; Anthropic and Mistral AI have equal weight, neither preferred. Planner: Claude Desktop, Mistral Vibe, or an MCP-capable client with a local open-weight model. Manual tactical profile: Claude Code or Mistral Vibe. Engine worker and reviewer: each bound separately to the Anthropic API, the Mistral API, or a local OpenAI-compatible server (oMLX preferred; LM Studio permitted). |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -163,7 +165,7 @@ ai/
 | Phase | Content | Behaviour change |
 |---|---|---|
 | 1 | Layout and terminology migration (change-5bcd46ad) | No |
-| 2 | Engine generalisation: manifest, gates, stage flow, role-to-model binding, write scope; engine-mcp rebuild | Yes |
+| 2 | Engine generalisation: manifest, gates, stage flow, role-to-model binding across providers (D-16), write scope; engine-mcp rebuild | Yes |
 | 3 | Second governance model: document authoring | — |
 | 4 | Web GUI | — |
 
@@ -177,9 +179,24 @@ Phases 2 to 4 each require their own requirements and design documents.
 
 | ID | Question | Decide in |
 |---|---|---|
-| OQ-01 | Claude Code profiles (`claude-code`, `claude-omlx`): retain as a manual option or retire under D-03? | Phase 2 |
+| OQ-01 | Claude Code profiles (`claude-code`, `claude-omlx`): retain as a manual option or retire under D-03? Resolved 2026-09-29: retained; a Mistral Vibe profile is added (D-16). | Resolved |
 | OQ-02 | `governance.md` describes a Strategic Domain (Claude Desktop) and a Tactical Domain. Under D-03 and D-07 these become agent roles. The migration keeps the current terms. | Phase 2 |
 | OQ-03 | Which parts of `governance.md` are engine-generic rather than SE-specific (backlog §2.0-6)? | Phase 2 |
+| OQ-04 | Anthropic's OpenAI SDK compatibility layer is described by Anthropic as intended for testing and ignores `strict` for tool calls [1]. Use it, or add a native Anthropic adapter to the engine? | Phase 2 |
+| OQ-05 | Which client hosts an open-weight planner (e.g. Mistral Vibe with a custom provider [2], LM Studio [3])? | Phase 2 |
+| OQ-06 | LM Studio as an engine provider reverses its 2026-03-11 deprecation. The engine's live context-window query and readiness check are oMLX-specific. | Phase 2 |
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## References
+
+[1] ANTHROPIC, 2026. *OpenAI SDK compatibility* [online]. Available from: https://platform.claude.com/docs/en/cli-sdks-libraries/libraries/openai-sdk [Accessed 29 September 2026].
+
+[2] MISTRAL AI, 2026. *Configuration — Mistral Vibe* [online]. Available from: https://docs.mistral.ai/vibe/code/cli/configuration [Accessed 29 September 2026].
+
+[3] LM STUDIO, 2026. *Use MCP Servers* [online]. Available from: https://lmstudio.ai/docs/app/mcp [Accessed 29 September 2026].
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -191,6 +208,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 |---|---|---|
 | 0.1 | 2026-09-25 | Initial proposal from the 2026-09-25 brainstorming session |
 | 0.2 | 2026-09-25 | Status: accepted; Phase 1 implemented |
+| 0.3 | 2026-09-29 | D-16 provider choice added; D-07 clarified (planner runs in a chat client); Phase 2 scope references D-16; OQ-01 resolved; OQ-04 to OQ-06 and References added |
 
 ---
 
