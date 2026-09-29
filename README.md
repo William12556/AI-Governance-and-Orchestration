@@ -20,11 +20,13 @@
 
 AI Governance and Orchestration (AI-G&O) runs AI agents under a governance model. A governance model defines how work proceeds: stages, document templates, and gates that must pass before work continues. One governance model is loaded per project.
 
+AI-G&O governs how agent work proceeds; it does not address organisational compliance. It is single-user and local-first.
+
 Work is divided among three roles:
 
 | Role | Function |
 |---|---|
-| Planner | Plans work, authors governance documents and task briefs, validates results. Runs in a chat client of your choice. |
+| Planner | Plans work, authors governance documents and task briefs, validates results. Runs in an MCP-capable chat client (currently Claude Desktop; see 2.2). |
 | Worker | Executes an approved task brief. |
 | Reviewer | Checks the worker's output and returns a verdict. |
 
@@ -60,7 +62,7 @@ Today the engine's worker and reviewer may use different models, but both must b
 
 ### 2.3 Other Planned Items
 
-- Web interface for managing governance models and engines (*Planned*)
+- Web interface for managing governance models and engine runs (*Planned*)
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -76,6 +78,7 @@ Today the engine's worker and reviewer may use different models, but both must b
 | Git | Any recent version |
 | Planner | Claude Desktop with the `Filesystem` and `mcp-ripgrep` MCP servers |
 | Local inference | oMLX with a supported model |
+| Node.js | Required for `npx`, which runs the engine's filesystem MCP server |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -118,6 +121,8 @@ Full walkthrough: [docs/guide-getting-started.md](docs/guide-getting-started.md)
 | Profile selection | [docs/guide-profile-selection.md](docs/guide-profile-selection.md) |
 | Local inference setup | [Devstral](docs/setup-apple-silicon-mlx.md), [Magistral reviewer](docs/setup-apple-silicon-mlx-magistral.md), [North Mini Code](docs/setup-apple-silicon-mlx-north-mini-code.md) |
 | Engine orchestration | [docs/guide-orchestration.md](docs/guide-orchestration.md) |
+| Starting the engine from the planner (engine-mcp) | [docs/guide-orchestration.md](docs/guide-orchestration.md) §6.0 |
+| Monitoring (overwatch) | [docs/guide-orchestration.md](docs/guide-orchestration.md) §5.0 |
 | Software engineering governance | [ai/governance/software-engineering/governance.md](ai/governance/software-engineering/governance.md) |
 | Developers | [docs/guide-install.md](docs/guide-install.md) §3.0 (developer install, propagation, migration, release); [CLAUDE.md](CLAUDE.md); `dev/` |
 
@@ -176,6 +181,7 @@ This framework is experimental, serving as a learning exercise in AI agent gover
 | 3.8 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 | 3.9 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 4.0 | 2026-09-29 | Simplified to user content; reframed for AI-G&O pivot (governance models, planner/worker/reviewer roles, provider choice per D-16); Status section marks planned items; developer content moved to docs/guide-install.md §3.0; RATIONALE.md link and motivation paragraph removed; profile table and requirements condensed |
+| 4.1 | 2026-09-29 | Review corrections: leading blank line removed; scope sentence (D-01, D-02); planner client wording matches §2.2; Node.js requirement; web interface wording; engine-mcp and overwatch documentation rows |
 
 ---
 
