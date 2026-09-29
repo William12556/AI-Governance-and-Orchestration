@@ -58,7 +58,7 @@ Each requires a T06 issue → T07 change → T03 prompt triple.
 2. `run_phase`: normalise (abspath) `read_paths` on the F28 wall-clock-cap early return (d7f4a1c8 P08 review; no observed impact).
 3. `bin/bootstrap.sh`: refuse, with a clear message, a release tarball without `ai/engine/` (audit-5bcd46ad H-01 option; H-01 itself resolved by release v0.1.0).
 4. Pre-existing items recorded by audit-5bcd46ad L-12: governance P10.6 says the framework repository "contains only ai/, doc/, and templates/" (inaccurate); `audit-review.yaml` tests for `.complete` containing `DURATION_LIMIT`, which the orchestrator never writes (a timeout writes `.timeout` and returns before review); `ai/profiles/README.md` links to the gitignored `docs/claude/project_information.md`.
-5. `run_phase` crashes with `TypeError: 'NoneType' object is not subscriptable` at `response.choices[0]` when the endpoint returns a completion without `choices` (solax-modbus pilot run `engine_20260929-131033`, first worker call, rc=1, no BLOCKED.md). Treat a response without choices as an endpoint error: log the raw payload, retry through `_completion_with_retry`, then write BLOCKED.md. Needs a T06/T07/T03 triple.
+5. `run_phase` crashes with `TypeError: 'NoneType' object is not subscriptable` at `response.choices[0]` when the endpoint returns a completion without `choices` (solax-modbus pilot run `engine_20260929-131033`, first worker call, rc=1, no BLOCKED.md). Treat a response without choices as an endpoint error: log the raw payload, retry through `_completion_with_retry`, then write BLOCKED.md. Needs a T06/T07/T03 triple. Not reproduced on the immediate rerun with the same configuration (17 tools, `engine_20260929-131551`), so the payload was most likely a transient endpoint error; the crash on it is the defect.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -84,6 +84,7 @@ Verified 2026-09-24 under change-c37198be (dev/smoke harness, AEL venv `~/.venvs
 6. ~~Confirm the orphaned process from run 8c2040d3 (PID 22391, July 2026) no longer exists.~~ Done 2026-09-24: no process with PID 22391.
 7. Observation (open): in every 2026-09-24 run the worker wrote unrequested helper scripts in `dev/smoke/` and edited tracked files there, despite `context.md` §4.0. Consider restricting worker writes to declared deliverables. Moved to Phase 2 of the pivot (manifest write scope, proposal-5bcd46ad §6.0). Recurred in the 2026-09-25 CLI run (edited `run_test.py`, created `test_output.txt`) despite an explicit `context.md` constraint.
 8. Observation (open): in engine-mcp run 4870846d (2026-09-29) the reviewer resolved a relative deliverable path from `work-summary.txt` against the state directory (`ai/state/src/split.py`) and issued a false REVISE. Consider requiring absolute paths in work summaries, or resolving them against `project_root` in the orchestrator.
+9. Observation (open): solax-modbus pilot `engine_20260929-131551` (2026-09-29). The worker implemented prompt-c8e760ee correctly in iteration 1 (syntax and pytest gates PASS in all three iterations), but Magistral 8-bit returned REVISE claiming the guard clause was missing although it had read the lines containing it. In iterations 2 and 3 the reviewer read only `task.md` and `work-summary.txt`, repeated the objection, and the loop ended in stall BLOCK. Same failure class as item 2: reviewer false negatives are not corrected by gate evidence. Consider letting a PASS gate plus a diff of the deliverables be presented to the reviewer, or a different reviewer model.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -136,6 +137,7 @@ None pending. All resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.22 | 2026-09-29 | §3.0 item 5 not reproduced on rerun; §5.0 item 9 reviewer false REVISE in the solax-modbus pilot |
 | 1.21 | 2026-09-29 | §3.0 item 5: run_phase crash on a completion without choices (solax-modbus pilot) |
 | 1.20 | 2026-09-29 | §2.0 item 10: pytest gate interpreter and per-role context window (solax-modbus pilot preparation) |
 | 1.19 | 2026-09-29 | audit-5bcd46ad dispositions: §2.0 items 8–9 (Phase 2 inputs, tests); §3.0 items 3–4 (bootstrap guard, pre-existing items); §5.0 item 2 outcome, item 7 recurrence, item 8 added; §8.0 item 2 ael-mcp removal |
