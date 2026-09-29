@@ -6,7 +6,7 @@ change_info:
   title: "Layout and terminology migration: ai/engine/, ai/governance/<name>/, ai/config.yaml; retire AEL, Ralph Loop and govwatch"
   date: "2026-09-25"
   author: "William Watson"
-  status: "implemented"
+  status: "verified"
   priority: "high"
   iteration: 1
   coupled_docs:
@@ -83,7 +83,7 @@ rational:
     which governance models are loadable packages and the engine is generic.
   proposed_solution: >
     A mechanical migration driven by a path and term mapping, applied with
-    git mv and scripted replacement, verified by tests, static checks, a
+    mv -n and scripted replacement (git records renames at commit), verified by tests, static checks, a
     smoke run and a residue search. Downstream projects migrate once through
     bin/migrate-layout.sh, then receive the new layout through propagate.sh.
   alternatives_considered:
@@ -104,7 +104,7 @@ rational:
     - risk: "Recipe prompt wording changes (RALPH LOOP → LOOP) alter model behaviour"
       mitigation: "Smoke run to SHIP in dev/smoke before closure"
     - risk: "Downstream migration damages a project"
-      mitigation: "Script uses git mv, refuses a dirty working tree, never deletes; dry run on a copy first"
+      mitigation: "Script uses mv -n, refuses a dirty working tree, never deletes; dry run on a copy first"
     - risk: "Missed path or term reference"
       mitigation: "Repository-wide residue search against the mapping"
     - risk: "Closed documents keep target_profile: ael"
@@ -136,18 +136,19 @@ technical_details:
   code_changes:
     - component: "orchestrator"
       file: "ai/engine/src/orchestrator.py"
-      change_summary: "Default config path ../../config.yaml; state file and log names; recipe set name; console prefix; target_profile alias"
+      change_summary: "Default config path ../../config.yaml; state file and log names; recipe set name; console prefix; target_profile alias; [AEL RUNTIME CONTEXT] -> [ENGINE RUNTIME CONTEXT] in task framing (orchestrator and recipes)"
       functions_affected:
         - "main"
+        - "main_async (target_profile alias)"
         - "setup_logging"
         - "_select_recipe_set"
-        - "extract_target_profile"
       classes_affected: []
     - component: "overwatch"
       file: "ai/src/overwatch.py"
       change_summary: "State directory ai/state/; state file names; target_profile alias; AEL labels"
       functions_affected:
         - "Scanner._read_ael_state (renamed _read_engine_state)"
+        - "AlertWriter (alert line 'AEL:' -> 'engine:'; page JSON key ael_state -> engine_state)"
       classes_affected:
         - "ProjectPaths"
         - "AelState (renamed EngineState)"
@@ -166,7 +167,7 @@ technical_details:
       classes_affected: []
     - component: "downstream migration"
       file: "bin/migrate-layout.sh"
-      change_summary: "One-time: git mv old layout to new in a downstream project; --dry-run; refuses a dirty tree"
+      change_summary: "One-time: mv -n old layout to new in a downstream project (plan by default, --apply to act); refuses a dirty tree; rewrites loop.state_dir; log label 'retired framework path (contents not verified)'"
       functions_affected: []
       classes_affected: []
   data_changes:
@@ -226,7 +227,7 @@ implementation:
       owner: "Strategic Domain"
     - step: "2. Write dev/tools/mapping-5bcd46ad.yaml"
       owner: "Strategic Domain"
-    - step: "3. git mv to the target layout; remove govwatch files"
+    - step: "3. mv to the target layout; remove govwatch files"
       owner: "Strategic Domain"
     - step: "4. Update paths and terms in documents; governance.md → 11.0"
       owner: "Strategic Domain"
@@ -238,14 +239,14 @@ implementation:
       owner: "Independent session; human"
     - step: "8. Migrate and propagate: dev/smoke/ai, GTach, solax-modbus, e-Paper-IP-Display, pi-netconfig"
       owner: "Human"
-  rollback_procedure: "Framework: git reset to tag pre-5bcd46ad. Downstream: git revert of the migration commit (git mv only)."
+  rollback_procedure: "Framework: git reset to tag pre-5bcd46ad. Downstream: git revert of the migration commit (moves only; state_dir edit reverts with it)."
   deployment_notes: "One commit per implementation step. governance.md major version 11.0 requires propagate.sh --allow-major."
 
 verification:
   implemented_date: "2026-09-25"
   implemented_by: "Strategic Domain (Claude, Cowork session), operator-approved"
-  verification_date: ""
-  verified_by: ""
+  verification_date: "2026-09-29"
+  verified_by: "Independent strategic audit audit-5bcd46ad (dev/audit/audit-5bcd46ad-strategic-2026-09-29.md), verdict accept with remediation; operator pytest run"
   test_results: >
     Session checks 2026-09-25: tests/engine and tests/overwatch 62/62 pass,
     identical to the pre-migration tree, run with an offline stub harness
@@ -277,21 +278,35 @@ verification:
     the relative deliverable path against the state directory), SHIP at
     iteration 2 with syntax and pytest gates PASS; reset_engine cleared
     state. Findings, not regressions: (a) engine_status still reported
-    pid_alive true about two minutes after "engine end rc=0"; a later
-    ps check showed no process 97994, so no lasting zombie; cause
-    undetermined (slow MCP teardown, or an unreaped child collected later);
-    re-check in the Phase 2 engine-mcp rebuild; (b) in the CLI run the worker edited
+    pid_alive true about two minutes after "engine end rc=0". The audit
+    (L-02) attributes this, with moderate confidence, to an unreaped child:
+    the server never waits on its Popen child, so os.kill(pid, 0) succeeds
+    on the zombie until the next Popen (here reset_engine) reaps it, which
+    matches the later ps check finding no process 97994. Inherited from
+    ael-mcp; fix in the Phase 2 engine-mcp rebuild; (b) in the CLI run the worker edited
     tracked dev/smoke/run_test.py and created test_output.txt despite the
-    context.md constraint (backlog §5.0 item 7). Pending: real pytest in the
-    engine environment, independent review.
+    context.md constraint (backlog §5.0 item 7).
+    Operator pytest 2026-09-29, engine environment (~/.venvs/ael):
+    tests/engine tests/overwatch 62 passed (audit M-01 resolved).
+    Release v0.1.0 (2026-09-29) published from the new layout; tarball
+    contains ai/engine/config.template.yaml and the SE seed files, so
+    bin/bootstrap.sh on main installs successfully (audit H-01 resolved
+    without source change; bootstrap guard moved to the backlog).
+    Audit remediation 2026-09-29: M-02 log label changed under P04.12; all
+    29 files in solax-modbus ai-local/retired-5bcd46ad/ match framework
+    history blobs (no project files). M-03 design update done.
   issues_found: []
 
 traceability:
   design_updates:
     - design_ref: "dev/design/design-ael-orchestrator.md"
       sections_updated:
-        - "paths and terms"
-      update_date: ""
+        - "paths and terms (v0.5)"
+      update_date: "2026-09-25"
+    - design_ref: "dev/design/design-project-overwatch.md"
+      sections_updated:
+        - "paths and terms (v0.4)"
+      update_date: "2026-09-25"
   related_changes:
     - change_ref: "change-c37198be"
       relationship: "folds in"
@@ -306,7 +321,11 @@ notes: >
   file names design-ael-orchestrator.md and requirements-1c1f4ef6-ael.md
   (traceability); historical records (dev/task.md, eb782f83 design and
   requirements, struck backlog items, closed documents, Version History
-  rows); the overwatch alert-file heading text (output unchanged).
+  rows); the overwatch alert-file heading text "# govwatch alerts".
+  Additional as-built items (audit L-04): mcp_client.py console prefix
+  [ael] -> [engine]; recipe wording "WORK/REVIEW LOOP" and "work/review
+  loop" instead of the mapped "LOOP"/"loop"; engine-mcp _STATE_FILES adds
+  .timeout.
   bin/propagate.sh installs one model (MODEL=software-engineering); model
   selection is Phase 2. Recipes remain in ai/engine/recipes/ (audit recipes
   move in Phase 2).
@@ -337,6 +356,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Finding (a) revised after operator ps check: process had exited"
+  - version: "0.6"
+    date: "2026-09-29"
+    author: "William Watson"
+    changes:
+      - "Audit-5bcd46ad remediation: status verified; pytest and release v0.1.0 recorded; finding (a) aligned with audit L-02; git mv wording corrected (L-03); as-built items added (L-04); design_updates completed (L-11); M-02 and solax-modbus retired-folder check recorded"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

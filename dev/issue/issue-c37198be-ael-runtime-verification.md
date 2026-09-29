@@ -6,7 +6,7 @@ issue_info:
   title: "AEL: mcp 2.x breaks tool loading; missing --task file used as task text; filesystem-mcp 2.x write tools unrecognised; backlog §5.0 item 5 cases untested"
   date: "2026-09-24"
   reporter: "William Watson"
-  status: "open"
+  status: "resolved"
   severity: "medium"
   type: "defect"
   iteration: 1
@@ -88,15 +88,15 @@ resolution:
   target_date: "2026-09-24"
   approach: "Pin mcp<2; refuse a path-like --task that does not exist; recognise filesystem-mcp 2.x write tools and batched paths, pin the server to 2.5.0; add tests/ael/ unit tests with stub model and MCP clients."
   change_ref: "change-c37198be"
-  resolved_date: ""
-  resolved_by: ""
-  fix_description: ""
+  resolved_date: "2026-09-24"
+  resolved_by: "Claude (Cowork, Opus 5.5)"
+  fix_description: "D1 mcp pinned <2; D2 path-like missing --task refused (exit 1); D3 filesystem-mcp 2.x write tools and nested paths scope-checked, server pinned to 2.5.0; tests added (moved to tests/engine/ by change-5bcd46ad)."
 
 verification:
-  verified_date: ""
-  verified_by: ""
-  test_results: ""
-  closure_notes: ""
+  verified_date: "2026-09-29"
+  verified_by: "Independent strategic audit audit-5bcd46ad (dev/audit/audit-5bcd46ad-strategic-2026-09-29.md)"
+  test_results: "43 passed 2026-09-24 (tests/ael/); 62 passed 2026-09-29 in tests/engine and tests/overwatch after change-5bcd46ad."
+  closure_notes: "Closure with change-c37198be after operator acceptance of audit-5bcd46ad."
 
 traceability:
   design_refs:
@@ -122,6 +122,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25)"
+  - version: "1.3"
+    date: "2026-09-29"
+    author: "William Watson"
+    changes:
+      - "Status resolved; resolution and verification recorded (audit-5bcd46ad L-07)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

@@ -6,7 +6,7 @@ change_info:
   title: "AEL: pin mcp<2; refuse a missing --task file; filesystem-mcp 2.x write tools; tests for backlog §5.0 item 5 cases"
   date: "2026-09-24"
   author: "William Watson"
-  status: "implemented"
+  status: "verified"
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -99,15 +99,19 @@ technical_details:
       functions_affected:
         - "MCPClient._is_readonly_tool"
       classes_affected: []
-      classes_affected: []
   data_changes: []
   interface_changes:
-    - "orchestrator.py exits 1 with an error when --task names a missing file"
+    - interface: "orchestrator.py --task"
+      change_type: "contract"
+      details: "Exits 1 with an error when a path-like --task value names a missing file"
+      backward_compatible: "no"
 
 dependencies:
   internal: []
   external:
-    - "mcp>=1.0.0,<2"
+    - library: "mcp"
+      version_change: ">=1.0.0,<2"
+      impact: "mcp 2.x removed Tool.inputSchema; the bound keeps tool loading working"
   required_changes: []
 
 testing_requirements:
@@ -159,7 +163,7 @@ verification:
   implemented_date: "2026-09-24"
   implemented_by: "Claude (Cowork, Opus 5.5)"
   verification_date: "2026-09-24"
-  verified_by: "Claude (Cowork, Opus 5.5) — implementing session; independent review pending"
+  verified_by: "Claude (Cowork, Opus 5.5) — implementing session; independent review audit-5bcd46ad (2026-09-29), accept with remediation"
   test_results: >
     pytest tests/ael/ on the operator's Mac (~/.venvs/ael, Python 3.11.14,
     mcp 1.30.0): 43 passed. Live dev/smoke runs: Run A2 (ael_20260924-141914)
@@ -171,7 +175,11 @@ verification:
   issues_found: []
 
 traceability:
-  design_updates: []
+  design_updates:
+    - design_ref: "dev/design/design-ael-orchestrator.md"
+      sections_updated:
+        - "§5.2, §5.4, §5.5, §5.7, §10.0, §11.0, §13.0 (v0.6; audit-5bcd46ad M-03)"
+      update_date: "2026-09-29"
   related_changes:
     - change_ref: "change-a2f9c4d1"
       relationship: "tests"
@@ -203,6 +211,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Implemented; test and live-run results recorded"
+  - version: "1.3"
+    date: "2026-09-29"
+    author: "William Watson"
+    changes:
+      - "Status verified after audit-5bcd46ad; T07 shapes corrected (duplicate key, interface_changes, dependencies); design update recorded (L-07, M-03)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

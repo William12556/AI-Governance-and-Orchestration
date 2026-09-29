@@ -179,7 +179,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 
 | ID | Question | Decide in |
 |---|---|---|
-| OQ-01 | Claude Code profiles (`claude-code`, `claude-omlx`): retain as a manual option or retire under D-03? Resolved 2026-09-29: retained; a Mistral Vibe profile is added (D-16). | Resolved |
+| OQ-01 | Claude Code profiles (`claude-code`, `claude-omlx`): retain as a manual option or retire under D-03? Resolved 2026-09-29: retained; a Mistral Vibe profile is to be added (D-16; not yet in `ai/profiles/`). | Resolved |
 | OQ-02 | `governance.md` describes a Strategic Domain (Claude Desktop) and a Tactical Domain. Under D-03 and D-07 these become agent roles. The migration keeps the current terms. | Phase 2 |
 | OQ-03 | Which parts of `governance.md` are engine-generic rather than SE-specific (backlog §2.0-6)? | Phase 2 |
 | OQ-04 | Anthropic's OpenAI SDK compatibility layer is described by Anthropic as intended for testing and ignores `strict` for tool calls [1]. Use it, or add a native Anthropic adapter to the engine? | Phase 2 |
@@ -209,6 +209,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 | 0.1 | 2026-09-25 | Initial proposal from the 2026-09-25 brainstorming session |
 | 0.2 | 2026-09-25 | Status: accepted; Phase 1 implemented |
 | 0.3 | 2026-09-29 | D-16 provider choice added; D-07 clarified (planner runs in a chat client); Phase 2 scope references D-16; OQ-01 resolved; OQ-04 to OQ-06 and References added |
+| 0.4 | 2026-09-29 | OQ-01 wording: Mistral Vibe profile planned, not yet present (audit-5bcd46ad L-11) |
 
 ---
 

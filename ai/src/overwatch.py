@@ -6,8 +6,8 @@ Project Overwatch FR-01 (design-project-overwatch.md §7.1): the three
 govwatch panels (Workflow State, Compliance Alerts, Document Registry)
 ported from a Textual TUI to a single self-contained HTML file. The data
 layer (Scanner, PhaseInference, ComplianceEngine, AlertWriter and their
-supporting types) is carried over from ai/src/govwatch.py unmodified; only
-the presentation layer is new.
+supporting types) was carried over from the govwatch TUI (retired under
+change-5bcd46ad); only the presentation layer was new.
 
 Each scan cycle writes two files and reads everything else read-only:
     <project>/overwatch.html          rendered dashboard (overwritten)

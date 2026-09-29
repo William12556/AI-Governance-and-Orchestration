@@ -4,16 +4,14 @@ Deferred work is held in `dev/backlog.md`. Move an item here when work on it sta
 
 ## Active
 
-change-5bcd46ad (layout and terminology migration; proposal-5bcd46ad Phase 1). Implemented 2026-09-25; folds in change-c37198be.
+change-5bcd46ad (layout and terminology migration; proposal-5bcd46ad Phase 1) and change-c37198be: verified 2026-09-29 (audit-5bcd46ad, accept with remediation; pytest 62 passed; release v0.1.0). Remediation done except the items below.
 
-1. Operator verification on the Mac, engine environment (`~/.venvs/ael`). Done: CLI smoke run SHIP (2026-09-25); engine-mcp start/status/reset exercised, SHIP (2026-09-29). Remaining: real pytest.
-   - `python -m pytest tests/engine tests/overwatch -v` (62 tests passed offline with a stub harness; confirm with real pytest).
-   - Smoke run: `dev/smoke/ai/` is a gitignored propagated copy in the old layout — remove it, create an empty `dev/smoke/ai/`, run `bin/propagate.sh --allow-major dev/smoke`, copy `dev/smoke/config.reference.yaml` to `dev/smoke/ai/config.yaml`, then run `--mode loop` from `dev/smoke` to SHIP. Doubles as the backlog §5.0 item 2 retry.
-   - engine-mcp: repoint the Claude Desktop entry to `ai/engine/mcp/server.py` with the engine interpreter; exercise `start_engine`, `engine_status`, `reset_engine` against `dev/smoke`.
-2. Independent review (one review covering change-5bcd46ad and change-c37198be); then close both triples.
-3. Downstream pilot: solax-modbus only. Migrated and propagated 2026-09-25 (awaiting operator commit and a live engine run there). Procedure: `bin/migrate-layout.sh <root>` (dry run), `--apply`, then `bin/propagate.sh --allow-major <root>`; update old paths reported in CLAUDE.md / AGENTS.md / .gitignore; pin `@j0hanz/filesystem-mcp@2.5.0` in `ai/config.yaml`. GTach, e-Paper-IP-Display and pi-netconfig follow only after the pilot is confirmed working (operator decision 2026-09-25).
-4. Archive the `ael-mcp` repository and the `~/mcp-ael` install.
+1. Operator: accept audit-5bcd46ad; then close change-5bcd46ad, change-c37198be and issue-c37198be (move to `closed/`), record acceptance in the audit §8.0, and move the audit to `dev/audit/closed/`. Follow-up audit waivable (P02.8.2): remediation changed only the `migrate-layout.sh` log label (P04.12).
+2. Downstream pilot: solax-modbus migrated and committed 2026-09-25; its `ai-local/retired-5bcd46ad/` holds only framework files (29 files, checked 2026-09-29) and may be deleted after review. Remaining: a live engine run on real work there. GTach, e-Paper-IP-Display and pi-netconfig follow only after the pilot is confirmed working (operator decision 2026-09-25). Procedure: `bin/migrate-layout.sh <root>` (dry run), `--apply`, `bin/propagate.sh --allow-major <root>`; update old paths reported in CLAUDE.md / AGENTS.md / .gitignore; pin `@j0hanz/filesystem-mcp@2.5.0` in `ai/config.yaml`.
+3. Operator: remove the `ael-mcp` entry from the Claude Desktop MCP configuration (audit L-10); archive the `ael-mcp` repository and the `~/mcp-ael` install.
 
 ## Planned
+
+- Phase 2 requirements (proposal-5bcd46ad §7.0; inputs in `dev/backlog.md` §2.0 items 8–9 and §5.0 items 7–8).
 
 ## Parked

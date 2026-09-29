@@ -15,6 +15,8 @@
 #     ai/primer.md, ai/templates/, ai/skills/, ai/doc/, ai/index.md,
 #     ai/src/govwatch.py, ai/src/requirements-govwatch.txt) move to
 #     ai-local/retired-5bcd46ad/ and are logged in ai-local/RELOCATED.md.
+#     Rows are labelled 'retired framework path (contents not verified)':
+#     a moved directory may hold project files, so review before deleting.
 #   - Never deletes, never overwrites (mv -n; every destination checked first).
 #   - In a git work tree, refuses uncommitted changes under ai/.
 #   - ai/state/ralph/ (runtime state) is left in place and reported.
@@ -141,7 +143,7 @@ while [[ ${i} -lt ${#MOVES[@]} ]]; do
         exit 3
     fi
     if [[ "${dst}" == "${LOCAL}/"* ]]; then
-        echo "| $(date +%Y-%m-%d) | ai/${MOVES[i]} | ${dst#"${PROJECT_ROOT}/"} | retired framework file | layout migration change-5bcd46ad |" >> "${LOG}"
+        echo "| $(date +%Y-%m-%d) | ai/${MOVES[i]} | ${dst#"${PROJECT_ROOT}/"} | retired framework path (contents not verified) | layout migration change-5bcd46ad |" >> "${LOG}"
     fi
     echo "moved  ai/${MOVES[i]}"
     i=$((i + 2))

@@ -46,12 +46,12 @@ workspace/proposal/closed/
 # Engine ephemeral state
 ai/state/
 
-# dev/smoke harness — propagated framework copy, generated deliverable, and
-# engine-mcp run records. The harness definition (task.md, tests/,
-# config.reference.yaml) and dev/smoke-fixtures/ remain tracked.
+# dev/smoke harness — propagated framework copy (including engine and
+# engine-mcp state under ai/state/) and generated deliverable. The harness
+# definition (task.md, tests/, config.reference.yaml) and
+# dev/smoke-fixtures/ remain tracked.
 dev/smoke/ai/
 dev/smoke/src/
-dev/smoke/.ael/
 dev/eval/.venv/
 dev/eval/.env
 dev/eval/results/

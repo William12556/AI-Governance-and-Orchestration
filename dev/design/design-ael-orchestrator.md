@@ -235,6 +235,10 @@ Responsibility: derive the task string passed into the loop.
   key in a fenced ` ```yaml ` block; Pass 2: fenced block beneath a
   `## N.N Tactical Brief` heading, WARNING-logged fallback). Empty result on both
   passes falls back to the raw document text (FR-AEL-007).
+- `_looks_like_task_path()` — a `--task` value that is a single token and ends in
+  `.md`, `.yaml`, `.yml` or `.txt`, or contains a path separator, is treated as a
+  file path; if no such file exists, `main_async` exits 1 before any state change
+  (change-c37198be D2). Free-text tasks are unchanged.
 - `run_preflight_check()` — optional (`loop.preflight_check`), two-pass
   `success_criteria` extraction with deterministic grep/`py_compile` checks;
   prepends a `[PRE-FLIGHT]` summary block to the task.
@@ -282,7 +286,10 @@ boundary condition fires. Key behaviours:
    `REVISE` before acceptance (audit runs only).
 6. On `REVISE`: stall detection via SHA-256 hash of feedback content — N
    (`stall_threshold`, default 3) consecutive identical hashes → BLOCKED.
-7. Boundary exits: max iterations (with interactive human extension prompt),
+7. Recipe pair: `_select_recipe_set(state_dir)` returns `audit` when
+   `audit-index.md` exists in the state directory, otherwise `loop`
+   (`loop-work.yaml`, `loop-review.yaml`; extracted under change-c37198be).
+8. Boundary exits: max iterations (with interactive human extension prompt),
    `--duration` deadline (`.timeout`, return code 2), `BLOCKED.md`
    presence (return code 1), `.complete` (return code 0).
 
@@ -295,7 +302,8 @@ the same asyncio task. `get_openai_tools(readonly=False)` filters by regex
 against `_READONLY_TOOL_PATTERNS` (`read`, `list`, `grep`, `search`, `stat`,
 `get_file_info`, `find`, `head`, `tail`, `cat` prefixes). `call_tool()` never
 raises — exceptions are caught and returned as `"Error calling '<name>': <e>"`
-strings, which `_is_mcp_error()` (§5.7) detects by prefix.
+strings, which `_is_mcp_error()` (§5.7) detects by prefix. A tool whose name
+contains a write verb is never classified as read-only (change-c37198be D3).
 
 ### 5.6 Tool Call Parser
 
@@ -314,7 +322,13 @@ Deduplicates by `(name, sorted-json-arguments)` signature within a single call.
 ### 5.7 Validation Guards
 
 - `_validate_write_scope()` — rejects write-tool calls whose resolved path falls
-  outside `project_root`.
+  outside `project_root`. Target paths come from `_scope_targets()`, which reads
+  flat and nested arguments (`path`, `files[]`, `paths[]`, `moves[]` source and
+  destination, `edits[]`). `_written_targets()` supplies the same paths to the
+  deliverable manifest and the post-write syntax check. `_WRITE_TOOLS` includes the
+  filesystem-mcp 2.x tools `create`, `patch`, `replace_text` and
+  `search_and_replace` (change-c37198be D3). Only names in `_WRITE_TOOLS` are
+  scope-checked (see §13.0).
 - `_validate_audit_report_write()` — rejects overwrite-semantics writes
   (`write`/`write_file`/`create_file`) to `audit-report.md` that would discard
   existing content not present in the new content; `edit`/`edit_file` unaffected.
@@ -498,7 +512,7 @@ against the owning stdio server session.
 | NFR-AEL-001 Single process | No subprocess spawning beyond MCP server stdio processes (`py_compile` invocations are the sole additional `subprocess.run` use, not daemonized) |
 | NFR-AEL-002 Async execution | `asyncio` throughout for completion calls and MCP dispatch; `run_phase`/`run_loop`/`main_async` are all coroutines |
 | NFR-AEL-003 Config-driven | All runtime parameters read from `config.yaml` (§4.2); `--model`, `--max-iterations`, `--config` are the only CLI overrides |
-| NFR-AEL-004 Backward compatibility | `--task <file or string>` interface unchanged; `extract_tactical_brief` fallback to raw document preserves behaviour for documents lacking a `tactical_brief` block |
+| NFR-AEL-004 Backward compatibility | `--task <file or string>` interface retained; since change-c37198be a path-like value naming a missing file is refused (exit 1) instead of being run as free text. `extract_tactical_brief` fallback to raw document preserves behaviour for documents lacking a `tactical_brief` block |
 | NFR-AEL-005 Minimal dependencies | `requirements.txt`: `openai`, `mcp`, `pyyaml`, `rich` only — no platform-specific or optional dependencies |
 
 [Return to Table of Contents](<#table of contents>)
@@ -569,6 +583,10 @@ underscore denotes module-private.
 | Element | Signature |
 |---|---|
 | `_validate_write_scope` | `(tool_name: str, arguments: dict, project_root: str) -> str \| None` |
+| `_scope_targets` | `(arguments: dict) -> list[str]` |
+| `_written_targets` | `(tool_name: str, arguments: dict) -> list[str]` |
+| `_looks_like_task_path` | `(value: str) -> bool` |
+| `_select_recipe_set` | `(state_dir: str) -> str` |
 | `_validate_audit_report_write` | `(tool_name: str, arguments: dict, state_dir: str) -> str \| None` |
 | `_is_mcp_error` | `(result: str) -> bool` |
 | `_WRITE_TOOLS` | `set[str]` |
@@ -635,6 +653,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | OI-002 | oMLX MCP native tool execution non-functional (GitHub issue #71) | Consistent with design: `MCPClient` never relies on `/v1/mcp/execute` (§8.4); no orchestrator-side action pending upstream fix |
 | OI-003 | Pipeline task dependency ordering not formally specified | Applies to §12.0 (not yet designed); remains open |
 | OI-004 | Pipeline mode behaviour on empty/no `.md` tasks directory undefined | Applies to §12.0 (not yet designed); remains open |
+| OI-005 | Write-scope check is fail-open: a write tool whose name is not in `_WRITE_TOOLS` is not scope-checked, while `mcp_client` classifies by verb pattern (fail-closed) | Mitigated by the filesystem-mcp 2.5.0 pin; to be resolved in Phase 2 by deriving write classification from one source (audit-5bcd46ad L-09) |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -674,6 +693,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | 0.3 | 2026-07-16 | §3.1 component diagram: corrected mcp-grep → mcp-ripgrep |
 | 0.4 | 2026-09-23 | Requirements reference updated: ael-requirements.md renamed to requirements-1c1f4ef6-ael.md (P00.10 naming) |
 | 0.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 0.6 | 2026-09-29 | change-c37198be design update (audit-5bcd46ad M-03): §5.2 missing-task-file refusal; §5.4 recipe-set selection; §5.5 write-verb classification; §5.7 nested-path scope targets and filesystem-mcp 2.x write tools; §10.0 NFR-AEL-004 note; §11.0 registry rows; §13.0 OI-005 |
 
 ---
 

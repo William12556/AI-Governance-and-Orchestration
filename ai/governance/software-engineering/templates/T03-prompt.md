@@ -222,7 +222,8 @@ properties:
           - engine
           - claude_code
           - claude_omlx
-        description: "Tactical Domain profile this prompt targets. Governs whether tactical_brief is required (see root-level allOf)."
+          - ael
+        description: "Tactical Domain profile this prompt targets. Governs whether tactical_brief is required (see root-level allOf). ael is deprecated (legacy value in closed documents, read as engine); do not use it in new prompts."
       date:
         type: string
       iteration:
@@ -545,6 +546,7 @@ properties:
 | 1.10    | 2026-07-02 | Added prompt_info.target_profile (enum: ael, claude_code, claude_omlx); coupled_docs required only when source_ref is change-sourced (allOf/if-then); tactical_brief required only when target_profile is ael (allOf/if-then); reworded tactical_brief comment and schema description (plain-text → prose value, F5); corrected stale embedded version labels v1.0 → v1.10 (F8); resolves issue-713437bc |
 | 1.11    | 2026-07-17 | Added deliverable.format_requirements default entry instructing pytest suite execution on completion, applicable to claude_code/claude_omlx/ael target profiles |
 | 1.12 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 1.13 | 2026-09-29 | target_profile enum: ael added as deprecated legacy value so closed prompts validate (audit-5bcd46ad L-06) |
 
 ---
 

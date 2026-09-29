@@ -42,6 +42,8 @@ and `dev/reports/closed/report-eb782f83-pre-migration-baseline.md`.
 5. Retire the numeric `schema_type` prefix in favour of the class word (audit F-04; governance Appendix A A.5).
 6. Evaluate splitting `ai/governance/software-engineering/governance.md` (OQ-1). Deferred to Phase 2 of the pivot (proposal-5bcd46ad OQ-03).
 7. ~~Consider moving the declared project files (`context.md`, `task.md`, `ael/config.yaml`, `workspace/`, `state/`) out of `ai/`, so `ai/` holds framework files only.~~ Resolved 2026-09-25 by the ownership boundary (proposal-5bcd46ad §5.0): framework-owned folders are `ai/engine/`, `ai/governance/<model>/`, `ai/profiles/`, `ai/src/`; configuration moved to `ai/config.yaml`.
+8. Phase 2 engine and engine-mcp requirements inputs from audit-5bcd46ad: (L-01) engine-mcp and overwatch read `loop.state_dir` from the project config instead of hard-coding `ai/state`, and `bin/migrate-layout.sh` warns when a non-standard `state_dir` remains; (L-02) engine-mcp reaps its child (`Popen.poll()` or `os.waitpid(pid, WNOHANG)`) before the liveness probe, so `pid_alive` is not reported for a finished run; (L-09) derive write-tool classification for the scope check from one source (design-ael-orchestrator OI-005).
+9. Tests, with P05 CI: engine-mcp `server.py` (paths, state names), `bin/migrate-layout.sh`, `bin/propagate.sh` old-layout refusal and seeding, the orchestrator default config path, and the legacy `ael` alias (audit-5bcd46ad L-08).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -53,6 +55,8 @@ Each requires a T06 issue → T07 change → T03 prompt triple.
 
 1. Consider a check that validates protocol citations in source comments (issue-e36a35d3 analysis).
 2. `run_phase`: normalise (abspath) `read_paths` on the F28 wall-clock-cap early return (d7f4a1c8 P08 review; no observed impact).
+3. `bin/bootstrap.sh`: refuse, with a clear message, a release tarball without `ai/engine/` (audit-5bcd46ad H-01 option; H-01 itself resolved by release v0.1.0).
+4. Pre-existing items recorded by audit-5bcd46ad L-12: governance P10.6 says the framework repository "contains only ai/, doc/, and templates/" (inaccurate); `audit-review.yaml` tests for `.complete` containing `DURATION_LIMIT`, which the orchestrator never writes (a timeout writes `.timeout` and returns before review); `ai/profiles/README.md` links to the gitignored `docs/claude/project_information.md`.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -71,12 +75,13 @@ None open. Completed 2026-09-23: 31 closed documents normalised to terminal stat
 Verified 2026-09-24 under change-c37198be (dev/smoke harness, AEL venv `~/.venvs/ael`, filesystem-mcp 2.5.0). Live runs required defects D1–D3 to be fixed first (mcp 2.x, missing `--task` file, filesystem-mcp 2.x write tools).
 
 1. ~~Live Ralph Loop smoke test of the pytest SHIP gate (change-5bdc2d9b) against a project with an existing `tests/` directory.~~ Done 2026-09-24: Run A2 (`ael_20260924-141914`), pytest gate PASS on `tests/test_split.py`, read-evidence gate satisfied, SHIP at iteration 3.
-2. Validate the REVISE → fix → SHIP convergence path. **Open.** REVISE and the pytest gate FAIL branch were observed live (Run B2, `ael_20260924-154002`), but no SHIP: Devstral 8-bit did not correct the defective fixture in 10 cycles, and Magistral then repeated one false objection until stall BLOCK. Run B (`ael_20260924-144119`): the fixture's header comment ("Known requirement violations") misled the reviewer despite gate PASS; copy the fixture without its header (`grep -v '^#'`). Next attempt needs a different worker model or a smaller defect. Retry in the change-5bcd46ad verification run.
+2. Validate the REVISE → fix → SHIP convergence path. **Open.** REVISE and the pytest gate FAIL branch were observed live (Run B2, `ael_20260924-154002`), but no SHIP: Devstral 8-bit did not correct the defective fixture in 10 cycles, and Magistral then repeated one false objection until stall BLOCK. Run B (`ael_20260924-144119`): the fixture's header comment ("Known requirement violations") misled the reviewer despite gate PASS; copy the fixture without its header (`grep -v '^#'`). Next attempt needs a different worker model or a smaller defect. 2026-09-29: engine-mcp run 4870846d went REVISE → SHIP, but the REVISE came from a reviewer path error (item 8), not a defect fix, so it does not count; remains open.
 3. ~~Confirm Magistral reviewer tool-calling on the first real review phase (a7d3f8b1).~~ Done 2026-09-24: the reviewer read the task, the manifest and the deliverables in every review phase of Runs A, A2, B and B2.
 4. ~~Run the AEL once against the eb782f83-migrated corpus.~~ Done 2026-09-24: `dev/smoke/ai/` at governance 10.5.
 5. ~~Unexercised test cases from the closed triples a2f9c4d1, f5c28a04 and d1f4a83b: worker-authored `work-summary.txt` then budget exhaustion; `move_file` deliverable; `log_archive_dir` unset; `_normalize_verdict` pass 1; `BLOCKED` exit; audit-loop recipe pair; pytest gate FAIL branch and SHIP override; stall-detection BLOCK.~~ Done 2026-09-24: `tests/ael/` (43 tests, change-c37198be) cover all nine; `BLOCKED` exit, stall BLOCK and gate FAIL also observed live.
 6. ~~Confirm the orphaned process from run 8c2040d3 (PID 22391, July 2026) no longer exists.~~ Done 2026-09-24: no process with PID 22391.
-7. Observation (open): in every 2026-09-24 run the worker wrote unrequested helper scripts in `dev/smoke/` and edited tracked files there, despite `context.md` §4.0. Consider restricting worker writes to declared deliverables. Moved to Phase 2 of the pivot (manifest write scope, proposal-5bcd46ad §6.0).
+7. Observation (open): in every 2026-09-24 run the worker wrote unrequested helper scripts in `dev/smoke/` and edited tracked files there, despite `context.md` §4.0. Consider restricting worker writes to declared deliverables. Moved to Phase 2 of the pivot (manifest write scope, proposal-5bcd46ad §6.0). Recurred in the 2026-09-25 CLI run (edited `run_test.py`, created `test_output.txt`) despite an explicit `context.md` constraint.
+8. Observation (open): in engine-mcp run 4870846d (2026-09-29) the reviewer resolved a relative deliverable path from `work-summary.txt` against the state directory (`ai/state/src/split.py`) and issued a false REVISE. Consider requiring absolute paths in work summaries, or resolving them against `project_root` in the orchestrator.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -109,7 +114,7 @@ None pending. All resolved 2026-09-23:
 ## 8.0 External Repositories
 
 1. `mcp-ripgrep`, `mcp-git`, `mcp-sed-awk`: check for the JSON Schema draft-07 `outputSchema` declaration that makes MCP tools unusable in Cowork sessions (observed 2026-09-23 on the Filesystem server's `read_text_file` and `directory_tree`). Emit 2020-12 or omit `$schema`.
-2. ~~Redeploy the stale `ael-mcp` build that resolves state to `.ael/ralph` instead of `ai/state/ralph`.~~ Resolved 2026-09-25: ael-mcp ported to `ai/engine/mcp/server.py` as engine-mcp (change-5bcd46ad). Operator: repoint the Claude Desktop MCP entry and archive the `ael-mcp` repository and the `~/mcp-ael` install.
+2. ~~Redeploy the stale `ael-mcp` build that resolves state to `.ael/ralph` instead of `ai/state/ralph`.~~ Resolved 2026-09-25: ael-mcp ported to `ai/engine/mcp/server.py` as engine-mcp (change-5bcd46ad). Operator: engine-mcp entry added 2026-09-29; the old `ael-mcp` entry is still registered (audit-5bcd46ad L-10) and is to be removed; archive the `ael-mcp` repository and the `~/mcp-ael` install.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -129,6 +134,7 @@ None pending. All resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.19 | 2026-09-29 | audit-5bcd46ad dispositions: §2.0 items 8–9 (Phase 2 inputs, tests); §3.0 items 3–4 (bootstrap guard, pre-existing items); §5.0 item 2 outcome, item 7 recurrence, item 8 added; §8.0 item 2 ael-mcp removal |
 | 1.18 | 2026-09-25 | Pivot dispositions (proposal-5bcd46ad §6.0): §2.0 items 1, 2 and 7 resolved or parked; §2.0 items 4 and 6 paths updated; §5.0 items 2 and 7 annotated; §8.0 item 2 resolved; §9.0 item 2 added |
 | 1.17 | 2026-09-24 | §5.0: runtime verification results (items 1, 3–6 done; item 2 open; item 7 observation added); §6.0 item 2 and §7.0 items struck as resolved |
 | 1.16 | 2026-09-23 | §6.0: remaining ai-local/ files resolved |
