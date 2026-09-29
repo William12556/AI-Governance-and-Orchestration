@@ -276,9 +276,11 @@ verification:
     reported progress and shipped; REVISE at iteration 1 (reviewer resolved
     the relative deliverable path against the state directory), SHIP at
     iteration 2 with syntax and pytest gates PASS; reset_engine cleared
-    state. Findings, not regressions: (a) engine_status keeps reporting
-    pid_alive true after the run ended, most likely because the server does
-    not reap its exited child (zombie); (b) in the CLI run the worker edited
+    state. Findings, not regressions: (a) engine_status still reported
+    pid_alive true about two minutes after "engine end rc=0"; a later
+    ps check showed no process 97994, so no lasting zombie; cause
+    undetermined (slow MCP teardown, or an unreaped child collected later);
+    re-check in the Phase 2 engine-mcp rebuild; (b) in the CLI run the worker edited
     tracked dev/smoke/run_test.py and created test_output.txt despite the
     context.md constraint (backlog §5.0 item 7). Pending: real pytest in the
     engine environment, independent review.
@@ -330,6 +332,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Live CLI and engine-mcp smoke runs recorded; two findings noted"
+  - version: "0.5"
+    date: "2026-09-29"
+    author: "William Watson"
+    changes:
+      - "Finding (a) revised after operator ps check: process had exited"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
