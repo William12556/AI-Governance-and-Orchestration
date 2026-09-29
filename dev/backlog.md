@@ -44,6 +44,7 @@ and `dev/reports/closed/report-eb782f83-pre-migration-baseline.md`.
 7. ~~Consider moving the declared project files (`context.md`, `task.md`, `ael/config.yaml`, `workspace/`, `state/`) out of `ai/`, so `ai/` holds framework files only.~~ Resolved 2026-09-25 by the ownership boundary (proposal-5bcd46ad §5.0): framework-owned folders are `ai/engine/`, `ai/governance/<model>/`, `ai/profiles/`, `ai/src/`; configuration moved to `ai/config.yaml`.
 8. Phase 2 engine and engine-mcp requirements inputs from audit-5bcd46ad: (L-01) engine-mcp and overwatch read `loop.state_dir` from the project config instead of hard-coding `ai/state`, and `bin/migrate-layout.sh` warns when a non-standard `state_dir` remains; (L-02) engine-mcp reaps its child (`Popen.poll()` or `os.waitpid(pid, WNOHANG)`) before the liveness probe, so `pid_alive` is not reported for a finished run; (L-09) derive write-tool classification for the scope check from one source (design-ael-orchestrator OI-005).
 9. Tests, with P05 CI: engine-mcp `server.py` (paths, state names), `bin/migrate-layout.sh`, `bin/propagate.sh` old-layout refusal and seeding, the orchestrator default config path, and the legacy `ael` alias (audit-5bcd46ad L-08).
+10. Phase 2 engine inputs found while preparing the solax-modbus pilot (2026-09-29): the pytest gate runs `sys.executable -m pytest`, so the project's test dependencies must be installed in the interpreter that runs the engine (engine-mcp inherits its own interpreter); make the gate command or interpreter configurable per project. The context window is resolved once for the worker model and also applied to the reviewer phase; resolve it per role (Magistral 40960 vs Devstral 262144).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -134,6 +135,7 @@ None pending. All resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.20 | 2026-09-29 | §2.0 item 10: pytest gate interpreter and per-role context window (solax-modbus pilot preparation) |
 | 1.19 | 2026-09-29 | audit-5bcd46ad dispositions: §2.0 items 8–9 (Phase 2 inputs, tests); §3.0 items 3–4 (bootstrap guard, pre-existing items); §5.0 item 2 outcome, item 7 recurrence, item 8 added; §8.0 item 2 ael-mcp removal |
 | 1.18 | 2026-09-25 | Pivot dispositions (proposal-5bcd46ad §6.0): §2.0 items 1, 2 and 7 resolved or parked; §2.0 items 4 and 6 paths updated; §5.0 items 2 and 7 annotated; §8.0 item 2 resolved; §9.0 item 2 added |
 | 1.17 | 2026-09-24 | §5.0: runtime verification results (items 1, 3–6 done; item 2 open; item 7 observation added); §6.0 item 2 and §7.0 items struck as resolved |
