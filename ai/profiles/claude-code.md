@@ -110,6 +110,7 @@ Reference: `ai/governance/software-engineering/governance.md` P13.3 Option C.
 # Claude Code profile - Tactical Domain
 CLAUDE.local.md
 .claude/settings.local.json
+.claude/commands/
 ```
 
 `.claude/settings.json` is team-shared and git-tracked (governance P10.6).
@@ -152,6 +153,7 @@ CLAUDE.local.md
 | 1.4 | 2026-08-19 | §5.0: corrected report path defect (ai/workspace/report-<uuid>-<name>.md → ai/workspace/report/report-<uuid>-<name>.md, aligning with governance §1.2.6 canonical directory); added cross-reference to governance §1.10.3 Option C |
 | 1.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.6 | 2026-09-29 | §1.0 aligned with D-16 and "Execution" row; §4.0 current install methods and account options [1]; §5.0 target_profile claude_code and validation hook; §6.0 .gitignore corrected to settings.local.json, hooks/ and validation/ added, mandatory skill step; References added |
+| 1.7 | 2026-09-29 | §6.0 .gitignore: added .claude/commands/, aligning with the governance P10.6 template |
 
 ---
 
