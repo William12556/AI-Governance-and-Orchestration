@@ -84,7 +84,7 @@ audit_info:
   title: "Strategic audit — change-5bcd46ad layout migration and change-c37198be engine runtime fixes, 23030ec against pre-5bcd46ad"
   date: "2026-09-29"
   mode: "strategic"
-  status: "complete"
+  status: "closed"
   auditor: "Strategic Domain (Claude, Cowork; independent session — not an implementing session)"
 
 scope:
@@ -301,11 +301,55 @@ notes: >
   both records name. It does not close either triple; closure follows
   operator acceptance.
 
+closure:
+  date: "2026-09-29"
+  approver: "William Watson"
+  recorded_by: >
+    The implementing session, not the auditor. This block records the closure
+    decision and the disposition of findings; no finding, verdict or rationale
+    above has been altered.
+  remediation:
+    changes: ["change-5bcd46ad (verified)", "change-c37198be (verified)"]
+    issue: "issue-c37198be (closed)"
+    commits: ["ce4a4ee", "dbb1da1"]
+    release: "v0.1.0"
+  criteria_p02_8_1:
+    - criterion: "All critical findings fully resolved"
+      assessment: "Met. There were none."
+    - criterion: "All high-priority findings addressed or mitigated with documented acceptance"
+      assessment: >
+        Met. H-01 resolved by release v0.1.0 (new layout; bootstrap on main
+        installs). The optional bootstrap guard is carried in dev/backlog.md
+        §3.0 item 3.
+    - criterion: "Completion documented in audit report"
+      assessment: "Met by this block."
+    - criterion: "Human approval obtained"
+      assessment: "Met. Operator accepted audit and remediation on 2026-09-29."
+  waiver:
+    requirement: "P02.8.2 — follow-up audit after remediation"
+    decision: >
+      Waived by the operator. The only source change after the audit was the
+      bin/migrate-layout.sh log label (M-02, P04.12); bin/bootstrap.sh was not
+      changed. Recorded as a waiver rather than as satisfaction of the
+      requirement.
+    consequence: >
+      The remediation in dbb1da1 is verified only by the implementing
+      session's own checks (linter, protocol_checker, bash -n, YAML parse).
+  disposition:
+    fixed: ["H-01", "M-01", "M-02", "M-03", "L-05", "L-06"]
+    record_corrected: ["L-03", "L-04", "L-07", "L-11"]
+    carried_to_backlog: ["L-01", "L-02", "L-08", "L-09", "L-12"]
+    operator_action: ["L-10"]
+
 version_history:
   - version: "1.0"
     date: "2026-09-29"
     changes:
       - "Initial strategic audit"
+  - version: "1.1"
+    date: "2026-09-29"
+    changes:
+      - "Closure recorded (operator acceptance; follow-up audit waived)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
@@ -381,7 +425,7 @@ All targets were throwaway git repositories built from `git archive pre-5bcd46ad
   - M-03 design update is made (documents only).
 - M-02 and the low findings may be carried as P03 issues or backlog entries.
 - Follow-up audit: required for H-01 only if remediation changes `bin/bootstrap.sh`. Remediation that only cuts a release changes no source, so the operator may waive the follow-up (P02.8.2).
-- Approver and closure date: pending operator acceptance.
+- Approver and closure date: William Watson, 2026-09-29. Audit and remediation accepted; follow-up audit waived (see `closure` in §4.0).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -400,6 +444,7 @@ All targets were throwaway git repositories built from `git archive pre-5bcd46ad
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-29 | Initial strategic audit of change-5bcd46ad and change-c37198be |
+| 1.1 | 2026-09-29 | Closure recorded: operator acceptance, P02.8.2 waiver, finding disposition |
 
 ---
 

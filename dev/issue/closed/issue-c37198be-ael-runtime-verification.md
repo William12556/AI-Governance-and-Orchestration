@@ -6,7 +6,7 @@ issue_info:
   title: "AEL: mcp 2.x breaks tool loading; missing --task file used as task text; filesystem-mcp 2.x write tools unrecognised; backlog §5.0 item 5 cases untested"
   date: "2026-09-24"
   reporter: "William Watson"
-  status: "resolved"
+  status: "closed"
   severity: "medium"
   type: "defect"
   iteration: 1
@@ -96,7 +96,7 @@ verification:
   verified_date: "2026-09-29"
   verified_by: "Independent strategic audit audit-5bcd46ad (dev/audit/audit-5bcd46ad-strategic-2026-09-29.md)"
   test_results: "43 passed 2026-09-24 (tests/ael/); 62 passed 2026-09-29 in tests/engine and tests/overwatch after change-5bcd46ad."
-  closure_notes: "Closure with change-c37198be after operator acceptance of audit-5bcd46ad."
+  closure_notes: "Closed 2026-09-29 with change-c37198be after operator acceptance of audit-5bcd46ad."
 
 traceability:
   design_refs:
@@ -127,6 +127,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Status resolved; resolution and verification recorded (audit-5bcd46ad L-07)"
+  - version: "1.4"
+    date: "2026-09-29"
+    author: "William Watson"
+    changes:
+      - "Closed after operator acceptance of audit-5bcd46ad; status resolved -> closed"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

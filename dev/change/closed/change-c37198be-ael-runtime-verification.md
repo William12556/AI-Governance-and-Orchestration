@@ -216,6 +216,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Status verified after audit-5bcd46ad; T07 shapes corrected (duplicate key, interface_changes, dependencies); design update recorded (L-07, M-03)"
+  - version: "1.4"
+    date: "2026-09-29"
+    author: "William Watson"
+    changes:
+      - "Closed after operator acceptance of audit-5bcd46ad (follow-up audit waived); moved to dev/change/closed/"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

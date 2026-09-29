@@ -2,9 +2,9 @@ Created: 2026 September 25
 
 # Proposal: AI-G&O Strategic Pivot
 
-**Status:** Accepted 2026-09-25. Phase 1 implemented (change-5bcd46ad); verification pending. Amended 2026-09-29 (D-16).
+**Status:** Accepted 2026-09-25; amended 2026-09-29 (D-16). Phase 1 implemented and verified; change-5bcd46ad closed 2026-09-29 (audit-5bcd46ad). Phase 2 not started.
 **UUID:** `5bcd46ad`
-**Coupled change:** `dev/change/change-5bcd46ad-layout-migration.md`
+**Coupled change:** `dev/change/closed/change-5bcd46ad-layout-migration.md`
 
 ---
 
@@ -210,6 +210,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 | 0.2 | 2026-09-25 | Status: accepted; Phase 1 implemented |
 | 0.3 | 2026-09-29 | D-16 provider choice added; D-07 clarified (planner runs in a chat client); Phase 2 scope references D-16; OQ-01 resolved; OQ-04 to OQ-06 and References added |
 | 0.4 | 2026-09-29 | OQ-01 wording: Mistral Vibe profile planned, not yet present (audit-5bcd46ad L-11) |
+| 0.5 | 2026-09-29 | Status: Phase 1 closed; coupled change path updated to closed/ |
 
 ---
 

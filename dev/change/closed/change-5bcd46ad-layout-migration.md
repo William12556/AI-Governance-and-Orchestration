@@ -361,6 +361,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Audit-5bcd46ad remediation: status verified; pytest and release v0.1.0 recorded; finding (a) aligned with audit L-02; git mv wording corrected (L-03); as-built items added (L-04); design_updates completed (L-11); M-02 and solax-modbus retired-folder check recorded"
+  - version: "0.7"
+    date: "2026-09-29"
+    author: "William Watson"
+    changes:
+      - "Closed after operator acceptance of audit-5bcd46ad (follow-up audit waived); moved to dev/change/closed/"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
