@@ -45,6 +45,7 @@ and `dev/reports/closed/report-eb782f83-pre-migration-baseline.md`.
 8. Phase 2 engine and engine-mcp requirements inputs from audit-5bcd46ad: (L-01) engine-mcp and overwatch read `loop.state_dir` from the project config instead of hard-coding `ai/state`, and `bin/migrate-layout.sh` warns when a non-standard `state_dir` remains; (L-02) engine-mcp reaps its child (`Popen.poll()` or `os.waitpid(pid, WNOHANG)`) before the liveness probe, so `pid_alive` is not reported for a finished run; (L-09) derive write-tool classification for the scope check from one source (design-ael-orchestrator OI-005).
 9. Tests, with P05 CI: engine-mcp `server.py` (paths, state names), `bin/migrate-layout.sh`, `bin/propagate.sh` old-layout refusal and seeding, the orchestrator default config path, and the legacy `ael` alias (audit-5bcd46ad L-08).
 10. Phase 2 engine inputs found while preparing the solax-modbus pilot (2026-09-29): the pytest gate runs `sys.executable -m pytest`, so the project's test dependencies must be installed in the interpreter that runs the engine (engine-mcp inherits its own interpreter); make the gate command or interpreter configurable per project. The context window is resolved once for the worker model and also applied to the reviewer phase; resolve it per role (Magistral 40960 vs Devstral 262144).
+11. Planner client integration for open-weight models (proposal-5bcd46ad OQ-05): profiles or setup guidance for MCP-capable clients such as Goose, Cherry Studio, BoltAI, Open WebUI, Codex CLI, OpenCode and Mistral Vibe. Not scheduled; until then the user integrates a client on their own.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -137,6 +138,7 @@ None pending. All resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.24 | 2026-09-30 | §2.0 item 11: planner client integration (proposal-5bcd46ad OQ-05) |
 | 1.23 | 2026-09-30 | §2.0 item 6: governance.md split deferred to Phase 3 (proposal-5bcd46ad OQ-03) |
 | 1.22 | 2026-09-29 | §3.0 item 5 not reproduced on rerun; §5.0 item 9 reviewer false REVISE in the solax-modbus pilot |
 | 1.21 | 2026-09-29 | §3.0 item 5: run_phase crash on a completion without choices (solax-modbus pilot) |
