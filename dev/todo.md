@@ -8,11 +8,10 @@ Phase 1 of proposal-5bcd46ad closed 2026-09-29 (change-5bcd46ad, change-c37198be
 
 1. Downstream migration: the solax-modbus pilot is confirmed. Its live engine run on prompt-c8e760ee was accepted on 2026-09-29 (`ee495f4`), and `ai-local/retired-5bcd46ad/` was removed (`74ebcbc`). GTach was migrated and corrected on 2026-09-29/30 (`f67d797` onwards). Its `ai-local/retired-5bcd46ad/` holds only framework files (29 files, checked 2026-09-29) and may be deleted after review. Remaining: e-Paper-IP-Display and pi-netconfig. Procedure: `bin/migrate-layout.sh <root>` (dry run), `--apply`, `bin/propagate.sh --allow-major <root>`; update old paths reported in CLAUDE.md / AGENTS.md / .gitignore; pin `@j0hanz/filesystem-mcp@2.5.0` in `ai/config.yaml`; add `reviewer_model`; gitignore `.claude/settings.local.json`.
 2. Operator: remove the `ael-mcp` entry from the Claude Desktop MCP configuration (audit L-10); archive the `ael-mcp` repository and the `~/mcp-ael` install.
-3. Phase 2 requirements: `dev/requirements/requirements-14e05e35-engine-generalisation.md` v0.3 (2026-09-30); OQ-01 and OQ-02 resolved, OQ-03 (research) and OQ-04 open (proposal-5bcd46ad §7.0; inputs in `dev/backlog.md` §2.0 items 8–10 and §5.0 items 7–9).
+3. Phase 2 requirements: `dev/requirements/requirements-14e05e35-engine-generalisation.md` v0.4 (2026-09-30); OQ-01 to OQ-03 resolved, OQ-04 open (to be settled in the design) (proposal-5bcd46ad §7.0; inputs in `dev/backlog.md` §2.0 items 8–10 and §5.0 items 7–9).
 
 ## Planned
 
 - Mistral Vibe manual profile `ai/profiles/mistral-vibe.md`, alongside `claude-code.md` (proposal-5bcd46ad OQ-01, D-16). Standalone documentation task, outside Phase 2; requires current facts on Vibe installation, custom providers and MCP.
-- Research: Mistral API tool-call support through the OpenAI-compatible client (requirements-14e05e35 OQ-03).
 
 ## Parked
