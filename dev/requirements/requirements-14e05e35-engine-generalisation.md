@@ -22,6 +22,7 @@ Created: 2026 September 30
 [4.5 FR-05 Write Scope](<#4.5 fr-05 write scope>)
 [4.6 FR-06 engine-mcp](<#4.6 fr-06 engine-mcp>)
 [4.7 FR-07 Terminology](<#4.7 fr-07 terminology>)
+[4.8 FR-08 Stage Tracking](<#4.8 fr-08 stage tracking>)
 [5.0 Non-Functional Requirements](<#5.0 non-functional requirements>)
 [6.0 Verification Requirements](<#6.0 verification requirements>)
 [7.0 Out of Scope](<#7.0 out of scope>)
@@ -51,6 +52,7 @@ In scope:
 - Stage flow, gates and write scope driven by the manifest and the task.
 - Binding of the worker and reviewer roles to providers and models.
 - The engine-mcp rebuild.
+- Tracking the stage of each work item, and checking its prerequisites before a loop run.
 - Replacement of the Strategic Domain and Tactical Domain terms with agent roles.
 
 The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-005 remain in force unless a requirement below supersedes them.
@@ -66,8 +68,8 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | CON-01 | Single-user, local-first, Apple Silicon. | D-01 |
 | CON-02 | One governance model per project, at `ai/governance/<name>/`. | D-05 |
 | CON-03 | The planner runs in a chat client, not in the engine. The engine runs the worker and the reviewer. | D-07 |
-| CON-04 | `governance.md` is not split in Phase 2. | OQ-03 |
-| CON-05 | Providers are the Anthropic API, the Mistral API and oMLX. LM Studio is excluded. | D-16, OQ-06 |
+| CON-04 | `governance.md` is not split in Phase 2. | Proposal OQ-03 |
+| CON-05 | Providers are the Anthropic API, the Mistral API and oMLX. LM Studio is excluded. | D-16, proposal OQ-06 |
 | CON-06 | The ownership boundary holds: propagation replaces framework-owned folders, seeds only absent project-owned files, and never deletes. | Proposal §5.0 |
 | CON-07 | pip only; the only new runtime dependency is the `anthropic` SDK. | NFR-AEL-005 |
 
@@ -87,6 +89,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | FR-01-04 | The manifest declares the workspace subfolders. Bootstrap and propagation create absent subfolders and change none that exist. |
 | FR-01-05 | The engine loads and validates the installed model's manifest at startup. An invalid or missing manifest stops the engine before any model call, with an error naming the file and field. |
 | FR-01-06 | The SE audit recipes move from `ai/engine/recipes/` to `ai/governance/software-engineering/recipes/` (proposal §4.1). Engine-generic recipes remain in `ai/engine/recipes/`. |
+| FR-01-07 | The manifest may declare additional paths the worker may write in every task (FR-05-01). |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -119,7 +122,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 |---|---|
 | FR-04-01 | `ai/config.yaml` binds the worker and the reviewer each to a provider and a model (D-16). |
 | FR-04-02 | Supported providers are `anthropic`, `mistral` and `omlx` (CON-05). |
-| FR-04-03 | The engine calls models through one provider interface with two implementations: OpenAI-compatible (oMLX, Mistral API) and native Anthropic (OQ-04). |
+| FR-04-03 | The engine calls models through one provider interface with two implementations: OpenAI-compatible (oMLX, Mistral API) and native Anthropic (proposal OQ-04). |
 | FR-04-04 | The native Anthropic implementation uses strict tool use and caches the static prompt prefix [1]. |
 | FR-04-05 | The context window is resolved per role. This supersedes the single resolution in FR-AEL-008 (backlog §2.0-10). |
 | FR-04-06 | Each provider implementation supplies its own readiness check and context-window resolution. The live oMLX query (FR-AEL-008, FR-AEL-009) is retained for `omlx`. |
@@ -132,7 +135,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 
 | ID | Requirement |
 |---|---|
-| FR-05-01 | The worker may write only the paths in the task's `deliverable.files` and the state directory. Any other write is rejected with a tool error the worker receives (backlog §5.0-7). |
+| FR-05-01 | The worker may write only the paths in the task's `deliverable.files`, the paths the manifest declares writable (for example `tests/`) and the state directory. Any other write is rejected with a tool error the worker receives (backlog §5.0-7, OQ-02). |
 | FR-05-02 | Write tools are classified from one source, used by both the scope check and the loop (audit-5bcd46ad L-09). |
 | FR-05-03 | The reviewer resolves every deliverable path against the project root, not the state directory (backlog §5.0-8). |
 | FR-05-04 | Every rejected write is logged with tool, path and reason. |
@@ -153,11 +156,27 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 
 | ID | Requirement |
 |---|---|
-| FR-07-01 | Strategic Domain becomes the planner role; Tactical Domain becomes the worker and reviewer roles; the human remains the approval gate (OQ-02). |
+| FR-07-01 | Strategic Domain becomes the planner role; Tactical Domain becomes the worker and reviewer roles; the human remains the approval gate (proposal OQ-02). |
 | FR-07-02 | The change applies to framework-owned documents, templates and profiles. Closed documents and version histories are unchanged. |
 | FR-07-03 | Template field names (for example `tactical_brief`, `target_profile`) are unchanged, so existing documents stay valid. |
 | FR-07-04 | The change is made by a script that plans by default and applies on request, as `bin/migrate-layout.sh` does. |
 | FR-07-05 | The governance version takes a major increment; downstream projects receive it through `bin/propagate.sh --allow-major`. |
+
+[Return to Table of Contents](<#table of contents>)
+
+### 4.8 FR-08 Stage Tracking
+
+The engine determines each work item's stage from its documents, so the record cannot drift from them, and it checks prerequisites before it acts (OQ-01).
+
+| ID | Requirement |
+|---|---|
+| FR-08-01 | The engine determines the current stage of each work item (UUID) from the documents in `ai/workspace/`. It keeps no separate stage record. |
+| FR-08-02 | For each stage, the manifest declares the evidence of completion: template, workspace folder and required status value. |
+| FR-08-03 | The manifest declares the permitted stage paths, including paths that skip stages (for example the SE trivial exemption, P04.12). |
+| FR-08-04 | Human approvals are recorded in `ai/approvals.yaml` (project-owned, git-tracked) by an operator command. No engine or engine-mcp tool writes this file. |
+| FR-08-05 | Before a loop run, the engine checks that the work item's earlier stages are complete and its required approvals are recorded. If not, the run does not start and the engine reports what is missing. |
+| FR-08-06 | engine-mcp provides a read-only status tool that lists each work item's current stage, missing evidence and awaited approvals. |
+| FR-08-07 | A document whose status contradicts its location is reported, not corrected. |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -191,8 +210,11 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | V-07 | engine-mcp reads a non-standard `state_dir`; `pid_alive` is false after a run | pytest | FR-06-02, FR-06-03 |
 | V-08 | No retired term remains in the live corpus outside version histories and closed documents | Corpus scan | FR-07-01, FR-07-02 |
 | V-09 | No API key appears in logs or state files after a live run | Scan | NFR-05 |
-| V-10 | Full pytest suite passes | pytest | All |
-| V-11 | Independent audit | T08 audit report | All |
+| V-10 | Stage derivation from fixture workspaces, including a skipped-stage path, gives the expected stage | pytest | FR-08-01 to FR-08-03 |
+| V-11 | A loop run with a missing approval or incomplete earlier stage does not start and names what is missing | pytest | FR-08-05 |
+| V-12 | The status tool lists stage, missing evidence and awaited approvals; it writes nothing | pytest | FR-08-06 |
+| V-13 | Full pytest suite passes | pytest | All |
+| V-14 | Independent audit | T08 audit report | All |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -202,11 +224,11 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 
 | Item | Disposition |
 |---|---|
-| Splitting `governance.md` | Phase 3 (OQ-03) |
+| Splitting `governance.md` | Phase 3 (proposal OQ-03) |
 | Second governance model (document authoring) | Phase 3 |
 | Web GUI | Phase 4 |
-| Planner client integration | Backlog §2.0-11 (OQ-05) |
-| LM Studio as a provider | Future possibility (OQ-06) |
+| Planner client integration | Backlog §2.0-11 (proposal OQ-05) |
+| LM Studio as a provider | Future possibility (proposal OQ-06) |
 | Overwatch FR-02 to FR-10 | Parked (D-12) |
 | Mistral Vibe manual profile | `dev/todo.md`, standalone documentation task |
 | Reviewer false REVISE (backlog §5.0-9) | Model-quality observation; not an engine requirement |
@@ -220,9 +242,10 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 
 | ID | Question | Bearing |
 |---|---|---|
-| OQ-01 | Does the engine keep the project's current stage across runs, or only report the BLOCKED return stage? | FR-02 |
-| OQ-02 | Test files are often not listed in `deliverable.files`. Must prompts list them, or may the manifest declare additional writable paths (for example `tests/`)? | FR-05-01 |
-| OQ-03 | Does the Mistral API support tool calls fully through the OpenAI-compatible client, or does it need its own implementation? | FR-04-03 |
+| OQ-01 | Does the engine keep the project's current stage across runs, or only report the BLOCKED return stage? **Resolved 2026-09-30:** the engine tracks the stage of each work item, derived from its documents, with approvals recorded by the operator (FR-08). Chosen over a stage ledger, which can drift from the documents. | Resolved |
+| OQ-04 | The planner client has its own filesystem access (CON-03), so the engine cannot stop it writing `ai/approvals.yaml`. Is a stronger safeguard needed than the planner's instructions? | FR-08-04 |
+| OQ-02 | Test files are often not listed in `deliverable.files`. Must prompts list them, or may the manifest declare additional writable paths (for example `tests/`)? **Resolved 2026-09-30:** the manifest declares them (FR-01-07, FR-05-01). | Resolved |
+| OQ-03 | Does the Mistral API support tool calls fully through the OpenAI-compatible client, or does it need its own implementation? Subject of separate research (`dev/todo.md`). | FR-04-03 |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -242,6 +265,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | Backlog §2.0-10 gate interpreter, per-role context window | FR-03-03, FR-04-05 |
 | Backlog §5.0-7 worker writes | FR-05-01 |
 | Backlog §5.0-8 reviewer path resolution | FR-05-03 |
+| OQ-01 stage tracking | FR-08 |
 
 Design, test and code traceability entries are added when those documents exist.
 
@@ -257,6 +281,7 @@ Design, test and code traceability entries are added when those documents exist.
 | Manifest | The machine-readable part of a governance model |
 | Planner | The agent role that authors plans and prompts; formerly the Strategic Domain |
 | Provider | A model source: the Anthropic API, the Mistral API or oMLX |
+| Work item | One unit of governed work, identified by the UUID its documents share |
 | Run type | A named pair of worker and reviewer recipes, for example `loop` or `audit` |
 | Worker, reviewer | The agent roles the engine runs in the loop; formerly the Tactical Domain |
 
@@ -276,6 +301,8 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 0.3 | 2026-09-30 | OQ-01 resolved: FR-08 Stage Tracking added (stage derived from documents, operator-recorded approvals, pre-run check, status tool); V-10 to V-12 added; full-suite and audit checks renumbered V-13 and V-14; OQ-04 added (approvals file protection). |
+| 0.2 | 2026-09-30 | OQ-02 resolved: manifest declares additional writable paths (FR-01-07 added, FR-05-01 amended). OQ-03 assigned to separate research. Proposal open questions cited as "proposal OQ-nn" to distinguish them from this document's. |
 | 0.1 | 2026-09-30 | Initial draft: seven functional requirement groups, six non-functional requirements, seven constraints, eleven verification requirements, three open questions |
 
 ---
