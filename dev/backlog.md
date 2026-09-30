@@ -40,7 +40,7 @@ and `dev/reports/closed/report-eb782f83-pre-migration-baseline.md`.
 3. Author the five reserved protocols: P05 Continuous Integration, P16 Execution, P17 Release, P18 Deployment and Propagation, P19 Observability (proposal-eb782f83 §5.3).
 4. Add `.github/workflows` CI running `linter.py`, `protocol_checker.py` and pytest on push (gap G1), and a check that `docs/claude/primer.md` is identical to `ai/governance/software-engineering/primer.md` (decision 7.1). Governed by P05 once authored. Until then, sync the primer copy manually.
 5. Retire the numeric `schema_type` prefix in favour of the class word (audit F-04; governance Appendix A A.5).
-6. Evaluate splitting `ai/governance/software-engineering/governance.md` (OQ-1). Deferred to Phase 2 of the pivot (proposal-5bcd46ad OQ-03).
+6. Evaluate splitting `ai/governance/software-engineering/governance.md` (OQ-1). Deferred to Phase 3 of the pivot (proposal-5bcd46ad OQ-03, resolved 2026-09-30).
 7. ~~Consider moving the declared project files (`context.md`, `task.md`, `ael/config.yaml`, `workspace/`, `state/`) out of `ai/`, so `ai/` holds framework files only.~~ Resolved 2026-09-25 by the ownership boundary (proposal-5bcd46ad §5.0): framework-owned folders are `ai/engine/`, `ai/governance/<model>/`, `ai/profiles/`, `ai/src/`; configuration moved to `ai/config.yaml`.
 8. Phase 2 engine and engine-mcp requirements inputs from audit-5bcd46ad: (L-01) engine-mcp and overwatch read `loop.state_dir` from the project config instead of hard-coding `ai/state`, and `bin/migrate-layout.sh` warns when a non-standard `state_dir` remains; (L-02) engine-mcp reaps its child (`Popen.poll()` or `os.waitpid(pid, WNOHANG)`) before the liveness probe, so `pid_alive` is not reported for a finished run; (L-09) derive write-tool classification for the scope check from one source (design-ael-orchestrator OI-005).
 9. Tests, with P05 CI: engine-mcp `server.py` (paths, state names), `bin/migrate-layout.sh`, `bin/propagate.sh` old-layout refusal and seeding, the orchestrator default config path, and the legacy `ael` alias (audit-5bcd46ad L-08).
@@ -137,6 +137,7 @@ None pending. All resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.23 | 2026-09-30 | §2.0 item 6: governance.md split deferred to Phase 3 (proposal-5bcd46ad OQ-03) |
 | 1.22 | 2026-09-29 | §3.0 item 5 not reproduced on rerun; §5.0 item 9 reviewer false REVISE in the solax-modbus pilot |
 | 1.21 | 2026-09-29 | §3.0 item 5: run_phase crash on a completion without choices (solax-modbus pilot) |
 | 1.20 | 2026-09-29 | §2.0 item 10: pytest gate interpreter and per-role context window (solax-modbus pilot preparation) |

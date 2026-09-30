@@ -2,7 +2,7 @@ Created: 2026 September 25
 
 # Proposal: AI-G&O Strategic Pivot
 
-**Status:** Accepted 2026-09-25; amended 2026-09-29 (D-16). Phase 1 implemented and verified; change-5bcd46ad closed 2026-09-29 (audit-5bcd46ad). Phase 2 not started.
+**Status:** Accepted 2026-09-25; amended 2026-09-29 (D-16). Phase 1 implemented and verified; change-5bcd46ad closed 2026-09-29 (audit-5bcd46ad). Phase 2 not started; OQ-02, OQ-03, OQ-04 and OQ-06 resolved 2026-09-30.
 **UUID:** `5bcd46ad`
 **Coupled change:** `dev/change/closed/change-5bcd46ad-layout-migration.md`
 
@@ -52,7 +52,7 @@ This document records the decisions of the 2026-09-25 brainstorming session and 
 | D-13 | Paused work (`dev/todo.md`, change-c37198be) is folded into the migration. |
 | D-14 | The migration uses one abbreviated change record (no issue or prompt document) and one independent review at the end. |
 | D-15 | ael-mcp is adapted as engine-mcp and moved into this repository. A rebuild is deferred to Phase 2. |
-| D-16 | Provider choice at every level; Anthropic and Mistral AI have equal weight, neither preferred. Planner: Claude Desktop, Mistral Vibe, or an MCP-capable client with a local open-weight model. Manual tactical profile: Claude Code or Mistral Vibe. Engine worker and reviewer: each bound separately to the Anthropic API, the Mistral API, or a local OpenAI-compatible server (oMLX preferred; LM Studio permitted). |
+| D-16 | Provider choice at every level; Anthropic and Mistral AI have equal weight, neither preferred. Planner: Claude Desktop, Mistral Vibe, or an MCP-capable client with a local open-weight model. Manual tactical profile: Claude Code or Mistral Vibe. Engine worker and reviewer: each bound separately to the Anthropic API, the Mistral API, or a local OpenAI-compatible server (oMLX; LM Studio a possible future provider, OQ-06). |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -147,7 +147,7 @@ ai/
 | §2.0-3 Reserved protocols | Deferred; belong to the SE package |
 | §2.0-4 CI and primer identity check | Deferred; paths updated |
 | §2.0-5 `schema_type` prefix | Deferred |
-| §2.0-6 Split `governance.md` | Deferred to Phase 2 |
+| §2.0-6 Split `governance.md` | Deferred to Phase 3 (OQ-03) |
 | §2.0-7 Project files out of `ai/` | Resolved by [5.0 Ownership Boundary](<#5.0 ownership boundary>) |
 | §3.0 Source and tooling fixes | Unaffected |
 | §5.0-2 REVISE → SHIP convergence | Retried in the migration's verification run |
@@ -180,11 +180,11 @@ Phases 2 to 4 each require their own requirements and design documents.
 | ID | Question | Decide in |
 |---|---|---|
 | OQ-01 | Claude Code profiles (`claude-code`, `claude-omlx`): retain as a manual option or retire under D-03? Resolved 2026-09-29: retained; a Mistral Vibe profile is to be added (D-16; not yet in `ai/profiles/`). | Resolved |
-| OQ-02 | `governance.md` describes a Strategic Domain (Claude Desktop) and a Tactical Domain. Under D-03 and D-07 these become agent roles. The migration keeps the current terms. | Phase 2 |
-| OQ-03 | Which parts of `governance.md` are engine-generic rather than SE-specific (backlog §2.0-6)? | Phase 2 |
-| OQ-04 | Anthropic's OpenAI SDK compatibility layer is described by Anthropic as intended for testing and ignores `strict` for tool calls [1]. Use it, or add a native Anthropic adapter to the engine? | Phase 2 |
-| OQ-05 | Which client hosts an open-weight planner (e.g. Mistral Vibe with a custom provider [2], LM Studio [3])? | Phase 2 |
-| OQ-06 | LM Studio as an engine provider reverses its 2026-03-11 deprecation. The engine's live context-window query and readiness check are oMLX-specific. | Phase 2 |
+| OQ-02 | `governance.md` describes a Strategic Domain (Claude Desktop) and a Tactical Domain. Under D-03 and D-07 these become agent roles. The migration keeps the current terms. Resolved 2026-09-30: the terms move to agent roles in Phase 2. Strategic Domain becomes the planner; Tactical Domain becomes the worker and the reviewer; the human remains the approval gate. | Resolved |
+| OQ-03 | Which parts of `governance.md` are engine-generic rather than SE-specific (backlog §2.0-6)? Resolved 2026-09-30: `governance.md` stays whole in Phase 2. The split is decided in Phase 3, when a second governance model shows which parts are shared. | Resolved |
+| OQ-04 | Anthropic's OpenAI SDK compatibility layer is described by Anthropic as intended for testing and ignores `strict` for tool calls [1]. Use it, or add a native Anthropic adapter to the engine? Resolved 2026-09-30: a small provider interface with two implementations, OpenAI-compatible (oMLX, Mistral API) and native Anthropic (strict tool use, prompt caching) [1]. | Resolved |
+| OQ-05 | Which client hosts an open-weight planner? The oMLX built-in chat has no MCP support. Candidates that accept a custom OpenAI-compatible endpoint and MCP servers: Goose (desktop and CLI) [4], Codex CLI [5], OpenCode [6], OpenClaw [7], Claude Code (via `ANTHROPIC_BASE_URL`, as in the `claude-omlx` profile), Mistral Vibe [2]. | Phase 2 |
+| OQ-06 | LM Studio as an engine provider reverses its 2026-03-11 deprecation. The engine's live context-window query and readiness check are oMLX-specific. Resolved 2026-09-30: LM Studio is excluded from Phase 2 and noted as a possible future provider. | Resolved |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -197,6 +197,14 @@ Phases 2 to 4 each require their own requirements and design documents.
 [2] MISTRAL AI, 2026. *Configuration — Mistral Vibe* [online]. Available from: https://docs.mistral.ai/vibe/code/cli/configuration [Accessed 29 September 2026].
 
 [3] LM STUDIO, 2026. *Use MCP Servers* [online]. Available from: https://lmstudio.ai/docs/app/mcp [Accessed 29 September 2026].
+
+[4] GOOSE, 2026. *Configure LLM Provider* [online]. Available from: https://goose-docs.ai/docs/getting-started/providers/ [Accessed 30 September 2026].
+
+[5] OPENAI, 2026. *Codex: Model Context Protocol* [online]. Available from: https://developers.openai.com/codex/mcp [Accessed 30 September 2026].
+
+[6] OPENCODE, 2026. *Providers* [online]. Available from: https://opencode.ai/docs/providers/ [Accessed 30 September 2026].
+
+[7] OPENCLAW, 2026. *Configuration — tools and custom providers* [online]. Available from: https://docs.openclaw.ai/gateway/config-tools [Accessed 30 September 2026].
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -211,6 +219,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 | 0.3 | 2026-09-29 | D-16 provider choice added; D-07 clarified (planner runs in a chat client); Phase 2 scope references D-16; OQ-01 resolved; OQ-04 to OQ-06 and References added |
 | 0.4 | 2026-09-29 | OQ-01 wording: Mistral Vibe profile planned, not yet present (audit-5bcd46ad L-11) |
 | 0.5 | 2026-09-29 | Status: Phase 1 closed; coupled change path updated to closed/ |
+| 0.6 | 2026-09-30 | OQ-02, OQ-03, OQ-04 and OQ-06 resolved; OQ-05 updated with planner client candidates [4]–[7]; D-16 and §6.0 aligned (LM Studio future provider; `governance.md` split deferred to Phase 3) |
 
 ---
 
