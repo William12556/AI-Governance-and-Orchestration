@@ -6,7 +6,7 @@ change_info:
   title: "Anthropic provider: optional base_url for Anthropic-compatible local endpoints"
   date: "2026-10-01"
   author: "William Watson"
-  status: "implemented"
+  status: "verified"
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -52,6 +52,9 @@ version_history:
   - version: "1.0"
     date: "2026-10-01"
     changes: ["Initial change record; implemented with tests (216 passed offline)"]
+  - version: "1.1"
+    date: "2026-10-01"
+    changes: ["Verified: live run against oMLX's Anthropic-compatible endpoint shipped (report-14e05e35-live-verification §6.0); operator test 216 passed; commit 8917b1a; closed"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
