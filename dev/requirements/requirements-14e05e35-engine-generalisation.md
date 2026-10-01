@@ -128,7 +128,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | FR-04-06 | Each provider implementation supplies its own readiness check and context-window resolution. The live oMLX query (FR-AEL-008, FR-AEL-009) is retained for `omlx`. |
 | FR-04-07 | API keys are read from environment variables only. |
 | FR-04-08 | The existing `omlx:` configuration block remains valid and binds both roles to oMLX. |
-| FR-04-09 | Tool call IDs the engine generates are 9 alphanumeric characters, the format the Mistral API requires [3][4]. |
+| FR-04-09 | Tool call IDs the engine generates are 9 alphanumeric characters. This matches the IDs Mistral itself issues and is a compatibility convention: other clients report 9 characters as required [4], while `mistral-medium-2604` also accepted 12 characters on 2026-10-01 (`dev/reports/report-14e05e35-mistral-api-hypothesis.md`). |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -205,7 +205,7 @@ The engine determines each work item's stage from its documents, so the record c
 | V-01 | Valid manifests load; invalid ones stop the engine with a named field | pytest | FR-01-05, NFR-04 |
 | V-02 | SE regression: a replay of prompt-c8e760ee in solax-modbus gives the same gate results | Live run; gate results compared, not reviewer wording | NFR-01, FR-03-04 |
 | V-03 | Each provider implementation passes the interface tests | pytest with stub servers | FR-04-03, NFR-06 |
-| V-04 | One live run per provider: Anthropic, Mistral, oMLX. The Mistral run includes a multi-turn tool exchange | Live run | FR-04-01, FR-04-02, FR-04-09 |
+| V-04 | One live run per provider: Anthropic, Mistral, oMLX. Each uses a pinned model ID. The Mistral run includes a multi-turn tool exchange | Live run | FR-04-01, FR-04-02, FR-04-09 |
 | V-05 | A write outside `deliverable.files` is rejected and logged | pytest | FR-05-01, FR-05-04 |
 | V-06 | A relative deliverable path is resolved against the project root | pytest | FR-05-03 |
 | V-07 | engine-mcp reads a non-standard `state_dir`; `pid_alive` is false after a run | pytest | FR-06-02, FR-06-03 |
@@ -246,7 +246,7 @@ The engine determines each work item's stage from its documents, so the record c
 | OQ-01 | Does the engine keep the project's current stage across runs, or only report the BLOCKED return stage? **Resolved 2026-09-30:** the engine tracks the stage of each work item, derived from its documents, with approvals recorded by the operator (FR-08). Chosen over a stage ledger, which can drift from the documents. | Resolved |
 | OQ-04 | The planner client has its own filesystem access (CON-03), so the engine cannot stop it writing `ai/approvals.yaml`. Is a stronger safeguard needed than the planner's instructions? **Resolved 2026-10-01:** only approvals committed to git count; the operator command commits them (design-14e05e35 §8.3). A planner with git or shell access is an accepted limit. | Resolved |
 | OQ-02 | Test files are often not listed in `deliverable.files`. Must prompts list them, or may the manifest declare additional writable paths (for example `tests/`)? **Resolved 2026-09-30:** the manifest declares them (FR-01-07, FR-05-01). | Resolved |
-| OQ-03 | Does the Mistral API support tool calls fully through the OpenAI-compatible client, or does it need its own implementation? **Resolved 2026-09-30:** the OpenAI-compatible implementation serves Mistral [2]. Tool definitions, tool calls and tool results have the same shape [3]. Differences: tool call IDs must be 9 alphanumeric characters (FR-04-09) [4]; forced tool use is `any`, not `required` (the engine does not set `tool_choice`); whether tool results need a `name` field is confirmed in the live run (V-04). | Resolved |
+| OQ-03 | Does the Mistral API support tool calls fully through the OpenAI-compatible client, or does it need its own implementation? **Resolved 2026-09-30:** the OpenAI-compatible implementation serves Mistral [2]. Tool definitions, tool calls and tool results have the same shape [3]. Differences: tool call IDs must be 9 alphanumeric characters (FR-04-09) [4]; forced tool use is `any`, not `required` (the engine does not set `tool_choice`); tool results need no `name` field (tested 2026-10-01, `dev/reports/report-14e05e35-mistral-api-hypothesis.md`). | Resolved |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -308,6 +308,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.2 | 2026-10-01 | From report-14e05e35 (Mistral API test): FR-04-09 rationale reworded as a compatibility convention; OQ-03 `name` field answered (not needed); V-04 uses pinned model IDs. |
 | 1.1 | 2026-10-01 | OQ-04 resolved by design-14e05e35 §8.3. |
 | 1.0 | 2026-09-30 | Approved by the operator; OQ-04 deferred to the design. |
 | 0.4 | 2026-09-30 | OQ-03 resolved: Mistral served by the OpenAI-compatible implementation; FR-04-09 added (9-character tool call IDs); V-04 extended; References [2]–[4] added. |

@@ -113,6 +113,7 @@ gates:
 | Keys | `api_key_env` names an environment variable. `api_key` is accepted only for `kind: omlx` (local, no secret). |
 | Legacy | Without `roles:`, both roles use a provider built from the `omlx:` block; worker model = `omlx.worker_model` or `omlx.default_model`; reviewer model = `omlx.reviewer_model` or `omlx.default_model` (FR-04-08). |
 | CLI | `--worker-model`, `--reviewer-model` and `--model` override the model within the role's provider. |
+| Model IDs | Roles use pinned model IDs, not `-latest` aliases, so runs are reproducible. Devstral is not available on the Mistral API (deprecated); a tested Mistral API model is `mistral-medium-2604` (`dev/reports/report-14e05e35-mistral-api-hypothesis.md`). Model choice per role is an operator decision. |
 | Gates | `gates.<name>` overrides the command gate of that name declared in the manifest (FR-03-03). |
 
 [Return to Table of Contents](<#table of contents>)
@@ -379,10 +380,11 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | ID | Issue |
 |---|---|
-| DI-01 | Whether tool results sent to the Mistral API need a `name` field (requirements OQ-03). Settled by V-04; if needed, the OpenAI-compatible provider adds it. |
+| DI-01 | **Closed 2026-10-01:** tool results sent to the Mistral API need no `name` field; the provider adds none (`dev/reports/report-14e05e35-mistral-api-hypothesis.md` §4.0). |
 | DI-02 | The proposal §4.2 downstream layout does not yet list `ai/approvals.yaml`. Update it with step 4. |
 | DI-03 | A planner with git or shell access can commit an approval (§8.3). Accepted for Phase 2. |
-| DI-04 | Using a Mistral Pro subscription for the `mistral` provider. Hypothesis: the plan's monthly API credits apply to a standard API key created in Studio [2][3][4]. Guidance: (1) create a Studio API key in the same account; do not use the Vibe-scoped subscription key [5]; (2) set `MISTRAL_API_KEY` for the engine process only, because a global value overrides Vibe's subscription key [6]; (3) usage beyond the included credits needs a payment method and a monthly spending limit; (4) check the workspace's rate limits, which may be the free Experiment limits. To be confirmed by a test request and the Studio usage page, before V-04. |
+| DI-04 | Mistral Pro subscription for the `mistral` provider. **Partially confirmed 2026-10-01** (`dev/reports/report-14e05e35-mistral-api-hypothesis.md` §5.0): a standard Studio key in the subscription's workspace works with pay-as-you-go disabled and no payment method; the account shows a $30 monthly included API allowance (the public pricing page states $15). Drawdown from the allowance is still to be observed after V-04. Guidance: (1) use a Studio key, not the Vibe-scoped key [5]; (2) keep the key in the macOS Keychain and inject `MISTRAL_API_KEY` per process with a wrapper, never globally [6]; (3) free-mode rate limits apply while pay-as-you-go is off and are sufficient for `mistral-medium` (1,000,000 tokens/min); some models allow 0.5 requests/s; (4) a subscription billed through Apple needs a separate payment method in the Mistral Admin Panel for pay-as-you-go. |
+| DI-05 | The error returned when the included allowance is exhausted with pay-as-you-go off is not yet known (report O-02). Once recorded, the provider treats it as non-retryable and the run ends BLOCKED naming the provider. |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -429,6 +431,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 0.3 | 2026-10-01 | From report-14e05e35 (Mistral API test): DI-01 closed; DI-04 updated (partially confirmed, guidance); DI-05 added (allowance exhaustion error); §3.0 pinned model IDs, Devstral unavailable on the Mistral API. |
 | 0.2 | 2026-10-01 | DI-04 added: Mistral Pro subscription for the `mistral` provider; References [2]–[6] added. |
 | 0.1 | 2026-10-01 | Initial draft from requirements 14e05e35 v1.0 |
 
