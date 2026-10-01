@@ -3,7 +3,7 @@ Created: 2026 September 30
 # Engine Generalisation Requirements (Phase 2)
 
 **UUID:** `14e05e35`
-**Status:** Approved 2026-09-30. OQ-04 is settled in the design.
+**Status:** Approved 2026-09-30. All open questions resolved.
 **Proposal:** `dev/proposals/proposal-5bcd46ad-ai-go-pivot.md` v0.7, §7.0 Phase 2
 **Baseline:** `dev/requirements/requirements-1c1f4ef6-ael.md` (FR-AEL-001 to FR-AEL-015, NFR-AEL-001 to NFR-AEL-005)
 
@@ -244,7 +244,7 @@ The engine determines each work item's stage from its documents, so the record c
 | ID | Question | Bearing |
 |---|---|---|
 | OQ-01 | Does the engine keep the project's current stage across runs, or only report the BLOCKED return stage? **Resolved 2026-09-30:** the engine tracks the stage of each work item, derived from its documents, with approvals recorded by the operator (FR-08). Chosen over a stage ledger, which can drift from the documents. | Resolved |
-| OQ-04 | The planner client has its own filesystem access (CON-03), so the engine cannot stop it writing `ai/approvals.yaml`. Is a stronger safeguard needed than the planner's instructions? | FR-08-04 |
+| OQ-04 | The planner client has its own filesystem access (CON-03), so the engine cannot stop it writing `ai/approvals.yaml`. Is a stronger safeguard needed than the planner's instructions? **Resolved 2026-10-01:** only approvals committed to git count; the operator command commits them (design-14e05e35 §8.3). A planner with git or shell access is an accepted limit. | Resolved |
 | OQ-02 | Test files are often not listed in `deliverable.files`. Must prompts list them, or may the manifest declare additional writable paths (for example `tests/`)? **Resolved 2026-09-30:** the manifest declares them (FR-01-07, FR-05-01). | Resolved |
 | OQ-03 | Does the Mistral API support tool calls fully through the OpenAI-compatible client, or does it need its own implementation? **Resolved 2026-09-30:** the OpenAI-compatible implementation serves Mistral [2]. Tool definitions, tool calls and tool results have the same shape [3]. Differences: tool call IDs must be 9 alphanumeric characters (FR-04-09) [4]; forced tool use is `any`, not `required` (the engine does not set `tool_choice`); whether tool results need a `name` field is confirmed in the live run (V-04). | Resolved |
 
@@ -308,6 +308,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.1 | 2026-10-01 | OQ-04 resolved by design-14e05e35 §8.3. |
 | 1.0 | 2026-09-30 | Approved by the operator; OQ-04 deferred to the design. |
 | 0.4 | 2026-09-30 | OQ-03 resolved: Mistral served by the OpenAI-compatible implementation; FR-04-09 added (9-character tool call IDs); V-04 extended; References [2]–[4] added. |
 | 0.3 | 2026-09-30 | OQ-01 resolved: FR-08 Stage Tracking added (stage derived from documents, operator-recorded approvals, pre-run check, status tool); V-10 to V-12 added; full-suite and audit checks renumbered V-13 and V-14; OQ-04 added (approvals file protection). |
