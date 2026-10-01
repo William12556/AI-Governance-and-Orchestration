@@ -2,9 +2,9 @@
 Engine orchestrator — worker/reviewer loop.
 
 Standalone tool loop: connects directly to MCP servers, sends tool
-definitions to oMLX, parses model tool calls (OpenAI and Mistral
-plain-text formats), dispatches tools, injects results, iterates
-until no tool calls remain.
+definitions to the worker and reviewer providers (providers.py: oMLX,
+OpenAI-compatible APIs, Anthropic), dispatches tool calls, injects results,
+iterates until no tool calls remain.
 
 Modes:
     worker   — single work phase pass
@@ -48,19 +48,17 @@ import subprocess
 import sys
 import time
 import traceback
-import urllib.parse
-import urllib.request
-import uuid
 
 import yaml
 
 # Project root derived from working directory, consistent with _archive_audit_artifacts() precedent.
 PROJECT_ROOT: str = os.getcwd()
-from openai import AsyncOpenAI
+from typing import Any, Callable
 
 sys.path.insert(0, os.path.dirname(__file__))
 from mcp_client import MCPClient
-from parser import parse_tool_calls
+from providers import (ConfigError, ProviderError, as_provider, build_role_bindings,
+                       query_omlx_context_window as _query_omlx_context_window)
 
 from rich.console import Console
 from rich.markup import escape
@@ -527,7 +525,7 @@ def _truncate_tool_result(content: str, max_chars: int) -> str:
 
 
 async def _completion_with_retry(
-    client,
+    provider,
     model: str,
     messages: list[dict],
     tools: list[dict] | None,
@@ -545,25 +543,16 @@ async def _completion_with_retry(
     a RuntimeError to signal clean termination (no uncaught exception).
 
     Args:
+        provider: A providers.py provider; returns a normalised Completion.
         max_completion_tokens: When non-null, passed as max_tokens to the completion
-            call to cap output length. When null, max_tokens is omitted (default).
+            call to cap output length. When null, the provider default applies.
     """
     backoff = initial_backoff
     last_error = None
 
     for attempt in range(1, max_retries + 1):
         try:
-            # Build kwargs, conditionally including max_tokens
-            create_kwargs = {
-                "model": model,
-                "messages": messages,
-                "tools": tools or None,
-                "stream": False,
-            }
-            if max_completion_tokens is not None:
-                create_kwargs["max_tokens"] = max_completion_tokens
-            response = await client.chat.completions.create(**create_kwargs)
-            return response
+            return await provider.complete(model, messages, tools, max_completion_tokens)
         except Exception as e:
             last_error = e
             log.warning(
@@ -730,69 +719,25 @@ def reset_state(state_dir: str) -> int:
     return 0
 
 
-def _query_omlx_context_window(model_name: str, base_url: str) -> int | None:
-    """
-    Query the oMLX admin API for the context window of a specific model.
-
-    Builds the admin URL by stripping a trailing '/v1' from base_url and
-    appending '/admin/api/models?model_id=<model_name>'.
-
-    Returns:
-        The value of settings.max_context_window for the matching model entry,
-        or None if the query fails or the value is absent.
-
-    This function never raises — all exceptions are caught and logged at WARNING.
-    """
-    log = logging.getLogger("engine")
-    try:
-        # Strip trailing '/v1' to get admin root
-        admin_root = base_url.rstrip("/")
-        if admin_root.endswith("/v1"):
-            admin_root = admin_root[:-3]
-
-        # Build admin API URL
-        encoded_model = urllib.parse.quote(model_name, safe="")
-        url = f"{admin_root}/admin/api/models?model_id={encoded_model}"
-
-        log.debug("querying oMLX admin API: %s", url)
-
-        # Make request with short timeout
-        req = urllib.request.Request(url, method="GET")
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-
-        # Parse response: find matching model entry
-        models = data.get("models", [])
-        for entry in models:
-            if entry.get("id") == model_name:
-                settings = entry.get("settings", {})
-                ctx = settings.get("max_context_window")
-                if ctx is not None:
-                    log.debug("oMLX admin query: found max_context_window=%d for '%s'", ctx, model_name)
-                    return int(ctx)
-                log.debug("oMLX admin query: settings.max_context_window is null for '%s'", model_name)
-                return None
-
-        log.debug("oMLX admin query: no matching model entry for '%s'", model_name)
-        return None
-
-    except Exception as exc:
-        log.warning("oMLX admin query failed for '%s': %s", model_name, exc)
-        return None
+_LEGACY_LIVE_QUERY = object()
 
 
-def resolve_context_window(model_name: str, config: dict) -> int | None:
+def resolve_context_window(model_name: str, config: dict,
+                           live_query: Callable[[str], int | None] | None | object = _LEGACY_LIVE_QUERY,
+                           ) -> int | None:
     """
     Resolve the model context window in tokens using a four-tier chain.
 
     Tier 1: config['context']['context_window'] if not null (explicit global override)
-    Tier 2: Live query to oMLX admin endpoint for settings.max_context_window
+    Tier 2: Live query (oMLX admin endpoint for settings.max_context_window)
     Tier 3: config['context']['model_context_windows'][model_name] if present
     Tier 4: Return None (context window unknown)
 
     Args:
-        model_name: The model id as configured in omlx.default_model
+        model_name: The model id bound to the role being resolved (FR-04-05)
         config: The parsed config.yaml contents
+        live_query: The role provider's live_context_window, or None to skip
+            tier 2. Omitted: query the legacy omlx.base_url, as before.
 
     Returns:
         Context window size in tokens, or None if unresolved at every tier.
@@ -808,17 +753,18 @@ def resolve_context_window(model_name: str, config: dict) -> int | None:
         return int(override)
     tiers_tried.append("tier 1 (global override): null")
 
-    # Tier 2: Live oMLX admin query
-    omlx_cfg = config.get("omlx", {})
-    base_url = omlx_cfg.get("base_url", "")
-    if base_url:
-        live_ctx = _query_omlx_context_window(model_name, base_url)
+    # Tier 2: Live query (oMLX only)
+    if live_query is _LEGACY_LIVE_QUERY:
+        base_url = (config.get("omlx") or {}).get("base_url", "")
+        live_query = (lambda m: _query_omlx_context_window(m, base_url)) if base_url else None
+    if live_query is not None:
+        live_ctx = live_query(model_name)
         if live_ctx is not None:
             log.info("context window: %d (tier 2: live oMLX admin query)", live_ctx)
             return live_ctx
         tiers_tried.append("tier 2 (live oMLX query): null or failed")
     else:
-        tiers_tried.append("tier 2 (live oMLX query): skipped (no base_url)")
+        tiers_tried.append("tier 2 (live query): not available for this provider")
 
     # Tier 3: Per-model override from config
     model_overrides = ctx_cfg.get("model_context_windows", {})
@@ -948,42 +894,6 @@ When authoring the next tactical_brief or T03 prompt:
 - If symptoms appear, reduce brief size and restart with --mode reset
 """
     write_state(state_dir, "context-budget.md", report)
-
-
-async def await_model_ready(
-    client: AsyncOpenAI,
-    model: str,
-    timeout: float = 60.0,
-    interval: float = 2.0,
-) -> None:
-    """
-    Poll /v1/models until the target model is listed or the endpoint is
-    reachable. Raises TimeoutError if the endpoint remains unreachable.
-    """
-    deadline = time.monotonic() + timeout
-    attempt = 0
-    while True:
-        attempt += 1
-        try:
-            models = await client.models.list()
-            ids = [m.id for m in models.data]
-            if model in ids:
-                console.print(f"[green][engine] model ready: {model}[/green]")
-                return
-            # Endpoint up; model not listed — oMLX loads on first request
-            console.print(f"[yellow][engine] endpoint ready; '{model}' not listed — proceeding[/yellow]")
-            return
-        except Exception as e:
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                raise TimeoutError(
-                    f"[engine] inference endpoint not reachable after {timeout}s: {e}"
-                ) from e
-            console.print(
-                f"[yellow][engine] waiting for endpoint "
-                f"(attempt {attempt}, {remaining:.0f}s remaining): {e}[/yellow]"
-            )
-            await asyncio.sleep(interval)
 
 
 def clear_state(state_dir: str, *filenames: str) -> None:
@@ -1175,7 +1085,7 @@ def format_tool_signatures(tools: list[dict]) -> str:
 
 
 async def run_phase(
-    client: AsyncOpenAI,
+    client: Any,
     mcp: MCPClient,
     model: str,
     recipe: dict,
@@ -1203,6 +1113,7 @@ async def run_phase(
       - read_paths: set of abspath-normalized file paths read via read/read_file/read_text_file
                     (populated for review phase; empty for worker phase)
     """
+    provider = as_provider(client)  # change-53c6f252: raw OpenAI-style clients are wrapped
     is_worker_phase = "REVIEW" not in phase_label.upper()
     # F5: review phase gets read-only tool subset; worker gets full toolset
     tools = mcp.get_openai_tools(readonly=not is_worker_phase)
@@ -1291,20 +1202,19 @@ async def run_phase(
 
         # F14: Use bounded retry with backoff for transient endpoint errors
         try:
-            response = await _completion_with_retry(
-                client, model, messages, tools, log, state_dir,
+            completion = await _completion_with_retry(
+                provider, model, messages, tools, log, state_dir,
                 max_completion_tokens=max_completion_tokens,
             )
         except RuntimeError:
             # Persistent failure — BLOCKED.md already written
             return 1, "", set()
 
-        message = response.choices[0].message
-        content = message.content or ""
+        content = completion.text or ""
         log.debug("iteration %d model response:\n%s", iteration, content)
 
         # Extract and display reasoning if present
-        reasoning, content = extract_reasoning(message, content, log)
+        reasoning, content = extract_reasoning(completion, content, log)
         if reasoning:
             log.debug("model reasoning:\n%s", reasoning)
             console.print(Panel(escape(reasoning), title="[dim cyan]think[/dim cyan]", border_style="dim cyan", expand=False))
@@ -1316,27 +1226,15 @@ async def run_phase(
             # Strip any plain-text [TOOL_CALLS] marker — that syntax is shown
             # separately via the 'call ->' line once parsed below.
             _narration = content.split("[TOOL_CALLS]")[0].strip()
-            if _narration and (message.tool_calls or "[TOOL_CALLS]" in content):
+            if _narration and (completion.tool_calls or "[TOOL_CALLS]" in content):
                 log.debug("untagged narration (%d chars)", len(_narration))
                 console.print(Panel(escape(_narration), title="[dim magenta]narration[/dim magenta]", border_style="dim magenta", expand=False))
 
-        tool_calls: list[dict] = []
-
-        if message.tool_calls:
-            # OpenAI-format tool_calls in API response
-            for tc in message.tool_calls:
-                try:
-                    arguments = json.loads(tc.function.arguments)
-                except json.JSONDecodeError:
-                    arguments = {}
-                tool_calls.append({"id": tc.id, "name": tc.function.name, "arguments": arguments})
-        else:
-            # Mistral plain-text format — parse from content
-            parsed = parse_tool_calls(content)
-            if parsed:
-                for tc in parsed:
-                    tc["id"] = f"call_{uuid.uuid4().hex[:8]}"
-                tool_calls = parsed
+        # change-53c6f252: native and plain-text tool calls are normalised by the provider
+        tool_calls: list[dict] = [
+            {"id": tc.id, "name": tc.name, "arguments": tc.arguments}
+            for tc in completion.tool_calls
+        ]
 
         # F3: Apply tool call cap BEFORE building assistant message to avoid orphaned IDs.
         # The assistant message must only reference tool_calls that will have matching results.
@@ -1369,7 +1267,7 @@ async def run_phase(
             # Check for unparsed tool call markers (model tried to emit calls but parser failed).
             # Do NOT use substring scans for error patterns — a summary may legitimately
             # contain such text without indicating a malformed response.
-            _has_unparsed_tool_marker = "[TOOL_CALLS]" in content and not message.tool_calls
+            _has_unparsed_tool_marker = "[TOOL_CALLS]" in content
             if _has_unparsed_tool_marker:
                 blocked_msg = (
                     "# BLOCKED\n\n"
@@ -2049,7 +1947,7 @@ def _extract_deliverables(state_dir: str, log: logging.Logger) -> set[str]:
 
 
 async def run_loop(
-    client: AsyncOpenAI,
+    client: Any,
     mcp: MCPClient,
     worker_model: str,
     reviewer_model: str,
@@ -2072,8 +1970,20 @@ async def run_loop(
     phase_duration_seconds: float | None = None,
     max_completion_tokens: int | None = None,
     max_tool_result_chars: int | None = None,
+    reviewer_client: Any = None,
+    reviewer_context_window: int | None = None,
 ) -> int:
-    """Full loop: worker/reviewer cycle until SHIP, max_iterations, or deadline."""
+    """
+    Full loop: worker/reviewer cycle until SHIP, max_iterations, or deadline.
+
+    client and context_window serve the worker; reviewer_client and
+    reviewer_context_window serve the reviewer and default to the worker's
+    (change-53c6f252, FR-04-05).
+    """
+    if reviewer_client is None:
+        reviewer_client = client
+    if reviewer_context_window is None:
+        reviewer_context_window = context_window
     ctx_line = f"  context:  {context_window:,} tokens\n" if context_window else ""
     console.print(Panel(
         f"  worker:   {escape(worker_model)}\n"
@@ -2227,10 +2137,10 @@ async def run_loop(
         if _syntax_result:
             review_task = _syntax_result + "\n" + review_task
         rc, reviewer_final_msg, _reviewer_read_paths = await run_phase(
-            client, mcp, reviewer_model, review_recipe,
+            reviewer_client, mcp, reviewer_model, review_recipe,
             review_task, phase_max_iterations, state_dir, log,
             phase_label="REVIEWER",
-            context_window=context_window,
+            context_window=reviewer_context_window,
             budget_warn_pct=budget_warn_pct,
             budget_abort_pct=budget_abort_pct,
             mcp_error_threshold=mcp_error_threshold,
@@ -2403,7 +2313,14 @@ async def main_async(args: argparse.Namespace) -> int:
         console.print(f"[yellow][engine] warning: prior SHIP detected in {state_dir}[/yellow]")
         console.print("[yellow][engine]          run --mode reset after human acceptance to clear[/yellow]")
 
-    omlx_cfg       = config["omlx"]
+    # change-53c6f252: role-to-model binding (FR-04-01, FR-04-08). Resolved
+    # before any state change so a configuration error stops the run cleanly.
+    try:
+        bindings = build_role_bindings(config, args)
+    except ConfigError as e:
+        console.print(f"[red][engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
+        return 1
+    worker_b, reviewer_b = bindings["worker"], bindings["reviewer"]
     max_iter          = args.max_iterations or config["loop"]["max_iterations"]
     deadline          = time.monotonic() + args.duration * 3600 if args.duration else None
     phase_max_iter    = config["loop"].get("phase_max_iterations", max_iter)
@@ -2413,7 +2330,7 @@ async def main_async(args: argparse.Namespace) -> int:
     # F28: phase wall-clock cap (minutes -> seconds; None disables)
     _phase_duration_min   = config["loop"].get("phase_duration_minutes")
     phase_duration_seconds = _phase_duration_min * 60 if _phase_duration_min else None
-    model          = args.model or omlx_cfg["default_model"]
+    model          = worker_b.model  # worker binding; used for banners and the context report
 
     # Execution controls (opt-in, default disabled)
     exec_cfg = config.get("execution", {})
@@ -2432,7 +2349,9 @@ async def main_async(args: argparse.Namespace) -> int:
     archive_prior_logs(state_dir, _log_archive_dir)
 
     log = setup_logging(state_dir)
-    log.info("engine start mode=%s model=%s state_dir=%s", args.mode, model, state_dir)
+    log.info("engine start mode=%s worker=%s:%s reviewer=%s:%s state_dir=%s", args.mode,
+             worker_b.provider_name, worker_b.model, reviewer_b.provider_name, reviewer_b.model,
+             state_dir)
     if _log_archive_dir:
         log.info("log archive dir: %s", _log_archive_dir)
 
@@ -2454,22 +2373,38 @@ async def main_async(args: argparse.Namespace) -> int:
             write_state(state_dir, "audit-report.md", "")
             log.info("audit-report.md initialized (zero-byte)")
 
-    client = AsyncOpenAI(base_url=omlx_cfg["base_url"], api_key=omlx_cfg["api_key"])
-
+    # change-53c6f252: readiness and context window per role in use (FR-04-05, FR-04-06)
+    roles_in_use = {"worker": [worker_b], "reviewer": [reviewer_b]}.get(args.mode, [worker_b, reviewer_b])
     readiness = config.get("readiness", {})
-    await await_model_ready(
-        client,
-        model,
-        timeout=readiness.get("timeout_seconds", 60.0),
-        interval=readiness.get("poll_interval_seconds", 2.0),
-    )
+    _ready: set[tuple[str, str]] = set()
+    for b in roles_in_use:
+        if (b.provider_name, b.model) in _ready:
+            continue
+        try:
+            await b.provider.await_ready(
+                b.model,
+                timeout=readiness.get("timeout_seconds", 60.0),
+                interval=readiness.get("poll_interval_seconds", 2.0),
+                echo=lambda msg, _r=b.role: console.print(f"[blue][engine] {_r}: {escape(msg)}[/blue]"),
+            )
+        except (TimeoutError, ProviderError) as e:
+            write_state(state_dir, "BLOCKED.md",
+                        f"# BLOCKED\n\n{b.role} provider '{b.provider_name}' not ready: {e}\n")
+            console.print(f"[red][engine] BLOCKED: {b.role} provider '{escape(b.provider_name)}' not ready: {escape(str(e))}[/red]")
+            log.error("provider not ready role=%s provider=%s: %s", b.role, b.provider_name, e)
+            return 1
+        _ready.add((b.provider_name, b.model))
 
-    # Resolve context window using four-tier chain
-    context_window = resolve_context_window(model, config)
-    if context_window:
-        console.print(f"[blue][engine] context window: {context_window:,} tokens ({escape(model)})[/blue]")
-    else:
-        console.print("[yellow][engine] context window: unknown — budget tracking disabled[/yellow]")
+    # Resolve context window per role using the four-tier chain
+    context_windows: dict[str, int | None] = {}
+    for b in (worker_b, reviewer_b):
+        ctx = resolve_context_window(b.model, config, live_query=b.provider.live_context_window)
+        context_windows[b.role] = ctx
+        if ctx:
+            console.print(f"[blue][engine] context window ({b.role}): {ctx:,} tokens ({escape(b.model)})[/blue]")
+        else:
+            console.print(f"[yellow][engine] context window ({b.role}): unknown — budget tracking disabled[/yellow]")
+    context_window = context_windows["worker"]
 
     # Substitute {PROJECT_ROOT} placeholders in mcp_servers before connection
     _substitute_project_root(config)
@@ -2550,9 +2485,9 @@ async def main_async(args: argparse.Namespace) -> int:
                 log.warning("clearing stale work-complete.txt from prior run")
                 console.print("[yellow][engine] clearing stale work-complete.txt from prior run[/yellow]")
                 os.remove(_stale)
-            rc, _, _ = await run_phase(client, mcp, model, work_recipe, task, phase_max_iter,
+            rc, _, _ = await run_phase(worker_b.provider, mcp, worker_b.model, work_recipe, task, phase_max_iter,
                                        state_dir, log, phase_label="WORKER",
-                                       context_window=context_window,
+                                       context_window=context_windows["worker"],
                                        budget_warn_pct=budget_warn,
                                        budget_abort_pct=budget_abort,
                                        mcp_error_threshold=mcp_error_thresh,
@@ -2575,9 +2510,9 @@ async def main_async(args: argparse.Namespace) -> int:
                 f"[END RUNTIME CONTEXT]\n\n"
                 f"Review the work in state directory '{state_dir}'."
             )
-            rc, _, _ = await run_phase(client, mcp, model, rev_recipe, _review_task, phase_max_iter,
+            rc, _, _ = await run_phase(reviewer_b.provider, mcp, reviewer_b.model, rev_recipe, _review_task, phase_max_iter,
                                        state_dir, log, phase_label="REVIEWER",
-                                       context_window=context_window,
+                                       context_window=context_windows["reviewer"],
                                        budget_warn_pct=budget_warn,
                                        budget_abort_pct=budget_abort,
                                        mcp_error_threshold=mcp_error_thresh,
@@ -2586,12 +2521,12 @@ async def main_async(args: argparse.Namespace) -> int:
                                        max_completion_tokens=max_completion_tokens,
                                        max_tool_result_chars=max_tool_result_chars)
         else:  # loop
-            worker_model   = args.worker_model   or omlx_cfg.get("worker_model")   or model
-            reviewer_model = args.reviewer_model or omlx_cfg.get("reviewer_model") or model
-            rc = await run_loop(client, mcp, worker_model, reviewer_model,
+            rc = await run_loop(worker_b.provider, mcp, worker_b.model, reviewer_b.model,
                                 work_recipe, rev_recipe, task, max_iter, phase_max_iter,
                                 state_dir, log,
-                                context_window=context_window,
+                                context_window=context_windows["worker"],
+                                reviewer_client=reviewer_b.provider,
+                                reviewer_context_window=context_windows["reviewer"],
                                 budget_warn_pct=budget_warn,
                                 budget_abort_pct=budget_abort,
                                 mcp_error_threshold=mcp_error_thresh,

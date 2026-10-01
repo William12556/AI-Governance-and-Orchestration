@@ -135,7 +135,7 @@ class ToolCall:
 class Completion:
     text: str
     tool_calls: list[ToolCall]
-    finish_reason: str            # "stop", "tool_calls", "length", "error"
+    finish_reason: str            # "stop", "tool_calls", "length"
     usage: dict | None            # input/output tokens where reported
 
 class Provider(Protocol):
@@ -152,7 +152,7 @@ The engine's message history stays in the current OpenAI chat format. Each provi
 - Wraps the existing `AsyncOpenAI` call and retry logic.
 - Moves the plain-text tool-call fallback (`parser.parse_tool_calls`) out of `run_phase` into the provider.
 - Generates missing tool call IDs with one helper: 9 characters from `[A-Za-z0-9]` (FR-04-09).
-- A response without `choices` becomes `finish_reason: "error"` instead of a crash (also closes backlog §3.0-5).
+- A response without `choices` raises `ProviderError` inside the existing bounded retry, so it is retried and ends BLOCKED instead of crashing (closes backlog §3.0-5; amended in change-53c6f252).
 - `kind: omlx` keeps the live context-window query and readiness polling (FR-AEL-008, FR-AEL-009). For `openai_compatible`, readiness is a successful `models.list()` containing the model; the context window comes from configuration tiers 1 and 3.
 
 ### 4.3 AnthropicProvider (kind `anthropic`)
@@ -431,6 +431,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.1 | 2026-10-01 | §4.2: a response without choices is retried, not returned as finish_reason error (change-53c6f252). |
 | 1.0 | 2026-10-01 | Approved by the operator. DI-04 and DI-05 remain open and do not block implementation. |
 | 0.3 | 2026-10-01 | From report-14e05e35 (Mistral API test): DI-01 closed; DI-04 updated (partially confirmed, guidance); DI-05 added (allowance exhaustion error); §3.0 pinned model IDs, Devstral unavailable on the Mistral API. |
 | 0.2 | 2026-10-01 | DI-04 added: Mistral Pro subscription for the `mistral` provider; References [2]–[6] added. |

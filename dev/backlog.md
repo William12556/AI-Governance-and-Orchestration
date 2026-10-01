@@ -59,7 +59,7 @@ Each requires a T06 issue → T07 change → T03 prompt triple.
 2. `run_phase`: normalise (abspath) `read_paths` on the F28 wall-clock-cap early return (d7f4a1c8 P08 review; no observed impact).
 3. `bin/bootstrap.sh`: refuse, with a clear message, a release tarball without `ai/engine/` (audit-5bcd46ad H-01 option; H-01 itself resolved by release v0.1.0).
 4. Pre-existing items recorded by audit-5bcd46ad L-12: governance P10.6 says the framework repository "contains only ai/, doc/, and templates/" (inaccurate); `audit-review.yaml` tests for `.complete` containing `DURATION_LIMIT`, which the orchestrator never writes (a timeout writes `.timeout` and returns before review); `ai/profiles/README.md` links to the gitignored `docs/claude/project_information.md`.
-5. `run_phase` crashes with `TypeError: 'NoneType' object is not subscriptable` at `response.choices[0]` when the endpoint returns a completion without `choices` (solax-modbus pilot run `engine_20260929-131033`, first worker call, rc=1, no BLOCKED.md). Treat a response without choices as an endpoint error: log the raw payload, retry through `_completion_with_retry`, then write BLOCKED.md. Needs a T06/T07/T03 triple. Not reproduced on the immediate rerun with the same configuration (17 tools, `engine_20260929-131551`), so the payload was most likely a transient endpoint error; the crash on it is the defect.
+5. ~~`run_phase` crashes with `TypeError: 'NoneType' object is not subscriptable` at `response.choices[0]` when the endpoint returns a completion without `choices` (solax-modbus pilot run `engine_20260929-131033`, first worker call, rc=1, no BLOCKED.md). Treat a response without choices as an endpoint error: log the raw payload, retry through `_completion_with_retry`, then write BLOCKED.md. Needs a T06/T07/T03 triple. Not reproduced on the immediate rerun with the same configuration (17 tools, `engine_20260929-131551`), so the payload was most likely a transient endpoint error; the crash on it is the defect.~~ Resolved 2026-10-01 by change-53c6f252: the provider raises `ProviderError` inside the bounded retry; persistent failure ends BLOCKED.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -138,6 +138,7 @@ None pending. All resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.25 | 2026-10-01 | §3.0 item 5 resolved by change-53c6f252 |
 | 1.24 | 2026-09-30 | §2.0 item 11: planner client integration (proposal-5bcd46ad OQ-05) |
 | 1.23 | 2026-09-30 | §2.0 item 6: governance.md split deferred to Phase 3 (proposal-5bcd46ad OQ-03) |
 | 1.22 | 2026-09-29 | §3.0 item 5 not reproduced on rerun; §5.0 item 9 reviewer false REVISE in the solax-modbus pilot |
