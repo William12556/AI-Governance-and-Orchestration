@@ -7,13 +7,13 @@ prompt_info:
   source_ref: "change-82dbf16a"
   target_profile: "claude_code"  # implemented by Claude in the planning session (operator decision 2026-10-01)
   date: "2026-10-01"
-  iteration: 4
+  iteration: 5
   coupled_docs:
     change_ref: "change-82dbf16a"
-    change_iteration: 4
+    change_iteration: 5
 
 context:
-  purpose: "Remediate audit-14e05e35 H-01 to H-03, M-01 to M-05 and the in-scope low findings; iteration 2: the follow-up audit residuals F-01 to F-06; iteration 3: the second follow-up F2-01 to F2-04; iteration 4: the third follow-up F3-01, F3-02."
+  purpose: "Remediate audit-14e05e35 H-01 to H-03, M-01 to M-05 and the in-scope low findings; iteration 2: the follow-up audit residuals F-01 to F-06; iteration 3: the second follow-up F2-01 to F2-04; iteration 4: the third follow-up F3-01, F3-02; iteration 5: the fourth follow-up F4-01, F4-02."
   constraints:
     - "The worker keeps write access to work-summary.txt, work-complete.txt and BLOCKED.md"
     - "Approvals are compared with the working copy of each evidence document"
@@ -39,6 +39,8 @@ specification:
       - "Iteration 3, F2-03, F2-04: clear review-result.txt, review-feedback.txt, .complete and awaiting-approval.md after the gates, before the review phase"
       - "Iteration 4, F3-01: run that clear before the UNCHECKED check"
       - "Iteration 4, F3-02: read the task bytes once before the pre-run check; prerun_missing(task_bytes) requires their blob hash to equal the approved hash of the matched document; use the bytes for the task text and the write scope"
+      - "Iteration 5, F4-01: clear_state and reset_state remove files, symlinks and directories; an unremovable entry ends the run BLOCKED and reset returns 1; engine_status shipped requires a regular, non-symlink .complete"
+      - "Iteration 5, F4-02: prerun_missing refuses a task path given without bytes"
 
 deliverable:
   format_requirements:

@@ -375,6 +375,8 @@ def prerun_missing(project_root: str, manifest, uuid: str, task_path: str | None
         err = task_document_error(project_root, manifest, task_path)
         if err:
             return [err]
+        if task_bytes is None:  # change-82dbf16a iteration 5 (audit F4-02)
+            return [f"task file {task_path!r}: content was not read; the run needs the bytes it checks"]
     if not is_git_repository(project_root):
         return [f"{project_root} is not a git repository; approvals cannot be verified"]
     report = scan(project_root, manifest)

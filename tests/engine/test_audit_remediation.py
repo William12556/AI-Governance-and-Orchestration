@@ -354,3 +354,66 @@ def _loop_with(orch, project, monkeypatch, gates, specs):
     return asyncio.run(orch.run_loop(None, None, "w", "r", {}, {}, "task", 1, 2, str(state),
                                      logging.getLogger("engine-test-f3"), project_root=str(project),
                                      gates=gates, gate_specs=specs))
+
+
+# --- iteration 5: fourth follow-up F4-01 ---------------------------------------------------
+
+@pytest.mark.parametrize("kind", ["symlink", "dangling", "directory"])
+def test_non_regular_state_entries_are_removed(orch, project, kind):
+    state = project / "ai" / "state"
+    target = state / ".complete"
+    if kind == "symlink":
+        (state / "review-feedback.txt").write_text("x")
+        target.symlink_to(state / "review-feedback.txt")
+    elif kind == "dangling":
+        target.symlink_to(state / "absent")
+    else:
+        target.mkdir()
+        (target / "inner").write_text("x")
+    assert orch.clear_state(str(state), ".complete") == []
+    assert not os.path.lexists(target)
+
+
+@pytest.mark.parametrize("kind", ["symlink", "directory"])
+def test_reset_removes_non_regular_state_entries(orch, project, kind):
+    state = project / "ai" / "state"
+    target = state / ".complete"
+    if kind == "symlink":
+        target.symlink_to(state / "absent")
+    else:
+        target.mkdir()
+    assert orch.reset_state(str(state)) == 0
+    assert not os.path.lexists(target)
+
+
+@pytest.mark.parametrize("kind", ["symlink", "directory"])
+def test_gate_created_non_regular_complete_is_cleared(orch, project, monkeypatch, kind):
+    """F4-01: a gate that creates .complete as a symlink or directory cannot leave it."""
+    state = project / "ai" / "state"
+    make = ("os.symlink('review-feedback.txt', 'ai/state/.complete'); "
+            "open('ai/state/review-feedback.txt', 'w').write('x')" if kind == "symlink"
+            else "os.mkdir('ai/state/.complete')")
+    specs = {"lint": {"command": f"{{python}} -c \"import os; {make}\"", "python": PY}}
+
+    async def fake_run_phase(client, mcp, model, recipe, task, max_iter, state_dir, log, **kw):
+        if kw["phase_label"] == "WORKER":
+            (state / "work-summary.txt").write_text("done\n")
+            return 0, "done", set()
+        assert not os.path.lexists(state / ".complete")
+        return 0, "REVISE: missing tests", set()
+
+    monkeypatch.setattr(orch, "run_phase", fake_run_phase)
+    monkeypatch.setattr(orch.sys, "stdin", io.StringIO())
+    rc = asyncio.run(orch.run_loop(None, None, "w", "r", {}, {}, "task", 1, 2, str(state),
+                                   logging.getLogger("engine-test-f4"), project_root=str(project),
+                                   gates=["lint", "reviewer"], gate_specs=specs))
+    assert rc == 1 and not os.path.lexists(state / ".complete")
+
+
+def test_uncleared_state_entry_blocks_the_run(orch, project, monkeypatch):
+    state = project / "ai" / "state"
+    monkeypatch.setattr(orch, "_remove_state_path",
+                        lambda path: not path.endswith(".complete"))
+    rc = _loop_with(orch, project, monkeypatch, ["reviewer"], {})
+    assert rc == 1 and "could not be removed" in (state / "BLOCKED.md").read_text()
+    assert ".complete" in (state / "BLOCKED.md").read_text()

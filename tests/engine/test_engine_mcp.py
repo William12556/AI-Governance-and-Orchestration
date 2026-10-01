@@ -56,6 +56,19 @@ def test_state_dir_comes_from_config(proj):
     assert server._validate_project(str(proj))[3] == root / "ai" / "state"
 
 
+@pytest.mark.parametrize("kind", ["symlink", "directory"])
+def test_non_regular_complete_is_not_shipped(proj, kind):
+    """change-82dbf16a iteration 5 (audit-14e05e35 F4-01)."""
+    state = proj / "ai" / "runtime"
+    state.mkdir()
+    (state / "review-feedback.txt").write_text("x")
+    if kind == "symlink":
+        (state / ".complete").symlink_to(state / "review-feedback.txt")
+    else:
+        (state / ".complete").mkdir()
+    assert json.loads(server.engine_status(str(proj)))["shipped"] is False
+
+
 def test_engine_status_reads_configured_state_dir(proj):
     state = proj / "ai" / "runtime"
     state.mkdir()

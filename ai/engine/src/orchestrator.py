@@ -615,7 +615,8 @@ def reset_state(state_dir: str) -> int:
     """
     Remove all loop state files from state_dir.
     Log files (engine_*.LOG) and context-budget.md are preserved.
-    Returns 0 in all cases; reset is idempotent.
+    Returns 0 unless an entry cannot be removed (change-82dbf16a iteration 5);
+    reset is idempotent.
 
     change-f5c28a04 (2.3): an absent state directory previously returned 1.
     Reset is idempotent by intent — resetting nothing is the requested outcome
@@ -626,12 +627,14 @@ def reset_state(state_dir: str) -> int:
         console.print(f"[yellow][engine] reset: state directory not present: {state_dir}[/yellow]")
         console.print("[green][engine] reset: nothing to clear[/green]")
         return 0
-    removed = []
+    removed, failed = [], []
     for name in _RESET_FILES:
         path = os.path.join(state_dir, name)
-        if os.path.exists(path):
-            os.remove(path)
-            removed.append(name)
+        if os.path.lexists(path):  # change-82dbf16a iteration 5 (F4-01): symlinks and directories too
+            (removed if _remove_state_path(path) else failed).append(name)
+    if failed:
+        console.print(f"[red][engine] reset: could not remove: {escape(', '.join(failed))}[/red]")
+        return 1
     if removed:
         console.print(f"[green][engine] reset: removed {len(removed)} state file(s)[/green]")
         for name in removed:
@@ -818,11 +821,27 @@ When authoring the next tactical_brief or T03 prompt:
     write_state(state_dir, "context-budget.md", report)
 
 
-def clear_state(state_dir: str, *filenames: str) -> None:
-    for name in filenames:
-        path = os.path.join(state_dir, name)
-        if os.path.exists(path):
-            os.remove(path)
+def _remove_state_path(path: str) -> bool:
+    """
+    change-82dbf16a iteration 5 (audit F4-01): remove a state entry whatever
+    its type: a file or symlink (dangling or not) is unlinked, a directory is
+    removed with its content (symlinks inside are not followed). True when the
+    name no longer exists.
+    """
+    try:
+        if os.path.isdir(path) and not os.path.islink(path):
+            shutil.rmtree(path)
+        elif os.path.lexists(path):
+            os.unlink(path)
+    except OSError:
+        pass
+    return not os.path.lexists(path)
+
+
+def clear_state(state_dir: str, *filenames: str) -> list[str]:
+    """Remove the named state entries; returns the names that could not be removed."""
+    return [name for name in filenames
+            if not _remove_state_path(os.path.join(state_dir, name))]
 
 
 def archive_prior_logs(state_dir: str, archive_dir: str | None) -> int:
@@ -1877,10 +1896,18 @@ async def run_loop(
     ))
     log.info("loop start worker=%s reviewer=%s task=%s", worker_model, reviewer_model, task)
 
-    clear_state(state_dir,
+    _not_cleared = clear_state(state_dir,
                 "review-result.txt", "review-feedback.txt",
                 "work-complete.txt", "work-summary.txt", ".complete", ".timeout",
                 "awaiting-approval.md")
+    if _not_cleared:  # change-82dbf16a iteration 5 (F4-01)
+        write_state(state_dir, "BLOCKED.md",
+                    "# BLOCKED\n\nState files could not be removed at loop start: "
+                    f"{', '.join(_not_cleared)}. Remove them by hand.\n")
+        log.error("BLOCKED: state files could not be removed: %s", ", ".join(_not_cleared))
+        console.print(f"[red][engine] BLOCKED: state files could not be removed: "
+                      f"{escape(', '.join(_not_cleared))}[/red]")
+        return 1
 
     # Audit scope snapshot: record original item count for scope lock enforcement.
     _audit_original_count = _snapshot_audit_index(state_dir, log)
@@ -2023,8 +2050,16 @@ async def run_loop(
         # the gates, because gate processes run worker-written code; .complete and
         # awaiting-approval.md are included, so only the engine's own SHIP path
         # can leave them. review-result.txt is not a verdict source (F-01).
-        clear_state(state_dir, "work-complete.txt", "review-feedback.txt", "review-result.txt",
-                    ".complete", "awaiting-approval.md")
+        _not_cleared = clear_state(state_dir, "work-complete.txt", "review-feedback.txt",
+                                   "review-result.txt", ".complete", "awaiting-approval.md")
+        if _not_cleared:  # change-82dbf16a iteration 5 (F4-01)
+            write_state(state_dir, "BLOCKED.md",
+                        "# BLOCKED\n\nState files could not be removed after the gates: "
+                        f"{', '.join(_not_cleared)}. Remove them by hand.\n")
+            log.error("BLOCKED: state files could not be removed: %s", ", ".join(_not_cleared))
+            console.print(f"[red][engine] BLOCKED: state files could not be removed: "
+                          f"{escape(', '.join(_not_cleared))}[/red]")
+            return 1
 
         # change-82dbf16a (M-02, FR-03-02 v1.3): a gate that cannot run ends the
         # run BLOCKED, naming the gate; SHIP is not possible without it.
@@ -2387,6 +2422,8 @@ async def main_async(args: argparse.Namespace) -> int:
             _task_bytes = _fh.read()
     _tracked = bool(work_item) and ST.is_tracked_task(os.getcwd(), args.task)
     if args.mode in ("loop", "worker") and _tracked:
+        # change-82dbf16a iteration 5 (audit F4-02): prerun_missing refuses a
+        # tracked task whose content was not read.
         _missing = ST.prerun_missing(os.getcwd(), manifest, work_item, args.task, _task_bytes)
         if _missing:
             console.print(f"[red][engine] work item {escape(work_item)} is not ready for "

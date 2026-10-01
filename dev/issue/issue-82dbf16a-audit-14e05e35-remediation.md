@@ -9,10 +9,10 @@ issue_info:
   status: "resolved"
   severity: "high"
   type: "defect"
-  iteration: 4
+  iteration: 5
   coupled_docs:
     change_ref: "change-82dbf16a"
-    change_iteration: 4
+    change_iteration: 5
 
 source:
   origin: "audit"
@@ -28,7 +28,9 @@ source:
     (dev/audit/audit-14e05e35-followup2-2026-10-01.md) found F2-01 to F2-04
     after commit 5ada0b6. Iteration 4: the third follow-up audit
     (dev/audit/audit-14e05e35-followup3-2026-10-01.md) found F3-01 and F3-02
-    after commit 736af62.
+    after commit 736af62. Iteration 5: the fourth follow-up audit
+    (dev/audit/audit-14e05e35-followup4-2026-10-01.md) found F4-01 and F4-02
+    after commit da21811.
 
 affected_scope:
   components:
@@ -60,6 +62,8 @@ reproduction:
     - "F2-04 (E-1g): gate-written review-feedback.txt survives a bare REVISE"
     - "F3-01 (third follow-up E-1j): a gate writes .complete and then times out, or a second gate cannot run; the files survive the BLOCKED return"
     - "F3-02 (third follow-up E-3): the task file is edited or a task symlink re-pointed after the pre-run check and before the engine reads it"
+    - "F4-01 (fourth follow-up E-1k, E-1l): a gate creates .complete as a symlink or directory; the clear keeps it and engine_status reports shipped for rc 1"
+    - "F4-02 (E-3e): the task is absent at the read and present at the check; the hash comparison is skipped"
   frequency: "always"
   reproducibility_conditions: "As stated per finding"
   preconditions: ""
@@ -94,7 +98,8 @@ analysis:
     limit behind F-01 (gate code runs with operator permissions) is recorded as
     design DI-06. Iteration 3 (operator approval 2026-10-01): F2-01 to F2-04
     fixed; loop-review.yaml step 5 wording (observation 5). Iteration 4
-    (operator approval 2026-10-01): F3-01 and F3-02 fixed.
+    (operator approval 2026-10-01): F3-01 and F3-02 fixed. Iteration 5
+    (operator approval 2026-10-01): F4-01 and F4-02 fixed.
 
 resolution:
   assigned_to: "Claude (Cowork, Opus 5.5)"
@@ -103,17 +108,17 @@ resolution:
   change_ref: "change-82dbf16a"
   resolved_date: "2026-10-01"
   resolved_by: "Claude (Cowork, Opus 5.5)"
-  fix_description: "Iteration 1: signal files protected and review-result.txt cleared before review; approvals record blob hashes and the pre-run check compares them; dispatch limited to offered tools, no writes in review; no-path writes refused; UNCHECKED blocks; git without optional locks; provider keys scrubbed from gates; document corrections. Iteration 2: verdict from the reviewer final message only (F-01); tracked task must be an active prompt document, engine and engine-mcp (F-02); blobs keyed by workspace-relative path (F-03); directory targets holding signal files refused (F-04); case-insensitive comparison (F-05); documents (F-06). Iteration 3: the task must be one of its work item's scanned active prompt documents, UUID from the name as given, full-name matching (F2-01, F2-02); signal files including .complete and awaiting-approval.md cleared after the gates (F2-03, F2-04). Iteration 4: the clear precedes the UNCHECKED check (F3-01); the task is read once, its bytes bound to the approved hash and used for the run (F3-02)."
+  fix_description: "Iteration 1: signal files protected and review-result.txt cleared before review; approvals record blob hashes and the pre-run check compares them; dispatch limited to offered tools, no writes in review; no-path writes refused; UNCHECKED blocks; git without optional locks; provider keys scrubbed from gates; document corrections. Iteration 2: verdict from the reviewer final message only (F-01); tracked task must be an active prompt document, engine and engine-mcp (F-02); blobs keyed by workspace-relative path (F-03); directory targets holding signal files refused (F-04); case-insensitive comparison (F-05); documents (F-06). Iteration 3: the task must be one of its work item's scanned active prompt documents, UUID from the name as given, full-name matching (F2-01, F2-02); signal files including .complete and awaiting-approval.md cleared after the gates (F2-03, F2-04). Iteration 4: the clear precedes the UNCHECKED check (F3-01); the task is read once, its bytes bound to the approved hash and used for the run (F3-02). Iteration 5: state entries of any type removed, unremovable entries BLOCK, reset returns 1 on failure, engine_status counts only a regular .complete (F4-01); a tracked task without bytes refused (F4-02)."
 
 verification:
   verified_date: ""
-  verified_by: "Fourth targeted follow-up audit (P02.8.2) of iteration 4, pending"
-  test_results: "Iteration 1: 258 passed. Iteration 2: 279 passed. Iteration 3: 287 passed. Iteration 4: 292 passed 2026-10-01 (offline shim, tests/engine and tests/overwatch); operator pytest run pending."
-  closure_notes: "Follow-up audit dev/audit/audit-14e05e35-followup-2026-10-01.md found F-01 to F-06; verified there: H-03, M-01 to M-05, FR-03-02 v1.3. Second follow-up dev/audit/audit-14e05e35-followup2-2026-10-01.md found F2-01 to F2-04; verified there: F-03 to F-06, the F-01 verdict source and the F-02 path, folder and extension cases. Third follow-up dev/audit/audit-14e05e35-followup3-2026-10-01.md found F3-01, F3-02 (medium); verified there: F2-01, F2-02, F2-04, and F2-03 for the review and REVISE paths."
+  verified_by: "Fifth targeted follow-up audit (P02.8.2) of iteration 5, pending"
+  test_results: "Iteration 1: 258 passed. Iteration 2: 279 passed. Iteration 3: 287 passed. Iteration 4: 292 passed. Iteration 5: 303 passed 2026-10-01 (offline shim, tests/engine and tests/overwatch); operator pytest run pending."
+  closure_notes: "Follow-up audit dev/audit/audit-14e05e35-followup-2026-10-01.md found F-01 to F-06; verified there: H-03, M-01 to M-05, FR-03-02 v1.3. Second follow-up dev/audit/audit-14e05e35-followup2-2026-10-01.md found F2-01 to F2-04; verified there: F-03 to F-06, the F-01 verdict source and the F-02 path, folder and extension cases. Third follow-up dev/audit/audit-14e05e35-followup3-2026-10-01.md found F3-01, F3-02 (medium); verified there: F2-01, F2-02, F2-04, and F2-03 for the review and REVISE paths. Fourth follow-up dev/audit/audit-14e05e35-followup4-2026-10-01.md: F3-01, F3-02 verified; F4-01 (medium), F4-02 (low) found."
 
 traceability:
   design_refs:
-    - "dev/design/design-14e05e35-engine-generalisation.md v1.9"
+    - "dev/design/design-14e05e35-engine-generalisation.md v1.10"
   change_refs:
     - "change-82dbf16a"
   test_refs:
@@ -144,6 +149,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Iteration 4 from the third follow-up audit (F3-01, F3-02); status resolved after implementation"
+  - version: "5.0"
+    date: "2026-10-01"
+    author: "William Watson"
+    changes:
+      - "Iteration 5 from the fourth follow-up audit (F4-01, F4-02); status resolved after implementation"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

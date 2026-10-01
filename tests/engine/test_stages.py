@@ -328,8 +328,10 @@ def test_closed_prompt_is_not_a_task(repo, se):
 def test_approved_active_prompt_is_a_valid_task(repo, se):
     prompt = _doc(repo, "prompt", "prompt")
     _commit_approval(repo, "prompt")
-    assert ST.prerun_missing(str(repo), se, U, str(prompt)) == []
+    assert ST.prerun_missing(str(repo), se, U, str(prompt), prompt.read_bytes()) == []
     assert ST.task_document_error(str(repo), se, str(prompt)) is None
+    # change-82dbf16a iteration 5 (F4-02): a task path without bytes is refused
+    assert "content was not read" in ST.prerun_missing(str(repo), se, U, str(prompt))[0]
 
 
 def test_engine_refuses_a_task_outside_the_prompt_folder(orch, repo, se):
@@ -350,7 +352,7 @@ def test_active_and_closed_copies_are_bound_separately(repo, se):
     blobs = ST.committed_approvals(str(repo))[(U, "prompt")]
     assert set(blobs) == {f"prompt/{active.name}", f"prompt/closed/{active.name}"}
     active.write_text(active.read_text() + "edited\n")
-    missing = ST.prerun_missing(str(repo), se, U, str(active))
+    missing = ST.prerun_missing(str(repo), se, U, str(active), active.read_bytes())
     assert any(f"changed: prompt/{active.name}" in m for m in missing)
 
 
@@ -484,3 +486,25 @@ def test_engine_runs_the_bytes_it_checked(orch, repo, se, monkeypatch, variant):
     with pytest.raises(_Stop):
         asyncio.run(orch.main_async(args))
     assert seen == [approved]
+
+
+# --- change-82dbf16a iteration 5: fourth follow-up F4-02 ----------------------------
+
+def test_engine_refuses_a_tracked_task_absent_at_the_read(orch, repo, se, monkeypatch):
+    """F4-02: the file is absent when read and back when checked; the run is refused (exit 3)."""
+    prompt = _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    real_isfile = orch.os.path.isfile
+    calls = {"n": 0}
+
+    def isfile_once_false(path):
+        if os.path.realpath(path) == os.path.realpath(str(prompt)) and calls["n"] == 0:
+            calls["n"] += 1
+            return False
+        return real_isfile(path)
+
+    monkeypatch.setattr(orch.os.path, "isfile", isfile_once_false)
+    args = argparse.Namespace(config=_config(repo), mode="loop", task=str(prompt), model=None,
+                              worker_model=None, reviewer_model=None, max_iterations=None, duration=None)
+    assert asyncio.run(orch.main_async(args)) == 3
+    assert calls["n"] == 1

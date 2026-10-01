@@ -256,7 +256,9 @@ def engine_status(project_dir: str) -> str:
         pid_alive = _pid_alive(record["pid"], str(root))
 
     present = [f for f in _STATE_FILES if (state_dir / f).exists()]
-    shipped  = (state_dir / ".complete").exists()
+    # change-82dbf16a iteration 5 (audit F4-01): only a regular file counts.
+    _complete = state_dir / ".complete"
+    shipped  = _complete.is_file() and not _complete.is_symlink()
     blocked  = (state_dir / "BLOCKED.md").exists()
 
     return json.dumps({
