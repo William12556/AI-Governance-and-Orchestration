@@ -382,6 +382,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 | DI-01 | Whether tool results sent to the Mistral API need a `name` field (requirements OQ-03). Settled by V-04; if needed, the OpenAI-compatible provider adds it. |
 | DI-02 | The proposal §4.2 downstream layout does not yet list `ai/approvals.yaml`. Update it with step 4. |
 | DI-03 | A planner with git or shell access can commit an approval (§8.3). Accepted for Phase 2. |
+| DI-04 | Using a Mistral Pro subscription for the `mistral` provider. Hypothesis: the plan's monthly API credits apply to a standard API key created in Studio [2][3][4]. Guidance: (1) create a Studio API key in the same account; do not use the Vibe-scoped subscription key [5]; (2) set `MISTRAL_API_KEY` for the engine process only, because a global value overrides Vibe's subscription key [6]; (3) usage beyond the included credits needs a payment method and a monthly spending limit; (4) check the workspace's rate limits, which may be the free Experiment limits. To be confirmed by a test request and the Studio usage page, before V-04. |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -410,6 +411,16 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 [1] ANTHROPIC, 2026. *OpenAI SDK compatibility* [online]. Available from: https://platform.claude.com/docs/en/cli-sdks-libraries/libraries/openai-sdk [Accessed 30 September 2026].
 
+[2] MISTRAL AI, 2026. *Pricing* [online]. Available from: https://mistral.ai/pricing [Accessed 1 October 2026].
+
+[3] MISTRAL AI, 2026. *Subscriptions* [online]. Available from: https://docs.mistral.ai/admin/billing-usage/subscriptions [Accessed 1 October 2026].
+
+[4] MISTRAL AI, 2026. *Activate Studio and generate an API key* [online]. Available from: https://docs.mistral.ai/getting-started/quickstarts/studio/activate-and-generate-api-key [Accessed 1 October 2026].
+
+[5] MISTRAL AI, 2026. *mistral-vibe issue 515: Cannot use Pro subscription with leanstral* [online]. Available from: https://github.com/mistralai/mistral-vibe/issues/515 [Accessed 1 October 2026].
+
+[6] MISTRAL AI, 2026. *mistral-vibe issue 1055: MISTRAL_API_KEY silently overrides subscription-linked Vibe key* [online]. Available from: https://github.com/mistralai/mistral-vibe/issues/1055 [Accessed 1 October 2026].
+
 [Return to Table of Contents](<#table of contents>)
 
 ---
@@ -418,6 +429,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 0.2 | 2026-10-01 | DI-04 added: Mistral Pro subscription for the `mistral` provider; References [2]–[6] added. |
 | 0.1 | 2026-10-01 | Initial draft from requirements 14e05e35 v1.0 |
 
 ---
