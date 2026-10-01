@@ -8,8 +8,8 @@ Created: 2026 July 16
 
 - [1.0 Overview](<#1.0 overview>)
 - [2.0 Placeholder Mappings](<#2.0 placeholder mappings>)
-- [3.0 Strategic Domain](<#3.0 strategic domain>)
-- [4.0 Tactical Domain](<#4.0 tactical domain>)
+- [3.0 Planner](<#3.0 planner>)
+- [4.0 Worker and Reviewer](<#4.0 worker and reviewer>)
 - [5.0 Tool-Calling Behaviour](<#5.0 tool-calling behaviour>)
 - [6.0 Engine](<#6.0 autonomous execution loop>)
 - [7.0 Model Selection](<#7.0 model selection>)
@@ -24,9 +24,9 @@ This profile maps governance abstract placeholders to a heterogeneous Apple Sili
 
 | Concern | Implementation |
 |---|---|
-| Strategic Domain | Claude Desktop (preferred) |
-| Tactical Domain — worker | Devstral Small 2 2512 8bit via oMLX + engine |
-| Tactical Domain — reviewer | Magistral Small 2509 6bit via oMLX + engine |
+| Planner | Claude Desktop (preferred) |
+| Worker | Devstral Small 2 2512 8bit via oMLX + engine |
+| Reviewer | Magistral Small 2509 6bit via oMLX + engine |
 | Engine mechanism | Engine orchestrator / loop |
 
 Rationale: the worker performs synthesis (code generation, multi-file editing); the reviewer performs verification. Using a distinct reasoning model for review provides heterogeneity without changing the worker. Both models are Mistral-family (`mistral3`), so the engine parser applies to both.
@@ -47,17 +47,17 @@ Rationale: the worker performs synthesis (code generation, multi-file editing); 
 
 ---
 
-## 3.0 Strategic Domain
+## 3.0 Planner
 
 **Preferred implementation:** Claude Desktop
 
-Any frontier model with sufficient reasoning capability may substitute. The Strategic Domain role requires: planning, governance interpretation, design creation, prompt authoring, and validation.
+Any frontier model with sufficient reasoning capability may substitute. The planner role requires: planning, governance interpretation, design creation, prompt authoring, and validation.
 
 [Return to Table of Contents](<#table of contents>)
 
 ---
 
-## 4.0 Tactical Domain
+## 4.0 Worker and Reviewer
 
 **Worker:** Devstral Small 2 2512 8bit via oMLX + engine orchestrator
 **Reviewer:** Magistral Small 2509 6bit via oMLX + engine orchestrator
@@ -167,7 +167,7 @@ Context windows (forced via `model_context_windows`): Devstral 262144 (vendor-va
 **.gitignore additions:**
 
 ```
-# MLX profile - Tactical Domain
+# MLX profile - Worker and Reviewer
 ai/state/
 ```
 
@@ -187,6 +187,7 @@ ai/state/
 | 1.1 | 2026-09-23 | Setup-guide links corrected: ../../../docs/ → ../../docs/ |
 | 1.2 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.3 | 2026-10-01 | Recipe location: governance model recipes and manifest run types (change-e58fd295) |
+| 1.4 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 
 ---
 

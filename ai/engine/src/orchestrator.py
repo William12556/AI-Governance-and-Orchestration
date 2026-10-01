@@ -758,8 +758,8 @@ def write_context_report(
     abort_pct: float,
 ) -> None:
     """
-    Write context-budget.md to state_dir for Strategic Domain consumption.
-    This file informs the Strategic Domain of available context headroom
+    Write context-budget.md to state_dir for planner consumption.
+    This file informs the planner of available context headroom
     before authoring the next tactical_brief or T03 prompt.
     """
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -805,7 +805,7 @@ Estimated accumulation per iteration: ~{est_per_iter} tokens
 Iterations before warn threshold:  ~{iters_to_warn}
 Iterations before abort threshold: ~{iters_to_abort}
 
-## Guidance for Strategic Domain
+## Guidance for Planner
 When authoring the next tactical_brief or T03 prompt:
 
 - Current initial load is {initial_pct:.1f}% of context window
@@ -2462,7 +2462,7 @@ async def main_async(args: argparse.Namespace) -> int:
     os.makedirs(state_dir, exist_ok=True)
     write_state(state_dir, "task.md", task)
 
-    # Write context budget report for Strategic Domain
+    # Write context budget report for the planner
     # F8: Include actual system prompt and tool schema in the initial estimate
     _sys_prompt = work_recipe.get("instructions", "")
     _tools = mcp.get_openai_tools()

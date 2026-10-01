@@ -1,6 +1,6 @@
 Created: 2026 June 02
 
-# Engine Operations — Strategic Domain Reference
+# Engine Operations — Planner Reference
 
 ---
 
@@ -20,7 +20,7 @@ Created: 2026 June 02
 
 ## 1.0 Purpose
 
-This document is an operational reference for the Strategic Domain when working with the engine orchestrator in a downstream project. It covers state files, configuration, CLI arguments, termination conditions, context budget management, recipes, and common failure modes.
+This document is an operational reference for the planner when working with the engine orchestrator in a downstream project. It covers state files, configuration, CLI arguments, termination conditions, context budget management, recipes, and common failure modes.
 
 Authoritative governance reference: `ai/governance/software-engineering/governance.md` P00.11 and P13.
 
@@ -44,16 +44,16 @@ State files reside in `ai/state/` (configured via `loop.state_dir` in `config.ya
 | `review-feedback.txt` | Reviewer | Specific feedback for next worker iteration |
 | `.complete` | Orchestrator | Completion marker (see §5.0 for content variants) |
 | `BLOCKED.md` | Worker | Unrecoverable failure details; seeds T06 issue |
-| `context-budget.md` | Orchestrator | Context window sizing report for Strategic Domain |
+| `context-budget.md` | Orchestrator | Context window sizing report for planner |
 | `engine_<timestamp>.LOG` | Orchestrator | Full debug log; preserved across reset |
 
 ### 2.2 Audit Loop additions
 
 | File | Written by | Purpose |
 |---|---|---|
-| `audit-index.md` | Strategic Domain | Ordered list of items to audit; worker marks `[x]` per item |
+| `audit-index.md` | Planner | Ordered list of items to audit; worker marks `[x]` per item |
 | `audit-report.md` | Worker | Append-only findings accumulator |
-| `audit-uml.md` | Strategic Domain | Optional structural map of target codebase |
+| `audit-uml.md` | Planner | Optional structural map of target codebase |
 
 ### 2.3 Reset behaviour
 
@@ -172,7 +172,7 @@ python ai/engine/src/orchestrator.py --mode reset
 
 ## 5.0 Termination Conditions
 
-| Condition | `.complete` content | Action for Strategic Domain |
+| Condition | `.complete` content | Action for planner |
 |---|---|---|
 | Reviewer issued SHIP | `COMPLETE: iteration N` | Review `work-summary.txt`; proceed to P15 test |
 | Duration limit reached | `DURATION_LIMIT: iteration N` | Review `audit-report.md`; archive and reset |
@@ -335,6 +335,7 @@ curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 | 1.7 | 2026-10-01 | §7.0: recipes resolved through manifest run types; gates, awaiting-approval.md and BLOCKED return stage (change-e58fd295) |
 | 1.8 | 2026-10-01 | §8.7: write outside the declared scope (change-bdc6820f) |
 | 1.9 | 2026-10-01 | §5.0: pre-run check (exit 3), stage tracking and approve.py (change-ee5357ec) |
+| 1.10 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 
 ---
 

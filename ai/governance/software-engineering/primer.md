@@ -1,6 +1,6 @@
 Created: 2026 April 27
 
-# Strategic Domain Primer
+# Planner Primer
 
 ---
 
@@ -23,7 +23,7 @@ Created: 2026 April 27
 
 ## 1.0 Purpose
 
-This document is a concise operational primer for the Strategic Domain. It distils
+This document is a concise operational primer for the planner. It distils
 `governance.md` into actionable guidance. `governance.md` is authoritative;
 this document provides orientation and quick reference only.
 
@@ -45,7 +45,7 @@ The framework separates software development into two domains:
 Communication between domains is filesystem-based (MCP). Neither domain has
 direct conversational access to the other.
 
-**Tactical Domain implementations:**
+**Worker/reviewer implementations:**
 
 - **Engine** — reference implementation. Runs a
   worker/reviewer cycle (loop) until `SHIP` or `BLOCKED`. State resides
@@ -54,14 +54,14 @@ direct conversational access to the other.
 - **Claude Code** — alternative profile. Manual invocation; no automated loop.
   Uses `CLAUDE.md` at project root as tactical context file. See `ai/profiles/claude-code.md`.
 
-**Tactical Domain execution options** (P13.3) — after T03 prompt approval, human
+**Worker/reviewer execution options** (P13.3) — after T03 prompt approval, human
 selects one of three options:
 
 - **Option A** — human executes engine command directly (all profiles).
-- **Option B** — Strategic Domain launches the engine via `engine-mcp` (Claude Desktop profile
+- **Option B** — planner launches the engine via `engine-mcp` (Claude Desktop profile
   only). Standalone MCP server exposing `start_engine`, `engine_status`, `reset_engine` and
   the read-only `work_status`; loop and worker runs accept only a T03 prompt inside ai/workspace/.
-  Allows the Strategic Domain to launch the engine and query outcome without human terminal
+  Allows the planner to launch the engine and query outcome without human terminal
   relay. See P10.8.
 - **Option C** — Claude Code manual invocation (`claude_code`/`claude_omlx` profiles).
   Human issues the task instruction directly in Claude Code. See `ai/profiles/claude-code.md` §5.0.
@@ -108,7 +108,7 @@ registry grouped by UUID. Writes `overwatch.html` (project root) and
 
 ## 3.0 Responsibilities
 
-The Strategic Domain owns the following functions:
+The planner owns the following functions:
 
 **Planning**
 
@@ -156,7 +156,7 @@ P12  Design (Tier 1–3)       →  human approval per tier → git tag baseline
 P13  T03 Prompt              →  query omlx_model_status → human approval
      Human selects execution option:
        Option A: human runs the engine terminal command (all profiles)
-       Option B: Strategic Domain calls start_engine / polls engine_status
+       Option B: Planner calls start_engine / polls engine_status
                  (Claude Desktop + engine-mcp only)
        Option C: Claude Code manual invocation (claude_code/claude_omlx profiles)
      Options A/B (engine)  →  SHIP or BLOCKED
@@ -249,7 +249,7 @@ required after each increment.
 
 - Creating, modifying, or deleting source code or documents without explicit
   human request (both domains).
-- Exceeding the Tactical Domain context budget when authoring T03 prompts.
+- Exceeding the worker/reviewer context budget when authoring T03 prompts.
 - Issuing an engine command when `tactical_brief` is empty.
 
 **Context Budget**
@@ -328,6 +328,7 @@ any document.
 | 0.14 | 2026-08-21 | Synced with governance v9.16: added §3.0 Governance bullet for `ai/task.md` open-work register maintenance (P00 §1.1.20); added §6.1 exemption note for `ai/task.md` |
 | 0.15 | 2026-09-25 | Synced with governance v11.0 (change-5bcd46ad): paths under ai/governance/software-engineering/ and ai/engine/; terms AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp; §2.2 govwatch replaced by overwatch |
 | 0.16 | 2026-10-01 | Option B: work_status tool; tracked prompt tasks only (change-793992ae) |
+| 0.17 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 
 ---
 

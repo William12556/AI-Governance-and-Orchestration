@@ -21,13 +21,13 @@ Created: 2026 June 26
 
 ## 1.0 Overview
 
-This guide covers running North Mini Code 1.0 on Apple Silicon using the MLX framework. oMLX exposes an OpenAI-compatible API consumed by the engine orchestrator as the Tactical Domain inference backend.
+This guide covers running North Mini Code 1.0 on Apple Silicon using the MLX framework. oMLX exposes an OpenAI-compatible API consumed by the engine orchestrator as the worker/reviewer inference backend.
 
 Model: **North Mini Code 1.0** (Cohere2 mixture-of-experts; 30B total parameters, 3B active; 128 experts, 8 active per token; built by Cohere)
 Licence: **Apache 2.0**.
 Quantisation: 6bit.
 
-This guide is provisional. The model is under evaluation as a Tactical Domain. See [9.0 Known Constraints](<#9.0 known constraints>). For profile mappings, see `ai/profiles/mlx_north_mini_code_1_0_6bit.md`.
+This guide is provisional. The model is under evaluation as a worker and reviewer. See [9.0 Known Constraints](<#9.0 known constraints>). For profile mappings, see `ai/profiles/mlx_north_mini_code_1_0_6bit.md`.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -223,6 +223,7 @@ Run a worker task that forces a single tool call and confirm the orchestrator pa
 | 0.1 | 2026-06-26 | Initial draft; provisional setup guide for North Mini Code 1.0 6bit. Facts verified against oMLX admin endpoint and on-disk model config |
 | 0.2 | 2026-06-26 | Added Apache 2.0 licence and 30B/3B parameter figures; referenced official CohereLabs card; corrected context to 256K per Cohere specification |
 | 0.3 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 0.4 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 
 ---
 

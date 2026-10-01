@@ -8,8 +8,8 @@ Created: 2026 April 30
 
 - [1.0 Overview](<#1.0 overview>)
 - [2.0 Placeholder Mappings](<#2.0 placeholder mappings>)
-- [3.0 Strategic Domain](<#3.0 strategic domain>)
-- [4.0 Tactical Domain](<#4.0 tactical domain>)
+- [3.0 Planner](<#3.0 planner>)
+- [4.0 Worker and Reviewer](<#4.0 worker and reviewer>)
 - [5.0 Invocation](<#5.0 invocation>)
 - [6.0 Project Setup](<#6.0 project setup>)
 - [References](<#references>)
@@ -19,14 +19,14 @@ Created: 2026 April 30
 
 ## 1.0 Overview
 
-This profile routes Claude Code CLI through the local oMLX inference server instead of the Anthropic API. It provides Claude Code tooling and invocation UX with Devstral as the underlying model. It is a manual Tactical Domain option alongside the engine profiles; providers carry equal weight and none is preferred (proposal-5bcd46ad D-16).
+This profile routes Claude Code CLI through the local oMLX inference server instead of the Anthropic API. It provides Claude Code tooling and invocation UX with Devstral as the underlying model. It is a manual worker/reviewer option alongside the engine profiles; providers carry equal weight and none is preferred (proposal-5bcd46ad D-16).
 
 Claude Code fulfils both the worker and reviewer roles in a single manual pass. There is no automated engine loop; the human operator controls the workflow and performs the review gate.
 
 | Concern | Implementation |
 |---|---|
-| Strategic Domain | Claude Desktop (preferred) |
-| Tactical Domain | Claude Code CLI → oMLX → Devstral |
+| Planner | Claude Desktop (preferred) |
+| Worker and reviewer | Claude Code CLI → oMLX → Devstral |
 | Execution | Manual — human invokes Claude Code per task; no engine loop |
 
 [Return to Table of Contents](<#table of contents>)
@@ -46,17 +46,17 @@ Claude Code fulfils both the worker and reviewer roles in a single manual pass. 
 
 ---
 
-## 3.0 Strategic Domain
+## 3.0 Planner
 
 **Preferred implementation:** Claude Desktop
 
-Any frontier model with sufficient reasoning capability may substitute. The Strategic Domain role requires: planning, governance interpretation, design creation, prompt authoring, and validation.
+Any frontier model with sufficient reasoning capability may substitute. The planner role requires: planning, governance interpretation, design creation, prompt authoring, and validation.
 
 [Return to Table of Contents](<#table of contents>)
 
 ---
 
-## 4.0 Tactical Domain
+## 4.0 Worker and Reviewer
 
 **Implementation:** Claude Code CLI redirected to oMLX via `ANTHROPIC_BASE_URL`
 
@@ -85,7 +85,7 @@ Claude Code fulfils both the worker and reviewer roles in a single manual pass. 
 **Procedure:**
 
 1. Ensure oMLX is running with Devstral loaded.
-2. Strategic Domain authors and approves the T03 prompt per the standard workflow, with `prompt_info.target_profile: claude_omlx`. A `tactical_brief` is not required for this profile.
+2. Planner authors and approves the T03 prompt per the standard workflow, with `prompt_info.target_profile: claude_omlx`. A `tactical_brief` is not required for this profile.
 3. Open a terminal in the project root.
 4. Issue the following command, substituting the actual T03 file path:
 
@@ -109,7 +109,7 @@ env -i HOME="$HOME" PATH="$PATH" \
 **.gitignore additions:**
 
 ```
-# claude-omlx profile - Tactical Domain
+# claude-omlx profile - Worker and Reviewer
 CLAUDE.local.md
 .claude/settings.local.json
 .claude/commands/
@@ -154,6 +154,7 @@ CLAUDE.local.md
 | 1.3 | 2026-06-17 | Removed <tactical_config>/ and <skills_dir>/ placeholder rows from §2.0; added note that .claude/ is a native Claude Code directory |
 | 1.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.5 | 2026-09-29 | Aligned with claude-code 1.6: §1.0 D-16 wording and "Execution" row; §4.0 current install methods [1] and validation prerequisite; §5.0 target_profile claude_omlx and validation hook; §6.0 .gitignore corrected to settings.local.json (settings.json is tracked; governance P10.6), hooks/ and validation/ added, mandatory skill step; References added |
+| 1.6 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 
 ---
 

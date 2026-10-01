@@ -43,8 +43,8 @@ This guide covers the steps from cloning the repository to running the first eng
 | Python | 3.11+ |
 | Git | Any recent version |
 | Node.js | 18+ (for Filesystem MCP server) |
-| Claude Desktop | Current release — Strategic Domain |
-| oMLX | Current release — Tactical Domain inference server |
+| Claude Desktop | Current release — planner |
+| oMLX | Current release — worker/reviewer inference server |
 | MCP servers | `Filesystem` (`@j0hanz/filesystem-mcp`) and `mcp-ripgrep` configured in Claude Desktop |
 
 Install oMLX and download Devstral before proceeding. See [setup-apple-silicon-mlx.md](setup-apple-silicon-mlx.md).
@@ -96,7 +96,7 @@ git commit -m "init: project from framework ai/"
 
 Three implementation profiles are available. For a full comparison see [guide-profile-selection.md](guide-profile-selection.md).
 
-| Profile | Tactical Domain | Best for |
+| Profile | Worker and reviewer | Best for |
 |---|---|---|
 | `mlx_devstral_small_2_2512_6bit.md` | Engine + Devstral (local) | Automated loops on Apple Silicon |
 | `mlx_devstral_magistral_heterogeneous.md` | Engine + Devstral (worker) / Magistral (reviewer), local | Automated loops with a distinct reviewer model |
@@ -171,7 +171,7 @@ A response of `OK` confirms end-to-end connectivity.
 
 ### 6.2 Read governance.md
 
-Ask the Strategic Domain (Claude Desktop) to read `ai/governance/software-engineering/governance.md` and initialise the project per P10 (P10 Project Initialization). The Strategic Domain will guide the workflow from that point.
+Ask the planner (Claude Desktop) to read `ai/governance/software-engineering/governance.md` and initialise the project per P10 (P10 Project Initialization). The planner will guide the workflow from that point.
 
 ### 6.3 Follow the workflow
 
@@ -181,7 +181,7 @@ The framework workflow is defined in `ai/governance/software-engineering/workflo
 P11 Requirements → P12 Design → P13 T03 Prompt → engine → P15 Test → P00 Close
 ```
 
-The Strategic Domain coordinates each step. Human approval gates are required before requirements baseline, design tier transitions, and code generation.
+The planner coordinates each step. Human approval gates are required before requirements baseline, design tier transitions, and code generation.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -216,6 +216,7 @@ The Strategic Domain coordinates each step. Human approval gates are required be
 | 1.10 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 | 1.11 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.12 | 2026-09-29 | Profile file name corrected: claude.md → claude-code.md |
+| 1.13 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 
 ---
 

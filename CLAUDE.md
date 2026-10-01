@@ -7,7 +7,7 @@ Created: 2026 July 02
 **Name:** AI-Governance-and-Orchestration
 **Description:** Governance and orchestration framework for AI agents with frontier and open-weight models. Governance models are loadable packages; software engineering is the one currently provided.
 **Technology stack:** Python 3.11+; OpenAI Python SDK, MCP Python SDK, PyYAML, Rich (engine, engine-mcp); PyYAML (overwatch)
-**Target platform:** macOS 14+ (Apple Silicon) required for the MLX/oMLX Tactical Domain profile; the framework tooling itself (`ai/src/`, `ai/engine/`) is otherwise platform-agnostic Python.
+**Target platform:** macOS 14+ (Apple Silicon) required for the MLX/oMLX worker/reviewer profile; the framework tooling itself (`ai/src/`, `ai/engine/`) is otherwise platform-agnostic Python.
 
 This repository is the framework itself, not a project consuming it. This file governs Claude Code sessions editing `ai/engine/`, `ai/src/`, or other framework source, invoked via a `dev/` T03 prompt.
 
@@ -53,6 +53,7 @@ Source-code changes (`ai/engine/`, `ai/src/`, `bin/`) require the standard T06 i
 | 0.2 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 | 0.3 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 0.4 | 2026-09-25 | Review corrections: description reflects the pivot; technology stack adds OpenAI SDK; target platform covers ai/engine/; pytest install, governance checks and release commands added; ai/workspace/ statement corrected; layout row added |
+| 0.5 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 
 ---
 

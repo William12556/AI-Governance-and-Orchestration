@@ -60,7 +60,7 @@ Execution → Results → Issue Creation (if needed) → Closure
 
 #### 1. Test Documentation Creation (P15.2)
 
-**Actor:** Strategic Domain
+**Actor:** Planner
 
 **Process:**
 1. Read template from `ai/governance/software-engineering/templates/T04-test.md`
@@ -70,7 +70,7 @@ Execution → Results → Issue Creation (if needed) → Closure
 5. Match iteration numbers with source prompt
 
 **Inputs:**
-- Generated source code from Tactical Domain
+- Generated source code from the worker
 - Component design specifications
 - Requirements traceability
 
@@ -81,7 +81,7 @@ Execution → Results → Issue Creation (if needed) → Closure
 
 #### 2. Test Script Generation (P15.3)
 
-**Actor:** Strategic Domain
+**Actor:** Planner
 
 **Automatic:** Precedes test execution
 
@@ -146,7 +146,7 @@ pytest -v tests/
 
 #### 5. Result Documentation (P15.13)
 
-**Actor:** Strategic Domain
+**Actor:** Planner
 
 **Process:**
 1. Review test execution output
@@ -871,7 +871,7 @@ Document closure
 
 ### Coupling Verification
 
-Strategic Domain verifies:
+Planner verifies:
 - UUID references are valid
 - Iteration numbers synchronized
 - Bidirectional linkage exists
@@ -885,7 +885,7 @@ Strategic Domain verifies:
 
 ### Traceability Matrix Updates
 
-After test execution, Strategic Domain updates the traceability matrix (P01) in:
+After test execution, planner updates the traceability matrix (P01) in:
 `ai/workspace/trace/trace-<name>-master.md`
 
 ### Required Linkages
@@ -926,7 +926,7 @@ After test execution, Strategic Domain updates the traceability matrix (P01) in:
 
 ### Coverage Metrics
 
-Strategic Domain tracks:
+Planner tracks:
 - **Requirement Coverage:** Percentage of requirements with tests
 - **Code Coverage:** Percentage of code exercised by tests
 - **Branch Coverage:** Percentage of code branches tested
@@ -934,7 +934,7 @@ Strategic Domain tracks:
 
 ### Gap Identification
 
-Strategic Domain identifies:
+Planner identifies:
 - Requirements without test coverage
 - Code without test coverage
 - Tests without requirement linkage
@@ -1041,6 +1041,7 @@ Strategic Domain identifies:
 | 1.2 | 2026-06-14 | Relocated workspace/ → ai/workspace/ in test, result, and trace path references |
 | 1.3 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 | 1.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 1.5 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 
 ---
 

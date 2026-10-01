@@ -19,11 +19,11 @@ Created: 2026 June 02
 
 ## 1.0 Overview
 
-An implementation profile maps the abstract framework roles — Strategic Domain and Tactical Domain — to concrete tooling. The profile determines the inference backend, execution model, and Tactical Domain context file.
+An implementation profile maps the abstract framework roles — planner, worker and reviewer — to concrete tooling. The profile determines the inference backend, execution model, and worker/reviewer context file.
 
 Three profiles are available, defined in `ai/profiles/`:
 
-| Profile file | Tactical Domain | Execution |
+| Profile file | Worker and reviewer | Execution |
 |---|---|---|
 | `mlx_devstral_small_2_2512_6bit.md` | Engine + Devstral (local, MLX) | Automated loop |
 | `claude-code.md` | Claude Code (Anthropic API) | Manual, human-directed |
@@ -67,7 +67,7 @@ No → you must use an MLX profile.
 
 **Profile file:** `ai/profiles/mlx_devstral_small_2_2512_6bit.md`
 
-The primary profile. The orchestrator (`orchestrator.py`) runs a worker/reviewer loop autonomously. The Strategic Domain authors a T03 prompt and issues an engine command; the loop runs to SHIP or BLOCKED without further human involvement per iteration.
+The primary profile. The orchestrator (`orchestrator.py`) runs a worker/reviewer loop autonomously. The planner authors a T03 prompt and issues an engine command; the loop runs to SHIP or BLOCKED without further human involvement per iteration.
 
 **Prerequisites:**
 
@@ -99,7 +99,7 @@ python ai/engine/src/orchestrator.py --mode loop \
 
 **Profile file:** `ai/profiles/claude-code.md`
 
-Manual profile using Claude Code as the Tactical Domain. The Strategic Domain authors a T03 prompt; the human pastes it into Claude Code and directs execution. No automated loop — each iteration is human-initiated.
+Manual profile using Claude Code as the worker and reviewer. The planner authors a T03 prompt; the human pastes it into Claude Code and directs execution. No automated loop — each iteration is human-initiated.
 
 **Prerequisites:**
 
@@ -172,6 +172,7 @@ The engine profile is the only profile that supports the automated audit loop (`
 | 1.3 | 2026-07-16 | mcp-grep → mcp-ripgrep in §3.1, §3.2, §3.3 prerequisites tables |
 | 1.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.5 | 2026-09-29 | Profile file name corrected: claude.md → claude-code.md |
+| 1.6 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 
 ---
 

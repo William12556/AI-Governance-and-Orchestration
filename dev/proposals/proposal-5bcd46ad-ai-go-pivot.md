@@ -181,7 +181,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 | ID | Question | Decide in |
 |---|---|---|
 | OQ-01 | Claude Code profiles (`claude-code`, `claude-omlx`): retain as a manual option or retire under D-03? Resolved 2026-09-29: retained; a Mistral Vibe profile is to be added (D-16; not yet in `ai/profiles/`). | Resolved |
-| OQ-02 | `governance.md` describes a Strategic Domain (Claude Desktop) and a Tactical Domain. Under D-03 and D-07 these become agent roles. The migration keeps the current terms. Resolved 2026-09-30: the terms move to agent roles in Phase 2. Strategic Domain becomes the planner; Tactical Domain becomes the worker and the reviewer; the human remains the approval gate. | Resolved |
+| OQ-02 | `governance.md` describes a Strategic Domain (Claude Desktop) and a Tactical Domain. Under D-03 and D-07 these become agent roles. The migration keeps the current terms. Resolved 2026-09-30: the terms move to agent roles in Phase 2. Strategic Domain becomes the planner; Tactical Domain becomes the worker and the reviewer; the human remains the approval gate. Implemented 2026-10-01 (change-155cc014, governance 12.0). | Resolved |
 | OQ-03 | Which parts of `governance.md` are engine-generic rather than SE-specific (backlog §2.0-6)? Resolved 2026-09-30: `governance.md` stays whole in Phase 2. The split is decided in Phase 3, when a second governance model shows which parts are shared. | Resolved |
 | OQ-04 | Anthropic's OpenAI SDK compatibility layer is described by Anthropic as intended for testing and ignores `strict` for tool calls [1]. Use it, or add a native Anthropic adapter to the engine? Resolved 2026-09-30: a small provider interface with two implementations, OpenAI-compatible (oMLX, Mistral API) and native Anthropic (strict tool use, prompt caching) [1]. | Resolved |
 | OQ-05 | Which client hosts an open-weight planner? The oMLX built-in chat has no MCP support. Resolved 2026-09-30: any client that accepts a custom OpenAI-compatible endpoint and MCP servers may host the planner; the choice and setup are left to the user. Options, documented only and not tested: Goose (desktop and CLI) [4], Cherry Studio and BoltAI (desktop) [8], Open WebUI (web; Streamable HTTP MCP only, stdio via mcpo) [9], Claude Code (via `ANTHROPIC_BASE_URL`, as in the `claude-omlx` profile), Codex CLI [5], OpenCode [6], Mistral Vibe [2], OpenClaw [7]. Further clients: [10]. Framework integration (profiles, setup guidance) is future work (backlog §2.0 item 11). | Resolved |
@@ -229,6 +229,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 | 0.6 | 2026-09-30 | OQ-02, OQ-03, OQ-04 and OQ-06 resolved; OQ-05 updated with planner client candidates [4]–[7]; D-16 and §6.0 aligned (LM Studio future provider; `governance.md` split deferred to Phase 3) |
 | 0.7 | 2026-09-30 | OQ-05 resolved: planner client is the user's choice; options documented [8]–[10]; integration deferred to backlog §2.0 item 11 |
 | 0.8 | 2026-10-01 | §4.2: ai/approvals.yaml added (design-14e05e35 DI-02, change-ee5357ec) |
+| 0.9 | 2026-10-01 | OQ-02 implemented (change-155cc014) |
 
 ---
 

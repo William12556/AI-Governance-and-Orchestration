@@ -31,7 +31,7 @@ This component replaces Goose as the engine for the oMLX/Devstral stack. It addr
 
 ## 2.0 Tactical Profiles
 
-Three Tactical Domain profiles are available. Engine is the primary profile; the others are manual alternatives.
+Three worker/reviewer profiles are available. Engine is the primary profile; the others are manual alternatives.
 
 | Aspect | Engine (Primary) | Claude Code | claude-omlx |
 |---|---|---|---|
@@ -56,7 +56,7 @@ engine/
 ├── config.template.yaml  # Seeds <project>/ai/config.yaml: inference endpoint, MCP servers, loop control
 ├── requirements.txt      # Python dependencies (engine and engine-mcp)
 ├── doc/
-│   └── guide-engine-operations.md  # Strategic Domain operational reference
+│   └── guide-engine-operations.md  # planner operational reference
 ├── mcp/
 │   └── server.py         # engine-mcp: start_engine, engine_status, reset_engine, work_status (Claude Desktop)
 ├── recipes/
@@ -176,7 +176,7 @@ python ai/engine/src/orchestrator.py --mode reset
 | `--duration` | Wall-clock time limit in hours (default: no limit) |
 | `--config` | Path to config.yaml |
 
-**`context-budget.md`** is written automatically by `orchestrator.py` at every startup (before the first phase); no separate invocation is required. It reports context window, thresholds, and recommended `tactical_brief` sizing. The Strategic Domain reads `ai/state/context-budget.md` before authoring any engine-targeted T03 prompt.
+**`context-budget.md`** is written automatically by `orchestrator.py` at every startup (before the first phase); no separate invocation is required. It reports context window, thresholds, and recommended `tactical_brief` sizing. The planner reads `ai/state/context-budget.md` before authoring any engine-targeted T03 prompt.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -240,6 +240,7 @@ The tests use stub model and MCP clients; no oMLX endpoint is required.
 | 2.8 | 2026-10-01 | §3.0 structure: scope.py added (change-bdc6820f) |
 | 2.9 | 2026-10-01 | §3.0 structure: stages.py and approve.py added (change-ee5357ec) |
 | 2.10 | 2026-10-01 | §3.0: engine-mcp work_status (change-793992ae) |
+| 2.11 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 
 ---
 

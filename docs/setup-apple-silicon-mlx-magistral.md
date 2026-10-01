@@ -21,7 +21,7 @@ Created: 2026 July 16
 
 ## 1.0 Overview
 
-This guide covers running Magistral Small 2509 on Apple Silicon using the MLX framework, for use as the **reviewer** model in a heterogeneous engine loop (Devstral worker, Magistral reviewer). oMLX exposes an OpenAI-compatible API consumed by the engine orchestrator as the Tactical Domain inference backend.
+This guide covers running Magistral Small 2509 on Apple Silicon using the MLX framework, for use as the **reviewer** model in a heterogeneous engine loop (Devstral worker, Magistral reviewer). oMLX exposes an OpenAI-compatible API consumed by the engine orchestrator as the worker/reviewer inference backend.
 
 Model: **Magistral Small 2509** (Mistral-family reasoning model; `config_model_type` `mistral3`)
 Licence: **Apache 2.0**.
@@ -183,6 +183,7 @@ Run one real review phase with the reviewer set to Magistral and confirm it call
 |---|---|---|
 | 0.1 | 2026-07-16 | Initial draft; reviewer setup guide for Magistral Small 2509 6bit. Facts verified against oMLX model status and on-disk model config.json |
 | 0.2 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 0.3 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 
 ---
 

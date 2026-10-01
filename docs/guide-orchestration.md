@@ -84,7 +84,7 @@ python ai/engine/src/orchestrator.py --mode loop \
 
 A read-only codebase quality analysis mode. Uses dedicated recipes (`audit-work.yaml`, `audit-review.yaml`). The worker reads source files, records findings, and marks items in a traversal index. The reviewer checks finding quality and coverage. No source file is written.
 
-State files pre-populated by the Strategic Domain before launch:
+State files pre-populated by the planner before launch:
 
 | File | Purpose |
 |---|---|
@@ -129,14 +129,14 @@ The govwatch TUI is retired (change-5bcd46ad).
 
 ## 6.0 engine-mcp
 
-An MCP server that registers once in Claude Desktop and exposes four tools: `start_engine`, `engine_status`, `reset_engine` and the read-only `work_status` (stage of every work item). Enables the Strategic Domain to launch and monitor the engine without human terminal access. In loop and worker mode `start_engine` accepts only a T03 prompt inside `ai/workspace/`, so the pre-run check always applies.
+An MCP server that registers once in Claude Desktop and exposes four tools: `start_engine`, `engine_status`, `reset_engine` and the read-only `work_status` (stage of every work item). Enables the planner to launch and monitor the engine without human terminal access. In loop and worker mode `start_engine` accepts only a T03 prompt inside `ai/workspace/`, so the pre-run check always applies.
 
 At T03 handoff (P13.3), the human selects the execution path:
 
 | Option | Who launches the engine | Status notification |
 |---|---|---|
-| A — Human executes (all profiles) | Human runs terminal command | Human notifies Strategic Domain |
-| B — engine-mcp (Claude Desktop profile only) | Strategic Domain calls `start_engine` | Strategic Domain calls `engine_status` on request |
+| A — Human executes (all profiles) | Human runs terminal command | Human notifies planner |
+| B — engine-mcp (Claude Desktop profile only) | Planner calls `start_engine` | Planner calls `engine_status` on request |
 
 Location: `ai/engine/mcp/server.py` (versioned with the engine; replaces the separate ael-mcp repository)
 Setup instructions: P10.8 in `ai/governance/software-engineering/governance.md`
@@ -152,6 +152,7 @@ Setup instructions: P10.8 in `ai/governance/software-engineering/governance.md`
 | 1.0 | 2026-06-18 | Initial document; content relocated from README.md Orchestration section |
 | 1.1 | 2026-09-25 | change-5bcd46ad: engine and governance paths; terms AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp; §5.0 govwatch replaced by overwatch |
 | 1.2 | 2026-10-01 | engine-mcp: work_status; tracked prompt tasks only (change-793992ae) |
+| 1.3 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 
 ---
 

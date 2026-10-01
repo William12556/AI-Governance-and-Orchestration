@@ -25,7 +25,7 @@ Created: 2026 March 05
 
 ## Overview
 
-This guide covers running Devstral on Apple Silicon using the MLX framework. oMLX exposes an OpenAI-compatible API consumed by the engine orchestrator as the Tactical Domain inference backend.
+This guide covers running Devstral on Apple Silicon using the MLX framework. oMLX exposes an OpenAI-compatible API consumed by the engine orchestrator as the worker/reviewer inference backend.
 
 Model: **Devstral Small 2507** (Apache 2.0 licence)
 Quantisation: Q8 recommended; BF16 available for systems with sufficient unified memory.
@@ -271,6 +271,7 @@ A response of `OK` confirms end-to-end connectivity.
 | 1.7 | 2026-06-14 | Updated config.yaml state_dir to ai/state/ralph |
 | 1.8 | 2026-06-16 | Updated Devstral 2512 section: Q8 → 6bit; corrected repo MLX-8Bit → MLX-6Bit; updated memory estimate |
 | 1.9 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 1.10 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 
 ---
 
