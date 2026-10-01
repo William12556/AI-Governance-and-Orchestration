@@ -381,7 +381,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 | ID | Issue |
 |---|---|
 | DI-01 | **Closed 2026-10-01:** tool results sent to the Mistral API need no `name` field; the provider adds none (`dev/reports/report-14e05e35-mistral-api-hypothesis.md` §4.0). |
-| DI-02 | The proposal §4.2 downstream layout does not yet list `ai/approvals.yaml`. Update it with step 4. |
+| DI-02 | **Closed 2026-10-01:** proposal §4.2 and governance P10.6 list `ai/approvals.yaml`; propagate.sh treats it as a project file (change-ee5357ec). |
 | DI-03 | A planner with git or shell access can commit an approval (§8.3). Accepted for Phase 2. |
 | DI-04 | Mistral Pro subscription for the `mistral` provider. **Partially confirmed 2026-10-01** (`dev/reports/report-14e05e35-mistral-api-hypothesis.md` §5.0): a standard Studio key in the subscription's workspace works with pay-as-you-go disabled and no payment method; the account shows a $30 monthly included API allowance (the public pricing page states $15). Drawdown from the allowance is still to be observed after V-04. Guidance: (1) use a Studio key, not the Vibe-scoped key [5]; (2) keep the key in the macOS Keychain and inject `MISTRAL_API_KEY` per process with a wrapper, never globally [6]; (3) free-mode rate limits apply while pay-as-you-go is off and are sufficient for `mistral-medium` (1,000,000 tokens/min); some models allow 0.5 requests/s; (4) a subscription billed through Apple needs a separate payment method in the Mistral Admin Panel for pay-as-you-go. |
 | DI-05 | The error returned when the included allowance is exhausted with pay-as-you-go off is not yet known (report O-02). Once recorded, the provider treats it as non-retryable and the run ends BLOCKED naming the provider. |
@@ -431,6 +431,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.3 | 2026-10-01 | DI-02 closed (change-ee5357ec). |
 | 1.2 | 2026-10-01 | §3.0, §5.2: pytest gate timeout 300 s, the historical value (FR-03-04; change-e58fd295). |
 | 1.1 | 2026-10-01 | §4.2: a response without choices is retried, not returned as finish_reason error (change-53c6f252). |
 | 1.0 | 2026-10-01 | Approved by the operator. DI-04 and DI-05 remain open and do not block implementation. |

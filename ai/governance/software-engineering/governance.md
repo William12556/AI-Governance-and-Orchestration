@@ -582,7 +582,7 @@ test.txt
   - P10.6 Project folder structure
     - Note: This structure applies to projects using the framework, not to the AI-Governance-and-Orchestration repository itself
     - The governance framework repository contains only ai/, doc/, and templates/ directories
-    - ai/ holds framework files plus only the project files declared in the layout below (config.yaml, context.md, task.md, state/, logs/, dashboard-alerts.md, workspace/)
+    - ai/ holds framework files plus only the project files declared in the layout below (config.yaml, context.md, task.md, approvals.yaml, state/, logs/, dashboard-alerts.md, workspace/)
     - Framework-owned folders: ai/engine/, ai/governance/<model>/, ai/profiles/, ai/src/; propagation replaces their contents. All other ai/ content is project-owned (proposal-5bcd46ad)
     - A project in the pre-5bcd46ad layout (ai/ael/, ai/governance.md) is migrated once with bin/migrate-layout.sh before propagation
     - Any other project file belongs outside ai/; bin/propagate.sh relocates such files, and retired framework files, to ai-local/ and logs them in ai-local/RELOCATED.md
@@ -599,6 +599,7 @@ test.txt
         │   ├── config.yaml           # Engine configuration (project-owned, git-tracked)
         │   ├── context.md            # engine profile only — Tactical Domain context (team shared)
         │   ├── task.md                # open-work register (git-tracked)
+        │   ├── approvals.yaml        # operator approvals, written and committed by ai/engine/src/approve.py (git-tracked)
         │   ├── state/                # engine loop state (ephemeral, excluded from git)
         │   ├── logs/                 # engine run-log archive (log_archive_dir)
         │   ├── dashboard-alerts.md   # overwatch output (excluded from git)
@@ -1263,6 +1264,7 @@ See [workflow.md](workflow.md).
 | 10.6 | 2026-09-25 | Project rename: title LLM Orchestration Framework → AI Governance and Orchestration Framework; LLM-G&O → AI-G&O in P10 and P11 notes. Historical row 5.4 unchanged. Non-breaking. |
 | 11.0 | 2026-09-25 | Layout and terminology migration (change-5bcd46ad): governance model at ai/governance/software-engineering/; ai/ael/ → ai/engine/; project configuration ai/ael/config.yaml → ai/config.yaml; state ai/state/ralph/ → ai/state/; terms AEL → engine, Ralph Loop → loop, RALPH-BLOCKED.md → BLOCKED.md, .ralph-complete/.ralph-timeout → .complete/.timeout, target_profile ael → engine (legacy value accepted); ael-mcp → engine-mcp in ai/engine/mcp/; govwatch retired (overwatch remains). P10.6 layout and ownership updated. Breaking: downstream projects run bin/migrate-layout.sh, then bin/propagate.sh --allow-major. |
 | 11.1 | 2026-10-01 | P10.4 recipe location: audit recipes moved to the governance model; run types declared in manifest.yaml (change-e58fd295) |
+| 11.2 | 2026-10-01 | P10.6: ai/approvals.yaml declared as a project file (operator approvals, change-ee5357ec) |
 
 ---
 [Return to Table of Contents](<#table of contents>)

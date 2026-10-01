@@ -6,7 +6,7 @@ change_info:
   title: "Phase 2 step 3: worker write scope and reviewer deliverables block"
   date: "2026-10-01"
   author: "William Watson"
-  status: "implemented"
+  status: "verified"
   priority: "high"
   iteration: 1
   coupled_docs:
@@ -63,6 +63,9 @@ version_history:
   - version: "1.0"
     date: "2026-10-01"
     changes: ["Initial change record"]
+  - version: "1.1"
+    date: "2026-10-01"
+    changes: ["Verified: operator test 161 passed; commit ee9d4ea; closed"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

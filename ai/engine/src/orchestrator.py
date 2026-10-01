@@ -61,6 +61,7 @@ from providers import (ConfigError, ProviderError, as_provider, build_role_bindi
                        query_omlx_context_window as _query_omlx_context_window)
 import gates as G
 import scope as S
+import stages as ST
 from manifest import ManifestError, load_manifest, locate_manifest
 from scope import is_write_tool, written_targets as _written_targets
 
@@ -2284,6 +2285,25 @@ async def main_async(args: argparse.Namespace) -> int:
         return 1
     loop_stage = manifest.loop_stage()
     work_item = _work_item_uuid(args.task)
+
+    # change-ee5357ec: pre-run check for tracked work items (FR-08-05). A T03
+    # prompt inside ai/workspace/ may enter the loop stage only when its
+    # earlier stages have evidence and committed approvals. Checked before any
+    # state change; exit code 3.
+    _tracked = bool(work_item) and ST.is_tracked_task(os.getcwd(), args.task)
+    if args.mode in ("loop", "worker") and _tracked:
+        _missing = ST.prerun_missing(os.getcwd(), manifest, work_item)
+        if _missing:
+            console.print(f"[red][engine] work item {escape(work_item)} is not ready for "
+                          f"'{escape(loop_stage.id)}'; missing:[/red]")
+            for _m in _missing:
+                console.print(f"[red]  - {escape(_m)}[/red]")
+            return 3
+        console.print(f"[blue][engine] work item {escape(work_item)}: prerequisites for "
+                      f"'{escape(loop_stage.id)}' met[/blue]")
+    elif work_item and not _tracked:
+        console.print(f"[yellow][engine] work item {escape(work_item)}: prompt is outside "
+                      f"ai/workspace/ — not tracked[/yellow]")
     max_iter          = args.max_iterations or config["loop"]["max_iterations"]
     deadline          = time.monotonic() + args.duration * 3600 if args.duration else None
     phase_max_iter    = config["loop"].get("phase_max_iterations", max_iter)

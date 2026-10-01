@@ -180,8 +180,17 @@ python ai/engine/src/orchestrator.py --mode reset
 | `max_iterations` exhausted | Not written | Review partial state; extend or retry |
 | Context budget abort | Not written | Reduce `tactical_brief`; run `--mode reset`; retry |
 | Unclean exit (crash/signal) | Not written | Check `.LOG` for `engine end rc=N` line; absence indicates unclean exit |
+| Pre-run check failed (exit 3) | Not written | Provide the listed documents or record the approvals; rerun |
 
 The `engine end rc=N` line is always written to the `.LOG` file on any clean exit. If this line is absent from the log, the process terminated abnormally.
+
+**Stage tracking and approvals (change-ee5357ec).** A T03 prompt inside `ai/workspace/` is a tracked work item. The engine derives its stage from its documents and from the approvals committed in `ai/approvals.yaml`. Before a `loop` or `worker` run it checks every earlier stage on the work item's path (SE: issue, change, prompt); when evidence or an approval is missing it lists what is missing and exits with code 3, before any state change. Record an approval from the project root:
+
+```bash
+python ai/engine/src/approve.py <uuid> <stage>   # e.g. approve.py 1a2b3c4d prompt
+```
+
+The command appends the entry and commits `ai/approvals.yaml` alone. Uncommitted edits to the file are ignored. Free-text tasks and prompt files outside `ai/workspace/` are not tracked.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -325,6 +334,7 @@ curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 | 1.6 | 2026-10-01 | §3.0: role-to-model binding note (providers:, roles:, api_key_env, per-role context window; change-53c6f252) |
 | 1.7 | 2026-10-01 | §7.0: recipes resolved through manifest run types; gates, awaiting-approval.md and BLOCKED return stage (change-e58fd295) |
 | 1.8 | 2026-10-01 | §8.7: write outside the declared scope (change-bdc6820f) |
+| 1.9 | 2026-10-01 | §5.0: pre-run check (exit 3), stage tracking and approve.py (change-ee5357ec) |
 
 ---
 

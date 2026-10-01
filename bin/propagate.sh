@@ -147,6 +147,7 @@ EXCLUDES=(
     --exclude='/state'               # engine runtime state
     --exclude='/logs'                # engine run-log archive (log_archive_dir)
     --exclude='/dashboard-alerts.md' # overwatch write target
+    --exclude='/approvals.yaml'      # operator approvals, committed by approve.py (change-ee5357ec)
     --exclude='.DS_Store'
     --exclude='__pycache__'
     --exclude='*.pyc'
@@ -155,7 +156,7 @@ EXCLUDES=(
 
 is_declared() {
     case "$1" in
-        config.yaml|context.md|task.md|dashboard-alerts.md) return 0 ;;
+        config.yaml|context.md|task.md|dashboard-alerts.md|approvals.yaml) return 0 ;;
         workspace|workspace/*|state|state/*|logs|logs/*) return 0 ;;
     esac
     return 1

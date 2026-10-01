@@ -117,6 +117,7 @@ ai/
 ├── config.yaml               project-owned
 ├── context.md                project-owned
 ├── task.md                   project-owned
+├── approvals.yaml            project-owned; operator approvals (P2, change-ee5357ec)
 ├── state/                    runtime (gitignored)
 ├── logs/                     run-log archive
 ├── dashboard-alerts.md       overwatch output
@@ -227,6 +228,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 | 0.5 | 2026-09-29 | Status: Phase 1 closed; coupled change path updated to closed/ |
 | 0.6 | 2026-09-30 | OQ-02, OQ-03, OQ-04 and OQ-06 resolved; OQ-05 updated with planner client candidates [4]–[7]; D-16 and §6.0 aligned (LM Studio future provider; `governance.md` split deferred to Phase 3) |
 | 0.7 | 2026-09-30 | OQ-05 resolved: planner client is the user's choice; options documented [8]–[10]; integration deferred to backlog §2.0 item 11 |
+| 0.8 | 2026-10-01 | §4.2: ai/approvals.yaml added (design-14e05e35 DI-02, change-ee5357ec) |
 
 ---
 
