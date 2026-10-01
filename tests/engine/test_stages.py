@@ -360,3 +360,44 @@ def test_task_check_command_line(repo):
     out = subprocess.run([sys.executable, stages_py, "--task-check", str(prompt)], cwd=str(repo),
                          capture_output=True, text=True)
     assert json.loads(out.stdout) == {"error": None}
+
+
+# --- change-82dbf16a iteration 3: second follow-up F2-01, F2-02 ------------------------
+
+V = "5e6f7a8b"
+
+
+def test_newline_terminated_task_name_is_refused(repo, se):
+    _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    evil = repo / "ai" / "workspace" / "prompt" / f"prompt-{U}-evil.md\n"
+    evil.write_text("x\n")
+    assert "is not an active prompt document" in ST.prerun_missing(str(repo), se, U, str(evil))[0]
+    assert U in ST.scan(str(repo), se).work_items and \
+        all("evil" not in d.path for d in ST.scan(str(repo), se).work_items[U].documents)
+
+
+@pytest.mark.parametrize("where", ["", "ai/workspace/scratch"])
+def test_symlink_named_for_another_work_item_is_refused(repo, se, where):
+    _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    other = _doc(repo, "prompt", "prompt", uuid=V)            # unapproved work item V
+    d = repo / where if where else repo
+    d.mkdir(parents=True, exist_ok=True)
+    link = d / f"prompt-{U}-link.md"
+    link.symlink_to(other)
+    assert "is not an active prompt document" in ST.prerun_missing(str(repo), se, U, str(link))[0]
+
+
+def test_engine_refuses_newline_and_foreign_symlink_tasks(orch, repo, se):
+    _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    other = _doc(repo, "prompt", "prompt", uuid=V)
+    link = repo / f"prompt-{U}-link.md"
+    link.symlink_to(other)
+    evil = repo / "ai" / "workspace" / "prompt" / f"prompt-{U}-evil.md\n"
+    evil.write_text("x\n")
+    for task in (link, evil):
+        args = argparse.Namespace(config=_config(repo), mode="loop", task=str(task), model=None,
+                                  worker_model=None, reviewer_model=None, max_iterations=None, duration=None)
+        assert asyncio.run(orch.main_async(args)) == 3

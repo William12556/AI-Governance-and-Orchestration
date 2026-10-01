@@ -7,13 +7,13 @@ prompt_info:
   source_ref: "change-82dbf16a"
   target_profile: "claude_code"  # implemented by Claude in the planning session (operator decision 2026-10-01)
   date: "2026-10-01"
-  iteration: 2
+  iteration: 3
   coupled_docs:
     change_ref: "change-82dbf16a"
-    change_iteration: 2
+    change_iteration: 3
 
 context:
-  purpose: "Remediate audit-14e05e35 H-01 to H-03, M-01 to M-05 and the in-scope low findings; iteration 2: the follow-up audit residuals F-01 to F-06."
+  purpose: "Remediate audit-14e05e35 H-01 to H-03, M-01 to M-05 and the in-scope low findings; iteration 2: the follow-up audit residuals F-01 to F-06; iteration 3: the second follow-up F2-01 to F2-04."
   constraints:
     - "The worker keeps write access to work-summary.txt, work-complete.txt and BLOCKED.md"
     - "Approvals are compared with the working copy of each evidence document"
@@ -35,6 +35,8 @@ specification:
       - "Iteration 2, F-02: prerun_missing(task_path) and stages.py --task-check refuse a task that is not an active evidence document of the stage before the loop stage (resolved path); engine-mcp runs the check before starting"
       - "Iteration 2, F-03: blobs keyed by path relative to ai/workspace/"
       - "Iteration 2, F-04, F-05: refuse a write whose target is or contains a signal file; compare case-folded paths"
+      - "Iteration 3, F2-01, F2-02: task_document_error requires realpath(task) to equal the realpath of an active task-stage document of the UUID taken from the task name as given; fullmatch for document and engine-mcp names"
+      - "Iteration 3, F2-03, F2-04: clear review-result.txt, review-feedback.txt, .complete and awaiting-approval.md after the gates, before the review phase"
 
 deliverable:
   format_requirements:
@@ -48,6 +50,7 @@ deliverable:
     - path: "ai/engine/src/gates.py"
     - path: "ai/engine/src/manifest.py"
     - path: "ai/engine/mcp/server.py"
+    - path: "ai/engine/recipes/loop-review.yaml"
     - path: "tests/engine/test_audit_remediation.py"
     - path: "tests/engine/test_stages.py"
     - path: "tests/engine/test_manifest_gates.py"

@@ -193,11 +193,12 @@ def _documents(project_root: str, manifest) -> dict[str, list[Document]]:
         ev = st.evidence
         if not ev:
             continue
-        pattern_re[st.id] = re.compile(rf"^{re.escape(ev['prefix'])}-([0-9a-f]{{8}})-.*\.md$")
+        # change-82dbf16a iteration 3 (F2-01): fullmatch; '$' would accept a trailing newline.
+        pattern_re[st.id] = re.compile(rf"{re.escape(ev['prefix'])}-([0-9a-f]{{8}})-.+\.md")
         for closed in (False, True):
             folder = os.path.join(project_root, WORKSPACE, ev["folder"], *(["closed"] if closed else []))
             for path in sorted(glob.glob(os.path.join(folder, f"{ev['prefix']}-*.md"))):
-                m = pattern_re[st.id].match(os.path.basename(path))
+                m = pattern_re[st.id].fullmatch(os.path.basename(path))
                 if not m:
                     continue
                 status = _status(path, ev["status_field"]) if ev.get("status_field") else None
@@ -334,19 +335,26 @@ def task_stage(manifest):
 
 def task_document_error(project_root: str, manifest, task_path: str) -> str | None:
     """
-    F-02: a tracked task must be an active evidence document of the stage
-    before the loop stage, compared after symlink resolution. None when it is.
+    F-02, iteration 3 (F2-01, F2-02): a tracked task must be one of its work
+    item's active evidence documents for the stage before the loop stage, as
+    the scan lists them. The UUID comes from the task name as given (the name
+    the engine tracks); the resolved task path must equal the resolved path of
+    one of that work item's documents. None when it is.
     """
     st = task_stage(manifest)
     if st is None:
         return None
     ev = st.evidence
-    folder = os.path.realpath(os.path.join(project_root, WORKSPACE, ev["folder"]))
-    real = os.path.realpath(task_path)
-    name_ok = re.match(rf"^{re.escape(ev['prefix'])}-[0-9a-f]{{8}}-.*\.md$", os.path.basename(real))
-    if os.path.dirname(real) != folder or not name_ok:
-        return (f"task file {task_path} is not an active {st.id} document; run the "
-                f"{st.id} from {WORKSPACE}/{ev['folder']}/{ev['prefix']}-<uuid>-<name>.md")
+    refusal = (f"task file {task_path!r} is not an active {st.id} document of its work item; "
+               f"run the {st.id} from {WORKSPACE}/{ev['folder']}/{ev['prefix']}-<uuid>-<name>.md")
+    m = re.fullmatch(rf"{re.escape(ev['prefix'])}-([0-9a-f]{{8}})-.+\.md", os.path.basename(task_path))
+    if not m:
+        return refusal
+    docs = _documents(project_root, manifest).get(m.group(1), [])
+    candidates = {os.path.realpath(os.path.join(project_root, d.path))
+                  for d in docs if d.stage == st.id and not d.closed}
+    if os.path.realpath(task_path) not in candidates:
+        return refusal
     return None
 
 

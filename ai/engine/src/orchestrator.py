@@ -1992,15 +1992,6 @@ async def run_loop(
             clear_state(state_dir, "work-complete.txt", "review-result.txt")
             continue
 
-        # Review phase — clear worker signal before reviewer starts
-        # change-b7e3d5a9: review-feedback.txt is cleared here, per cycle, not only
-        # at loop start. The worker has already consumed the prior cycle's feedback
-        # during its phase; without this clear the `if not existing_feedback:` guard
-        # freezes cycle 1's feedback for the whole run, so later reviewers are
-        # discarded and F12 stall detection compares the file to itself.
-        # change-82dbf16a (H-01): review-result.txt is cleared too; it is no
-        # longer a verdict source (iteration 2, audit F-01).
-        clear_state(state_dir, "work-complete.txt", "review-feedback.txt", "review-result.txt")
         console.print("\n[bold blue]▶ REVIEW PHASE[/bold blue]")
 
         # F6: syntax gate; F6b and change-e58fd295: declared command gates.
@@ -2038,6 +2029,16 @@ async def run_loop(
             log.error("BLOCKED: gate could not run: %s", _names)
             console.print(f"[red][engine] BLOCKED: gate could not run: {escape(_names)}[/red]")
             return 1
+
+        # Clear signal files before the reviewer starts.
+        # change-b7e3d5a9: review-feedback.txt is cleared here, per cycle, not only
+        # at loop start; the worker has already consumed the prior cycle's feedback.
+        # change-82dbf16a iteration 3 (audit F2-03, F2-04): the clear runs after
+        # the gates, because gate processes run worker-written code; .complete and
+        # awaiting-approval.md are included, so only the engine's own SHIP path
+        # can leave them. review-result.txt is not a verdict source (F-01).
+        clear_state(state_dir, "work-complete.txt", "review-feedback.txt", "review-result.txt",
+                    ".complete", "awaiting-approval.md")
 
         # F16: Prepend [ENGINE RUNTIME CONTEXT] to review_task for consistent framing
         _review_header = (

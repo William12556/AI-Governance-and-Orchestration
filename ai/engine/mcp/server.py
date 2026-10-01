@@ -38,7 +38,7 @@ _STATE_REL        = "ai/state"          # default; loop.state_dir in ai/config.y
 _STAGES_REL       = "ai/engine/src/stages.py"
 _WORKSPACE_REL    = "ai/workspace"
 _RUN_RECORD       = "mcp-run.json"
-_PROMPT_NAME      = re.compile(r"^prompt-[0-9a-f]{8}-.+\.md$")
+_PROMPT_NAME      = re.compile(r"prompt-[0-9a-f]{8}-.+\.md")  # fullmatch (change-82dbf16a F2-01)
 _TRACKED_MODES    = ("loop", "worker")
 
 # change-793992ae (L-02): Popen handles of children started by this server,
@@ -107,7 +107,7 @@ def _tracked_task_error(root: Path, task: str) -> str | None:
         return f"task must be a T03 prompt file inside {_WORKSPACE_REL}/; not found: {task}"
     if workspace not in path.parents:
         return f"task must be a T03 prompt file inside {_WORKSPACE_REL}/: {task}"
-    if not _PROMPT_NAME.match(path.name):
+    if not _PROMPT_NAME.fullmatch(path.name):
         return f"task must be named prompt-<uuid>-<name>.md: {path.name}"
     return None
 

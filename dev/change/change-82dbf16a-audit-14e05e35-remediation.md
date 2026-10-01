@@ -8,10 +8,10 @@ change_info:
   author: "William Watson"
   status: "implemented"
   priority: "high"
-  iteration: 2
+  iteration: 3
   coupled_docs:
     issue_ref: "issue-82dbf16a"
-    issue_iteration: 2
+    issue_iteration: 3
 
 source:
   type: "issue"
@@ -50,6 +50,13 @@ scope:
     is refused (F-04), compared case-insensitively (F-05); documents and the
     pytest gate docstring corrected, governance 12.2, design 1.7 with DI-06
     (F-06).
+    Iteration 3 (second follow-up F2-01 to F2-04): the task check requires
+    the resolved task path to equal one of the scanned active prompt documents
+    of the work item named by the task as given; document and engine-mcp
+    names are matched in full (F2-01, F2-02). review-result.txt,
+    review-feedback.txt, .complete and awaiting-approval.md are cleared after
+    the gates, immediately before the review phase (F2-03, F2-04).
+    loop-review.yaml 1.10.0 step 5 wording; engine guide §5.0; design 1.8.
   affected_components:
     - { name: "orchestrator", file_path: "ai/engine/src/orchestrator.py", change_type: "modify" }
     - { name: "scope", file_path: "ai/engine/src/scope.py", change_type: "modify" }
@@ -57,7 +64,8 @@ scope:
     - { name: "approve command", file_path: "ai/engine/src/approve.py", change_type: "modify" }
     - { name: "gates", file_path: "ai/engine/src/gates.py", change_type: "modify" }
     - { name: "manifest loader", file_path: "ai/engine/src/manifest.py", change_type: "modify" }
-    - { name: "engine-mcp", file_path: "ai/engine/mcp/server.py", change_type: "modify" }  # iteration 2
+    - { name: "engine-mcp", file_path: "ai/engine/mcp/server.py", change_type: "modify" }  # iterations 2, 3
+    - { name: "loop review recipe", file_path: "ai/engine/recipes/loop-review.yaml", change_type: "modify" }  # iteration 3
     - { name: "overwatch", file_path: "ai/src/overwatch.py", change_type: "modify" }
     - { name: "audit review recipe", file_path: "ai/governance/software-engineering/recipes/audit-review.yaml", change_type: "modify" }
     - { name: "governance", file_path: "ai/governance/software-engineering/governance.md (12.1), manifest.yaml, primer.md (both copies), templates/T03-prompt.md", change_type: "modify" }
@@ -74,7 +82,7 @@ rational:
     - "Existing approvals without blobs no longer open the loop; operators re-run approve.py once per tracked work item"
     - "Iteration 2: approvals recorded by iteration 1 are keyed by file name and must be re-recorded once"
     - "Iteration 2: a tracked run must name the prompt in ai/workspace/prompt/ itself"
-    - "Gate code written by the worker still runs with operator permissions (design DI-06)"
+    - "Gate code written by the worker still runs with operator permissions (design DI-06); a detached process started by a gate can still write state files after the clear"
     - "An edit to a change or prompt after approval (including a status edit) needs re-approval"
     - "A misconfigured gate now blocks a run that previously shipped"
     - "Write tools of other MCP servers that take no recognised path argument are refused"
@@ -83,6 +91,7 @@ testing_requirements:
   validation_criteria:
     - "All existing tests pass (two fixtures updated to bound approvals; iteration 2: blob keys in fixtures, FakePopen lets the task check run)"
     - "Iteration 2: gate-written review-result.txt and review-feedback.txt ignored; task in a prompt subfolder, other workspace folder, workspace root, closed/ or with .MD refused by the engine (exit 3) and engine-mcp; active and closed copies bound separately; directory targets holding signal files refused; case variants refused"
+    - "Iteration 3: newline-terminated task name and a symlink named for another work item refused by the pre-run check, main_async (exit 3) and engine-mcp; gate-written .complete, awaiting-approval.md, review-result.txt and review-feedback.txt absent during review and after REVISE, for bare, bold and empty REVISE messages"
     - "Forged review-result.txt does not override REVISE; reviewer and unoffered calls are refused and not dispatched; signal files refused; no-path writes refused; symlink target checked; UNCHECKED blocks naming the gate; SKIPPED listed; gate environment scrubbed; worker-mode return stage; declared deliverables in block; writable_paths validated; edited, added and unbound approvals reported; re-approval; unquoted UUID skipped; scan leaves .git/index unchanged; symlinked prompt tracked; bare-term scan"
 
 implementation:
@@ -90,8 +99,8 @@ implementation:
 
 traceability:
   requirements: ["FR-02-03", "FR-03-02", "FR-05-01", "FR-05-03", "FR-07-01", "FR-08-05", "FR-08-06", "NFR-05"]
-  design: "design-14e05e35 v1.7 §6.0, §7.0, §8.0, §9.0, §10.0, §14.0 DI-06"
-  audit: "dev/audit/audit-14e05e35-phase2-2026-10-01.md; follow-up dev/audit/audit-14e05e35-followup-2026-10-01.md"
+  design: "design-14e05e35 v1.8 §6.0, §7.0, §8.0, §9.0, §10.0, §14.0 DI-06"
+  audit: "dev/audit/audit-14e05e35-phase2-2026-10-01.md; follow-ups dev/audit/audit-14e05e35-followup-2026-10-01.md, dev/audit/audit-14e05e35-followup2-2026-10-01.md"
   prompt: "dev/prompt/closed/prompt-82dbf16a-audit-14e05e35-remediation.md"
 
 version_history:
@@ -100,7 +109,10 @@ version_history:
     changes: ["Initial change record; implemented 2026-10-01 (258 passed, offline shim); commit 9f692dc"]
   - version: "2.0"
     date: "2026-10-01"
-    changes: ["Iteration 2 from the follow-up audit (F-01 to F-06); implemented 2026-10-01 (279 passed, offline shim)"]
+    changes: ["Iteration 2 from the follow-up audit (F-01 to F-06); implemented 2026-10-01 (279 passed, offline shim); commit 5ada0b6"]
+  - version: "3.0"
+    date: "2026-10-01"
+    changes: ["Iteration 3 from the second follow-up audit (F2-01 to F2-04); implemented 2026-10-01 (287 passed, offline shim)"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

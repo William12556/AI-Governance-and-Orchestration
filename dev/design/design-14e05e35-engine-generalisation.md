@@ -223,7 +223,7 @@ The trivial exemption (P04.12) creates no documents and is not tracked; the git 
 |---|---|---|
 | `syntax` | Built-in | Current `_run_syntax_gate`, moved to `gates.py`; results unchanged. |
 | `pytest` (any declared command gate) | Command exit code | Command from the manifest, overridden by `gates.<name>` in config. Placeholders: `{python}`, `{targets}` (current deliverable-to-test mapping), `{project_root}`. Exit 0 = PASS, non-zero = FAIL, not runnable = UNCHECKED. FAIL overrides SHIP, as today (FR-03-04). UNCHECKED ends the run BLOCKED, naming the gate, before the review phase. A gate with nothing to check (no targets, no command) is SKIPPED: not applicable, listed in `awaiting-approval.md` (FR-03-02 v1.3; change-82dbf16a). Provider key variables (`api_key_env`) are removed from the gate environment. |
-| `reviewer` | Reviewer verdict | SHIP or REVISE from the reviewer's final response only. `review-result.txt` is cleared before each review phase and not read: command gates run worker-written code between the clear and the verdict (change-82dbf16a iteration 2, follow-up F-01). |
+| `reviewer` | Reviewer verdict | SHIP or REVISE from the reviewer's final response only. `review-result.txt` is not read (change-82dbf16a iteration 2, follow-up F-01). After the gates and before the review phase the engine clears `review-result.txt`, `review-feedback.txt`, `.complete` and `awaiting-approval.md`, so files written by gate processes do not survive into the verdict or the status (iteration 3, F2-03, F2-04). |
 | Human approval | Approval | Never passed by the engine (FR-03-05). Checked before a run (§8.0); after SHIP the engine writes `awaiting-approval.md` to the state directory naming the work item and stage. |
 
 Each gate result is logged as `gate=<name> type=<type> result=<PASS|FAIL|UNCHECKED|SKIPPED>` per iteration (FR-03-06).
@@ -288,7 +288,7 @@ The engine reads approvals with `git show HEAD:ai/approvals.yaml`, so uncommitte
 
 ### 8.4 Pre-run Check
 
-For a T03 prompt task, the engine derives the work item and refuses to start when any stage before `implement` lacks evidence or a required approval, or when an approval no longer matches its stage's documents: a document changed, added or removed since approval, or an entry without `blobs`. The message lists what is missing (FR-08-05). Git runs with `--no-optional-locks`, so the check and `work_status` do not write the index (FR-08-06). A task file is tracked when its resolved path lies in `ai/workspace/`. A tracked task must itself be an active evidence document of the last stage with evidence before the loop stage (SE: `ai/workspace/prompt/prompt-<uuid>-<name>.md`, resolved path, not `closed/`); otherwise the run is refused with exit 3 (change-82dbf16a iteration 2, follow-up F-02). Free-text CLI tasks are not tracked.
+For a T03 prompt task, the engine derives the work item and refuses to start when any stage before `implement` lacks evidence or a required approval, or when an approval no longer matches its stage's documents: a document changed, added or removed since approval, or an entry without `blobs`. The message lists what is missing (FR-08-05). Git runs with `--no-optional-locks`, so the check and `work_status` do not write the index (FR-08-06). A task file is tracked when its resolved path lies in `ai/workspace/`. A tracked task must itself be one of its work item's active evidence documents of the last stage with evidence before the loop stage, as the scan lists them (SE: `ai/workspace/prompt/prompt-<uuid>-<name>.md`, not `closed/`). The UUID comes from the task name as given; the resolved task path must equal the resolved path of one of that work item's documents. Names are matched in full (iteration 3, F2-01, F2-02); otherwise the run is refused with exit 3 (change-82dbf16a iteration 2, follow-up F-02). Free-text CLI tasks are not tracked.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -436,6 +436,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.8 | 2026-10-01 | Second follow-up audit (change-82dbf16a iteration 3): §6.0 signal files cleared after the gates; §8.4 task file must be a scanned document of its work item, full-name matching. |
 | 1.7 | 2026-10-01 | Follow-up audit of change-82dbf16a (iteration 2): §6.0 verdict from the final response only; §7.0 directory targets and case-insensitive signal files; §8.2 blob keys relative to ai/workspace/; §8.4 and §9.0 task file rule; §14.0 DI-06 gate code runs with operator permissions. |
 | 1.6 | 2026-10-01 | Audit-14e05e35 remediation (change-82dbf16a): §6.0 UNCHECKED blocks, SKIPPED listed, gate environment, verdict source, return stage in worker mode; §7.0 signal files, dispatch allowlist, no-path writes, symlinks, declared deliverables; §8.1 anomaly scope narrowed (L-11); §8.2 quoted UUID and blob hashes; §8.4 content-bound approvals, no optional locks, resolved task path; §10.0 implemented rules (L-04). |
 | 1.5 | 2026-10-01 | §3.0, §4.3: optional base_url for the Anthropic provider; literal key for local endpoints (change-43091424). |

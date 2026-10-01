@@ -108,6 +108,21 @@ def test_prompt_outside_the_prompt_folder_is_refused(proj, monkeypatch, where):
     assert FakePopen.calls == []
 
 
+def test_newline_name_and_foreign_symlink_are_refused(proj, monkeypatch):
+    """change-82dbf16a iteration 3 (second follow-up F2-01, F2-02)."""
+    FakePopen.calls = []
+    monkeypatch.setattr(server.subprocess, "Popen", FakePopen)
+    prompt_dir = proj / "ai" / "workspace" / "prompt"
+    (prompt_dir / f"prompt-{U}-evil.md\n").write_text("x")
+    other = prompt_dir / "prompt-5e6f7a8b-other.md"
+    other.write_text("x")
+    (proj / f"prompt-{U}-link.md").symlink_to(other)
+    for task in (f"ai/workspace/prompt/prompt-{U}-evil.md\n", f"prompt-{U}-link.md"):
+        out = json.loads(server.start_engine(str(proj), "loop", task))
+        assert "error" in out, task
+    assert FakePopen.calls == []
+
+
 def test_reviewer_mode_accepts_free_text(proj, monkeypatch):
     monkeypatch.setattr(server.subprocess, "Popen", FakePopen)
     out = json.loads(server.start_engine(str(proj), "reviewer", "review the work"))
