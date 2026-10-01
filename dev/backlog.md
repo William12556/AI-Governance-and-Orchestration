@@ -66,6 +66,8 @@ Each requires a T06 issue → T07 change → T03 prompt triple.
 8. Audit-14e05e35 L-10: `propagate.sh` creates workspace folders on the up-to-date path before confirmation and before the plan-error check; its awk parser ignores flow-style `workspace_folders` lists that `manifest.py` accepts; `migrate-layout.sh` warns on a single-quoted `'ai/state'`.
 9. Audit-14e05e35 L-11: the stage scan does not report a completed status in an active folder after closure. Design §8.1 narrowed in v1.6; implement if wanted.
 10. Audit-14e05e35 L-14 (remainder): `approve.py` accepts an `accept` approval before any loop run. Require loop completion (for example `.complete` or a SHIP record) first.
+11. Audit-14e05e35 fifth follow-up F5-01 (low): a prompt path in `ai/workspace/` that is not a regular file at launch (directory, FIFO) is classified as untracked; the CLI run starts with the path string as task text and project-root write scope, and the warning wrongly says "outside ai/workspace/". engine-mcp refuses it. Treat a task whose resolved path lies in `ai/workspace/` as tracked whatever its type and refuse it with exit 3 when no bytes were read; correct the warning; add a test with a directory at the prompt path.
+12. Audit-14e05e35 fifth follow-up §6.0 notes 1 and 3: log unremovable state entries before writing `BLOCKED.md` (the log line is lost when the write fails); add tests for a real unremovable entry, the `reset_state` return value 1 and the loop-start BLOCKED.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -144,6 +146,7 @@ None pending. All resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.30 | 2026-10-01 | §3.0 items 11–12: audit-14e05e35 fifth follow-up F5-01 and §6.0 notes 1, 3 (change-82dbf16a closed) |
 | 1.29 | 2026-10-01 | §3.0 items 6–10: audit-14e05e35 L-08, L-09, L-10, L-11 and the L-14 accept remainder (change-82dbf16a scope decision) |
 | 1.28 | 2026-10-01 | §2.0 item 12: deferred live Anthropic API check; §5.0 item 9 recurrence in the Phase 2 replay |
 | 1.27 | 2026-10-01 | §2.0 item 8 L-01, L-02 resolved; item 9 partly done (change-793992ae) |

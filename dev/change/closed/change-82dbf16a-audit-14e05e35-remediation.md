@@ -6,7 +6,7 @@ change_info:
   title: "Audit-14e05e35 remediation: verdict source, content-bound approvals, dispatch allowlist, gates and documents"
   date: "2026-10-01"
   author: "William Watson"
-  status: "implemented"
+  status: "verified"
   priority: "high"
   iteration: 5
   coupled_docs:
@@ -15,7 +15,7 @@ change_info:
 
 source:
   type: "issue"
-  reference: "dev/issue/issue-82dbf16a-audit-14e05e35-remediation.md"
+  reference: "dev/issue/closed/issue-82dbf16a-audit-14e05e35-remediation.md"
   description: "Remediation of audit-14e05e35 findings approved by the operator 2026-10-01 (recommendations 1–4)."
 
 scope:
@@ -112,7 +112,7 @@ implementation:
 traceability:
   requirements: ["FR-02-03", "FR-03-02", "FR-05-01", "FR-05-03", "FR-07-01", "FR-08-05", "FR-08-06", "NFR-05"]
   design: "design-14e05e35 v1.10 §6.0, §7.0, §8.0, §9.0, §10.0, §14.0 DI-06"
-  audit: "dev/audit/audit-14e05e35-phase2-2026-10-01.md; follow-ups dev/audit/audit-14e05e35-followup-2026-10-01.md, dev/audit/audit-14e05e35-followup2-2026-10-01.md, dev/audit/audit-14e05e35-followup3-2026-10-01.md, dev/audit/audit-14e05e35-followup4-2026-10-01.md"
+  audit: "dev/audit/audit-14e05e35-phase2-2026-10-01.md; follow-ups dev/audit/audit-14e05e35-followup-2026-10-01.md, dev/audit/audit-14e05e35-followup2-2026-10-01.md, dev/audit/audit-14e05e35-followup3-2026-10-01.md, dev/audit/audit-14e05e35-followup4-2026-10-01.md, dev/audit/audit-14e05e35-followup5-2026-10-01.md"
   prompt: "dev/prompt/closed/prompt-82dbf16a-audit-14e05e35-remediation.md"
 
 version_history:
@@ -130,7 +130,10 @@ version_history:
     changes: ["Iteration 4 from the third follow-up audit (F3-01, F3-02); implemented 2026-10-01 (292 passed, offline shim); commit da21811"]
   - version: "5.0"
     date: "2026-10-01"
-    changes: ["Iteration 5 from the fourth follow-up audit (F4-01, F4-02); implemented 2026-10-01 (303 passed, offline shim)"]
+    changes: ["Iteration 5 from the fourth follow-up audit (F4-01, F4-02); implemented 2026-10-01 (303 passed, offline shim); commit 5cd37d8"]
+  - version: "5.1"
+    date: "2026-10-01"
+    changes: ["Verified by the fifth follow-up audit (dev/audit/audit-14e05e35-followup5-2026-10-01.md); status implemented -> verified; closed. F5-01 carried to backlog §3.0 item 11"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
