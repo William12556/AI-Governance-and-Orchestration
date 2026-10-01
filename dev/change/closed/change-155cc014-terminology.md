@@ -6,7 +6,7 @@ change_info:
   title: "Phase 2 step 6: Strategic Domain / Tactical Domain replaced by the agent roles planner, worker and reviewer"
   date: "2026-10-01"
   author: "William Watson"
-  status: "implemented"
+  status: "verified"
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -63,6 +63,9 @@ version_history:
   - version: "1.1"
     date: "2026-10-01"
     changes: ["Applied after operator approval: 450 lines in 27 files, six hand fixes, table-of-contents link capitalisation, Version History rows; governance.md and manifest 12.0"]
+  - version: "1.2"
+    date: "2026-10-01"
+    changes: ["Verified: operator test 212 passed; commit 2c567b4; closed"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
