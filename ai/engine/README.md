@@ -61,11 +61,12 @@ engine/
 │   └── server.py         # engine-mcp: start_engine, engine_status, reset_engine (Claude Desktop)
 ├── recipes/
 │   ├── loop-work.yaml   # Standard worker role system prompt
-│   ├── loop-review.yaml # Standard reviewer role system prompt
-│   ├── audit-work.yaml   # Audit worker role system prompt (read-only analysis)
-│   └── audit-review.yaml # Audit reviewer role system prompt (coverage + quality)
+│   └── loop-review.yaml # Standard reviewer role system prompt
 └── src/
     ├── orchestrator.py     # Main loop and CLI entry point (--mode worker|reviewer|loop|reset); sole context-window resolver
+    ├── providers.py        # Provider interface: oMLX / OpenAI-compatible, Anthropic; role bindings
+    ├── manifest.py         # Governance model manifest loader (run types, gates, stages, paths)
+    ├── gates.py            # Syntax gate and command gates
     ├── mcp_client.py       # MCP stdio connection and tool dispatch
     ├── parser.py           # Mistral [TOOL_CALLS] plain-text parser
     ├── linter.py            # Layer 1 governance linter: static validation of workspace documents (naming, structure, YAML fields, UUID coupling, Obsidian links)
@@ -189,6 +190,8 @@ Recipes are YAML files providing role-specific system prompts. The `instructions
 | `audit-work.yaml` | Audit worker | Read-only codebase analysis; accumulates findings in `audit-report.md` |
 | `audit-review.yaml` | Audit reviewer | Checks finding quality and coverage; outputs `SHIP` or `REVISE` |
 
+The audit recipes belong to the software-engineering governance model (`ai/governance/software-engineering/recipes/`). The model's `manifest.yaml` maps each run type (`loop`, `audit`) to its recipe pair.
+
 State files are written to `ai/state/` in the project root during loop execution. This directory is ephemeral and excluded from git.
 
 [Return to Table of Contents](<#table of contents>)
@@ -230,6 +233,7 @@ The tests use stub model and MCP clients; no oMLX endpoint is required.
 | 2.4 | 2026-07-16 | Removed budget.py (retired, change-d42e64a9): §3.0 structure entry removed; §6.0 config example rewritten (reviewer_model, execution.* controls, model_context_windows, removed models_dir); §7.0 invocation and explanatory note replaced with the automatic context-budget.md write. §4.0: noted 8bit and optional reviewer_model |
 | 2.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 2.6 | 2026-09-29 | Profile file name corrected: claude.md → claude-code.md |
+| 2.7 | 2026-10-01 | §3.0 structure: providers.py, manifest.py, gates.py added; audit recipes moved to the governance model; §8.0 run types (change-53c6f252, change-e58fd295) |
 
 ---
 

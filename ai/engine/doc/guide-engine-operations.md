@@ -228,7 +228,7 @@ Devstral Small 2 (2512) reports `max_context_window: 393216` via oMLX, but that 
 
 ## 7.0 Recipes
 
-Recipes are YAML files in `ai/engine/recipes/`. The `instructions` field is injected as the system prompt for each inference call. `{{TOOLS}}` is replaced at runtime with the live MCP tool signatures.
+Recipes are YAML files. The `instructions` field is injected as the system prompt for each inference call. `{{TOOLS}}` is replaced at runtime with the live MCP tool signatures.
 
 | Recipe | Role | Use |
 |---|---|---|
@@ -237,7 +237,9 @@ Recipes are YAML files in `ai/engine/recipes/`. The `instructions` field is inje
 | `audit-work.yaml` | Audit worker | Read-only codebase analysis |
 | `audit-review.yaml` | Audit reviewer | Coverage check and finding quality |
 
-The orchestrator selects recipes from `ai/engine/recipes/` relative to `orchestrator.py`. Custom recipes may be placed in the same directory and referenced by modifying the recipe load path in `main_async()`.
+The governance model's `manifest.yaml` maps each run type (`loop`, `audit`) to a recipe pair. A recipe path resolves against the model folder first (`ai/governance/<model>/`), then `ai/engine/recipes/`. The loop recipes are in `ai/engine/recipes/`; the SE audit recipes are in `ai/governance/software-engineering/recipes/`. The orchestrator selects the `audit` run type when `audit-index.md` is present in the state directory, otherwise `loop`.
+
+Gates: the loop stage's gates come from the manifest (SE: `syntax`, `pytest`, `reviewer`). Each result is logged as `gate=<name> type=<type> result=<result>`. A failing command gate overrides SHIP. Override a command gate or the interpreter for `{python}` under `gates:` in `ai/config.yaml` (see the template). After SHIP the engine writes `awaiting-approval.md`; for a T03 prompt task that ends BLOCKED, `BLOCKED.md` names the stage to return to (change-e58fd295).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -313,6 +315,7 @@ curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 | 1.4 | 2026-07-16 | §2.1: context-budget.md writer corrected budget.py → Orchestrator. §3.0: mcp-grep example → mcp-ripgrep. §6.1 and §8.4: removed retired standalone budget.py invocation; context-budget.md is written automatically at orchestrator startup |
 | 1.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.6 | 2026-10-01 | §3.0: role-to-model binding note (providers:, roles:, api_key_env, per-role context window; change-53c6f252) |
+| 1.7 | 2026-10-01 | §7.0: recipes resolved through manifest run types; gates, awaiting-approval.md and BLOCKED return stage (change-e58fd295) |
 
 ---
 

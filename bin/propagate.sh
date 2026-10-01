@@ -28,6 +28,8 @@
 #     at ai/governance.md); run bin/migrate-layout.sh first (change-5bcd46ad).
 #   - Seeds ai/config.yaml, ai/context.md and ai/task.md when absent, from
 #     ai/engine/config.template.yaml and ai/governance/<model>/seed/.
+#   - Creates the ai/workspace/ folders listed in the model's manifest.yaml
+#     when absent; existing paths are never changed (change-e58fd295).
 #
 # Exit codes: 0 done or up to date; 1 usage; 2 confirmation required;
 #   3 refused before the copy (unsafe ai-local/ or declared path, target or
@@ -104,6 +106,23 @@ gov_version() {
             | sed -E 's/^\| *([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/' || true)"
     fi
     echo "${v:-unknown}"
+}
+
+# --- Workspace folders (change-e58fd295, FR-01-04) ---------------------------
+# Creates each ai/workspace/<folder> listed under workspace_folders: in the
+# governance model manifest when absent. Existing paths are never changed; a
+# non-directory in the way is reported and left alone.
+create_workspace_folders() {
+    local manifest="$1" workspace="$2" d
+    [[ -f "${manifest}" ]] || { echo "workspace: no manifest at ${manifest}; folders not created"; return 0; }
+    while IFS= read -r d; do
+        [[ -z "${d}" || "${d}" == /* || "/${d}/" == */../* ]] && continue
+        if [[ -e "${workspace}/${d}" || -L "${workspace}/${d}" ]]; then
+            [[ -d "${workspace}/${d}" ]] || echo "workspace: ${d} exists and is not a directory; left unchanged"
+            continue
+        fi
+        mkdir -p "${workspace}/${d}" && echo "workspace: created ${d}/"
+    done < <(awk '/^workspace_folders:/{f=1;next} f&&/^[^[:space:]#]/{f=0} f&&/^[[:space:]]*-[[:space:]]/{sub(/^[[:space:]]*-[[:space:]]*/,"");sub(/[[:space:]]*#.*$/,"");gsub(/["\047]/,"");print}' "${manifest}")
 }
 
 SRC_VER="$(gov_version "${GOV_SRC}/governance.md")"
@@ -434,6 +453,7 @@ if [[ "${UPDATE_COUNT}" -eq 0 && "${CAND_COUNT}" -eq 0 && "${BACKUP_COUNT}" -eq 
       && "${NEEDS_SEED_CONFIG}" == "false" && "${NEEDS_SEED_CONTEXT}" == "false" \
       && "${NEEDS_SEED_TASK}" == "false" ]]; then
     echo "Target is up to date. No changes to apply."
+    create_workspace_folders "${PROJECT_AI}/governance/${MODEL}/manifest.yaml" "${PROJECT_AI}/workspace"
     exit 0
 fi
 
@@ -620,6 +640,9 @@ else
     echo ""
     echo "task.md: existing project copy preserved."
 fi
+
+echo ""
+create_workspace_folders "${PROJECT_AI}/governance/${MODEL}/manifest.yaml" "${PROJECT_AI}/workspace"
 
 if [[ "${CAND_COUNT}" -gt 0 || "${BACKUP_COUNT}" -gt 0 ]]; then
     echo ""

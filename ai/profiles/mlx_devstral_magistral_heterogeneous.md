@@ -41,7 +41,7 @@ Rationale: the worker performs synthesis (code generation, multi-file editing); 
 |---|---|
 | `<tactical_context>` | `ai/context.md` |
 
-`<tactical_config>/` and `<skills_dir>/` do not apply to this profile. Engine configuration is in `ai/config.yaml`; recipes are in `ai/engine/recipes/`.
+`<tactical_config>/` and `<skills_dir>/` do not apply to this profile. Engine configuration is in `ai/config.yaml`; recipes are in `ai/engine/recipes/` and `ai/governance/<model>/recipes/`, mapped by the model's `manifest.yaml`.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -186,6 +186,7 @@ ai/state/
 | 1.0 | 2026-07-16 | Initial document; heterogeneous Devstral (worker, 8bit) / Magistral (reviewer, 6bit) profile |
 | 1.1 | 2026-09-23 | Setup-guide links corrected: ../../../docs/ → ../../docs/ |
 | 1.2 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 1.3 | 2026-10-01 | Recipe location: governance model recipes and manifest run types (change-e58fd295) |
 
 ---
 

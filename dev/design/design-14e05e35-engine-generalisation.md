@@ -105,7 +105,7 @@ gates:
   python: null                       # interpreter for {python}; null = the engine's own interpreter
   pytest:
     command: "{python} -m pytest -q {targets}"
-    timeout_seconds: 600
+    timeout_seconds: 300
 ```
 
 | Rule | Behaviour |
@@ -198,7 +198,7 @@ run_types:
   loop:  { worker: loop-work.yaml,  reviewer: loop-review.yaml }
   audit: { worker: recipes/audit-work.yaml, reviewer: recipes/audit-review.yaml }
 gates:
-  pytest: { command: "{python} -m pytest -q {targets}", timeout_seconds: 600 }
+  pytest: { command: "{python} -m pytest -q {targets}", timeout_seconds: 300 }
 stages:
   - { id: issue,  owner: planner, evidence: { folder: issues, prefix: issue,  status_field: issue_info.status,  complete_statuses: [open, investigating, resolved, verified, closed] } }
   - { id: change, owner: planner, approval: true, evidence: { folder: change, prefix: change, status_field: change_info.status, complete_statuses: [approved, implemented, verified] } }
@@ -431,6 +431,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.2 | 2026-10-01 | §3.0, §5.2: pytest gate timeout 300 s, the historical value (FR-03-04; change-e58fd295). |
 | 1.1 | 2026-10-01 | §4.2: a response without choices is retried, not returned as finish_reason error (change-53c6f252). |
 | 1.0 | 2026-10-01 | Approved by the operator. DI-04 and DI-05 remain open and do not block implementation. |
 | 0.3 | 2026-10-01 | From report-14e05e35 (Mistral API test): DI-01 closed; DI-04 updated (partially confirmed, guidance); DI-05 added (allowance exhaustion error); §3.0 pinned model IDs, Devstral unavailable on the Mistral API. |

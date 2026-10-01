@@ -39,7 +39,7 @@ This profile maps governance abstract placeholders to Apple Silicon MLX-based lo
 |---|---|
 | `<tactical_context>` | `ai/context.md` |
 
-`<tactical_config>/` and `<skills_dir>/` do not apply to this profile. Engine configuration is in `ai/config.yaml`; recipes are in `ai/engine/recipes/`.
+`<tactical_config>/` and `<skills_dir>/` do not apply to this profile. Engine configuration is in `ai/config.yaml`; recipes are in `ai/engine/recipes/` and `ai/governance/<model>/recipes/`, mapped by the model's `manifest.yaml`.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -201,6 +201,7 @@ This profile is provisional pending evaluation. Open items:
 | 0.3 | 2026-07-16 | Tool-guidance example: mcp-grep__grep → mcp-ripgrep__search |
 | 0.4 | 2026-09-23 | Setup-guide link corrected: ../../../docs/ → ../../docs/ |
 | 0.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 0.6 | 2026-10-01 | Recipe location: governance model recipes and manifest run types (change-e58fd295) |
 
 ---
 

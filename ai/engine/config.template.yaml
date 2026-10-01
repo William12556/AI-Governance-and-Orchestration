@@ -37,6 +37,18 @@ omlx:
 # For API models, add the context window under context.model_context_windows
 # (no live query exists for them).
 
+# Gate overrides (change-e58fd295, design-14e05e35 §6.0). Command gates are
+# declared in ai/governance/<model>/manifest.yaml; override them here per project.
+# gates.python sets the interpreter for {python}, e.g. the project venv, so the
+# pytest gate finds the project's test dependencies. Default: the engine's own
+# interpreter.
+#
+# gates:
+#   python: "venv/bin/python"        # relative to the project root
+#   pytest:
+#     command: "{python} -m pytest -q {targets}"
+#     timeout_seconds: 300
+
 # MCP server definitions
 # F4: filesystem MCP is confined to the project root for scope containment.
 # Each downstream project sets its own allowed_dirs in its local config.yaml.

@@ -168,10 +168,12 @@ def test_t6_recipe_selection(orch, project):
     assert orch._select_recipe_set(str(state)) == "loop"
     (state / "audit-index.md").write_text("- [ ] item\n")
     assert orch._select_recipe_set(str(state)) == "audit"
+    # change-e58fd295: recipes resolve through the governance model manifest
+    import manifest
+    m = manifest.load_manifest(manifest.locate_manifest())
     for name in ("loop", "audit"):
-        for part in ("work", "review"):
-            recipe = orch.load_yaml(os.path.join(ENGINE_DIR, "recipes", f"{name}-{part}.yaml"))
-            assert recipe.get("instructions")
+        for path in m.recipe_paths(name):
+            assert orch.load_yaml(path).get("instructions")
 
 
 def test_t7_pytest_gate_fail(orch, log, project):

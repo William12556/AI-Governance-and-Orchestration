@@ -59,6 +59,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 from mcp_client import MCPClient
 from providers import (ConfigError, ProviderError, as_provider, build_role_bindings,
                        query_omlx_context_window as _query_omlx_context_window)
+import gates as G
+from manifest import ManifestError, load_manifest, locate_manifest
 
 from rich.console import Console
 from rich.markup import escape
@@ -1664,173 +1666,71 @@ def run_preflight_check(task: str, log: logging.Logger) -> str:
 
 def _run_syntax_gate(state_dir: str, log: logging.Logger) -> str:
     """
-    F6: Run py_compile on modified .py files and return a summary for the reviewer.
-
-    Extracts .py file paths from work-summary.txt, runs py_compile on each,
-    and returns a [SYNTAX GATE] block to inject into the reviewer task.
-    Returns empty string if no .py files found or work-summary.txt absent.
+    F6: Built-in syntax gate (gates.syntax_check). Returns a [SYNTAX GATE]
+    block for the reviewer task, or '' when no .py deliverable exists.
     """
-    summary_path = os.path.join(state_dir, "work-summary.txt")
-    if not os.path.exists(summary_path):
-        return ""
-
-    summary_content = open(summary_path).read()
-
-    # Extract .py file paths from the work summary
-    # Match patterns like: path/to/file.py, "path/to/file.py", 'path/to/file.py'
-    py_files = re.findall(r'["\']?([\w./\-]+\.py)["\']?', summary_content)
-    # Deduplicate while preserving order
-    seen = set()
-    unique_py_files = []
-    for f in py_files:
-        if f not in seen and os.path.exists(f):
-            seen.add(f)
-            unique_py_files.append(f)
-
-    if not unique_py_files:
-        return ""
-
-    results = []
-    all_passed = True
-
-    for py_path in unique_py_files:
-        try:
-            proc = subprocess.run(
-                [sys.executable, "-m", "py_compile", py_path],
-                capture_output=True,
-                text=True,
-            )
-            if proc.returncode == 0:
-                results.append(f"  ✓ {py_path}: OK")
-            else:
-                all_passed = False
-                err = proc.stderr.strip()[:200]
-                results.append(f"  ✗ {py_path}: SYNTAX ERROR\n    {err}")
-        except Exception as exc:
-            all_passed = False
-            results.append(f"  ? {py_path}: check failed ({exc})")
-
-    status = "PASS" if all_passed else "FAIL"
-    log.info("syntax gate: %d files checked, status=%s", len(unique_py_files), status)
-
-    gate_block = (
-        f"[SYNTAX GATE: {status}]\n"
-        f"The orchestrator ran py_compile on {len(unique_py_files)} .py file(s):\n"
-        + "\n".join(results)
-        + "\n[END SYNTAX GATE]\n"
-    )
-
-    if not all_passed:
-        console.print(f"[yellow][engine] syntax gate: {status} ({len(unique_py_files)} files)[/yellow]")
-    else:
-        console.print(f"[dim][engine] syntax gate: {status} ({len(unique_py_files)} files)[/dim]")
-
-    return gate_block
+    block, count = G.syntax_check(state_dir, log)
+    if block:
+        status = G.gate_status(block)
+        style = "dim" if status == "PASS" else "yellow"
+        console.print(f"[{style}][engine] syntax gate: {status} ({count} files)[/{style}]")
+    return block
 
 
-def _run_pytest_gate(state_dir: str, log: logging.Logger, project_root: str) -> str:
+def _run_pytest_gate(state_dir: str, log: logging.Logger, project_root: str,
+                     spec: dict | None = None) -> str:
     """
-    F6b: Run pytest on deliverable-derived test targets and return a summary for the reviewer.
+    F6b: pytest command gate on deliverable-derived targets (gates.pytest_targets).
 
-    Extracts deliverables from work-summary.txt via _extract_deliverables, maps them to
-    test targets (tests/ paths direct; src/<component>/ -> tests/<component>/ if exists),
-    runs pytest, and returns a [TEST GATE] block to inject into the reviewer task.
-    Returns empty string if no test-relevant targets resolve.
-
-    Status interpretation:
-      - PASS: pytest ran successfully with exit code 0
-      - FAIL: pytest ran but reported test failures (exit code != 0)
-      - UNCHECKED: pytest could not be run (missing, timeout, exception)
-
-    Only FAIL triggers the SHIP override in run_loop; UNCHECKED and empty-result do not.
+    spec: {command, python, timeout_seconds} from the manifest and ai/config.yaml
+    (change-e58fd295); omitted, the historical command runs with this
+    interpreter. Returns a [TEST GATE] block, or '' when no target resolves.
+    PASS: exit 0; FAIL: tests failed; UNCHECKED: pytest could not run. Only
+    FAIL overrides SHIP in run_loop.
     """
     deliverables = _extract_deliverables(state_dir, log)
     if not deliverables:
         log.debug("pytest gate: no deliverables — gate is no-op")
         return ""
-
-    # Resolve test targets from deliverables
-    targets: set[str] = set()
-    for path in deliverables:
-        # Normalize to relative path for pattern matching
-        if project_root and path.startswith(project_root):
-            rel_path = path[len(project_root):].lstrip(os.sep)
-        else:
-            rel_path = path
-
-        # Direct include for tests/ paths
-        if rel_path.startswith("tests" + os.sep) or rel_path.startswith("tests/"):
-            if os.path.exists(path):
-                targets.add(path)
-        # Map src/<component>/ to tests/<component>/ if that directory exists
-        elif rel_path.startswith("src" + os.sep) or rel_path.startswith("src/"):
-            parts = rel_path.split(os.sep)
-            if len(parts) >= 2:
-                component = parts[1]
-                test_dir = os.path.join(project_root, "tests", component) if project_root else os.path.join("tests", component)
-                if os.path.isdir(test_dir):
-                    targets.add(test_dir)
-                else:
-                    # change-b7e3d5a9: flat-layout fallback. For src/<name>.py the
-                    # component-directory mapping above tests isdir("tests/<name>.py"),
-                    # which can never hold, so the gate resolved nothing and silently
-                    # enforced nothing. Fall back to the flat module convention.
-                    _stem = os.path.splitext(os.path.basename(rel_path))[0]
-                    for _candidate in (f"test_{_stem}.py", f"{_stem}_test.py"):
-                        _test_file = (os.path.join(project_root, "tests", _candidate)
-                                      if project_root else os.path.join("tests", _candidate))
-                        if os.path.isfile(_test_file):
-                            targets.add(_test_file)
-                            break
-
+    targets = G.pytest_targets(deliverables, project_root)
     if not targets:
         log.debug("pytest gate: no test-relevant targets resolved — gate is no-op")
         return ""
-
-    # Run pytest
-    target_list = sorted(targets)
-    log.info("pytest gate: running pytest on %d target(s): %s", len(target_list), target_list)
-
-    try:
-        proc = subprocess.run(
-            [sys.executable, "-m", "pytest"] + target_list + ["-q"],
-            capture_output=True,
-            text=True,
-            cwd=project_root if project_root else None,
-            timeout=300,  # 5 minute timeout
-        )
-        if proc.returncode == 0:
-            status = "PASS"
-        else:
-            status = "FAIL"
-        output = proc.stdout + proc.stderr
-    except Exception as exc:
-        status = "UNCHECKED"
-        output = f"pytest execution failed: {exc}"
-        log.warning("pytest gate: execution failed — %s", exc)
-        log.debug("pytest gate exception traceback:\n%s", traceback.format_exc())
-
-    # Truncate output to last 1000 chars for readability
-    if len(output) > 1000:
-        output = "...(truncated)...\n" + output[-1000:]
-
-    target_list_str = "\n".join(f"  - {t}" for t in target_list)
-    gate_block = (
-        f"[TEST GATE: {status}]\n"
-        f"The orchestrator ran pytest on {len(target_list)} test target(s):\n"
-        f"{target_list_str}\n\n"
-        f"Output:\n{output.strip()}\n"
-        f"[END TEST GATE]\n"
-    )
-
+    log.info("pytest gate: running pytest on %d target(s): %s", len(targets), targets)
+    block = G.run_command_gate(G.PYTEST_GATE, spec or {}, targets, project_root, log)
+    status = G.gate_status(block)
     if status == "PASS":
-        log.info("pytest gate: %d target(s), status=%s", len(target_list), status)
-        console.print(f"[dim][engine] pytest gate: {status} ({len(target_list)} targets)[/dim]")
+        log.info("pytest gate: %d target(s), status=%s", len(targets), status)
+        console.print(f"[dim][engine] pytest gate: {status} ({len(targets)} targets)[/dim]")
     else:
-        log.warning("pytest gate: %d target(s), status=%s", len(target_list), status)
-        console.print(f"[yellow][engine] pytest gate: {status} ({len(target_list)} targets)[/yellow]")
+        log.warning("pytest gate: %d target(s), status=%s", len(targets), status)
+        console.print(f"[yellow][engine] pytest gate: {status} ({len(targets)} targets)[/yellow]")
+    return block
 
-    return gate_block
+
+def _run_command_gate(name: str, spec: dict, state_dir: str, log: logging.Logger,
+                      project_root: str) -> str:
+    """
+    A declared command gate other than pytest (change-e58fd295). {targets}
+    expands to the deliverables of this cycle.
+    """
+    if not spec.get("command"):
+        log.warning("%s gate: no command configured — gate is no-op", name)
+        return ""
+    targets = sorted(_extract_deliverables(state_dir, log))
+    block = G.run_command_gate(name, spec, targets, project_root, log)
+    status = G.gate_status(block)
+    style = "dim" if status == "PASS" else "yellow"
+    console.print(f"[{style}][engine] {escape(name)} gate: {status}[/{style}]")
+    return block
+
+
+def _log_gate(log: logging.Logger, name: str, gate_type: str, result: str) -> None:
+    """FR-03-06: one line per gate per iteration."""
+    log.info("gate=%s type=%s result=%s", name, gate_type, result)
+
+
+_DEFAULT_LOOP_GATES = ("syntax", "pytest", "reviewer")
 
 
 def _parse_audit_items(index_path: str) -> list[tuple[bool, str]]:
@@ -1972,14 +1872,21 @@ async def run_loop(
     max_tool_result_chars: int | None = None,
     reviewer_client: Any = None,
     reviewer_context_window: int | None = None,
+    gates: list[str] | None = None,
+    gate_specs: dict[str, dict] | None = None,
 ) -> int:
     """
     Full loop: worker/reviewer cycle until SHIP, max_iterations, or deadline.
 
     client and context_window serve the worker; reviewer_client and
     reviewer_context_window serve the reviewer and default to the worker's
-    (change-53c6f252, FR-04-05).
+    (change-53c6f252, FR-04-05). gates lists the loop stage's gates and
+    gate_specs the command gate specifications from the manifest and
+    ai/config.yaml; omitted, the historical syntax, pytest and reviewer gates
+    run (change-e58fd295).
     """
+    gate_list = list(gates) if gates else list(_DEFAULT_LOOP_GATES)
+    gate_specs = gate_specs or {}
     if reviewer_client is None:
         reviewer_client = client
     if reviewer_context_window is None:
@@ -1997,7 +1904,8 @@ async def run_loop(
 
     clear_state(state_dir,
                 "review-result.txt", "review-feedback.txt",
-                "work-complete.txt", "work-summary.txt", ".complete", ".timeout")
+                "work-complete.txt", "work-summary.txt", ".complete", ".timeout",
+                "awaiting-approval.md")
 
     # Audit scope snapshot: record original item count for scope lock enforcement.
     _audit_original_count = _snapshot_audit_index(state_dir, log)
@@ -2117,11 +2025,22 @@ async def run_loop(
         clear_state(state_dir, "work-complete.txt", "review-feedback.txt")
         console.print("\n[bold blue]▶ REVIEW PHASE[/bold blue]")
 
-        # F6: Run syntax gate and inject result into reviewer task
-        _syntax_result = _run_syntax_gate(state_dir, log)
-
-        # F6b: Run pytest gate and inject result into reviewer task
-        _pytest_result = _run_pytest_gate(state_dir, log, project_root)
+        # F6: syntax gate; F6b and change-e58fd295: declared command gates.
+        # Results are injected into the reviewer task.
+        _syntax_result = _run_syntax_gate(state_dir, log) if "syntax" in gate_list else ""
+        if "syntax" in gate_list:
+            _log_gate(log, "syntax", "built_in", G.gate_status(_syntax_result))
+        _command_results: list[tuple[str, str]] = []
+        for _g in gate_list:
+            if _g in ("syntax", "reviewer"):
+                continue
+            if _g == G.PYTEST_GATE:
+                _res = (_run_pytest_gate(state_dir, log, project_root, spec=gate_specs[_g])
+                        if _g in gate_specs else _run_pytest_gate(state_dir, log, project_root))
+            else:
+                _res = _run_command_gate(_g, gate_specs.get(_g, {}), state_dir, log, project_root)
+            _log_gate(log, _g, "command", G.gate_status(_res))
+            _command_results.append((_g, _res))
 
         # F16: Prepend [ENGINE RUNTIME CONTEXT] to review_task for consistent framing
         _review_header = (
@@ -2131,9 +2050,10 @@ async def run_loop(
             f"[END RUNTIME CONTEXT]\n\n"
         )
         review_task = _review_header + f"Review the work in state directory '{state_dir}'."
-        # Prepend gate results to review_task
-        if _pytest_result:
-            review_task = _pytest_result + "\n" + review_task
+        # Prepend gate results to review_task (syntax first, then command gates in order)
+        for _g, _res in reversed(_command_results):
+            if _res:
+                review_task = _res + "\n" + review_task
         if _syntax_result:
             review_task = _syntax_result + "\n" + review_task
         rc, reviewer_final_msg, _reviewer_read_paths = await run_phase(
@@ -2167,6 +2087,7 @@ async def run_loop(
         else:
             verdict = "REVISE"
             log.debug("no verdict source — defaulting to REVISE")
+        _log_gate(log, "reviewer", "reviewer_verdict", verdict)
 
         # Persist fallback REVISE feedback body when reviewer_final_msg provided verdict.
         # Reviewer is read-only (F5) so cannot write review-feedback.txt itself.
@@ -2238,19 +2159,33 @@ async def run_loop(
                         else:
                             log.debug("read-evidence SHIP gate: no deliverables — gate is no-op")
 
-                        # Pytest SHIP gate: non-audit (loop) path only.
-                        # Override SHIP to REVISE if pytest gate reported FAIL.
-                        if _read_gate_pass and "[TEST GATE: FAIL]" in _pytest_result:
+                        # Command SHIP gates: non-audit (loop) path only.
+                        # Override SHIP to REVISE if any command gate reported FAIL
+                        # (FR-03-02; the pytest gate keeps its historical message).
+                        for _g, _res in _command_results:
+                            if not _read_gate_pass:
+                                break
+                            if G.gate_status(_res) != "FAIL":
+                                continue
                             _read_gate_pass = False
-                            log.warning("pytest SHIP gate: test failures detected — overriding SHIP")
-                            console.print(
-                                "[yellow][engine] pytest SHIP gate: test failures detected "
-                                "— overriding SHIP to REVISE[/yellow]"
-                            )
-                            write_state(
-                                state_dir, "review-feedback.txt",
-                                f"Pytest gate failed: tests did not pass.\n\n{_pytest_result}"
-                            )
+                            if _g == G.PYTEST_GATE:
+                                log.warning("pytest SHIP gate: test failures detected — overriding SHIP")
+                                console.print(
+                                    "[yellow][engine] pytest SHIP gate: test failures detected "
+                                    "— overriding SHIP to REVISE[/yellow]"
+                                )
+                                write_state(
+                                    state_dir, "review-feedback.txt",
+                                    f"Pytest gate failed: tests did not pass.\n\n{_res}"
+                                )
+                            else:
+                                log.warning("%s SHIP gate: FAIL — overriding SHIP", _g)
+                                console.print(
+                                    f"[yellow][engine] {escape(_g)} SHIP gate: FAIL "
+                                    f"— overriding SHIP to REVISE[/yellow]"
+                                )
+                                write_state(state_dir, "review-feedback.txt",
+                                            f"{_g} gate failed.\n\n{_res}")
 
                     if _read_gate_pass:
                         console.print(Panel(
@@ -2293,6 +2228,77 @@ async def run_loop(
         clear_state(state_dir, "work-complete.txt", "review-result.txt")
 
 
+def _resolve_gate_specs(manifest, config: dict) -> dict[str, dict]:
+    """
+    Command gate specifications: manifest defaults overridden by gates.<name>
+    in ai/config.yaml; gates.python selects {python} (FR-03-03, change-e58fd295).
+    """
+    gcfg = config.get("gates") or {}
+    if not isinstance(gcfg, dict):
+        raise ConfigError("gates: must be a mapping")
+    unknown = sorted(set(gcfg) - set(manifest.gates) - {"python"})
+    if unknown:
+        raise ConfigError(f"gates.{unknown[0]}: not declared in the governance model manifest")
+    python = gcfg.get("python") or sys.executable
+    if os.sep in python and not os.path.isabs(python):
+        python = os.path.abspath(python)  # relative to the project root (cwd)
+    specs: dict[str, dict] = {}
+    for name, g in manifest.gates.items():
+        override = gcfg.get(name) or {}
+        if not isinstance(override, dict):
+            raise ConfigError(f"gates.{name}: must be a mapping")
+        specs[name] = {
+            "command": override.get("command") or g["command"],
+            "timeout_seconds": override.get("timeout_seconds") or g.get("timeout_seconds", G.DEFAULT_TIMEOUT_SECONDS),
+            "python": python,
+        }
+    return specs
+
+
+_PROMPT_UUID_RE = re.compile(r"^prompt-([0-9a-f]{8})-")
+
+
+def _work_item_uuid(task: str | None) -> str | None:
+    """The work-item UUID of a T03 prompt task file (prompt-<uuid>-<name>.md), else None."""
+    if not task:
+        return None
+    m = _PROMPT_UUID_RE.match(os.path.basename(task))
+    return m.group(1) if m else None
+
+
+def _write_awaiting_approval(state_dir: str, manifest, loop_stage_id: str,
+                             work_item: str | None, log: logging.Logger) -> None:
+    """After SHIP: record that operator approval is awaited (FR-03-05)."""
+    stage = manifest.next_approval_stage(loop_stage_id)
+    if stage is None:
+        return
+    item = work_item or "untracked task (no prompt UUID)"
+    write_state(state_dir, "awaiting-approval.md",
+                "# Awaiting approval\n\n"
+                f"Work item: {item}\n"
+                f"Stage: {stage.id}\n\n"
+                "The loop shipped. The engine does not pass human approval gates; "
+                "the operator reviews the result and records the approval.\n")
+    log.info("awaiting approval: work item=%s stage=%s", item, stage.id)
+    console.print(f"[blue][engine] awaiting operator approval: {escape(item)} → {escape(stage.id)}[/blue]")
+
+
+def _annotate_blocked_return(state_dir: str, loop_stage, work_item: str | None,
+                             since: float, log: logging.Logger) -> None:
+    """On BLOCKED for a tracked work item, name the stage to return to (FR-02-03)."""
+    if not work_item or not loop_stage.on_blocked:
+        return
+    path = os.path.join(state_dir, "BLOCKED.md")
+    if not os.path.exists(path) or os.path.getmtime(path) < since:
+        return
+    with open(path) as fh:
+        if "Return to stage:" in fh.read():
+            return
+    with open(path, "a") as fh:
+        fh.write(f"\nReturn to stage: {loop_stage.on_blocked} (work item {work_item})\n")
+    log.info("BLOCKED: return to stage %s for work item %s", loop_stage.on_blocked, work_item)
+
+
 async def main_async(args: argparse.Namespace) -> int:
     config    = load_yaml(args.config)
     state_dir = os.path.abspath(config["loop"]["state_dir"])
@@ -2321,6 +2327,20 @@ async def main_async(args: argparse.Namespace) -> int:
         console.print(f"[red][engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
         return 1
     worker_b, reviewer_b = bindings["worker"], bindings["reviewer"]
+
+    # change-e58fd295: the installed governance model's manifest (FR-01-05)
+    try:
+        manifest = load_manifest(locate_manifest())
+    except ManifestError as e:
+        console.print(f"[red][engine] manifest error: {escape(str(e))}[/red]")
+        return 1
+    try:
+        gate_specs = _resolve_gate_specs(manifest, config)
+    except ConfigError as e:
+        console.print(f"[red][engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
+        return 1
+    loop_stage = manifest.loop_stage()
+    work_item = _work_item_uuid(args.task)
     max_iter          = args.max_iterations or config["loop"]["max_iterations"]
     deadline          = time.monotonic() + args.duration * 3600 if args.duration else None
     phase_max_iter    = config["loop"].get("phase_max_iterations", max_iter)
@@ -2355,12 +2375,19 @@ async def main_async(args: argparse.Namespace) -> int:
     if _log_archive_dir:
         log.info("log archive dir: %s", _log_archive_dir)
 
-    recipe_dir  = os.path.join(os.path.dirname(__file__), "..", "recipes")
+    # change-e58fd295: recipes come from the manifest's run types (FR-01-03)
     recipe_set  = _select_recipe_set(state_dir)
-    work_recipe = load_yaml(os.path.join(recipe_dir, f"{recipe_set}-work.yaml"))
-    rev_recipe  = load_yaml(os.path.join(recipe_dir, f"{recipe_set}-review.yaml"))
-    console.print(f"[blue][engine] recipe set: {recipe_set}[/blue]")
-    log.info("recipe set: %s", recipe_set)
+    try:
+        _work_path, _rev_path = manifest.recipe_paths(recipe_set)
+    except ManifestError as e:
+        console.print(f"[red][engine] manifest error: {escape(str(e))}[/red]")
+        return 1
+    work_recipe = load_yaml(_work_path)
+    rev_recipe  = load_yaml(_rev_path)
+    console.print(f"[blue][engine] governance model: {escape(manifest.name)} {escape(manifest.version)}; "
+                  f"recipe set: {recipe_set}[/blue]")
+    log.info("governance model: %s %s; recipe set: %s (%s, %s)", manifest.name, manifest.version,
+             recipe_set, _work_path, _rev_path)
 
     # F29: initialize audit-report.md as zero-byte at run start (audit runs
     # only, and only if absent) so the worker's first read/find/ls probe on
@@ -2477,6 +2504,7 @@ async def main_async(args: argparse.Namespace) -> int:
         console.print(f"[dim][engine] context report: {state_dir}/context-budget.md[/dim]")
 
     rc = 1  # default: failure — ensures rc is defined even on unexpected exception
+    _run_started = time.time()  # change-e58fd295: BLOCKED.md written by this run
     try:
         if args.mode == "worker":
             # F11: Clear stale phase signals to prevent false completion on iteration 1
@@ -2527,6 +2555,8 @@ async def main_async(args: argparse.Namespace) -> int:
                                 context_window=context_windows["worker"],
                                 reviewer_client=reviewer_b.provider,
                                 reviewer_context_window=context_windows["reviewer"],
+                                gates=loop_stage.gates,
+                                gate_specs=gate_specs,
                                 budget_warn_pct=budget_warn,
                                 budget_abort_pct=budget_abort,
                                 mcp_error_threshold=mcp_error_thresh,
@@ -2539,6 +2569,9 @@ async def main_async(args: argparse.Namespace) -> int:
                                 max_tool_result_chars=max_tool_result_chars)
             if rc == 0:
                 _archive_audit_artifacts(state_dir, args.task, log)
+                _write_awaiting_approval(state_dir, manifest, loop_stage.id, work_item, log)
+            else:
+                _annotate_blocked_return(state_dir, loop_stage, work_item, _run_started, log)
     finally:
         log.info("engine end rc=%d", rc)
         await mcp.close()

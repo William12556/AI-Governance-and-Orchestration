@@ -695,7 +695,7 @@ pip list
       - Install engine dependencies: `pip install -r ai/engine/requirements.txt`
       - Configure `ai/config.yaml` with inference endpoint and MCP server definitions
       - `ai/engine/src/orchestrator.py` resolves context-window size at startup (config.yaml override → live oMLX query → per-model config.yaml override → unknown) and writes context-budget.md to the state directory automatically; no separate script to run
-      - Recipe location: `<project name>/ai/engine/recipes/`
+      - Recipe location: `<project name>/ai/engine/recipes/` (loop) and `<project name>/ai/governance/software-engineering/recipes/` (audit); run types are declared in `ai/governance/software-engineering/manifest.yaml`
       - Reference: P00.11, P10.4
 
   - P10.9 Python documents
@@ -1262,6 +1262,7 @@ See [workflow.md](workflow.md).
 | 10.5    | 2026-09-23 | P10.6: locally edited framework files are backed up to ai-local/ before propagation overwrites them. Non-breaking. |
 | 10.6 | 2026-09-25 | Project rename: title LLM Orchestration Framework → AI Governance and Orchestration Framework; LLM-G&O → AI-G&O in P10 and P11 notes. Historical row 5.4 unchanged. Non-breaking. |
 | 11.0 | 2026-09-25 | Layout and terminology migration (change-5bcd46ad): governance model at ai/governance/software-engineering/; ai/ael/ → ai/engine/; project configuration ai/ael/config.yaml → ai/config.yaml; state ai/state/ralph/ → ai/state/; terms AEL → engine, Ralph Loop → loop, RALPH-BLOCKED.md → BLOCKED.md, .ralph-complete/.ralph-timeout → .complete/.timeout, target_profile ael → engine (legacy value accepted); ael-mcp → engine-mcp in ai/engine/mcp/; govwatch retired (overwatch remains). P10.6 layout and ownership updated. Breaking: downstream projects run bin/migrate-layout.sh, then bin/propagate.sh --allow-major. |
+| 11.1 | 2026-10-01 | P10.4 recipe location: audit recipes moved to the governance model; run types declared in manifest.yaml (change-e58fd295) |
 
 ---
 [Return to Table of Contents](<#table of contents>)

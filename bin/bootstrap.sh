@@ -80,6 +80,24 @@ MODEL="software-engineering"
 [[ -e "${PROJECT_AI}/context.md" ]]  || cp "${PROJECT_AI}/governance/${MODEL}/seed/context.md" "${PROJECT_AI}/context.md"
 [[ -e "${PROJECT_AI}/task.md" ]]     || cp "${PROJECT_AI}/governance/${MODEL}/seed/task.md" "${PROJECT_AI}/task.md"
 
+# --- Workspace folders (change-e58fd295, FR-01-04) ---------------------------
+# Creates each ai/workspace/<folder> listed under workspace_folders: in the
+# governance model manifest when absent. Existing paths are never changed; a
+# non-directory in the way is reported and left alone.
+create_workspace_folders() {
+    local manifest="$1" workspace="$2" d
+    [[ -f "${manifest}" ]] || { echo "workspace: no manifest at ${manifest}; folders not created"; return 0; }
+    while IFS= read -r d; do
+        [[ -z "${d}" || "${d}" == /* || "/${d}/" == */../* ]] && continue
+        if [[ -e "${workspace}/${d}" || -L "${workspace}/${d}" ]]; then
+            [[ -d "${workspace}/${d}" ]] || echo "workspace: ${d} exists and is not a directory; left unchanged"
+            continue
+        fi
+        mkdir -p "${workspace}/${d}" && echo "workspace: created ${d}/"
+    done < <(awk '/^workspace_folders:/{f=1;next} f&&/^[^[:space:]#]/{f=0} f&&/^[[:space:]]*-[[:space:]]/{sub(/^[[:space:]]*-[[:space:]]*/,"");sub(/[[:space:]]*#.*$/,"");gsub(/["\047]/,"");print}' "${manifest}")
+}
+create_workspace_folders "${PROJECT_AI}/governance/${MODEL}/manifest.yaml" "${PROJECT_AI}/workspace"
+
 # --- Cleanup ----------------------------------------------------------------
 
 rm -rf "${TMPWORK}"
