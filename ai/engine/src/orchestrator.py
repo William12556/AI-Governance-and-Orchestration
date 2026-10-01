@@ -2016,9 +2016,22 @@ async def run_loop(
                 gate_outcomes["syntax"] = G.gate_status(_syntax_result)
             gate_outcomes.update((_g, G.gate_status(_res)) for _g, _res in _command_results)
 
+        # Clear signal files after the gates, before the reviewer starts.
+        # change-b7e3d5a9: review-feedback.txt is cleared here, per cycle, not only
+        # at loop start; the worker has already consumed the prior cycle's feedback.
+        # change-82dbf16a iteration 3 (audit F2-03, F2-04): the clear runs after
+        # the gates, because gate processes run worker-written code; .complete and
+        # awaiting-approval.md are included, so only the engine's own SHIP path
+        # can leave them. review-result.txt is not a verdict source (F-01).
+        clear_state(state_dir, "work-complete.txt", "review-feedback.txt", "review-result.txt",
+                    ".complete", "awaiting-approval.md")
+
         # change-82dbf16a (M-02, FR-03-02 v1.3): a gate that cannot run ends the
         # run BLOCKED, naming the gate; SHIP is not possible without it.
         _not_run = [(_g, _res) for _g, _res in _command_results if G.gate_status(_res) == "UNCHECKED"]
+        # change-82dbf16a iteration 4 (audit F3-01): the clear above runs before
+        # this check, so a gate that writes state files and then cannot run
+        # leaves none of them.
         if _not_run:
             _names = ", ".join(_g for _g, _ in _not_run)
             write_state(state_dir, "BLOCKED.md",
@@ -2029,16 +2042,6 @@ async def run_loop(
             log.error("BLOCKED: gate could not run: %s", _names)
             console.print(f"[red][engine] BLOCKED: gate could not run: {escape(_names)}[/red]")
             return 1
-
-        # Clear signal files before the reviewer starts.
-        # change-b7e3d5a9: review-feedback.txt is cleared here, per cycle, not only
-        # at loop start; the worker has already consumed the prior cycle's feedback.
-        # change-82dbf16a iteration 3 (audit F2-03, F2-04): the clear runs after
-        # the gates, because gate processes run worker-written code; .complete and
-        # awaiting-approval.md are included, so only the engine's own SHIP path
-        # can leave them. review-result.txt is not a verdict source (F-01).
-        clear_state(state_dir, "work-complete.txt", "review-feedback.txt", "review-result.txt",
-                    ".complete", "awaiting-approval.md")
 
         # F16: Prepend [ENGINE RUNTIME CONTEXT] to review_task for consistent framing
         _review_header = (
@@ -2376,9 +2379,15 @@ async def main_async(args: argparse.Namespace) -> int:
     # prompt inside ai/workspace/ may enter the loop stage only when its
     # earlier stages have evidence and committed approvals. Checked before any
     # state change; exit code 3.
+    # change-82dbf16a iteration 4 (audit F3-02): the task file is read once,
+    # here; the pre-run check verifies these bytes and the run uses them.
+    _task_bytes: bytes | None = None
+    if args.task and os.path.isfile(args.task):
+        with open(args.task, "rb") as _fh:
+            _task_bytes = _fh.read()
     _tracked = bool(work_item) and ST.is_tracked_task(os.getcwd(), args.task)
     if args.mode in ("loop", "worker") and _tracked:
-        _missing = ST.prerun_missing(os.getcwd(), manifest, work_item, args.task)
+        _missing = ST.prerun_missing(os.getcwd(), manifest, work_item, args.task, _task_bytes)
         if _missing:
             console.print(f"[red][engine] work item {escape(work_item)} is not ready for "
                           f"'{escape(loop_stage.id)}'; missing:[/red]")
@@ -2488,8 +2497,9 @@ async def main_async(args: argparse.Namespace) -> int:
     await mcp.connect()
 
     # Resolve task
-    if args.task and os.path.exists(args.task):
-        raw = open(args.task).read()
+    if _task_bytes is not None:
+        # universal newlines, as the text-mode read did before iteration 4
+        raw = _task_bytes.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
         brief = extract_tactical_brief(raw, log)
 
         # strict_tactical_brief: fail fast when engine profile has no valid brief
@@ -2523,7 +2533,7 @@ async def main_async(args: argparse.Namespace) -> int:
     # change-bdc6820f: write scope from the T03 prompt's deliverables (FR-05-01)
     project_root = os.getcwd()
     write_scope = None
-    if args.task and os.path.exists(args.task):
+    if _task_bytes is not None:
         _deliverables = S.extract_deliverable_paths(raw)
         if _deliverables is not None:
             write_scope = S.build_write_scope(project_root, _deliverables,

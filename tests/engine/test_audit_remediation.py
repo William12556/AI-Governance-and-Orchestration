@@ -313,3 +313,44 @@ def test_gate_written_complete_and_feedback_are_cleared(orch, project, monkeypat
     assert not (state / ".complete").exists()
     assert not (state / "review-feedback.txt").exists() or \
         "FORGED" not in (state / "review-feedback.txt").read_text()
+
+
+# --- iteration 4: third follow-up F3-01 ----------------------------------------------------
+
+_FORGE_ALL = ("{python} -c \"import pathlib; d=pathlib.Path('ai/state'); "
+              "[(d/n).write_text(t) for n, t in (('review-result.txt', 'SHIP'), ('review-feedback.txt', 'FORGED'), "
+              "('.complete', 'COMPLETE: iteration 1'), ('awaiting-approval.md', 'x'))]\"")
+
+
+@pytest.mark.parametrize("variant", ["timeout", "second_gate"])
+def test_gate_written_files_are_cleared_when_a_gate_cannot_run(orch, project, monkeypatch, variant):
+    """F3-01: files a gate writes are cleared before a BLOCKED return for a gate that cannot run."""
+    state = project / "ai" / "state"
+    if variant == "timeout":
+        gates = ["lint", "reviewer"]
+        specs = {"lint": {"command": _FORGE_ALL[:-1] + "; import time; time.sleep(5)\"",
+                          "python": PY, "timeout_seconds": 1}}
+    else:
+        gates = ["lint", "missing", "reviewer"]
+        specs = {"lint": {"command": _FORGE_ALL, "python": PY},
+                 "missing": {"command": "/nonexistent/tool"}}
+    rc = _loop_with(orch, project, monkeypatch, gates, specs)
+    assert rc == 1 and "Gate could not run" in (state / "BLOCKED.md").read_text()
+    for name in ("review-result.txt", "review-feedback.txt", ".complete", "awaiting-approval.md"):
+        assert not (state / name).exists(), name
+
+
+def _loop_with(orch, project, monkeypatch, gates, specs):
+    state = project / "ai" / "state"
+
+    async def fake_run_phase(client, mcp, model, recipe, task, max_iter, state_dir, log, **kw):
+        if kw["phase_label"] == "WORKER":
+            (state / "work-summary.txt").write_text("done\n")
+            return 0, "done", set()
+        raise AssertionError("the review phase must not run")
+
+    monkeypatch.setattr(orch, "run_phase", fake_run_phase)
+    monkeypatch.setattr(orch.sys, "stdin", io.StringIO())
+    return asyncio.run(orch.run_loop(None, None, "w", "r", {}, {}, "task", 1, 2, str(state),
+                                     logging.getLogger("engine-test-f3"), project_root=str(project),
+                                     gates=gates, gate_specs=specs))

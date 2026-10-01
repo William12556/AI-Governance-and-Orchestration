@@ -7,13 +7,13 @@ prompt_info:
   source_ref: "change-82dbf16a"
   target_profile: "claude_code"  # implemented by Claude in the planning session (operator decision 2026-10-01)
   date: "2026-10-01"
-  iteration: 3
+  iteration: 4
   coupled_docs:
     change_ref: "change-82dbf16a"
-    change_iteration: 3
+    change_iteration: 4
 
 context:
-  purpose: "Remediate audit-14e05e35 H-01 to H-03, M-01 to M-05 and the in-scope low findings; iteration 2: the follow-up audit residuals F-01 to F-06; iteration 3: the second follow-up F2-01 to F2-04."
+  purpose: "Remediate audit-14e05e35 H-01 to H-03, M-01 to M-05 and the in-scope low findings; iteration 2: the follow-up audit residuals F-01 to F-06; iteration 3: the second follow-up F2-01 to F2-04; iteration 4: the third follow-up F3-01, F3-02."
   constraints:
     - "The worker keeps write access to work-summary.txt, work-complete.txt and BLOCKED.md"
     - "Approvals are compared with the working copy of each evidence document"
@@ -37,6 +37,8 @@ specification:
       - "Iteration 2, F-04, F-05: refuse a write whose target is or contains a signal file; compare case-folded paths"
       - "Iteration 3, F2-01, F2-02: task_document_error requires realpath(task) to equal the realpath of an active task-stage document of the UUID taken from the task name as given; fullmatch for document and engine-mcp names"
       - "Iteration 3, F2-03, F2-04: clear review-result.txt, review-feedback.txt, .complete and awaiting-approval.md after the gates, before the review phase"
+      - "Iteration 4, F3-01: run that clear before the UNCHECKED check"
+      - "Iteration 4, F3-02: read the task bytes once before the pre-run check; prerun_missing(task_bytes) requires their blob hash to equal the approved hash of the matched document; use the bytes for the task text and the write scope"
 
 deliverable:
   format_requirements:

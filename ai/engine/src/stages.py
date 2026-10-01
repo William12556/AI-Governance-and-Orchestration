@@ -78,7 +78,11 @@ def _git(project_root: str, *args: str) -> subprocess.CompletedProcess:
 def blob_hash(path: str) -> str:
     """The git blob hash of a file's content (as git hash-object without filters)."""
     with open(path, "rb") as fh:
-        data = fh.read()
+        return blob_hash_bytes(fh.read())
+
+
+def blob_hash_bytes(data: bytes) -> str:
+    """The git blob hash of the given content."""
     return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
 
 
@@ -358,11 +362,14 @@ def task_document_error(project_root: str, manifest, task_path: str) -> str | No
     return None
 
 
-def prerun_missing(project_root: str, manifest, uuid: str, task_path: str | None = None) -> list[str]:
+def prerun_missing(project_root: str, manifest, uuid: str, task_path: str | None = None,
+                   task_bytes: bytes | None = None) -> list[str]:
     """
     What is missing before the work item may enter the loop stage (FR-08-05).
     Empty when the run may start. With task_path, the task file must be an
-    active evidence document of the work item (F-02).
+    active evidence document of the work item (F-02). With task_bytes (the
+    content the engine read once and will use), its blob hash must equal the
+    approved hash of that document (change-82dbf16a iteration 4, F3-02).
     """
     if task_path is not None:
         err = task_document_error(project_root, manifest, task_path)
@@ -390,7 +397,26 @@ def prerun_missing(project_root: str, manifest, uuid: str, task_path: str | None
         if mismatch:
             missing.append(f"{sid}: the approval does not match the current documents ({mismatch}); "
                            f"review and re-approve (python ai/engine/src/approve.py {uuid} {sid})")
+    if task_path is not None and task_bytes is not None:
+        missing += _task_content_mismatch(project_root, manifest, item, approvals, task_path, task_bytes)
     return missing
+
+
+def _task_content_mismatch(project_root: str, manifest, item: WorkItem, approvals: Approvals,
+                           task_path: str, task_bytes: bytes) -> list[str]:
+    """F3-02: the bytes the engine will run must be the approved content of the task document."""
+    st = task_stage(manifest)
+    recorded = approvals.get((item.uuid, st.id)) if st is not None else None
+    if not recorded:
+        return []  # no approval or no hashes: already reported
+    real = os.path.realpath(task_path)
+    keys = [os.path.relpath(d.path, WORKSPACE).replace(os.sep, "/") for d in item.documents
+            if d.stage == st.id and os.path.realpath(os.path.join(project_root, d.path)) == real]
+    if keys and recorded.get(keys[0]) == blob_hash_bytes(task_bytes):
+        return []
+    return [f"{st.id}: the task content the engine read does not match the approved "
+            f"{keys[0] if keys else task_path}; review and re-approve "
+            f"(python ai/engine/src/approve.py {item.uuid} {st.id})"]
 
 
 def main() -> None:

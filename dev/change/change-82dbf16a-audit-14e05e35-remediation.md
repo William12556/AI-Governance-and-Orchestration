@@ -8,10 +8,10 @@ change_info:
   author: "William Watson"
   status: "implemented"
   priority: "high"
-  iteration: 3
+  iteration: 4
   coupled_docs:
     issue_ref: "issue-82dbf16a"
-    issue_iteration: 3
+    issue_iteration: 4
 
 source:
   type: "issue"
@@ -57,6 +57,11 @@ scope:
     review-feedback.txt, .complete and awaiting-approval.md are cleared after
     the gates, immediately before the review phase (F2-03, F2-04).
     loop-review.yaml 1.10.0 step 5 wording; engine guide §5.0; design 1.8.
+    Iteration 4 (third follow-up F3-01, F3-02): the post-gate clear runs
+    before the UNCHECKED check (F3-01); main_async reads the task bytes once
+    before the pre-run check, prerun_missing compares their blob hash with
+    the approved hash of the matched document, and the run uses those bytes
+    for the task text and the write scope (F3-02). Engine guide §5.0; design 1.9.
   affected_components:
     - { name: "orchestrator", file_path: "ai/engine/src/orchestrator.py", change_type: "modify" }
     - { name: "scope", file_path: "ai/engine/src/scope.py", change_type: "modify" }
@@ -92,6 +97,7 @@ testing_requirements:
     - "All existing tests pass (two fixtures updated to bound approvals; iteration 2: blob keys in fixtures, FakePopen lets the task check run)"
     - "Iteration 2: gate-written review-result.txt and review-feedback.txt ignored; task in a prompt subfolder, other workspace folder, workspace root, closed/ or with .MD refused by the engine (exit 3) and engine-mcp; active and closed copies bound separately; directory targets holding signal files refused; case variants refused"
     - "Iteration 3: newline-terminated task name and a symlink named for another work item refused by the pre-run check, main_async (exit 3) and engine-mcp; gate-written .complete, awaiting-approval.md, review-result.txt and review-feedback.txt absent during review and after REVISE, for bare, bold and empty REVISE messages"
+    - "Iteration 4: gate-written files cleared when the gate times out or a later gate cannot run; task bytes differing from the approved content refused; an in-place edit or symlink re-point after the pre-run check does not reach the run (main_async with stubbed providers and MCP)"
     - "Forged review-result.txt does not override REVISE; reviewer and unoffered calls are refused and not dispatched; signal files refused; no-path writes refused; symlink target checked; UNCHECKED blocks naming the gate; SKIPPED listed; gate environment scrubbed; worker-mode return stage; declared deliverables in block; writable_paths validated; edited, added and unbound approvals reported; re-approval; unquoted UUID skipped; scan leaves .git/index unchanged; symlinked prompt tracked; bare-term scan"
 
 implementation:
@@ -99,8 +105,8 @@ implementation:
 
 traceability:
   requirements: ["FR-02-03", "FR-03-02", "FR-05-01", "FR-05-03", "FR-07-01", "FR-08-05", "FR-08-06", "NFR-05"]
-  design: "design-14e05e35 v1.8 §6.0, §7.0, §8.0, §9.0, §10.0, §14.0 DI-06"
-  audit: "dev/audit/audit-14e05e35-phase2-2026-10-01.md; follow-ups dev/audit/audit-14e05e35-followup-2026-10-01.md, dev/audit/audit-14e05e35-followup2-2026-10-01.md"
+  design: "design-14e05e35 v1.9 §6.0, §7.0, §8.0, §9.0, §10.0, §14.0 DI-06"
+  audit: "dev/audit/audit-14e05e35-phase2-2026-10-01.md; follow-ups dev/audit/audit-14e05e35-followup-2026-10-01.md, dev/audit/audit-14e05e35-followup2-2026-10-01.md, dev/audit/audit-14e05e35-followup3-2026-10-01.md"
   prompt: "dev/prompt/closed/prompt-82dbf16a-audit-14e05e35-remediation.md"
 
 version_history:
@@ -112,7 +118,10 @@ version_history:
     changes: ["Iteration 2 from the follow-up audit (F-01 to F-06); implemented 2026-10-01 (279 passed, offline shim); commit 5ada0b6"]
   - version: "3.0"
     date: "2026-10-01"
-    changes: ["Iteration 3 from the second follow-up audit (F2-01 to F2-04); implemented 2026-10-01 (287 passed, offline shim)"]
+    changes: ["Iteration 3 from the second follow-up audit (F2-01 to F2-04); implemented 2026-10-01 (287 passed, offline shim); commit 736af62"]
+  - version: "4.0"
+    date: "2026-10-01"
+    changes: ["Iteration 4 from the third follow-up audit (F3-01, F3-02); implemented 2026-10-01 (292 passed, offline shim)"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

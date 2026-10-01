@@ -401,3 +401,86 @@ def test_engine_refuses_newline_and_foreign_symlink_tasks(orch, repo, se):
         args = argparse.Namespace(config=_config(repo), mode="loop", task=str(task), model=None,
                                   worker_model=None, reviewer_model=None, max_iterations=None, duration=None)
         assert asyncio.run(orch.main_async(args)) == 3
+
+
+# --- change-82dbf16a iteration 4: third follow-up F3-02 ------------------------------
+
+def test_task_bytes_must_match_the_approved_content(repo, se):
+    prompt = _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    approved = prompt.read_bytes()
+    assert ST.prerun_missing(str(repo), se, U, str(prompt), approved) == []
+    missing = ST.prerun_missing(str(repo), se, U, str(prompt), approved + b"EVIL\n")
+    assert len(missing) == 1 and "task content the engine read does not match" in missing[0]
+    assert f"prompt/{prompt.name}" in missing[0]
+
+
+class _Stop(Exception):
+    pass
+
+
+@pytest.mark.parametrize("variant", ["edit", "repoint"])
+def test_engine_runs_the_bytes_it_checked(orch, repo, se, monkeypatch, variant):
+    """F3-02: a change to the task file after the pre-run check does not reach the run."""
+    import types
+    prompt = _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    approved = prompt.read_text()
+    other = _doc(repo, "prompt", "prompt", uuid=V)
+    other.write_text(other.read_text() + "EVIL\n")
+    task = prompt
+    if variant == "repoint":
+        task = repo / "ai" / "workspace" / "scratch" / f"prompt-{U}-link.md"
+        task.parent.mkdir(parents=True)
+        task.symlink_to(prompt)
+
+    real_prerun = orch.ST.prerun_missing
+
+    def racing_prerun(*a, **k):
+        result = real_prerun(*a, **k)
+        if variant == "edit":
+            prompt.write_text(approved + "EVIL\n")
+        else:
+            task.unlink()
+            task.symlink_to(other)
+        return result
+
+    class Prov:
+        async def await_ready(self, *a, **k):
+            return None
+
+        def live_context_window(self, *a, **k):
+            return None
+
+    def bindings(*a, **k):
+        return {r: types.SimpleNamespace(role=r, provider_name="p", provider=Prov(), model="m")
+                for r in ("worker", "reviewer")}
+
+    class MCP:
+        def __init__(self, *a, **k):
+            pass
+
+        async def connect(self):
+            return None
+
+        async def close(self):
+            return None
+
+        def get_openai_tools(self, readonly=False):
+            return []
+
+    seen = []
+
+    def capture(raw, log):
+        seen.append(raw)
+        raise _Stop
+
+    monkeypatch.setattr(orch.ST, "prerun_missing", racing_prerun)
+    monkeypatch.setattr(orch, "build_role_bindings", bindings)
+    monkeypatch.setattr(orch, "MCPClient", MCP)
+    monkeypatch.setattr(orch, "extract_tactical_brief", capture)
+    args = argparse.Namespace(config=_config(repo), mode="loop", task=str(task), model=None,
+                              worker_model=None, reviewer_model=None, max_iterations=None, duration=None)
+    with pytest.raises(_Stop):
+        asyncio.run(orch.main_async(args))
+    assert seen == [approved]
