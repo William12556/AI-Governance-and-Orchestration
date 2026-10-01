@@ -3,7 +3,7 @@ Created: 2026 October 01
 # Engine Generalisation Design (Phase 2)
 
 **UUID:** `14e05e35`
-**Status:** Draft
+**Status:** Approved 2026-10-01.
 **Requirements:** `dev/requirements/requirements-14e05e35-engine-generalisation.md` v1.0
 **Baseline:** `dev/design/design-ael-orchestrator.md` v0.6. This document describes changes only; everything not mentioned here is unchanged.
 
@@ -431,6 +431,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.0 | 2026-10-01 | Approved by the operator. DI-04 and DI-05 remain open and do not block implementation. |
 | 0.3 | 2026-10-01 | From report-14e05e35 (Mistral API test): DI-01 closed; DI-04 updated (partially confirmed, guidance); DI-05 added (allowance exhaustion error); §3.0 pinned model IDs, Devstral unavailable on the Mistral API. |
 | 0.2 | 2026-10-01 | DI-04 added: Mistral Pro subscription for the `mistral` provider; References [2]–[6] added. |
 | 0.1 | 2026-10-01 | Initial draft from requirements 14e05e35 v1.0 |
