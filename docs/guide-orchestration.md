@@ -41,8 +41,8 @@ Created: 2026 June 18
 | `iteration.txt` | Current loop cycle number |
 | `work-summary.txt` | Worker phase output |
 | `work-complete.txt` | Worker completion signal |
-| `review-result.txt` | `SHIP` or `REVISE` decision |
-| `review-feedback.txt` | Reviewer notes for next worker iteration |
+| `review-result.txt` | Cleared before each review phase; not read. The verdict is the reviewer's final response |
+| `review-feedback.txt` | Feedback for the next worker iteration, from the reviewer's final response or a gate |
 | `.complete` | Success marker |
 | `BLOCKED.md` | Failure details; seeds T06 Issue |
 
@@ -154,6 +154,7 @@ Setup instructions: P10.8 in `ai/governance/software-engineering/governance.md`
 | 1.2 | 2026-10-01 | engine-mcp: work_status; tracked prompt tasks only (change-793992ae) |
 | 1.3 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 1.4 | 2026-10-01 | Overwatch phase label: Loop execution (audit-14e05e35 M-03, change-82dbf16a) |
+| 1.5 | 2026-10-01 | State files: review-result.txt not read (change-82dbf16a iteration 2, audit-14e05e35 follow-up, F-06) |
 
 ---
 

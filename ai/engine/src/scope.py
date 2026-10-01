@@ -133,8 +133,11 @@ SIGNAL_FILES = ("review-result.txt", "review-feedback.txt", ".complete", ".timeo
 
 
 def signal_files(state_dir: str) -> frozenset[str]:
-    """Resolved absolute paths of the engine signal files in state_dir."""
-    return frozenset(_real(os.path.join(state_dir, f)) for f in SIGNAL_FILES)
+    """
+    Resolved absolute paths of the engine signal files in state_dir,
+    case-folded (F-05: macOS volumes are normally case-insensitive).
+    """
+    return frozenset(_real(os.path.join(state_dir, f)).casefold() for f in SIGNAL_FILES)
 
 
 def _real(path: str) -> str:
@@ -211,9 +214,12 @@ def check(tool_name: str, arguments: dict, project_root: str,
             return Violation(target, "outside the project root",
                              f"Scope violation: path '{target}' is outside the project root "
                              f"'{project_root}'. All writes must target paths within the project.")
-        if resolved in protected:
+        # F-04, F-05: a target equal to a signal file, or a directory holding
+        # one (tools such as replace_text rewrite under a directory), is refused.
+        folded = resolved.casefold()
+        if any(p == folded or _within(p, folded) for p in protected):
             return Violation(target, "engine signal file",
-                             f"write refused: {target} is an engine signal file; "
+                             f"write refused: {target} is or contains an engine signal file; "
                              f"only the engine writes it")
         if write_scope is not None and not write_scope.allows(resolved, tool_name in DIRECTORY_TOOLS):
             return Violation(target, "outside the declared scope",

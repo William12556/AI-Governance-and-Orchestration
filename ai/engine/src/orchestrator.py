@@ -1638,8 +1638,9 @@ def _run_pytest_gate(state_dir: str, log: logging.Logger, project_root: str,
     spec: {command, python, timeout_seconds} from the manifest and ai/config.yaml
     (change-e58fd295); omitted, the historical command runs with this
     interpreter. Returns a [TEST GATE] block, or '' when no target resolves.
-    PASS: exit 0; FAIL: tests failed; UNCHECKED: pytest could not run. Only
-    FAIL overrides SHIP in run_loop.
+    PASS: exit 0; FAIL: tests failed; UNCHECKED: pytest could not run. In
+    run_loop FAIL overrides SHIP and UNCHECKED ends the run BLOCKED
+    (change-82dbf16a).
     """
     deliverables = _extract_deliverables(state_dir, log)
     if not deliverables:
@@ -1997,8 +1998,8 @@ async def run_loop(
         # during its phase; without this clear the `if not existing_feedback:` guard
         # freezes cycle 1's feedback for the whole run, so later reviewers are
         # discarded and F12 stall detection compares the file to itself.
-        # change-82dbf16a (H-01): review-result.txt is cleared too, so only this
-        # cycle's review phase can supply a verdict file.
+        # change-82dbf16a (H-01): review-result.txt is cleared too; it is no
+        # longer a verdict source (iteration 2, audit F-01).
         clear_state(state_dir, "work-complete.txt", "review-feedback.txt", "review-result.txt")
         console.print("\n[bold blue]▶ REVIEW PHASE[/bold blue]")
 
@@ -2077,12 +2078,11 @@ async def run_loop(
             console.print("[red]✗ REVIEW PHASE FAILED[/red]")
             return 1
 
-        # F1/F2: Read review-result.txt (precedence), fallback to reviewer final message
-        result_raw = read_state(state_dir, "review-result.txt")
-        if result_raw:
-            verdict = _normalize_verdict(result_raw)
-            log.debug("verdict from review-result.txt: '%s' -> '%s'", result_raw.strip(), verdict)
-        elif reviewer_final_msg:
+        # change-82dbf16a iteration 2 (audit F-01): the verdict comes from the
+        # reviewer's final message only. review-result.txt is no longer read: the
+        # review phase cannot write, and gate processes (worker-written test code)
+        # run between the clear above and this point.
+        if reviewer_final_msg:
             verdict = _normalize_verdict(reviewer_final_msg)
             log.debug("verdict from reviewer final message: '%s' -> '%s'",
                       reviewer_final_msg[:60].replace('\n', ' '), verdict)
@@ -2091,20 +2091,19 @@ async def run_loop(
             log.debug("no verdict source — defaulting to REVISE")
         _log_gate(log, "reviewer", "reviewer_verdict", verdict)
 
-        # Persist fallback REVISE feedback body when reviewer_final_msg provided verdict.
+        # Persist the REVISE feedback body from the reviewer's final message.
         # Reviewer is read-only (F5) so cannot write review-feedback.txt itself.
-        # Extract feedback = reviewer_final_msg minus the leading verdict token.
-        if verdict == "REVISE" and not result_raw and reviewer_final_msg:
-            existing_feedback = read_state(state_dir, "review-feedback.txt")
-            if not existing_feedback:
-                # Strip the verdict declaration, whichever form it took. Using
-                # _strip_verdict rather than an unconditional leading-token drop
-                # keeps the body intact when the verdict was stated on its own
-                # line at the end, which is the common case.
-                feedback_body = _strip_verdict(reviewer_final_msg)
-                if feedback_body:
-                    write_state(state_dir, "review-feedback.txt", feedback_body)
-                    log.debug("persisted fallback REVISE feedback (%d chars)", len(feedback_body))
+        # The file was cleared before the review phase; any content now came from
+        # outside the engine (audit F-01), so the reviewer's feedback replaces it.
+        if verdict == "REVISE" and reviewer_final_msg:
+            # Strip the verdict declaration, whichever form it took. Using
+            # _strip_verdict rather than an unconditional leading-token drop
+            # keeps the body intact when the verdict was stated on its own
+            # line at the end, which is the common case.
+            feedback_body = _strip_verdict(reviewer_final_msg)
+            if feedback_body:
+                write_state(state_dir, "review-feedback.txt", feedback_body)
+                log.debug("persisted REVISE feedback (%d chars)", len(feedback_body))
 
         if verdict == "SHIP":
             # Audit SHIP gate: check scope integrity then coverage before accepting SHIP.
@@ -2378,7 +2377,7 @@ async def main_async(args: argparse.Namespace) -> int:
     # state change; exit code 3.
     _tracked = bool(work_item) and ST.is_tracked_task(os.getcwd(), args.task)
     if args.mode in ("loop", "worker") and _tracked:
-        _missing = ST.prerun_missing(os.getcwd(), manifest, work_item)
+        _missing = ST.prerun_missing(os.getcwd(), manifest, work_item, args.task)
         if _missing:
             console.print(f"[red][engine] work item {escape(work_item)} is not ready for "
                           f"'{escape(loop_stage.id)}'; missing:[/red]")

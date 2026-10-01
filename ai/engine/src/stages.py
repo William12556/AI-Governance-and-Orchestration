@@ -11,6 +11,10 @@ change-82dbf16a (audit-14e05e35): an approval records the git blob hash of
 each evidence document of its stage; the pre-run check requires the current
 documents to match exactly (H-02). git runs without optional locks, so a scan
 never writes the index (M-04).
+
+change-82dbf16a iteration 2 (audit-14e05e35 follow-up): blobs are keyed by the
+path relative to ai/workspace/ (F-03), and a tracked task must itself be an
+active evidence document of the stage before the loop stage (F-02).
 """
 
 from __future__ import annotations
@@ -122,8 +126,12 @@ def committed_approvals(project_root: str) -> Approvals:
 
 
 def stage_blobs(project_root: str, item: "WorkItem", stage_id: str) -> dict[str, str]:
-    """{document name: blob hash} of the work item's evidence documents for one stage."""
-    return {os.path.basename(d.path): blob_hash(os.path.join(project_root, d.path))
+    """
+    {path relative to ai/workspace/: blob hash} of the work item's evidence
+    documents for one stage (F-03: an active and a closed copy are distinct).
+    """
+    return {os.path.relpath(d.path, WORKSPACE).replace(os.sep, "/"):
+            blob_hash(os.path.join(project_root, d.path))
             for d in item.documents if d.stage == stage_id}
 
 
@@ -316,11 +324,42 @@ def is_tracked_task(project_root: str, task_path: str | None) -> bool:
     return os.path.realpath(task_path).startswith(workspace + os.sep)
 
 
-def prerun_missing(project_root: str, manifest, uuid: str) -> list[str]:
+def task_stage(manifest):
+    """The last stage with evidence before the loop stage (SE: prompt), or None."""
+    loop = manifest.loop_stage()
+    before = manifest.stages[:manifest.stages.index(loop)]
+    with_evidence = [s for s in before if s.evidence]
+    return with_evidence[-1] if with_evidence else None
+
+
+def task_document_error(project_root: str, manifest, task_path: str) -> str | None:
+    """
+    F-02: a tracked task must be an active evidence document of the stage
+    before the loop stage, compared after symlink resolution. None when it is.
+    """
+    st = task_stage(manifest)
+    if st is None:
+        return None
+    ev = st.evidence
+    folder = os.path.realpath(os.path.join(project_root, WORKSPACE, ev["folder"]))
+    real = os.path.realpath(task_path)
+    name_ok = re.match(rf"^{re.escape(ev['prefix'])}-[0-9a-f]{{8}}-.*\.md$", os.path.basename(real))
+    if os.path.dirname(real) != folder or not name_ok:
+        return (f"task file {task_path} is not an active {st.id} document; run the "
+                f"{st.id} from {WORKSPACE}/{ev['folder']}/{ev['prefix']}-<uuid>-<name>.md")
+    return None
+
+
+def prerun_missing(project_root: str, manifest, uuid: str, task_path: str | None = None) -> list[str]:
     """
     What is missing before the work item may enter the loop stage (FR-08-05).
-    Empty when the run may start.
+    Empty when the run may start. With task_path, the task file must be an
+    active evidence document of the work item (F-02).
     """
+    if task_path is not None:
+        err = task_document_error(project_root, manifest, task_path)
+        if err:
+            return [err]
     if not is_git_repository(project_root):
         return [f"{project_root} is not a git repository; approvals cannot be verified"]
     report = scan(project_root, manifest)
@@ -355,6 +394,9 @@ def main() -> None:
 
     p = argparse.ArgumentParser(description="Report the stage of every work item.")
     p.add_argument("--json", action="store_true", help="print the report as JSON")
+    p.add_argument("--task-check", metavar="TASK",
+                   help="print JSON {error} for whether TASK is an active evidence document "
+                        "of the stage before the loop stage (used by engine-mcp)")
     args = p.parse_args()
     try:
         manifest = load_manifest(locate_manifest())
@@ -362,6 +404,9 @@ def main() -> None:
         print(json.dumps({"error": f"manifest error: {e}"}) if args.json else f"manifest error: {e}",
               file=sys.stdout if args.json else sys.stderr)
         sys.exit(1)
+    if args.task_check:
+        print(json.dumps({"error": task_document_error(os.getcwd(), manifest, args.task_check)}))
+        return
     report = scan(os.getcwd(), manifest)
     if args.json:
         print(report.to_json())

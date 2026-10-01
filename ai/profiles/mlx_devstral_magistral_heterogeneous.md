@@ -117,7 +117,7 @@ Setup guides: [Devstral](../../docs/setup-apple-silicon-mlx.md) (worker) and [Ma
 
 Both models are Mistral-family (`mistral3`) and emit Mistral-format tool calls, which the engine parser (`ai/engine/src/parser.py`) handles. The orchestrator owns the full tool dispatch loop; tool calls are parsed from model output and dispatched directly via the Python MCP SDK.
 
-Reviewer verdict parsing was verified for Magistral (clean `SHIP` / `REVISE` leading token; reasoning not leaked into content despite `enable_thinking: true`). Native reviewer tool-calling (reading files, writing `review-result.txt`) is expected on the `mistral3` family basis and should be confirmed on the first real review phase.
+Reviewer verdict parsing was verified for Magistral (clean `SHIP` / `REVISE` leading token; reasoning not leaked into content despite `enable_thinking: true`). Native reviewer tool-calling (reading files; the verdict is the final response, the review phase cannot write) is expected on the `mistral3` family basis and should be confirmed on the first real review phase.
 
 Name tools explicitly in recipe prompts; use imperative phrasing.
 
@@ -188,7 +188,7 @@ ai/state/
 | 1.2 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.3 | 2026-10-01 | Recipe location: governance model recipes and manifest run types (change-e58fd295) |
 | 1.4 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
-| 1.5 | 2026-10-01 | TOC anchor for §6.0 corrected (audit-14e05e35 L-05, change-82dbf16a) |
+| 1.5 | 2026-10-01 | TOC anchor for §6.0 corrected (audit-14e05e35 L-05, change-82dbf16a); reviewer verdict wording (follow-up F-06) |
 
 ---
 

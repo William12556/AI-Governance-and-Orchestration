@@ -7,13 +7,13 @@ prompt_info:
   source_ref: "change-82dbf16a"
   target_profile: "claude_code"  # implemented by Claude in the planning session (operator decision 2026-10-01)
   date: "2026-10-01"
-  iteration: 1
+  iteration: 2
   coupled_docs:
     change_ref: "change-82dbf16a"
-    change_iteration: 1
+    change_iteration: 2
 
 context:
-  purpose: "Remediate audit-14e05e35 H-01 to H-03, M-01 to M-05 and the in-scope low findings."
+  purpose: "Remediate audit-14e05e35 H-01 to H-03, M-01 to M-05 and the in-scope low findings; iteration 2: the follow-up audit residuals F-01 to F-06."
   constraints:
     - "The worker keeps write access to work-summary.txt, work-complete.txt and BLOCKED.md"
     - "Approvals are compared with the working copy of each evidence document"
@@ -31,6 +31,10 @@ specification:
       - "M-04: stages.py runs git with --no-optional-locks"
       - "M-05: gate specs carry scrub_env from providers.*.api_key_env; run_command_gate removes those variables"
       - "L-01, L-02: realpath in is_tracked_task and the scope check; L-03: writable_paths must be relative paths below the root; L-12: return stage in worker mode; L-13: declared deliverables in the [DELIVERABLES] block; L-14: approval UUIDs must be quoted 8-hex strings"
+      - "Iteration 2, F-01: the verdict and the REVISE feedback come from the reviewer final message only; review-result.txt is not read"
+      - "Iteration 2, F-02: prerun_missing(task_path) and stages.py --task-check refuse a task that is not an active evidence document of the stage before the loop stage (resolved path); engine-mcp runs the check before starting"
+      - "Iteration 2, F-03: blobs keyed by path relative to ai/workspace/"
+      - "Iteration 2, F-04, F-05: refuse a write whose target is or contains a signal file; compare case-folded paths"
 
 deliverable:
   format_requirements:
@@ -43,10 +47,12 @@ deliverable:
     - path: "ai/engine/src/approve.py"
     - path: "ai/engine/src/gates.py"
     - path: "ai/engine/src/manifest.py"
+    - path: "ai/engine/mcp/server.py"
     - path: "tests/engine/test_audit_remediation.py"
     - path: "tests/engine/test_stages.py"
     - path: "tests/engine/test_manifest_gates.py"
     - path: "tests/engine/test_migrate_terms.py"
+    - path: "tests/engine/test_engine_mcp.py"
 
 success_criteria:
   - "Full engine and overwatch test suites pass"

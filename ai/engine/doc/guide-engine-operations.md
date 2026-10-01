@@ -40,7 +40,7 @@ State files reside in `ai/state/` (configured via `loop.state_dir` in `config.ya
 | `iteration.txt` | Orchestrator | Current outer loop cycle number |
 | `work-summary.txt` | Worker | Summary of work done this iteration |
 | `work-complete.txt` | Worker | Signals worker phase is complete |
-| `review-result.txt` | Orchestrator | Cleared before each review phase; the verdict is the reviewer's final response (`SHIP` or `REVISE`) |
+| `review-result.txt` | Orchestrator | Cleared before each review phase and not read; the verdict is the reviewer's final response (`SHIP` or `REVISE`) |
 | `review-feedback.txt` | Orchestrator | Feedback for the next worker iteration, from the reviewer's final response or a gate |
 | `.complete` | Orchestrator | Completion marker (see §5.0 for content variants) |
 | `BLOCKED.md` | Worker | Unrecoverable failure details; seeds T06 issue |
@@ -192,7 +192,7 @@ The `engine end rc=N` line is always written to the `.LOG` file on any clean exi
 python ai/engine/src/approve.py <uuid> <stage>   # e.g. approve.py 1a2b3c4d prompt
 ```
 
-The command appends the entry and commits `ai/approvals.yaml` alone. Uncommitted edits to the file are ignored. The entry records the git blob hash of each document of the approved stage (change-82dbf16a). When a document of an approved stage is edited, or another document with the same UUID is added, the pre-run check reports that the approval no longer matches; review the documents and run `approve.py` again. Record an approval after the document is final, including its status field. Free-text tasks and prompt files outside `ai/workspace/` are not tracked.
+The command appends the entry and commits `ai/approvals.yaml` alone. Uncommitted edits to the file are ignored. The entry records the git blob hash of each document of the approved stage, keyed by its path under `ai/workspace/` (change-82dbf16a). When a document of an approved stage is edited, or another document with the same UUID is added, the pre-run check reports that the approval no longer matches; review the documents and run `approve.py` again. Record an approval after the document is final, including its status field. The task passed to the engine must be the approved prompt itself, in `ai/workspace/prompt/`; any other file for a tracked work item is refused (exit 3; engine-mcp refuses it before starting). Free-text tasks and prompt files outside `ai/workspace/` are not tracked.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -319,7 +319,7 @@ curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 
 **Remediation:** If the file is a genuine deliverable, add it to `deliverable.files` in the prompt and rerun. Directory creation on the way to a declared file is allowed. The reviewer receives the deliverables as absolute paths in a `[DELIVERABLES]` block.
 
-Related refusals (change-82dbf16a): `write refused: … is an engine signal file` (the worker wrote an engine-owned state file); `write refused: tool '…' was called without a recognised path argument`; `tool refused tool=… reason=…` in the log (a tool not offered to the phase, or any write tool in the review phase). Paths are compared after symlink resolution.
+Related refusals (change-82dbf16a): `write refused: … is or contains an engine signal file` (the worker targeted an engine-owned state file, or a directory holding one; compared case-insensitively); `write refused: tool '…' was called without a recognised path argument`; `tool refused tool=… reason=…` in the log (a tool not offered to the phase, or any write tool in the review phase). Paths are compared after symlink resolution.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -341,6 +341,7 @@ Related refusals (change-82dbf16a): `write refused: … is an engine signal file
 | 1.9 | 2026-10-01 | §5.0: pre-run check (exit 3), stage tracking and approve.py (change-ee5357ec) |
 | 1.10 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 1.11 | 2026-10-01 | §2.1 state file writers, §3.0 legacy model precedence, §5.0 content-bound approvals, §7.0 UNCHECKED and not-applicable gates, §8.7 refusals (change-82dbf16a; audit-14e05e35 H-01, H-02, H-03, M-01, M-02, L-06, L-07) |
+| 1.12 | 2026-10-01 | §2.1 review-result.txt not read; §5.0 blob keys and task file rule; §8.7 directory and case refusals (change-82dbf16a iteration 2; follow-up F-01 to F-06) |
 
 ---
 

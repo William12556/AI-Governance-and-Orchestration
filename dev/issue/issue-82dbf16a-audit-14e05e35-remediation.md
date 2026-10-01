@@ -9,10 +9,10 @@ issue_info:
   status: "resolved"
   severity: "high"
   type: "defect"
-  iteration: 1
+  iteration: 2
   coupled_docs:
     change_ref: "change-82dbf16a"
-    change_iteration: 1
+    change_iteration: 2
 
 source:
   origin: "audit"
@@ -22,7 +22,9 @@ source:
     five medium and sixteen low findings. The operator approved remediation
     of H-01 to H-03, M-01 to M-05 and the low findings L-01 to L-07, L-12,
     L-13, L-14 (UUID parsing), L-15 and L-16; L-08 to L-11 and the L-14
-    accept remainder go to the backlog.
+    accept remainder go to the backlog. Iteration 2: the follow-up audit
+    (dev/audit/audit-14e05e35-followup-2026-10-01.md) found residuals F-01 to
+    F-06 after commit 9f692dc.
 
 affected_scope:
   components:
@@ -44,6 +46,10 @@ reproduction:
     - "H-03 (E-3): a reviewer call to write_file src/x.py is dispatched"
     - "M-01 (E-4): write calls with filename, file, directory or uri arguments pass the scope check"
     - "M-04 (E-5): git status in the stage scan changes .git/index"
+    - "F-01 (follow-up E-1b): a worker-written conftest.py writes SHIP into review-result.txt during the pytest gate; the reviewer answers REVISE; rc 0"
+    - "F-02 (follow-up E-2b, E-2c): prompt-<uuid>-evil.md outside ai/workspace/prompt/ (or .MD) runs under the approval of the unchanged prompt"
+    - "F-03 (follow-up E-2d): active and closed copies with one name share one blob entry"
+    - "F-04 (follow-up E-1f): replace_text with path ai/state is allowed"
   frequency: "always"
   reproducibility_conditions: "As stated per finding"
   preconditions: ""
@@ -71,7 +77,12 @@ analysis:
     offered tool list. M-01: the scope check is fail-open when no target is
     extracted. M-02: only FAIL overrides SHIP. M-04: git status takes the
     optional index lock. M-05: subprocess.run inherits the environment.
-  technical_notes: "M-02 decided by the operator 2026-10-01: UNCHECKED blocks; gates with nothing to check are listed in awaiting-approval.md; FR-03-02 amended."
+  technical_notes: >
+    M-02 decided by the operator 2026-10-01: UNCHECKED blocks; gates with
+    nothing to check are listed in awaiting-approval.md; FR-03-02 amended.
+    Iteration 2 (operator approval 2026-10-01): F-01 to F-06 fixed; the wider
+    limit behind F-01 (gate code runs with operator permissions) is recorded as
+    design DI-06.
 
 resolution:
   assigned_to: "Claude (Cowork, Opus 5.5)"
@@ -80,17 +91,17 @@ resolution:
   change_ref: "change-82dbf16a"
   resolved_date: "2026-10-01"
   resolved_by: "Claude (Cowork, Opus 5.5)"
-  fix_description: "Signal files protected and review-result.txt cleared before review; approvals record blob hashes and the pre-run check compares them; dispatch limited to offered tools, no writes in review; no-path writes refused; UNCHECKED blocks; git without optional locks; provider keys scrubbed from gates; document corrections."
+  fix_description: "Iteration 1: signal files protected and review-result.txt cleared before review; approvals record blob hashes and the pre-run check compares them; dispatch limited to offered tools, no writes in review; no-path writes refused; UNCHECKED blocks; git without optional locks; provider keys scrubbed from gates; document corrections. Iteration 2: verdict from the reviewer final message only (F-01); tracked task must be an active prompt document, engine and engine-mcp (F-02); blobs keyed by workspace-relative path (F-03); directory targets holding signal files refused (F-04); case-insensitive comparison (F-05); documents (F-06)."
 
 verification:
   verified_date: ""
-  verified_by: "Targeted follow-up audit (P02.8.2), pending"
-  test_results: "258 passed 2026-10-01 (offline shim, tests/engine and tests/overwatch); operator pytest run pending."
-  closure_notes: ""
+  verified_by: "Second targeted follow-up audit (P02.8.2) of iteration 2, pending"
+  test_results: "Iteration 1: 258 passed. Iteration 2: 279 passed 2026-10-01 (offline shim, tests/engine and tests/overwatch); operator pytest run pending."
+  closure_notes: "Follow-up audit dev/audit/audit-14e05e35-followup-2026-10-01.md found F-01 to F-06; verified there: H-03, M-01 to M-05, FR-03-02 v1.3."
 
 traceability:
   design_refs:
-    - "dev/design/design-14e05e35-engine-generalisation.md v1.6"
+    - "dev/design/design-14e05e35-engine-generalisation.md v1.7"
   change_refs:
     - "change-82dbf16a"
   test_refs:
@@ -98,6 +109,7 @@ traceability:
     - "tests/engine/test_stages.py"
     - "tests/engine/test_manifest_gates.py"
     - "tests/engine/test_migrate_terms.py"
+    - "tests/engine/test_engine_mcp.py"
 
 version_history:
   - version: "1.0"
@@ -105,6 +117,11 @@ version_history:
     author: "William Watson"
     changes:
       - "Initial issue from audit-14e05e35; status resolved after implementation"
+  - version: "2.0"
+    date: "2026-10-01"
+    author: "William Watson"
+    changes:
+      - "Iteration 2 from the follow-up audit (F-01 to F-06); status resolved after implementation"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

@@ -112,6 +112,26 @@ def _tracked_task_error(root: Path, task: str) -> str | None:
     return None
 
 
+def _task_document_error(root: Path, task: str) -> str | None:
+    """
+    change-82dbf16a iteration 2 (audit F-02): the task must be an active
+    evidence document of the stage before the loop stage, as the project's own
+    stages.py decides (the same rule as the engine's pre-run check).
+    """
+    stages_py = root / _STAGES_REL
+    if not stages_py.is_file():
+        return f"stages.py not found: {stages_py}"
+    path = Path(task).expanduser()
+    if not path.is_absolute():
+        path = root / path
+    result = subprocess.run([sys.executable, str(stages_py), "--task-check", str(path)],
+                            cwd=str(root), capture_output=True, text=True, timeout=60)
+    try:
+        return json.loads(result.stdout).get("error")
+    except (ValueError, AttributeError):
+        return f"task check failed: {(result.stderr or result.stdout).strip()[:300]}"
+
+
 def _read_run_record(state_dir: Path) -> dict:
     path = state_dir / _RUN_RECORD
     if path.exists():
@@ -173,7 +193,7 @@ def start_engine(project_dir: str, mode: str, task: str) -> str:
         return json.dumps({"error": str(exc)})
 
     if mode in _TRACKED_MODES:
-        reason = _tracked_task_error(root, task)
+        reason = _tracked_task_error(root, task) or _task_document_error(root, task)
         if reason:
             return json.dumps({"error": reason})
 

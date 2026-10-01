@@ -29,8 +29,17 @@ def proj(tmp_path):
     return tmp_path
 
 
+_REAL_POPEN = subprocess.Popen
+
+
 class FakePopen:
+    """Stands in for the engine process; the stages.py task check runs for real."""
     calls = []
+
+    def __new__(cls, cmd, **kw):
+        if "--task-check" in cmd:
+            return _REAL_POPEN(cmd, **kw)
+        return super().__new__(cls)
 
     def __init__(self, cmd, **kw):
         FakePopen.calls.append(cmd)
@@ -84,6 +93,19 @@ def test_tracked_prompt_starts_and_record_uses_state_dir(proj, monkeypatch):
     assert out["pid"] == 424242 and out["log_path"].startswith(str(proj.resolve() / "ai" / "runtime"))
     assert (proj / "ai" / "runtime" / "mcp-run.json").exists()
     assert "--task" in FakePopen.calls[-1]
+
+
+@pytest.mark.parametrize("where", ["ai/workspace/prompt/sub", "ai/workspace/scratch", "ai/workspace"])
+def test_prompt_outside_the_prompt_folder_is_refused(proj, monkeypatch, where):
+    """change-82dbf16a iteration 2 (audit-14e05e35 F-02)."""
+    FakePopen.calls = []
+    monkeypatch.setattr(server.subprocess, "Popen", FakePopen)
+    d = proj / where
+    d.mkdir(parents=True, exist_ok=True)
+    (d / f"prompt-{U}-evil.md").write_text("x")
+    out = json.loads(server.start_engine(str(proj), "loop", f"{where}/prompt-{U}-evil.md"))
+    assert "is not an active prompt document" in out.get("error", "")
+    assert FakePopen.calls == []
 
 
 def test_reviewer_mode_accepts_free_text(proj, monkeypatch):

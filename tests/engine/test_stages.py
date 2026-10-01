@@ -2,8 +2,10 @@
 
 import argparse
 import asyncio
+import json
 import os
 import subprocess
+import sys
 import time
 
 import pytest
@@ -66,7 +68,8 @@ def _commit_approval(root, stage, uuid=U, bound=True):
             folder, prefix = _EVIDENCE[stage]
             base = root / "ai" / "workspace" / folder
             for f in sorted(list(base.glob(f"{prefix}-{uuid}-*.md")) + list(base.glob(f"closed/{prefix}-{uuid}-*.md"))):
-                pairs.append(f'"{f.name}": "{ST.blob_hash(str(f))}"')
+                rel = f.relative_to(root / "ai" / "workspace").as_posix()
+                pairs.append(f'"{rel}": "{ST.blob_hash(str(f))}"')
         blobs = f", blobs: {{ {', '.join(pairs)} }}"
     path.write_text(text + f'  - {{ uuid: "{uuid}", stage: "{stage}"{blobs} }}\n')
     _git(root, "add", "ai/approvals.yaml")
@@ -237,7 +240,7 @@ def test_edited_prompt_needs_reapproval(repo, se):
     prompt.write_text(prompt.read_text() + "deliverable: changed\n")
     missing = ST.prerun_missing(str(repo), se, U)
     assert len(missing) == 1 and "does not match the current documents" in missing[0]
-    assert f"changed: prompt-{U}-work.md" in missing[0] and f"approve.py {U} prompt" in missing[0]
+    assert f"changed: prompt/prompt-{U}-work.md" in missing[0] and f"approve.py {U} prompt" in missing[0]
     item = ST.scan(str(repo), se).work_items[U]
     assert item.current_stage == "implement" and "does not match" in item.missing[0]
     code, msg = A.approve(str(repo), U, "prompt", manifest=se)
@@ -250,7 +253,7 @@ def test_added_same_uuid_prompt_needs_reapproval(repo, se):
     _commit_approval(repo, "prompt")
     (repo / "ai" / "workspace" / "prompt" / f"prompt-{U}-second.md").write_text("x\n")
     missing = ST.prerun_missing(str(repo), se, U)
-    assert any(f"added: prompt-{U}-second.md" in m for m in missing)
+    assert any(f"added: prompt/prompt-{U}-second.md" in m for m in missing)
 
 
 def test_approval_without_hashes_does_not_open_the_loop(repo, se):
@@ -264,7 +267,7 @@ def test_approve_records_blob_hashes(repo, se):
     prompt = _doc(repo, "prompt", "prompt")
     assert A.approve(str(repo), U, "prompt", manifest=se)[0] == 0
     blob = _git(repo, "hash-object", str(prompt)).stdout.strip()
-    assert ST.committed_approvals(str(repo))[(U, "prompt")] == {prompt.name: blob}
+    assert ST.committed_approvals(str(repo))[(U, "prompt")] == {f"prompt/{prompt.name}": blob}
     assert ST.blob_hash(str(prompt)) == blob
 
 
@@ -292,3 +295,68 @@ def test_symlink_into_workspace_is_tracked(project):
     link = project / f"prompt-{U}-link.md"
     link.symlink_to(inside)
     assert ST.is_tracked_task(str(project), str(link))
+
+
+# --- change-82dbf16a iteration 2: audit-14e05e35 follow-up F-02, F-03 ----------------
+
+@pytest.mark.parametrize("where", ["ai/workspace/prompt/sub", "ai/workspace/scratch",
+                                   "ai/workspace/change", "ai/workspace"])
+def test_task_outside_the_prompt_folder_is_refused(repo, se, where):
+    _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    d = repo / where
+    d.mkdir(parents=True, exist_ok=True)
+    evil = d / f"prompt-{U}-evil.md"
+    evil.write_text("x\n")
+    missing = ST.prerun_missing(str(repo), se, U, str(evil))
+    assert len(missing) == 1 and "is not an active prompt document" in missing[0]
+
+
+def test_task_with_upper_case_extension_is_refused(repo, se):
+    _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    evil = repo / "ai" / "workspace" / "prompt" / f"prompt-{U}-evil.MD"
+    evil.write_text("x\n")
+    assert "is not an active prompt document" in ST.prerun_missing(str(repo), se, U, str(evil))[0]
+
+
+def test_closed_prompt_is_not_a_task(repo, se):
+    closed = _doc(repo, "prompt", "prompt", closed=True)
+    assert "is not an active prompt document" in ST.prerun_missing(str(repo), se, U, str(closed))[0]
+
+
+def test_approved_active_prompt_is_a_valid_task(repo, se):
+    prompt = _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    assert ST.prerun_missing(str(repo), se, U, str(prompt)) == []
+    assert ST.task_document_error(str(repo), se, str(prompt)) is None
+
+
+def test_engine_refuses_a_task_outside_the_prompt_folder(orch, repo, se):
+    _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    evil = repo / "ai" / "workspace" / "scratch" / f"prompt-{U}-evil.md"
+    evil.parent.mkdir(parents=True)
+    evil.write_text("x\n")
+    args = argparse.Namespace(config=_config(repo), mode="loop", task=str(evil), model=None,
+                              worker_model=None, reviewer_model=None, max_iterations=None, duration=None)
+    assert asyncio.run(orch.main_async(args)) == 3
+
+
+def test_active_and_closed_copies_are_bound_separately(repo, se):
+    active = _doc(repo, "prompt", "prompt")
+    _doc(repo, "prompt", "prompt", closed=True)
+    assert A.approve(str(repo), U, "prompt", manifest=se)[0] == 0
+    blobs = ST.committed_approvals(str(repo))[(U, "prompt")]
+    assert set(blobs) == {f"prompt/{active.name}", f"prompt/closed/{active.name}"}
+    active.write_text(active.read_text() + "edited\n")
+    missing = ST.prerun_missing(str(repo), se, U, str(active))
+    assert any(f"changed: prompt/{active.name}" in m for m in missing)
+
+
+def test_task_check_command_line(repo):
+    prompt = _doc(repo, "prompt", "prompt")
+    stages_py = os.path.join(REPO, "ai", "engine", "src", "stages.py")
+    out = subprocess.run([sys.executable, stages_py, "--task-check", str(prompt)], cwd=str(repo),
+                         capture_output=True, text=True)
+    assert json.loads(out.stdout) == {"error": None}

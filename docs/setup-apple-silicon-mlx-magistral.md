@@ -157,7 +157,7 @@ Send a review-style prompt and confirm the response begins with a bare `SHIP` or
 
 **3. Confirm reviewer tool-calling (required before execution use):**
 
-Run one real review phase with the reviewer set to Magistral and confirm it calls read-only tools and writes `review-result.txt` rather than emitting prose. Native tool-calling is expected on the `mistral3` family basis but should be confirmed end-to-end. See [9.0 Known Constraints](<#9.0 known constraints>).
+Run one real review phase with the reviewer set to Magistral and confirm it calls read-only tools and states its verdict (`SHIP` or `REVISE: …`) as the leading token of its final response. The review phase cannot write files. Native tool-calling is expected on the `mistral3` family basis but should be confirmed end-to-end. See [9.0 Known Constraints](<#9.0 known constraints>).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -184,6 +184,7 @@ Run one real review phase with the reviewer set to Magistral and confirm it call
 | 0.1 | 2026-07-16 | Initial draft; reviewer setup guide for Magistral Small 2509 6bit. Facts verified against oMLX model status and on-disk model config.json |
 | 0.2 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 0.3 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 0.4 | 2026-10-01 | §8.0 step 3: verdict from the final response; review phase cannot write (change-82dbf16a iteration 2, audit-14e05e35 follow-up, F-06) |
 
 ---
 

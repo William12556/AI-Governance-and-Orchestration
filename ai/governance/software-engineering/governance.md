@@ -136,8 +136,8 @@ python ai/engine/src/orchestrator.py --mode loop \
       - `iteration.txt`: Current cycle number
       - `work-summary.txt`: Worker iteration output
       - `work-complete.txt`: Worker completion signal
-      - `review-result.txt`: SHIP or REVISE decision
-      - `review-feedback.txt`: Reviewer notes for next iteration
+      - `review-result.txt`: Cleared before each review phase; not read (the verdict is the reviewer's final response)
+      - `review-feedback.txt`: Feedback for the next iteration, from the reviewer's final response or a gate
       - `.complete`: Success marker
       - `BLOCKED.md`: Failure details
     - Boundary Conditions:
@@ -921,6 +921,7 @@ exclude_lines = [
     - Context file name: Defined in implementation profile (ai/profiles/)
     - Human: Records each approval of a tracked work item with `python ai/engine/src/approve.py <uuid> <stage>` (SE: change and prompt); the command commits ai/approvals.yaml and binds the approval to the current content of the stage's documents
     - Human: Re-approves after any edit of an approved document, or after a document with the same UUID is added (for example a prompt revised after BLOCKED); otherwise the engine refuses the run (exit 3)
+    - Planner: Passes the approved prompt itself as the engine task, from `ai/workspace/prompt/`; the engine and engine-mcp refuse any other task file for a tracked work item
     - Planner: After human approval of T03 prompt, presents worker/reviewer execution options; human selects preferred option:
 
     - **Option A — Human executes (all profiles):**
@@ -1270,6 +1271,7 @@ See [workflow.md](workflow.md).
 | 11.3 | 2026-10-01 | P00 engine-mcp: work_status tool; loop and worker runs only for T03 prompts inside ai/workspace/ (change-793992ae) |
 | 12.0 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 12.1 | 2026-10-01 | P00.4–P00.7 two-domain wording replaced; P10/P13.3 context file wording; P00.11 and P13.3 approvals recorded with approve.py and re-approval after edits; P13.1 worker/reviewer compound (audit-14e05e35 M-03, L-05, L-15; change-82dbf16a) |
+| 12.2 | 2026-10-01 | P00.11 state files: review-result.txt not read; P13.3 task file must be the approved prompt in ai/workspace/prompt/ (change-82dbf16a iteration 2, audit-14e05e35 follow-up) |
 
 ---
 [Return to Table of Contents](<#table of contents>)
