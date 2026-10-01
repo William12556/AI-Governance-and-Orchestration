@@ -302,10 +302,19 @@ class AnthropicProvider:
     kind = "anthropic"
 
     def __init__(self, api_key: str = "", max_tokens: int = _ANTHROPIC_DEFAULT_MAX_TOKENS,
-                 strict_tools: bool = True, client: Any = None):
+                 strict_tools: bool = True, base_url: str | None = None, client: Any = None):
+        """
+        base_url: optional Anthropic-compatible endpoint other than the Anthropic
+        API, for example a local oMLX server (change-43091424). Omitted, the SDK
+        default (the Anthropic API) applies.
+        """
+        self.base_url = base_url or None
         if client is None:
             from anthropic import AsyncAnthropic  # optional dependency, needed only here
-            client = AsyncAnthropic(api_key=api_key)
+            kwargs: dict[str, Any] = {"api_key": api_key}
+            if self.base_url:
+                kwargs["base_url"] = self.base_url
+            client = AsyncAnthropic(**kwargs)
         self.client = client
         self.max_tokens = max_tokens
         self.strict_tools = strict_tools
@@ -324,11 +333,29 @@ class AnthropicProvider:
 
     async def await_ready(self, model: str, timeout: float = 60.0, interval: float = 2.0,
                           echo: Callable[[str], None] = lambda s: None) -> None:
-        """The model must be retrievable from the Models API."""
+        """
+        Anthropic API: the model must be retrievable from the Models API.
+        Custom base_url (local server): the endpoint must answer the model list;
+        an unlisted model is accepted, as for kind omlx.
+        """
         deadline = time.monotonic() + timeout
         attempt = 0
         while True:
             attempt += 1
+            if self.base_url:
+                try:
+                    page = await self.client.models.list()
+                    ids = [getattr(m, "id", None) for m in getattr(page, "data", None) or []]
+                except Exception as e:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise TimeoutError(f"endpoint {self.base_url} not reachable after {timeout}s: {e}") from e
+                    echo(f"waiting for {self.base_url} (attempt {attempt}, {remaining:.0f}s remaining): {e}")
+                    await asyncio.sleep(interval)
+                    continue
+                echo(f"model ready: {model}" if model in ids
+                     else f"endpoint ready; '{model}' not listed — proceeding")
+                return
             try:
                 await self.client.models.retrieve(model)
                 echo(f"model ready: {model}")
@@ -358,6 +385,17 @@ class Binding:
     model: str
 
 
+_LOCAL_HOSTS = ("localhost", "127.0.0.1", "::1", "[::1]")
+
+
+def _is_local(base_url: str | None) -> bool:
+    """True for an endpoint on this machine, where a literal key is no secret."""
+    if not base_url:
+        return False
+    host = urllib.parse.urlparse(base_url).hostname or ""
+    return host in _LOCAL_HOSTS
+
+
 def _api_key(name: str, pcfg: dict, kind: str) -> str:
     env = pcfg.get("api_key_env")
     if env:
@@ -366,9 +404,9 @@ def _api_key(name: str, pcfg: dict, kind: str) -> str:
             raise ConfigError(f"providers.{name}: environment variable {env} is not set")
         return value
     if "api_key" in pcfg:
-        if kind != "omlx":
-            raise ConfigError(f"providers.{name}: api_key is accepted only for kind omlx; "
-                              f"use api_key_env")
+        if kind != "omlx" and not _is_local(pcfg.get("base_url")):
+            raise ConfigError(f"providers.{name}: api_key is accepted only for kind omlx or a "
+                              f"local base_url; use api_key_env")
         return str(pcfg["api_key"])
     if kind == "omlx":
         return "local"
@@ -386,7 +424,8 @@ def make_provider(name: str, pcfg: dict) -> Any:
     if kind == "anthropic":
         return AnthropicProvider(api_key=key,
                                  max_tokens=int(pcfg.get("max_tokens") or _ANTHROPIC_DEFAULT_MAX_TOKENS),
-                                 strict_tools=bool(pcfg.get("strict_tools", True)))
+                                 strict_tools=bool(pcfg.get("strict_tools", True)),
+                                 base_url=pcfg.get("base_url"))
     base_url = pcfg.get("base_url")
     if not base_url:
         raise ConfigError(f"providers.{name}.base_url: required for kind {kind}")

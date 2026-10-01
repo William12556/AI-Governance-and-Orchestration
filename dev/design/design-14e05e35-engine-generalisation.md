@@ -110,7 +110,7 @@ gates:
 
 | Rule | Behaviour |
 |---|---|
-| Keys | `api_key_env` names an environment variable. `api_key` is accepted only for `kind: omlx` (local, no secret). |
+| Keys | `api_key_env` names an environment variable. A literal `api_key` is accepted only for `kind: omlx` or a provider whose `base_url` is on this machine (no secret; change-43091424). |
 | Legacy | Without `roles:`, both roles use a provider built from the `omlx:` block; worker model = `omlx.worker_model` or `omlx.default_model`; reviewer model = `omlx.reviewer_model` or `omlx.default_model` (FR-04-08). |
 | CLI | `--worker-model`, `--reviewer-model` and `--model` override the model within the role's provider. |
 | Model IDs | Roles use pinned model IDs, not `-latest` aliases, so runs are reproducible. Devstral is not available on the Mistral API (deprecated); a tested Mistral API model is `mistral-medium-2604` (`dev/reports/report-14e05e35-mistral-api-hypothesis.md`). Model choice per role is an operator decision. |
@@ -164,7 +164,7 @@ The engine's message history stays in the current OpenAI chat format. Each provi
 | Assistant tool calls | `tool_calls` become `tool_use` content blocks. |
 | Tool results | Consecutive `tool` messages merge into one `user` message of `tool_result` blocks. |
 | Caching | `cache_control: {type: "ephemeral"}` on the last system block and the last tool definition, so the static prefix is cached (FR-04-04). |
-| Readiness | `models.retrieve(model)` succeeds. |
+| Readiness | `models.retrieve(model)` succeeds. With an optional `base_url` (an Anthropic-compatible local endpoint such as oMLX), the model list must answer and an unlisted model is accepted (change-43091424). |
 | Context window | Configuration tiers 1 and 3. |
 
 Worker and reviewer phases keep separate message histories, so tool call IDs never cross providers.
@@ -431,6 +431,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.5 | 2026-10-01 | §3.0, §4.3: optional base_url for the Anthropic provider; literal key for local endpoints (change-43091424). |
 | 1.4 | 2026-10-01 | §9.0: worker mode also limited to tracked prompts (change-793992ae). |
 | 1.3 | 2026-10-01 | DI-02 closed (change-ee5357ec). |
 | 1.2 | 2026-10-01 | §3.0, §5.2: pytest gate timeout 300 s, the historical value (FR-03-04; change-e58fd295). |

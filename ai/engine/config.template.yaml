@@ -29,6 +29,10 @@ omlx:
 #     api_key_env: ANTHROPIC_API_KEY
 #     max_tokens: 8192               # required by the Anthropic API
 #     strict_tools: true             # set false if a tool schema is rejected
+#   omlx_anthropic:                  # Anthropic-format requests to a local server
+#     kind: anthropic
+#     base_url: "http://127.0.0.1:8000"
+#     api_key: "local"               # literal key allowed for local endpoints only
 #
 # roles:
 #   worker:   { provider: omlx,    model: "mistralai_Devstral-Small-2-24B-Instruct-2512-MLX-8Bit" }

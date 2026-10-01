@@ -380,3 +380,56 @@ def test_main_async_stops_on_configuration_error(orch, project):
                               duration=None)
     assert asyncio.run(orch.main_async(args)) == 1
     assert not (project / "ai" / "state" / "fresh").exists()
+
+
+# --- Anthropic-compatible local endpoint (change-43091424) -------------------------
+
+def test_anthropic_custom_base_url_readiness_accepts_unlisted_model():
+    async def list_models():
+        return SimpleNamespace(data=[SimpleNamespace(id="other")])
+
+    seen = []
+    prov = P.AnthropicProvider(base_url="http://127.0.0.1:8000",
+                               client=SimpleNamespace(models=SimpleNamespace(list=list_models)))
+    asyncio.run(prov.await_ready("devstral", timeout=1, interval=0, echo=seen.append))
+    assert "not listed" in seen[0]
+
+
+def test_anthropic_without_base_url_requires_retrievable_model():
+    class NotFound(Exception):
+        status_code = 404
+
+    async def retrieve(model):
+        raise NotFound("missing")
+
+    prov = P.AnthropicProvider(client=SimpleNamespace(models=SimpleNamespace(retrieve=retrieve)))
+    with pytest.raises(P.ProviderError):
+        asyncio.run(prov.await_ready("claude-x", timeout=1, interval=0))
+
+
+def test_literal_key_accepted_only_for_local_endpoints():
+    assert P._api_key("a", {"kind": "anthropic", "base_url": "http://127.0.0.1:8000", "api_key": "local"},
+                      "anthropic") == "local"
+    assert P._api_key("a", {"kind": "anthropic", "base_url": "http://localhost:8000", "api_key": "x"},
+                      "anthropic") == "x"
+    with pytest.raises(P.ConfigError):
+        P._api_key("a", {"kind": "anthropic", "base_url": "https://api.example.com", "api_key": "x"},
+                   "anthropic")
+    with pytest.raises(P.ConfigError):
+        P._api_key("a", {"kind": "anthropic", "api_key": "x"}, "anthropic")
+
+
+def test_make_provider_passes_base_url_to_anthropic(monkeypatch):
+    captured = {}
+
+    class FakeAnthropic:
+        def __init__(self, **kw):
+            captured.update(kw)
+
+    import types
+    import sys as _sys
+    monkeypatch.setitem(_sys.modules, "anthropic", types.SimpleNamespace(AsyncAnthropic=FakeAnthropic))
+    prov = P.make_provider("local", {"kind": "anthropic", "base_url": "http://127.0.0.1:8000",
+                                     "api_key": "local", "strict_tools": False})
+    assert prov.base_url == "http://127.0.0.1:8000" and prov.strict_tools is False
+    assert captured == {"api_key": "local", "base_url": "http://127.0.0.1:8000"}
