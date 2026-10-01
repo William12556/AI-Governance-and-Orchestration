@@ -3,7 +3,7 @@ Created: 2026 September 30
 # Engine Generalisation Requirements (Phase 2)
 
 **UUID:** `14e05e35`
-**Status:** Draft
+**Status:** Approved 2026-09-30. OQ-04 is settled in the design.
 **Proposal:** `dev/proposals/proposal-5bcd46ad-ai-go-pivot.md` v0.7, §7.0 Phase 2
 **Baseline:** `dev/requirements/requirements-1c1f4ef6-ael.md` (FR-AEL-001 to FR-AEL-015, NFR-AEL-001 to NFR-AEL-005)
 
@@ -308,6 +308,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.0 | 2026-09-30 | Approved by the operator; OQ-04 deferred to the design. |
 | 0.4 | 2026-09-30 | OQ-03 resolved: Mistral served by the OpenAI-compatible implementation; FR-04-09 added (9-character tool call IDs); V-04 extended; References [2]–[4] added. |
 | 0.3 | 2026-09-30 | OQ-01 resolved: FR-08 Stage Tracking added (stage derived from documents, operator-recorded approvals, pre-run check, status tool); V-10 to V-12 added; full-suite and audit checks renumbered V-13 and V-14; OQ-04 added (approvals file protection). |
 | 0.2 | 2026-09-30 | OQ-02 resolved: manifest declares additional writable paths (FR-01-07 added, FR-05-01 amended). OQ-03 assigned to separate research. Proposal open questions cited as "proposal OQ-nn" to distinguish them from this document's. |
