@@ -298,7 +298,7 @@ Refactored in place in `ai/engine/mcp/server.py`.
 | Change | Design |
 |---|---|
 | Tools | `start_engine`, `engine_status`, `reset_engine` keep their arguments (FR-06-01). New `work_status(project_dir)` returns the §8.1 records as JSON; read-only (FR-08-06). |
-| Tracked runs only | `start_engine` in `loop` mode accepts only a T03 prompt path under `ai/workspace/`, so a planner cannot bypass the pre-run check with a free-text task. |
+| Tracked runs only | `start_engine` in `loop` and `worker` mode accepts only a T03 prompt path under `ai/workspace/`, so a planner cannot bypass the pre-run check with a free-text task (worker mode added in change-793992ae; the pre-run check covers both modes). |
 | State directory | Read from `loop.state_dir` in `ai/config.yaml`, default `ai/state` (FR-06-02). `bin/migrate-layout.sh` warns on any other value. |
 | Reaping | The server keeps the `Popen` handle per project and calls `poll()` before the liveness probe; without a handle (server restarted) it calls `os.waitpid(pid, WNOHANG)` and treats `ChildProcessError` as not a child (FR-06-03). |
 
@@ -431,6 +431,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.4 | 2026-10-01 | §9.0: worker mode also limited to tracked prompts (change-793992ae). |
 | 1.3 | 2026-10-01 | DI-02 closed (change-ee5357ec). |
 | 1.2 | 2026-10-01 | §3.0, §5.2: pytest gate timeout 300 s, the historical value (FR-03-04; change-e58fd295). |
 | 1.1 | 2026-10-01 | §4.2: a response without choices is retried, not returned as finish_reason error (change-53c6f252). |

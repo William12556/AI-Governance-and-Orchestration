@@ -91,6 +91,16 @@ while [[ ${i} -lt ${#MOVES[@]} ]]; do
     i=$((i + 2))
 done
 [[ "${STATE_EDIT}" == "true" ]] && echo "edit   ai/config.yaml: loop.state_dir \"ai/state/ralph\" -> \"ai/state\""
+# change-793992ae (FR-06-02): engine-mcp and overwatch read loop.state_dir from
+# ai/config.yaml; report any value other than the standard one.
+for cfg in "${AI}/config.yaml" "${AI}/ael/config.yaml"; do
+    [[ -f "${cfg}" ]] || continue
+    sd="$(sed -nE 's/^[[:space:]]*state_dir:[[:space:]]*"?([^"#]*[^"#[:space:]])"?.*$/\1/p' "${cfg}" | head -1)"
+    if [[ -n "${sd}" && "${sd}" != "ai/state" && "${sd}" != "ai/state/ralph" ]]; then
+        echo "warn   ${cfg#"${PROJECT_ROOT}/"}: loop.state_dir is \"${sd}\" (standard: \"ai/state\"); engine-mcp and overwatch will use it"
+    fi
+    break
+done
 [[ -d "${AI}/state/ralph" ]] && echo "note   ai/state/ralph/ is runtime state; left in place. Reset or remove it manually."
 
 echo ""

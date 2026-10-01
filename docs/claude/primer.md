@@ -59,7 +59,8 @@ selects one of three options:
 
 - **Option A** — human executes engine command directly (all profiles).
 - **Option B** — Strategic Domain launches the engine via `engine-mcp` (Claude Desktop profile
-  only). Standalone MCP server exposing `start_engine`, `engine_status`, and `reset_engine`.
+  only). Standalone MCP server exposing `start_engine`, `engine_status`, `reset_engine` and
+  the read-only `work_status`; loop and worker runs accept only a T03 prompt inside ai/workspace/.
   Allows the Strategic Domain to launch the engine and query outcome without human terminal
   relay. See P10.8.
 - **Option C** — Claude Code manual invocation (`claude_code`/`claude_omlx` profiles).
@@ -326,6 +327,7 @@ any document.
 | 0.13 | 2026-08-19 | Synced with governance v9.13: added Option C (Claude Code manual invocation) to §2.0 alongside Options A/B; corrected stale `ai/profiles/claude.md` → `ai/profiles/claude-code.md` reference in §2.0 and §2.1; flattened §4.0 workflow block to present Options A/B/C as one selection set, matching governance §1.10.3 structure |
 | 0.14 | 2026-08-21 | Synced with governance v9.16: added §3.0 Governance bullet for `ai/task.md` open-work register maintenance (P00 §1.1.20); added §6.1 exemption note for `ai/task.md` |
 | 0.15 | 2026-09-25 | Synced with governance v11.0 (change-5bcd46ad): paths under ai/governance/software-engineering/ and ai/engine/; terms AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp; §2.2 govwatch replaced by overwatch |
+| 0.16 | 2026-10-01 | Option B: work_status tool; tracked prompt tasks only (change-793992ae) |
 
 ---
 

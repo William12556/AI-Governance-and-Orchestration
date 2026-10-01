@@ -128,7 +128,7 @@ python ai/engine/src/orchestrator.py --mode loop \
     - Loop State Directory: `ai/state/` (ephemeral, per-task)
     - Loop Entry: After human approval of T03 Prompt
     - Integration Scripts: Project-scoped scripts reside in `<project>/bin/`. Scripts are version-controlled project artifacts. Global installation (e.g. `~/bin/`) is not required.
-    - Claude Desktop Interface: `engine-mcp` (`ai/engine/mcp/server.py`) provides `start_engine`, `engine_status`, and `reset_engine` MCP tools for use within the Claude Desktop profile; registers once in Claude Desktop MCP configuration; serves all downstream projects via `project_dir` parameter; reference: P10.8
+    - Claude Desktop Interface: `engine-mcp` (`ai/engine/mcp/server.py`) provides `start_engine`, `engine_status`, `reset_engine` and the read-only `work_status` MCP tools for use within the Claude Desktop profile; in loop and worker mode `start_engine` accepts only a T03 prompt inside ai/workspace/; registers once in Claude Desktop MCP configuration; serves all downstream projects via `project_dir` parameter; reference: P10.8
     - Loop Execution: Worker/reviewer cycle until SHIP or boundary exceeded
     - Loop Exit: SHIP → Strategic Domain captures work-summary.txt in T05 Result; BLOCKED → Strategic Domain seeds T06 Issue from BLOCKED.md
     - State Files:
@@ -1265,6 +1265,7 @@ See [workflow.md](workflow.md).
 | 11.0 | 2026-09-25 | Layout and terminology migration (change-5bcd46ad): governance model at ai/governance/software-engineering/; ai/ael/ → ai/engine/; project configuration ai/ael/config.yaml → ai/config.yaml; state ai/state/ralph/ → ai/state/; terms AEL → engine, Ralph Loop → loop, RALPH-BLOCKED.md → BLOCKED.md, .ralph-complete/.ralph-timeout → .complete/.timeout, target_profile ael → engine (legacy value accepted); ael-mcp → engine-mcp in ai/engine/mcp/; govwatch retired (overwatch remains). P10.6 layout and ownership updated. Breaking: downstream projects run bin/migrate-layout.sh, then bin/propagate.sh --allow-major. |
 | 11.1 | 2026-10-01 | P10.4 recipe location: audit recipes moved to the governance model; run types declared in manifest.yaml (change-e58fd295) |
 | 11.2 | 2026-10-01 | P10.6: ai/approvals.yaml declared as a project file (operator approvals, change-ee5357ec) |
+| 11.3 | 2026-10-01 | P00 engine-mcp: work_status tool; loop and worker runs only for T03 prompts inside ai/workspace/ (change-793992ae) |
 
 ---
 [Return to Table of Contents](<#table of contents>)

@@ -267,3 +267,40 @@ def prerun_missing(project_root: str, manifest, uuid: str) -> list[str]:
         st = manifest.stage(sid)
         missing += _missing_for(st, item, approvals)
     return missing
+
+
+def main() -> None:
+    """Command line: print the stage report for the project in the current directory."""
+    import argparse
+    import sys
+
+    from manifest import ManifestError, load_manifest, locate_manifest
+
+    p = argparse.ArgumentParser(description="Report the stage of every work item.")
+    p.add_argument("--json", action="store_true", help="print the report as JSON")
+    args = p.parse_args()
+    try:
+        manifest = load_manifest(locate_manifest())
+    except ManifestError as e:
+        print(json.dumps({"error": f"manifest error: {e}"}) if args.json else f"manifest error: {e}",
+              file=sys.stdout if args.json else sys.stderr)
+        sys.exit(1)
+    report = scan(os.getcwd(), manifest)
+    if args.json:
+        print(report.to_json())
+        return
+    for w in report.warnings:
+        print(f"warning: {w}")
+    for uuid, item in sorted(report.work_items.items()):
+        state = item.current_stage or "complete"
+        print(f"{uuid}  {item.path or '-'}  {state}")
+        for m in item.missing:
+            print(f"    missing: {m}")
+        for a in item.anomalies:
+            print(f"    anomaly: {a}")
+
+
+if __name__ == "__main__":
+    import sys as _sys
+    _sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    main()

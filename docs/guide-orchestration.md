@@ -129,7 +129,7 @@ The govwatch TUI is retired (change-5bcd46ad).
 
 ## 6.0 engine-mcp
 
-An MCP server that registers once in Claude Desktop and exposes three tools: `start_engine`, `engine_status`, and `reset_engine`. Enables the Strategic Domain to launch and monitor the engine without human terminal access.
+An MCP server that registers once in Claude Desktop and exposes four tools: `start_engine`, `engine_status`, `reset_engine` and the read-only `work_status` (stage of every work item). Enables the Strategic Domain to launch and monitor the engine without human terminal access. In loop and worker mode `start_engine` accepts only a T03 prompt inside `ai/workspace/`, so the pre-run check always applies.
 
 At T03 handoff (P13.3), the human selects the execution path:
 
@@ -151,6 +151,7 @@ Setup instructions: P10.8 in `ai/governance/software-engineering/governance.md`
 |---|---|---|
 | 1.0 | 2026-06-18 | Initial document; content relocated from README.md Orchestration section |
 | 1.1 | 2026-09-25 | change-5bcd46ad: engine and governance paths; terms AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp; §5.0 govwatch replaced by overwatch |
+| 1.2 | 2026-10-01 | engine-mcp: work_status; tracked prompt tasks only (change-793992ae) |
 
 ---
 

@@ -58,7 +58,7 @@ engine/
 ├── doc/
 │   └── guide-engine-operations.md  # Strategic Domain operational reference
 ├── mcp/
-│   └── server.py         # engine-mcp: start_engine, engine_status, reset_engine (Claude Desktop)
+│   └── server.py         # engine-mcp: start_engine, engine_status, reset_engine, work_status (Claude Desktop)
 ├── recipes/
 │   ├── loop-work.yaml   # Standard worker role system prompt
 │   └── loop-review.yaml # Standard reviewer role system prompt
@@ -239,6 +239,7 @@ The tests use stub model and MCP clients; no oMLX endpoint is required.
 | 2.7 | 2026-10-01 | §3.0 structure: providers.py, manifest.py, gates.py added; audit recipes moved to the governance model; §8.0 run types (change-53c6f252, change-e58fd295) |
 | 2.8 | 2026-10-01 | §3.0 structure: scope.py added (change-bdc6820f) |
 | 2.9 | 2026-10-01 | §3.0 structure: stages.py and approve.py added (change-ee5357ec) |
+| 2.10 | 2026-10-01 | §3.0: engine-mcp work_status (change-793992ae) |
 
 ---
 

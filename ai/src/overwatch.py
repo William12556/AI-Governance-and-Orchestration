@@ -1237,12 +1237,22 @@ class HtmlRenderer:
 # ---------------------------------------------------------------------------
 
 
+def _configured_state_dir(root: Path) -> Path:
+    """loop.state_dir from ai/config.yaml, else ai/state (change-793992ae, audit L-01)."""
+    try:
+        data = yaml.safe_load((root / "ai" / "config.yaml").read_text()) or {}
+        value = (data.get("loop") or {}).get("state_dir")
+    except Exception:
+        value = None
+    return root / (value if isinstance(value, str) and value.strip() else "ai/state")
+
+
 def resolve_paths(root: Path) -> ProjectPaths:
-    """Build a ProjectPaths for *root* using govwatch's layout conventions."""
+    """Build a ProjectPaths for *root* using the framework layout conventions."""
     return ProjectPaths(
         root=root,
         workspace=root / "ai" / "workspace",
-        engine_state=root / "ai" / "state",
+        engine_state=_configured_state_dir(root),
         alerts_file=root / "ai" / "dashboard-alerts.md",
     )
 
