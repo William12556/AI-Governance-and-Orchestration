@@ -653,7 +653,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | OI-002 | oMLX MCP native tool execution non-functional (GitHub issue #71) | Consistent with design: `MCPClient` never relies on `/v1/mcp/execute` (§8.4); no orchestrator-side action pending upstream fix |
 | OI-003 | Pipeline task dependency ordering not formally specified | Applies to §12.0 (not yet designed); remains open |
 | OI-004 | Pipeline mode behaviour on empty/no `.md` tasks directory undefined | Applies to §12.0 (not yet designed); remains open |
-| OI-005 | Write-scope check is fail-open: a write tool whose name is not in `_WRITE_TOOLS` is not scope-checked, while `mcp_client` classifies by verb pattern (fail-closed) | Mitigated by the filesystem-mcp 2.5.0 pin; to be resolved in Phase 2 by deriving write classification from one source (audit-5bcd46ad L-09) |
+| OI-005 | Write-scope check is fail-open: a write tool whose name is not in `_WRITE_TOOLS` is not scope-checked, while `mcp_client` classifies by verb pattern (fail-closed) | Resolved 2026-10-01 by change-bdc6820f: scope.py is the single, fail-closed source for write classification (audit-5bcd46ad L-09) |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -694,6 +694,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | 0.4 | 2026-09-23 | Requirements reference updated: ael-requirements.md renamed to requirements-1c1f4ef6-ael.md (P00.10 naming) |
 | 0.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 0.6 | 2026-09-29 | change-c37198be design update (audit-5bcd46ad M-03): §5.2 missing-task-file refusal; §5.4 recipe-set selection; §5.5 write-verb classification; §5.7 nested-path scope targets and filesystem-mcp 2.x write tools; §10.0 NFR-AEL-004 note; §11.0 registry rows; §13.0 OI-005 |
+| 0.7 | 2026-10-01 | §13.0 OI-005 resolved by change-bdc6820f |
 
 ---
 

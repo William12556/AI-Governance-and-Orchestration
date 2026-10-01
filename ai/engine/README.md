@@ -67,6 +67,7 @@ engine/
     ├── providers.py        # Provider interface: oMLX / OpenAI-compatible, Anthropic; role bindings
     ├── manifest.py         # Governance model manifest loader (run types, gates, stages, paths)
     ├── gates.py            # Syntax gate and command gates
+    ├── scope.py            # Write-tool classification and worker write scope
     ├── mcp_client.py       # MCP stdio connection and tool dispatch
     ├── parser.py           # Mistral [TOOL_CALLS] plain-text parser
     ├── linter.py            # Layer 1 governance linter: static validation of workspace documents (naming, structure, YAML fields, UUID coupling, Obsidian links)
@@ -234,6 +235,7 @@ The tests use stub model and MCP clients; no oMLX endpoint is required.
 | 2.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 2.6 | 2026-09-29 | Profile file name corrected: claude.md → claude-code.md |
 | 2.7 | 2026-10-01 | §3.0 structure: providers.py, manifest.py, gates.py added; audit recipes moved to the governance model; §8.0 run types (change-53c6f252, change-e58fd295) |
+| 2.8 | 2026-10-01 | §3.0 structure: scope.py added (change-bdc6820f) |
 
 ---
 

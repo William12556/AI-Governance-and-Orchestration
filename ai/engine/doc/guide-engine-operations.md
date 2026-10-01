@@ -300,6 +300,14 @@ curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 
 **Remediation:** Orchestrator automatically injects a read instruction. If mismatch recurs across iterations, the brief may be referencing stale content. Reset and update the brief.
 
+### 8.7 Write outside the declared scope
+
+**Symptom:** Worker TUI shows "scope violation: write outside the declared scope: <path>"; the log has `write rejected tool=… path=… reason=…`.
+
+**Cause:** For a T03 prompt task the worker may write only the prompt's `deliverable.files`, the governance model's `writable_paths` (SE: `tests/`) and the state directory (change-bdc6820f). Free-text tasks keep project-root containment only.
+
+**Remediation:** If the file is a genuine deliverable, add it to `deliverable.files` in the prompt and rerun. Directory creation on the way to a declared file is allowed. The reviewer receives the deliverables as absolute paths in a `[DELIVERABLES]` block.
+
 [Return to Table of Contents](<#table of contents>)
 
 ---
@@ -316,6 +324,7 @@ curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 | 1.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.6 | 2026-10-01 | §3.0: role-to-model binding note (providers:, roles:, api_key_env, per-role context window; change-53c6f252) |
 | 1.7 | 2026-10-01 | §7.0: recipes resolved through manifest run types; gates, awaiting-approval.md and BLOCKED return stage (change-e58fd295) |
+| 1.8 | 2026-10-01 | §8.7: write outside the declared scope (change-bdc6820f) |
 
 ---
 

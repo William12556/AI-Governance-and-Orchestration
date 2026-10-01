@@ -60,7 +60,9 @@ from mcp_client import MCPClient
 from providers import (ConfigError, ProviderError, as_provider, build_role_bindings,
                        query_omlx_context_window as _query_omlx_context_window)
 import gates as G
+import scope as S
 from manifest import ManifestError, load_manifest, locate_manifest
+from scope import is_write_tool, written_targets as _written_targets
 
 from rich.console import Console
 from rich.markup import escape
@@ -91,63 +93,6 @@ _EDIT_PATTERN_ERRORS = (
     "E_INVALID_INPUT",
 )
 
-# F4: Write/destructive tool names for scope validation
-_WRITE_TOOLS = {
-    "write", "write_file", "create_file",
-    "edit", "edit_file",
-    "delete", "remove", "delete_file", "remove_file",
-    "move", "rename", "move_file", "rename_file",
-    "mkdir", "create_directory", "makedirs",
-    # change-c37198be (D3): @j0hanz/filesystem-mcp 2.x write tools
-    "create", "patch", "replace_text", "search_and_replace",
-}
-
-# change-c37198be (D3): argument keys that carry paths. filesystem-mcp 2.x
-# batches paths in lists (create/edit: files[{path}], delete: paths[],
-# move: moves[{...}]); scalar keys cover the 1.x-style tools.
-_PATH_KEYS = ("path", "file_path", "destination", "new_path", "source",
-              "from", "to", "src", "dst", "target", "newPath")
-_DEST_KEYS = ("destination", "new_path", "newPath", "to", "dst", "target")
-_MOVE_TOOLS = ("move", "rename", "move_file", "rename_file")
-
-
-def _path_values(obj: dict, keys: tuple) -> list[str]:
-    return [obj[k] for k in keys if isinstance(obj.get(k), str) and obj[k]]
-
-
-def _scope_targets(arguments: dict) -> list[str]:
-    """Every path a write call names, including those nested in files/paths/moves/edits."""
-    targets = _path_values(arguments, _PATH_KEYS)
-    for key in ("paths",):
-        targets += [p for p in arguments.get(key) or [] if isinstance(p, str) and p]
-    for key in ("files", "moves", "edits"):
-        for item in arguments.get(key) or []:
-            if isinstance(item, dict):
-                targets += _path_values(item, _PATH_KEYS)
-    return targets
-
-
-def _written_targets(tool_name: str, arguments: dict) -> list[str]:
-    """
-    Paths a successful write call leaves as files: move/rename destinations,
-    otherwise the paths written. Delete calls produce no deliverable.
-    """
-    if tool_name in ("delete", "remove", "delete_file", "remove_file"):
-        return []
-    if tool_name in _MOVE_TOOLS:
-        dests = _path_values(arguments, _DEST_KEYS)
-        for item in arguments.get("moves") or []:
-            if isinstance(item, dict):
-                dests += _path_values(item, _DEST_KEYS)
-        if dests:
-            return dests
-        return _path_values(arguments, ("path", "file_path"))[:1]
-    written = _path_values(arguments, ("path", "file_path", "destination"))[:1]
-    for item in arguments.get("files") or []:
-        if isinstance(item, dict):
-            written += _path_values(item, ("path", "file_path"))[:1]
-    return written
-
 # F12: Stall detection — consecutive identical REVISE feedback threshold
 _DEFAULT_STALL_THRESHOLD = 3
 
@@ -157,41 +102,15 @@ _COMPLETION_INITIAL_BACKOFF = 2.0  # seconds
 _COMPLETION_BACKOFF_MULTIPLIER = 2.0
 
 
-def _validate_write_scope(tool_name: str, arguments: dict, project_root: str) -> str | None:
+def _validate_write_scope(tool_name: str, arguments: dict, project_root: str,
+                          write_scope: "S.WriteScope | None" = None) -> str | None:
     """
-    F4: Validate that write/destructive tool calls target paths within project_root.
-
-    Returns None if the tool is in scope or not a write tool.
-    Returns an error message string if the path is out of scope.
+    F4 / change-bdc6820f: pre-dispatch write check (scope.check). Returns None
+    when allowed or not a write tool, otherwise the error message for the
+    worker. Without write_scope only project-root containment applies.
     """
-    if tool_name not in _WRITE_TOOLS:
-        return None
-
-    # change-d1f4a83b (N2): every path argument a write tool carries is checked,
-    # not merely the first one present. The prior `path or file_path or
-    # destination` chain stopped at the first match, so a move or rename that
-    # supplied its source as `path` was validated on the source alone and its
-    # destination was never examined — a call relocating a file out of the
-    # project root passed the gate. Each path a call touches is a distinct
-    # containment obligation, so each is tested.
-    # change-c37198be (D3): nested files/paths/moves/edits entries included.
-    targets = _scope_targets(arguments)
-    if not targets:
-        return None  # Let MCP validate missing required args
-
-    # Resolve to absolute and check containment
-    for target_path in targets:
-        try:
-            resolved = os.path.abspath(target_path)
-            if not resolved.startswith(project_root + os.sep) and resolved != project_root:
-                return (
-                    f"Scope violation: path '{target_path}' is outside the project root "
-                    f"'{project_root}'. All writes must target paths within the project."
-                )
-        except Exception:
-            continue  # Let MCP handle malformed paths
-
-    return None
+    violation = S.check(tool_name, arguments, project_root, write_scope)
+    return violation.message if violation else None
 
 
 _TASK_FILE_SUFFIXES = (".md", ".yaml", ".yml", ".txt")
@@ -1105,6 +1024,7 @@ async def run_phase(
     phase_duration_seconds: float | None = None,
     max_completion_tokens: int | None = None,
     max_tool_result_chars: int | None = None,
+    write_scope: "S.WriteScope | None" = None,
 ) -> tuple[int, str, set[str]]:
     """
     Single phase (worker or reviewer): inject tools, send completions,
@@ -1298,8 +1218,12 @@ async def run_phase(
             console.print(f"[yellow]  call →[/yellow]  [bold]{escape(tc['name'])}[/bold][dim]({escape(json.dumps(tc['arguments']))})[/dim]")
             log.debug("tool call: %s args=%s", tc["name"], json.dumps(tc["arguments"]))
 
-            # F4: Pre-dispatch write scope validation
-            _scope_err = _validate_write_scope(tc["name"], tc["arguments"], project_root) if project_root else None
+            # F4 / change-bdc6820f: pre-dispatch write scope validation (FR-05-01, FR-05-04)
+            _violation = S.check(tc["name"], tc["arguments"], project_root, write_scope) if project_root else None
+            _scope_err = _violation.message if _violation else None
+            if _violation:
+                log.warning("write rejected tool=%s path=%s reason=%s",
+                            tc["name"], _violation.path, _violation.reason)
             # F21: Pre-dispatch audit-report.md append-only validation
             _report_err = _validate_audit_report_write(tc["name"], tc["arguments"], state_dir)
             if _scope_err:
@@ -1338,7 +1262,7 @@ async def run_phase(
             # change-a2f9c4d1: record successful write targets for work-summary
             # synthesis. Only calls that raised no scope error, no audit-report
             # error and no MCP error are treated as writes that actually landed.
-            if (tc["name"] in _WRITE_TOOLS
+            if (is_write_tool(tc["name"])
                     and not _scope_err and not _report_err
                     and not _is_mcp_error(result)):
                 # change-f5c28a04 (F3): for move/rename the deliverable ends up
@@ -1481,7 +1405,7 @@ async def run_phase(
                 # P4: post-write Python syntax check
                 # change-c37198be (D3): every file a write call leaves, incl. 2.x batches.
                 _py_paths = (_written_targets(tc["name"], tc["arguments"])
-                             if tc["name"] in _WRITE_TOOLS else [])
+                             if is_write_tool(tc["name"]) else [])
                 for _py_path in _py_paths:
                     if _py_path.endswith(".py") and os.path.isfile(_py_path):
                         proc = subprocess.run(
@@ -1846,6 +1770,18 @@ def _extract_deliverables(state_dir: str, log: logging.Logger) -> set[str]:
     return deliverables
 
 
+def _deliverables_block_for(state_dir: str, log: logging.Logger) -> str:
+    """[DELIVERABLES] block listing this cycle's deliverables as absolute paths."""
+    deliverables = sorted(_extract_deliverables(state_dir, log))
+    if not deliverables:
+        return ""
+    lines = "\n".join(f"  - {p}" for p in deliverables)
+    return ("[DELIVERABLES]\n"
+            "The worker reported these deliverables. Paths are absolute; read each at this path.\n"
+            f"{lines}\n"
+            "[END DELIVERABLES]\n")
+
+
 async def run_loop(
     client: Any,
     mcp: MCPClient,
@@ -1874,6 +1810,7 @@ async def run_loop(
     reviewer_context_window: int | None = None,
     gates: list[str] | None = None,
     gate_specs: dict[str, dict] | None = None,
+    write_scope: "S.WriteScope | None" = None,
 ) -> int:
     """
     Full loop: worker/reviewer cycle until SHIP, max_iterations, or deadline.
@@ -1991,7 +1928,8 @@ async def run_loop(
                                    project_root=project_root,
                                    phase_duration_seconds=phase_duration_seconds,
                                    max_completion_tokens=max_completion_tokens,
-                                   max_tool_result_chars=max_tool_result_chars)
+                                   max_tool_result_chars=max_tool_result_chars,
+                                   write_scope=write_scope)
         log.info("work phase rc=%d", rc)
         if rc != 0:
             console.print("[red]✗ WORK PHASE FAILED[/red]")
@@ -2050,6 +1988,11 @@ async def run_loop(
             f"[END RUNTIME CONTEXT]\n\n"
         )
         review_task = _review_header + f"Review the work in state directory '{state_dir}'."
+        # change-bdc6820f (FR-05-03): absolute deliverable paths, so the reviewer
+        # does not resolve relative paths against the state directory.
+        _deliverables_block = _deliverables_block_for(state_dir, log)
+        if _deliverables_block:
+            review_task = _deliverables_block + "\n" + review_task
         # Prepend gate results to review_task (syntax first, then command gates in order)
         for _g, _res in reversed(_command_results):
             if _res:
@@ -2471,8 +2414,21 @@ async def main_async(args: argparse.Namespace) -> int:
         await mcp.close()
         return 1
 
-    # Resolve placeholders and prepend runtime context
+    # change-bdc6820f: write scope from the T03 prompt's deliverables (FR-05-01)
     project_root = os.getcwd()
+    write_scope = None
+    if args.task and os.path.exists(args.task):
+        _deliverables = S.extract_deliverable_paths(raw)
+        if _deliverables is not None:
+            write_scope = S.build_write_scope(project_root, _deliverables,
+                                              manifest.writable_paths, state_dir)
+    if write_scope is not None:
+        console.print(f"[blue][engine] write scope: {escape(write_scope.describe())}[/blue]")
+        log.info("write scope: %s", write_scope.describe())
+    else:
+        log.info("write scope: project root (task is not a T03 prompt)")
+
+    # Resolve placeholders and prepend runtime context
     task = task.replace("{STATE_DIR}", state_dir).replace("{PROJECT_ROOT}", project_root)
     runtime_header = (
         f"[ENGINE RUNTIME CONTEXT]\n"
@@ -2522,7 +2478,8 @@ async def main_async(args: argparse.Namespace) -> int:
                                        max_tool_calls_per_iter=max_tool_calls,
                                        project_root=project_root,
                                        max_completion_tokens=max_completion_tokens,
-                                       max_tool_result_chars=max_tool_result_chars)
+                                       max_tool_result_chars=max_tool_result_chars,
+                                       write_scope=write_scope)
         elif args.mode == "reviewer":
             # F11: Clear stale phase signals for single-phase reviewer mode
             _stale = os.path.join(state_dir, "work-complete.txt")
@@ -2557,6 +2514,7 @@ async def main_async(args: argparse.Namespace) -> int:
                                 reviewer_context_window=context_windows["reviewer"],
                                 gates=loop_stage.gates,
                                 gate_specs=gate_specs,
+                                write_scope=write_scope,
                                 budget_warn_pct=budget_warn,
                                 budget_abort_pct=budget_abort,
                                 mcp_error_threshold=mcp_error_thresh,
