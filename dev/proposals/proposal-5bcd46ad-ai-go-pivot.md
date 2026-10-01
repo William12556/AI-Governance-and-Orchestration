@@ -2,7 +2,7 @@ Created: 2026 September 25
 
 # Proposal: AI-G&O Strategic Pivot
 
-**Status:** Accepted 2026-09-25; amended 2026-09-29 (D-16). Phase 1 implemented and verified; change-5bcd46ad closed 2026-09-29 (audit-5bcd46ad). Phase 2 not started; all open questions resolved 2026-09-30.
+**Status:** Accepted 2026-09-25; amended 2026-09-29 (D-16). Phase 1 implemented and verified; change-5bcd46ad closed 2026-09-29 (audit-5bcd46ad). Phase 2 implemented and verified; closed 2026-10-01 (requirements-14e05e35 §6.1, audit-14e05e35 and follow-ups, change-82dbf16a). Phase 3 not started.
 **UUID:** `5bcd46ad`
 **Coupled change:** `dev/change/closed/change-5bcd46ad-layout-migration.md`
 
@@ -230,6 +230,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 | 0.7 | 2026-09-30 | OQ-05 resolved: planner client is the user's choice; options documented [8]–[10]; integration deferred to backlog §2.0 item 11 |
 | 0.8 | 2026-10-01 | §4.2: ai/approvals.yaml added (design-14e05e35 DI-02, change-ee5357ec) |
 | 0.9 | 2026-10-01 | OQ-02 implemented (change-155cc014) |
+| 0.10 | 2026-10-01 | Status: Phase 2 closed |
 
 ---
 

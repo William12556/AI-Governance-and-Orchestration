@@ -145,8 +145,8 @@ Not verified live: the Anthropic API itself, its acceptance of strict tool schem
 |---|---|
 | O-01 | **Closed 2026-10-01.** V-09: `grep -rlF` for the Mistral key over `ai/state/` and `ai/logs/` found 0 files (NFR-05). |
 | O-02 | DI-04: read the Mistral "Included API usage" meter after the Mistral run. |
-| O-03 | `phase2-replay` branch deleted 2026-10-01. Remaining: propagate governance 12.0 to solax-modbus `main` with `--allow-major`, then record the c8e760ee approvals there if the work item is replayed. |
-| O-04 | Independent audit (V-14). |
+| O-03 | `phase2-replay` branch deleted 2026-10-01. Remaining: propagate governance 12.x to solax-modbus `main` with `--allow-major`, then record the c8e760ee approvals there if the work item is replayed (dev/todo.md). |
+| O-04 | **Closed 2026-10-01.** V-14: `dev/audit/audit-14e05e35-phase2-2026-10-01.md` and five follow-up audits; change-82dbf16a closed. |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -156,6 +156,7 @@ Not verified live: the Anthropic API itself, its acceptance of strict tool schem
 
 | Version | Date | Description |
 |---|---|---|
+| 1.3 | 2026-10-01 | O-04 closed (V-14); O-03 remaining step names governance 12.x (Phase 2 closure) |
 | 1.2 | 2026-10-01 | §8.0: basis of the V-04 oMLX verdict stated (audit-14e05e35 L-16) |
 | 1.1 | 2026-10-01 | O-01 closed: V-09 pass; replay branch deleted (O-03 partly done) |
 | 1.0 | 2026-10-01 | Initial report: V-02 pass, V-04 oMLX and Mistral pass, Anthropic partial; four observations; four open items |

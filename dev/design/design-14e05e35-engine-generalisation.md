@@ -3,7 +3,7 @@ Created: 2026 October 01
 # Engine Generalisation Design (Phase 2)
 
 **UUID:** `14e05e35`
-**Status:** Approved 2026-10-01.
+**Status:** Approved 2026-10-01. Implemented (steps 1–7, design §13.0); Phase 2 closed 2026-10-01. DI-04 and DI-05 remain open; DI-03 and DI-06 accepted.
 **Requirements:** `dev/requirements/requirements-14e05e35-engine-generalisation.md` v1.0
 **Baseline:** `dev/design/design-ael-orchestrator.md` v0.6. This document describes changes only; everything not mentioned here is unchanged.
 
@@ -436,6 +436,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.11 | 2026-10-01 | Phase 2 closure: status. |
 | 1.10 | 2026-10-01 | Fourth follow-up audit (change-82dbf16a iteration 5): §6.0 non-regular state entries removed or BLOCKED, regular `.complete` only for `shipped`; §8.4 tracked task without bytes refused. |
 | 1.9 | 2026-10-01 | Third follow-up audit (change-82dbf16a iteration 4): §6.0 clear before the UNCHECKED check; §8.4 task read once and its bytes bound to the approved hash. |
 | 1.8 | 2026-10-01 | Second follow-up audit (change-82dbf16a iteration 3): §6.0 signal files cleared after the gates; §8.4 task file must be a scanned document of its work item, full-name matching. |

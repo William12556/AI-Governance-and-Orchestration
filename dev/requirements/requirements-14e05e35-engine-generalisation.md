@@ -3,7 +3,7 @@ Created: 2026 September 30
 # Engine Generalisation Requirements (Phase 2)
 
 **UUID:** `14e05e35`
-**Status:** Approved 2026-09-30. All open questions resolved.
+**Status:** Approved 2026-09-30. Implemented and verified; Phase 2 closed 2026-10-01 (§6.1).
 **Proposal:** `dev/proposals/proposal-5bcd46ad-ai-go-pivot.md` v0.7, §7.0 Phase 2
 **Baseline:** `dev/requirements/requirements-1c1f4ef6-ael.md` (FR-AEL-001 to FR-AEL-015, NFR-AEL-001 to NFR-AEL-005)
 
@@ -25,6 +25,7 @@ Created: 2026 September 30
 [4.8 FR-08 Stage Tracking](<#4.8 fr-08 stage tracking>)
 [5.0 Non-Functional Requirements](<#5.0 non-functional requirements>)
 [6.0 Verification Requirements](<#6.0 verification requirements>)
+[6.1 Verification Results](<#6.1 verification results>)
 [7.0 Out of Scope](<#7.0 out of scope>)
 [8.0 Open Questions](<#8.0 open questions>)
 [9.0 Traceability](<#9.0 traceability>)
@@ -217,6 +218,27 @@ The engine determines each work item's stage from its documents, so the record c
 | V-13 | Full pytest suite passes | pytest | All |
 | V-14 | Independent audit | T08 audit report | All |
 
+### 6.1 Verification Results
+
+Recorded at Phase 2 closure, 2026-10-01.
+
+| ID | Result | Evidence |
+|---|---|---|
+| V-01 | Pass | `tests/engine/test_manifest_gates.py`; `test_main_async_stops_on_configuration_error` |
+| V-02 | Pass | Live report §4.0: gate results identical to the c8e760ee baseline |
+| V-03 | Pass, with a deviation | `tests/engine/test_providers.py` with fake client objects; the stub HTTP servers named in design §12.0 were not built (audit-14e05e35 §4.0) |
+| V-04 | Partial, accepted | oMLX and Mistral API pass (live report §4.0, §5.0). Anthropic provider verified against oMLX's Anthropic-compatible endpoint only; the Anthropic API run is deferred (backlog §2.0 item 12, operator decision 2026-10-01) |
+| V-05 | Pass | `tests/engine/test_write_scope.py`, `tests/engine/test_audit_remediation.py` |
+| V-06 | Pass | `test_reviewer_gets_absolute_deliverables_block`, `test_declared_deliverables_join_the_block` |
+| V-07 | Pass | `tests/engine/test_engine_mcp.py` |
+| V-08 | Pass | `test_live_corpus_has_no_retired_terms`, `test_live_corpus_has_no_bare_domain_terms` |
+| V-09 | Pass | Live report O-01 (state and logs); audit-14e05e35 `git grep` over the committed range |
+| V-10 | Pass | `tests/engine/test_stages.py` |
+| V-11 | Pass | `tests/engine/test_stages.py` (pre-run check, content-bound approvals, task file rule) |
+| V-12 | Pass | `test_work_status_reports_and_writes_nothing`, `test_scan_does_not_write_the_git_index` |
+| V-13 | Pass | 303 passed (offline runner, change-82dbf16a iteration 5); auditor run 302 passed, 1 skipped as root, 303 as non-root |
+| V-14 | Pass | `dev/audit/audit-14e05e35-phase2-2026-10-01.md` and five follow-up audits; remediation issue- and change-82dbf16a closed 2026-10-01 |
+
 [Return to Table of Contents](<#table of contents>)
 
 ---
@@ -308,6 +330,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.4 | 2026-10-01 | Phase 2 closure: status; §6.1 Verification Results added (V-03 deviation and V-04 partial accepted by the operator). |
 | 1.3 | 2026-10-01 | FR-03-02 amended: UNCHECKED gates block; gates with nothing to check are not applicable and listed at approval (audit-14e05e35 M-02, operator decision). |
 | 1.2 | 2026-10-01 | From report-14e05e35 (Mistral API test): FR-04-09 rationale reworded as a compatibility convention; OQ-03 `name` field answered (not needed); V-04 uses pinned model IDs. |
 | 1.1 | 2026-10-01 | OQ-04 resolved by design-14e05e35 §8.3. |
