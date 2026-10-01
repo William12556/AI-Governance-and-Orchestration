@@ -81,7 +81,7 @@ The primary profile. The orchestrator (`orchestrator.py`) runs a worker/reviewer
 
 **Setup:** See [setup-apple-silicon-mlx.md](setup-apple-silicon-mlx.md) for oMLX and model installation.
 
-**Tactical context file:** `config.yaml` (at `ai/config.yaml`)
+**Worker/reviewer context file:** `config.yaml` (at `ai/config.yaml`)
 
 **State directory:** `ai/state/`
 
@@ -110,7 +110,7 @@ Manual profile using Claude Code as the worker and reviewer. The planner authors
 | Claude Code | `npm install -g @anthropic-ai/claude-code` |
 | MCP servers | Filesystem and mcp-ripgrep configured in Claude Desktop |
 
-**Tactical context file:** `CLAUDE.md` (at project root)
+**Worker/reviewer context file:** `CLAUDE.md` (at project root)
 
 **State directory:** `.claude/`
 
@@ -136,7 +136,7 @@ Manual profile using the Claude Code CLI pointed at a local oMLX endpoint. Combi
 | Claude Code | `npm install -g @anthropic-ai/claude-code` |
 | MCP servers | Filesystem and mcp-ripgrep configured in Claude Desktop |
 
-**Tactical context file:** `CLAUDE.md` (at project root)
+**Worker/reviewer context file:** `CLAUDE.md` (at project root)
 
 **Invocation:** Human pastes T03 prompt into Claude Code session configured to use the local oMLX endpoint.
 
@@ -173,6 +173,7 @@ The engine profile is the only profile that supports the automated audit loop (`
 | 1.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.5 | 2026-09-29 | Profile file name corrected: claude.md → claude-code.md |
 | 1.6 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 1.7 | 2026-10-01 | Terminology: worker/reviewer context file (audit-14e05e35 M-03, change-82dbf16a) |
 
 ---
 

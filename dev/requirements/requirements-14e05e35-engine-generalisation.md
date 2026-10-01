@@ -108,7 +108,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | ID | Requirement |
 |---|---|
 | FR-03-01 | Three gate types exist: human approval, reviewer verdict and command exit code. |
-| FR-03-02 | Each stage's gates are declared in the manifest. A stage completes only when all its gates pass. |
+| FR-03-02 | Each stage's gates are declared in the manifest. A stage completes only when every applicable gate passes. A gate that cannot run ends the run BLOCKED and is named. A gate with nothing to check is not applicable and is listed for the operator at approval. |
 | FR-03-03 | A command gate's command, working directory and interpreter are configurable per project in `ai/config.yaml`. The default reproduces the current pytest gate (backlog §2.0-10). |
 | FR-03-04 | The SE syntax and pytest gates become declared command gates with unchanged results. |
 | FR-03-05 | The engine never marks a human approval gate as passed. It ends the run and records that approval is awaited. |
@@ -308,6 +308,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.3 | 2026-10-01 | FR-03-02 amended: UNCHECKED gates block; gates with nothing to check are not applicable and listed at approval (audit-14e05e35 M-02, operator decision). |
 | 1.2 | 2026-10-01 | From report-14e05e35 (Mistral API test): FR-04-09 rationale reworded as a compatibility convention; OQ-03 `name` field answered (not needed); V-04 uses pinned model IDs. |
 | 1.1 | 2026-10-01 | OQ-04 resolved by design-14e05e35 §8.3. |
 | 1.0 | 2026-09-30 | Approved by the operator; OQ-04 deferred to the design. |

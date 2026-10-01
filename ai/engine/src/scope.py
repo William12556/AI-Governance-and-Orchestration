@@ -12,6 +12,10 @@ For a T03 prompt task the worker may write only (FR-05-01):
     - the state directory.
 Directory creation is allowed for ancestors of those paths. Free-text tasks
 and task files that are not T03 prompts keep project-root containment.
+
+change-82dbf16a (audit-14e05e35): engine signal files in the state directory
+are never writable by the worker (H-01); a write call with no recognised path
+argument is refused (M-01); paths are compared after symlink resolution (L-02).
 """
 
 from __future__ import annotations
@@ -120,6 +124,24 @@ def extract_deliverable_paths(raw: str) -> list[str] | None:
     return paths if is_prompt else None
 
 
+# Engine-owned state files the worker must not write (change-82dbf16a, H-01).
+# work-summary.txt, work-complete.txt and BLOCKED.md stay writable: the work
+# recipes instruct the worker to write them, and none can produce SHIP.
+SIGNAL_FILES = ("review-result.txt", "review-feedback.txt", ".complete", ".timeout",
+                "awaiting-approval.md", "mcp-run.json", "iteration.txt", "task.md",
+                "context-budget.md")
+
+
+def signal_files(state_dir: str) -> frozenset[str]:
+    """Resolved absolute paths of the engine signal files in state_dir."""
+    return frozenset(_real(os.path.join(state_dir, f)) for f in SIGNAL_FILES)
+
+
+def _real(path: str) -> str:
+    """Absolute path with symlinks resolved (L-02)."""
+    return os.path.realpath(os.path.abspath(path))
+
+
 def _within(path: str, root: str) -> bool:
     return path == root or path.startswith(root.rstrip(os.sep) + os.sep)
 
@@ -145,14 +167,14 @@ class WriteScope:
 def build_write_scope(project_root: str, deliverables: list[str], writable_paths: list[str],
                       state_dir: str) -> WriteScope:
     """Resolve declared paths against the project root."""
-    root = os.path.abspath(project_root)
+    root = _real(project_root)
 
     def absolute(p: str) -> str:
-        return os.path.normpath(p if os.path.isabs(p) else os.path.join(root, p))
+        return _real(p if os.path.isabs(p) else os.path.join(root, p))
 
     return WriteScope(project_root=root,
                       files={absolute(p) for p in deliverables},
-                      prefixes=[absolute(p) for p in writable_paths] + [os.path.abspath(state_dir)])
+                      prefixes=[absolute(p) for p in writable_paths] + [_real(state_dir)])
 
 
 @dataclass
@@ -163,23 +185,36 @@ class Violation:
 
 
 def check(tool_name: str, arguments: dict, project_root: str,
-          write_scope: WriteScope | None = None) -> Violation | None:
+          write_scope: WriteScope | None = None,
+          protected: frozenset[str] = frozenset()) -> Violation | None:
     """
     Pre-dispatch check of one tool call. None when allowed or not a write tool.
     Every path a call touches is checked (change-d1f4a83b N2), including the
-    source and destination of a move.
+    source and destination of a move. protected holds resolved paths no write
+    may touch (engine signal files, change-82dbf16a H-01). A write call with no
+    recognised path argument is refused (M-01).
     """
     if not is_write_tool(tool_name):
         return None
-    for target in scope_targets(arguments):
+    targets = scope_targets(arguments)
+    if not targets:
+        return Violation("(none)", "no recognised path argument",
+                         f"write refused: tool '{tool_name}' was called without a recognised "
+                         f"path argument ({', '.join(PATH_KEYS)}, paths, files, moves, edits)")
+    root = _real(project_root)
+    for target in targets:
         try:
-            resolved = os.path.abspath(target)
+            resolved = _real(target)
         except Exception:
             continue  # malformed path: left to the MCP server
-        if not _within(resolved, project_root):
+        if not _within(resolved, root):
             return Violation(target, "outside the project root",
                              f"Scope violation: path '{target}' is outside the project root "
                              f"'{project_root}'. All writes must target paths within the project.")
+        if resolved in protected:
+            return Violation(target, "engine signal file",
+                             f"write refused: {target} is an engine signal file; "
+                             f"only the engine writes it")
         if write_scope is not None and not write_scope.allows(resolved, tool_name in DIRECTORY_TOOLS):
             return Violation(target, "outside the declared scope",
                              f"write outside the declared scope: {target}; "

@@ -7,6 +7,10 @@ Usage (from the project root):
 Appends one entry to ai/approvals.yaml and commits that file alone. The
 engine counts only committed approvals (design §8.3). This command is for the
 operator; no engine or engine-mcp tool runs it.
+
+The entry records the git blob hash of each evidence document of the stage
+(change-82dbf16a, H-02). After a document is edited or added, run the command
+again: the new entry replaces the old one.
 """
 
 from __future__ import annotations
@@ -46,12 +50,20 @@ def approve(project_root: str, uuid: str, stage: str, manifest=None,
     report = ST.scan(project_root, manifest)
     if uuid not in report.work_items:
         return 1, f"work item {uuid}: no documents found in {ST.WORKSPACE}/"
-    if (uuid, stage) in ST.committed_approvals(project_root):
+    item = report.work_items[uuid]
+    st = manifest.stage(stage)
+    blobs = ST.stage_blobs(project_root, item, stage) if st.evidence else {}
+    if st.evidence and not blobs:
+        return 1, f"work item {uuid}: no {stage} document to approve"
+    committed = ST.committed_approvals(project_root)
+    if (uuid, stage) in committed and not ST.approval_mismatch(project_root, item, st, committed):
         return 0, f"{uuid} {stage}: already approved"
 
     path = os.path.join(project_root, ST.APPROVALS_FILE)
     stamp = (now or datetime.datetime.now(datetime.timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    entry = f'  - {{ uuid: "{uuid}", stage: "{stage}", date: "{stamp}" }}\n'
+    blob_map = ", ".join(f'"{n}": "{h}"' for n, h in sorted(blobs.items()))
+    entry = (f'  - {{ uuid: "{uuid}", stage: "{stage}", date: "{stamp}", '
+             f'blobs: {{ {blob_map} }} }}\n')
     if os.path.exists(path):
         with open(path) as fh:
             current = fh.read()

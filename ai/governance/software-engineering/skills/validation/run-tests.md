@@ -109,7 +109,7 @@ exit 0
 
 - File-level targeted validation only (per-modification). Iteration-level full-suite validation remains a planner review step (governance P15.15 Progressive Validation Strategy) and is not automated by this hook.
 - `PostToolUse` cannot undo a write already made; a failing test surfaces as feedback for Claude to revise in a subsequent turn, not as a blocked edit.
-- Requires `jq` on the tactical execution host.
+- Requires `jq` on the worker/reviewer execution host.
 - Test-to-component mapping assumes `tests/<component>/` layout per governance P15.3/P15.7. Projects with a different layout must adapt §4.0 before provisioning.
 - The other P00.18 example skills (`.claude/governance/validate-design.md`, `.claude/testing/generate-pytest.md`, `.claude/validation/coupling-check.md`, `.claude/audit/protocol-compliance.md`) remain illustrative only; not addressed by this template.
 
@@ -124,6 +124,7 @@ exit 0
 | 1.0 | 2026-07-17 | Initial canonical template — closes P06 §1.7.15 PostToolUse pytest gap for claude_code/claude_omlx profiles |
 | 1.1 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.2 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 1.3 | 2026-10-01 | Terminology: worker/reviewer execution host (audit-14e05e35 M-03, change-82dbf16a) |
 
 ---
 

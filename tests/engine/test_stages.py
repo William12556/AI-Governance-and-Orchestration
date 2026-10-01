@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import os
 import subprocess
+import time
 
 import pytest
 
@@ -51,10 +52,23 @@ def _doc(root, folder, prefix, status_key=None, status=None, closed=False, uuid=
     return p
 
 
-def _commit_approval(root, stage, uuid=U):
+_EVIDENCE = {"change": ("change", "change"), "prompt": ("prompt", "prompt")}
+
+
+def _commit_approval(root, stage, uuid=U, bound=True):
+    """Commit an approval entry; bound records the blob hashes approve.py would (change-82dbf16a)."""
     path = root / "ai" / "approvals.yaml"
     text = path.read_text() if path.exists() else "approvals:\n"
-    path.write_text(text + f'  - {{ uuid: "{uuid}", stage: "{stage}" }}\n')
+    blobs = ""
+    if bound:
+        pairs = []
+        if stage in _EVIDENCE:
+            folder, prefix = _EVIDENCE[stage]
+            base = root / "ai" / "workspace" / folder
+            for f in sorted(list(base.glob(f"{prefix}-{uuid}-*.md")) + list(base.glob(f"closed/{prefix}-{uuid}-*.md"))):
+                pairs.append(f'"{f.name}": "{ST.blob_hash(str(f))}"')
+        blobs = f", blobs: {{ {', '.join(pairs)} }}"
+    path.write_text(text + f'  - {{ uuid: "{uuid}", stage: "{stage}"{blobs} }}\n')
     _git(root, "add", "ai/approvals.yaml")
     _git(root, "commit", "-q", "-m", f"approve {stage}")
 
@@ -212,3 +226,69 @@ def test_propagate_declares_approvals_file():
     out = subprocess.run(["bash", "-c", func + "\nis_declared approvals.yaml && echo yes"],
                          capture_output=True, text=True)
     assert out.stdout.strip() == "yes"
+
+
+# --- change-82dbf16a: approvals bound to document content (H-02), L-01, L-14, M-04 ---
+
+def test_edited_prompt_needs_reapproval(repo, se):
+    prompt = _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    assert ST.prerun_missing(str(repo), se, U) == []
+    prompt.write_text(prompt.read_text() + "deliverable: changed\n")
+    missing = ST.prerun_missing(str(repo), se, U)
+    assert len(missing) == 1 and "does not match the current documents" in missing[0]
+    assert f"changed: prompt-{U}-work.md" in missing[0] and f"approve.py {U} prompt" in missing[0]
+    item = ST.scan(str(repo), se).work_items[U]
+    assert item.current_stage == "implement" and "does not match" in item.missing[0]
+    code, msg = A.approve(str(repo), U, "prompt", manifest=se)
+    assert code == 0 and "approved and committed" in msg
+    assert ST.prerun_missing(str(repo), se, U) == []
+
+
+def test_added_same_uuid_prompt_needs_reapproval(repo, se):
+    _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    (repo / "ai" / "workspace" / "prompt" / f"prompt-{U}-second.md").write_text("x\n")
+    missing = ST.prerun_missing(str(repo), se, U)
+    assert any(f"added: prompt-{U}-second.md" in m for m in missing)
+
+
+def test_approval_without_hashes_does_not_open_the_loop(repo, se):
+    _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt", bound=False)
+    missing = ST.prerun_missing(str(repo), se, U)
+    assert any("records no document hashes" in m for m in missing)
+
+
+def test_approve_records_blob_hashes(repo, se):
+    prompt = _doc(repo, "prompt", "prompt")
+    assert A.approve(str(repo), U, "prompt", manifest=se)[0] == 0
+    blob = _git(repo, "hash-object", str(prompt)).stdout.strip()
+    assert ST.committed_approvals(str(repo))[(U, "prompt")] == {prompt.name: blob}
+    assert ST.blob_hash(str(prompt)) == blob
+
+
+@pytest.mark.parametrize("entry", ['{ uuid: 01234567, stage: "prompt" }',
+                                   '{ uuid: 12345678, stage: "prompt" }',
+                                   '{ uuid: "XYZ", stage: "prompt" }'])
+def test_unquoted_or_invalid_uuid_is_skipped(entry):
+    assert ST.parse_approvals(f"approvals:\n  - {entry}\n") == {}
+
+
+def test_scan_does_not_write_the_git_index(repo, se):
+    _doc(repo, "prompt", "prompt")
+    readme = repo / "README.md"
+    t = time.time() + 5
+    os.utime(readme, (t, t))           # stat-dirty: a plain git status would refresh the index
+    index = repo / ".git" / "index"
+    before = index.stat().st_mtime_ns
+    ST.scan(str(repo), se)
+    ST.prerun_missing(str(repo), se, U)
+    assert index.stat().st_mtime_ns == before
+
+
+def test_symlink_into_workspace_is_tracked(project):
+    inside = _doc(project, "prompt", "prompt")
+    link = project / f"prompt-{U}-link.md"
+    link.symlink_to(inside)
+    assert ST.is_tracked_task(str(project), str(link))

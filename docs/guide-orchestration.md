@@ -112,7 +112,7 @@ See `docs/guide-audit-loop.md` for an overview and `ai/governance/software-engin
 
 A read-only monitor for a downstream project's governance state, rendered to a self-contained browser page. Scans `ai/workspace/` and `ai/state/` each polling cycle and reports:
 
-- Inferred workflow phase (Idle, Change cycle, Tactical execution, etc.)
+- Inferred workflow phase (Idle, Change cycle, Loop execution, etc.)
 - Two-tier compliance alerts: coupling violations, UUID mismatches, invalid `tactical_brief`, naming convention failures
 - Open document registry grouped by UUID
 - Output: `overwatch.html` (project root, auto-refreshing) and `ai/dashboard-alerts.md`
@@ -153,6 +153,7 @@ Setup instructions: P10.8 in `ai/governance/software-engineering/governance.md`
 | 1.1 | 2026-09-25 | change-5bcd46ad: engine and governance paths; terms AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp; §5.0 govwatch replaced by overwatch |
 | 1.2 | 2026-10-01 | engine-mcp: work_status; tracked prompt tasks only (change-793992ae) |
 | 1.3 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 1.4 | 2026-10-01 | Overwatch phase label: Loop execution (audit-14e05e35 M-03, change-82dbf16a) |
 
 ---
 

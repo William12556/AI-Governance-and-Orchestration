@@ -2,6 +2,7 @@
 
 import importlib.util
 import os
+import re
 
 import pytest
 
@@ -61,3 +62,26 @@ def test_scan_reports_project_owned_files_only(tmp_path, capsys):
 def test_live_corpus_has_no_retired_terms():
     """V-08: nothing left to convert in the framework repository."""
     assert MT.plan(REPO) == {}
+
+
+# change-82dbf16a (audit-14e05e35 M-03): bare Strategic/Tactical wording outside
+# the audit mode names (P02.9, T08 mode) and the tactical_brief field.
+BARE = re.compile(r"\b[Ss]trategic\b|\b[Tt]actical\b(?!_)")
+ALLOWED = re.compile(r"audit|-led\b|favours|^\s*-\s*(strategic|tactical)\s*$|#\s+(strategic|tactical) \(|"
+                     r"strategic, tactical|tactical brief", re.IGNORECASE)
+
+
+def test_live_corpus_has_no_bare_domain_terms():
+    """V-08 widened: no two-domain wording remains outside the allowlist."""
+    found = []
+    for path in MT.iter_files(REPO, MT.SCOPE):
+        try:
+            with open(path, encoding="utf-8") as fh:
+                lines = fh.read().split("\n")
+        except (OSError, UnicodeDecodeError):
+            continue
+        for i, line in enumerate(lines, 1):
+            if MT.VERSION_ROW.match(line) or not BARE.search(line) or ALLOWED.search(line):
+                continue
+            found.append(f"{os.path.relpath(path, REPO)}:{i}: {line.strip()}")
+    assert found == []

@@ -7,7 +7,7 @@ Created: 2026 March 11
 ## Table of Contents
 
 - [1.0 Overview](<#1.0 overview>)
-- [2.0 Tactical Profiles](<#2.0 tactical profiles>)
+- [2.0 Worker/Reviewer Profiles](<#2.0 worker/reviewer profiles>)
 - [3.0 Structure](<#3.0 structure>)
 - [4.0 Requirements](<#4.0 requirements>)
 - [5.0 Installation](<#5.0 installation>)
@@ -29,7 +29,7 @@ This component replaces Goose as the engine for the oMLX/Devstral stack. It addr
 
 ---
 
-## 2.0 Tactical Profiles
+## 2.0 Worker/Reviewer Profiles
 
 Three worker/reviewer profiles are available. Engine is the primary profile; the others are manual alternatives.
 
@@ -241,6 +241,7 @@ The tests use stub model and MCP clients; no oMLX endpoint is required.
 | 2.9 | 2026-10-01 | §3.0 structure: stages.py and approve.py added (change-ee5357ec) |
 | 2.10 | 2026-10-01 | §3.0: engine-mcp work_status (change-793992ae) |
 | 2.11 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 2.12 | 2026-10-01 | §2.0 heading: Worker/Reviewer Profiles (audit-14e05e35 M-03, change-82dbf16a) |
 
 ---
 

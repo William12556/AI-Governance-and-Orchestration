@@ -222,13 +222,13 @@ The trivial exemption (P04.12) creates no documents and is not tracked; the git 
 | Gate | Type | Behaviour |
 |---|---|---|
 | `syntax` | Built-in | Current `_run_syntax_gate`, moved to `gates.py`; results unchanged. |
-| `pytest` (any declared command gate) | Command exit code | Command from the manifest, overridden by `gates.<name>` in config. Placeholders: `{python}`, `{targets}` (current deliverable-to-test mapping), `{project_root}`. Exit 0 = PASS, non-zero = FAIL, not runnable = UNCHECKED. FAIL overrides SHIP, as today (FR-03-04). |
-| `reviewer` | Reviewer verdict | SHIP or REVISE from the review phase, as today. |
+| `pytest` (any declared command gate) | Command exit code | Command from the manifest, overridden by `gates.<name>` in config. Placeholders: `{python}`, `{targets}` (current deliverable-to-test mapping), `{project_root}`. Exit 0 = PASS, non-zero = FAIL, not runnable = UNCHECKED. FAIL overrides SHIP, as today (FR-03-04). UNCHECKED ends the run BLOCKED, naming the gate, before the review phase. A gate with nothing to check (no targets, no command) is SKIPPED: not applicable, listed in `awaiting-approval.md` (FR-03-02 v1.3; change-82dbf16a). Provider key variables (`api_key_env`) are removed from the gate environment. |
+| `reviewer` | Reviewer verdict | SHIP or REVISE from the review phase. `review-result.txt` is cleared before each review phase; in practice the verdict is the reviewer's final response (change-82dbf16a). |
 | Human approval | Approval | Never passed by the engine (FR-03-05). Checked before a run (§8.0); after SHIP the engine writes `awaiting-approval.md` to the state directory naming the work item and stage. |
 
-Each gate result is logged as `gate=<name> type=<type> result=<PASS|FAIL|UNCHECKED>` per iteration (FR-03-06).
+Each gate result is logged as `gate=<name> type=<type> result=<PASS|FAIL|UNCHECKED|SKIPPED>` per iteration (FR-03-06).
 
-On BLOCKED the engine appends `Return to stage: <on_blocked>` to `BLOCKED.md` when the task belongs to a tracked work item (FR-02-03).
+On BLOCKED the engine appends `Return to stage: <on_blocked>` to `BLOCKED.md` when the task belongs to a tracked work item, in loop and worker mode (FR-02-03; change-82dbf16a).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -243,9 +243,11 @@ On BLOCKED the engine appends `Return to stage: <on_blocked>` to `BLOCKED.md` wh
 | T03 prompt file | `deliverable.files[].path`, the manifest's `writable_paths`, the run type's own paths, and the state directory (FR-05-01) |
 | Free-text task (CLI only) | The project root, as today (NFR-02) |
 
-A rejected call returns a tool error to the worker: `write outside the declared scope: <path>; allowed: <list>`. It is logged with tool, path and reason (FR-05-04). Paths are normalised to project-root-relative form before matching; `writable_paths` match as prefixes, deliverables match exactly.
+A rejected call returns a tool error to the worker: `write outside the declared scope: <path>; allowed: <list>`. It is logged with tool, path and reason (FR-05-04). Paths are resolved (symlinks included) before matching; `writable_paths` match as prefixes, deliverables match exactly. A write call with no recognised path argument is rejected (change-82dbf16a).
 
-Before the review phase the engine injects a `[DELIVERABLES]` block listing each deliverable as an absolute path, so the reviewer does not resolve relative paths against the state directory (FR-05-03).
+The worker never writes the engine signal files in the state directory (`review-result.txt`, `review-feedback.txt`, `.complete`, `.timeout`, `awaiting-approval.md`, `mcp-run.json`, `iteration.txt`, `task.md`, `context-budget.md`), whatever the task; `work-summary.txt`, `work-complete.txt` and `BLOCKED.md` stay writable. Only tools offered to a phase are dispatched, and a review phase dispatches no write tool (change-82dbf16a).
+
+Before the review phase the engine injects a `[DELIVERABLES]` block listing each deliverable as an absolute path, so the reviewer does not resolve relative paths against the state directory (FR-05-03). The block merges the worker's reported deliverables with the prompt's declared `deliverable.files` that exist (change-82dbf16a).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -265,7 +267,7 @@ Before the review phase the engine injects a `[DELIVERABLES]` block listing each
 | `approvals` | Stages approved in the committed approvals file |
 | `current_stage` | First stage on the path whose evidence or approval is incomplete |
 | `missing` | Evidence and approvals still required before `current_stage` completes |
-| `anomalies` | Status that contradicts location, e.g. a completed status in an active folder after closure, or an active status in `closed/` (FR-08-07) |
+| `anomalies` | Status that contradicts location: an active status in `closed/`, or documents of one stage in both the active and the closed folder (FR-08-07). A completed status in an active folder is not detected (backlog, audit-14e05e35 L-11). |
 
 The scan only reads files.
 
@@ -274,10 +276,11 @@ The scan only reads files.
 ```yaml
 # ai/approvals.yaml — written only by ai/engine/src/approve.py
 approvals:
-  - { uuid: 14e05e35, stage: prompt, date: "2026-10-01T09:30:00Z" }
+  - { uuid: "14e05e35", stage: "prompt", date: "2026-10-01T09:30:00Z",
+      blobs: { "prompt-14e05e35-x.md": "<git blob hash>" } }
 ```
 
-`python ai/engine/src/approve.py <uuid> <stage>` checks that the stage exists and requires approval, appends the entry, and commits `ai/approvals.yaml` with the message `approve: <uuid> <stage>`.
+`python ai/engine/src/approve.py <uuid> <stage>` checks that the stage exists and requires approval, appends the entry, and commits `ai/approvals.yaml` with the message `approve: <uuid> <stage>`. The UUID is a quoted string; an unquoted UUID is skipped. `blobs` records the git blob hash of each evidence document of the stage, keyed by file name; the last entry for a UUID and stage wins, so running the command again after an edit re-approves (change-82dbf16a).
 
 ### 8.3 Protection (requirements OQ-04)
 
@@ -285,7 +288,7 @@ The engine reads approvals with `git show HEAD:ai/approvals.yaml`, so uncommitte
 
 ### 8.4 Pre-run Check
 
-For a T03 prompt task, the engine derives the work item and refuses to start when any stage before `implement` lacks evidence or a required approval. The message lists what is missing (FR-08-05). Free-text CLI tasks are not tracked.
+For a T03 prompt task, the engine derives the work item and refuses to start when any stage before `implement` lacks evidence or a required approval, or when an approval no longer matches its stage's documents: a document changed, added or removed since approval, or an entry without `blobs`. The message lists what is missing (FR-08-05). Git runs with `--no-optional-locks`, so the check and `work_status` do not write the index (FR-08-06). A task file is tracked when its resolved path lies in `ai/workspace/`. Free-text CLI tasks are not tracked.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -312,9 +315,10 @@ Refactored in place in `ai/engine/mcp/server.py`.
 
 | Rule | Behaviour |
 |---|---|
-| Line-prefix forms | `Strategic Domain:` → `Planner:`; `Tactical Domain:` → `Worker:` where the clause describes implementation, otherwise listed for review. |
-| Table cells and headings | `Strategic Domain` → `Planner`; `Tactical Domain` → `Worker and reviewer`. |
-| Other prose | Listed with file and line for manual edit; not rewritten. |
+| Line-prefix forms | `Strategic Domain:` → `Planner:`; `- Tactical Domain:` → `- Worker:`. |
+| Table cells and headings | `Strategic Domain` → `Planner`; `Tactical Domain` → `Worker and Reviewer`, or `Worker/Reviewer` before a noun. |
+| Other prose | Rewritten by the same rules: `planner`; `worker and reviewer`, or `worker/reviewer` before a noun such as profile or context. Capitalised at a sentence, cell or list start. Anchors follow their headings. |
+| Bare forms | `Strategic`/`Tactical` without `Domain` are edited by hand; a test scans for them, allowing the audit mode names and `tactical_brief` (change-82dbf16a). |
 | Excluded | `closed/` folders, Version History tables, `dev/` records, template field names such as `tactical_brief` (FR-07-02, FR-07-03). |
 
 Downstream projects receive the changed framework files through `bin/propagate.sh --allow-major` (FR-07-05). Occurrences in project-owned files are reported by the script's `--scan <project>` option, not rewritten.
@@ -431,6 +435,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.6 | 2026-10-01 | Audit-14e05e35 remediation (change-82dbf16a): §6.0 UNCHECKED blocks, SKIPPED listed, gate environment, verdict source, return stage in worker mode; §7.0 signal files, dispatch allowlist, no-path writes, symlinks, declared deliverables; §8.1 anomaly scope narrowed (L-11); §8.2 quoted UUID and blob hashes; §8.4 content-bound approvals, no optional locks, resolved task path; §10.0 implemented rules (L-04). |
 | 1.5 | 2026-10-01 | §3.0, §4.3: optional base_url for the Anthropic provider; literal key for local endpoints (change-43091424). |
 | 1.4 | 2026-10-01 | §9.0: worker mode also limited to tracked prompts (change-793992ae). |
 | 1.3 | 2026-10-01 | DI-02 closed (change-ee5357ec). |

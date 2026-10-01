@@ -8,7 +8,7 @@ Created: 2026 April 27
 
 [1.0 Purpose](<#1.0 purpose>)
 [2.0 Architecture](<#2.0 architecture>)
-[2.1 Tactical Profiles](<#2.1 tactical profiles>)
+[2.1 Worker/Reviewer Profiles](<#2.1 worker/reviewer profiles>)
 [2.2 Monitoring Tools](<#2.2 monitoring tools>)
 [3.0 Responsibilities](<#3.0 responsibilities>)
 [4.0 Workflow](<#4.0 workflow>)
@@ -35,15 +35,17 @@ this document provides orientation and quick reference only.
 
 ## 2.0 Architecture
 
-The framework separates software development into two domains:
+The framework assigns work to three agent roles:
 
-| Domain | Role | Implementation |
+| Role | Function | Implementation |
 |---|---|---|
-| Strategic | Plan, control, validate | Claude Desktop |
-| Tactical | Execute, generate code | Engine (loop) or Claude Code |
+| Planner | Plan, control, validate | Claude Desktop |
+| Worker | Execute, generate code | Engine (loop) or Claude Code |
+| Reviewer | Review the worker's output; SHIP or REVISE | Engine (loop) |
 
-Communication between domains is filesystem-based (MCP). Neither domain has
-direct conversational access to the other.
+Communication between the planner and the worker and reviewer is
+filesystem-based (MCP). The planner has no direct conversational access to the
+worker or reviewer.
 
 **Worker/reviewer implementations:**
 
@@ -52,7 +54,7 @@ direct conversational access to the other.
   in `ai/state/`. Requires oMLX inference endpoint and `config.yaml`.
   Context file: `ai/context.md`.
 - **Claude Code** — alternative profile. Manual invocation; no automated loop.
-  Uses `CLAUDE.md` at project root as tactical context file. See `ai/profiles/claude-code.md`.
+  Uses `CLAUDE.md` at project root as worker/reviewer context file. See `ai/profiles/claude-code.md`.
 
 **Worker/reviewer execution options** (P13.3) — after T03 prompt approval, human
 selects one of three options:
@@ -67,13 +69,13 @@ selects one of three options:
   Human issues the task instruction directly in Claude Code. See `ai/profiles/claude-code.md` §5.0.
 
 Implementation profiles are defined in `ai/profiles/`. The active profile
-determines the tactical context file name, skills directory, and engine configuration.
+determines the worker/reviewer context file name, skills directory, and engine configuration.
 
 [Return to Table of Contents](<#table of contents>)
 
 ---
 
-## 2.1 Tactical Profiles
+## 2.1 Worker/Reviewer Profiles
 
 | Aspect       | Engine (Primary)                       | Claude Code                   | claude-omlx                         |
 | ------------ | ----------------------------------- | ----------------------------- | ----------------------------------- |
@@ -154,6 +156,7 @@ P10  Project Initialization  →  configure config.yaml
 P11  Requirements            →  human approval → baseline
 P12  Design (Tier 1–3)       →  human approval per tier → git tag baseline
 P13  T03 Prompt              →  query omlx_model_status → human approval
+                                 (recorded with approve.py; re-approve after any edit)
      Human selects execution option:
        Option A: human runs the engine terminal command (all profiles)
        Option B: Planner calls start_engine / polls engine_status
@@ -329,6 +332,7 @@ any document.
 | 0.15 | 2026-09-25 | Synced with governance v11.0 (change-5bcd46ad): paths under ai/governance/software-engineering/ and ai/engine/; terms AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp; §2.2 govwatch replaced by overwatch |
 | 0.16 | 2026-10-01 | Option B: work_status tool; tracked prompt tasks only (change-793992ae) |
 | 0.17 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 0.18 | 2026-10-01 | §2.0 three agent roles replace the two-domain table; §2.1 heading; context file wording; §4.0 approvals recorded with approve.py (audit-14e05e35 M-03, change-82dbf16a, L-15) |
 
 ---
 

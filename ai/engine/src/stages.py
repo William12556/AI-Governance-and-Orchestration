@@ -6,11 +6,17 @@ ai/workspace/, using the manifest's stage evidence and paths; nothing else
 records it (FR-08-01). Operator approvals count only when committed: they are
 read from git HEAD, so uncommitted edits to ai/approvals.yaml are ignored
 (design §8.3). This module only reads files and git.
+
+change-82dbf16a (audit-14e05e35): an approval records the git blob hash of
+each evidence document of its stage; the pre-run check requires the current
+documents to match exactly (H-02). git runs without optional locks, so a scan
+never writes the index (M-04).
 """
 
 from __future__ import annotations
 
 import glob
+import hashlib
 import json
 import os
 import re
@@ -60,7 +66,16 @@ class Report:
 # --- approvals -----------------------------------------------------------------
 
 def _git(project_root: str, *args: str) -> subprocess.CompletedProcess:
-    return subprocess.run(["git", "-C", project_root, *args], capture_output=True, text=True)
+    # M-04: --no-optional-locks keeps git status from refreshing the index.
+    return subprocess.run(["git", "--no-optional-locks", "-C", project_root, *args],
+                          capture_output=True, text=True)
+
+
+def blob_hash(path: str) -> str:
+    """The git blob hash of a file's content (as git hash-object without filters)."""
+    with open(path, "rb") as fh:
+        data = fh.read()
+    return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
 
 
 def is_git_repository(project_root: str) -> bool:
@@ -70,26 +85,66 @@ def is_git_repository(project_root: str) -> bool:
         return False
 
 
-def parse_approvals(text: str) -> set[tuple[str, str]]:
-    """(uuid, stage) pairs from approvals.yaml content; malformed entries are skipped."""
+Approvals = dict  # (uuid, stage) -> {document name: blob hash}, or None when unbound
+
+
+def parse_approvals(text: str) -> Approvals:
+    """
+    (uuid, stage) -> recorded blob hashes, from approvals.yaml content. The
+    last entry for a pair wins (a re-approval). Malformed entries are skipped,
+    including a UUID that is not a quoted 8-character hex string (L-14).
+    """
     try:
         data = yaml.safe_load(text) or {}
     except yaml.YAMLError:
-        return set()
+        return {}
     entries = data.get("approvals") if isinstance(data, dict) else None
-    out: set[tuple[str, str]] = set()
+    out: Approvals = {}
     for e in entries or []:
-        if isinstance(e, dict) and e.get("uuid") and e.get("stage"):
-            out.add((str(e["uuid"]), str(e["stage"])))
+        if not (isinstance(e, dict) and isinstance(e.get("uuid"), str)
+                and UUID_RE.match(e["uuid"]) and e.get("stage")):
+            continue
+        blobs = e.get("blobs")
+        if isinstance(blobs, dict):
+            blobs = {str(k): str(v) for k, v in blobs.items()}
+        else:
+            blobs = None
+        out[(e["uuid"], str(e["stage"]))] = blobs
     return out
 
 
-def committed_approvals(project_root: str) -> set[tuple[str, str]]:
+def committed_approvals(project_root: str) -> Approvals:
     """Approvals in git HEAD. Raises NotAGitRepository outside a git working tree."""
     if not is_git_repository(project_root):
         raise NotAGitRepository(f"{project_root} is not a git repository; approvals cannot be read")
     proc = _git(project_root, "show", f"HEAD:{APPROVALS_FILE}")
-    return parse_approvals(proc.stdout) if proc.returncode == 0 else set()
+    return parse_approvals(proc.stdout) if proc.returncode == 0 else {}
+
+
+def stage_blobs(project_root: str, item: "WorkItem", stage_id: str) -> dict[str, str]:
+    """{document name: blob hash} of the work item's evidence documents for one stage."""
+    return {os.path.basename(d.path): blob_hash(os.path.join(project_root, d.path))
+            for d in item.documents if d.stage == stage_id}
+
+
+def approval_mismatch(project_root: str, item: "WorkItem", st, approvals: Approvals) -> str | None:
+    """
+    Why a recorded approval no longer covers the stage's documents (H-02), or
+    None when it does. A stage without evidence needs no binding.
+    """
+    if not st.evidence or (item.uuid, st.id) not in approvals:
+        return None
+    recorded = approvals[(item.uuid, st.id)]
+    if recorded is None:
+        return "approval records no document hashes"
+    current = stage_blobs(project_root, item, st.id)
+    added = sorted(set(current) - set(recorded))
+    removed = sorted(set(recorded) - set(current))
+    changed = sorted(n for n in set(current) & set(recorded) if current[n] != recorded[n])
+    parts = ([f"changed: {', '.join(changed)}"] if changed else []) + \
+            ([f"added: {', '.join(added)}"] if added else []) + \
+            ([f"removed: {', '.join(removed)}"] if removed else [])
+    return "; ".join(parts) if parts else None
 
 
 def _uncommitted_approvals(project_root: str) -> bool:
@@ -154,7 +209,7 @@ def _complete_evidence(stage, docs: list[Document]) -> bool:
     return any(d.status in ev["complete_statuses"] for d in mine)
 
 
-def _evaluate(item: WorkItem, manifest, approvals: set[tuple[str, str]]) -> None:
+def _evaluate(item: WorkItem, manifest, approvals: Approvals) -> None:
     """Fill path, current_stage, missing and anomalies for one work item."""
     stage_ids = [s.id for s in manifest.stages]
     present = {d.stage for d in item.documents}
@@ -196,7 +251,7 @@ def _evaluate(item: WorkItem, manifest, approvals: set[tuple[str, str]]) -> None
             item.anomalies.append(f"{st.id}: documents in both the active and the closed folder")
 
 
-def _missing_for(st, item: WorkItem, approvals: set[tuple[str, str]]) -> list[str]:
+def _missing_for(st, item: WorkItem, approvals: Approvals) -> list[str]:
     missing: list[str] = []
     ev = st.evidence
     if ev and not _complete_evidence(st, item.documents):
@@ -231,16 +286,34 @@ def scan(project_root: str, manifest) -> Report:
     for uuid, docs in _documents(project_root, manifest).items():
         item = WorkItem(uuid=uuid, documents=docs)
         _evaluate(item, manifest, approvals)
+        _flag_stale_approvals(project_root, item, manifest, approvals)
         items[uuid] = item
     return Report(work_items=items, warnings=warnings)
+
+
+def _flag_stale_approvals(project_root: str, item: WorkItem, manifest, approvals: Approvals) -> None:
+    """At the loop stage, report approvals that no longer match their documents (H-02)."""
+    loop_id = manifest.loop_stage().id
+    if item.current_stage != loop_id or item.path is None:
+        return
+    stale = []
+    for sid in manifest.paths[item.path]["stages"]:
+        if sid == loop_id:
+            break
+        mismatch = approval_mismatch(project_root, item, manifest.stage(sid), approvals)
+        if mismatch:
+            stale.append(f"{sid}: the approval does not match the current documents ({mismatch}); "
+                         f"review and re-approve (python ai/engine/src/approve.py {item.uuid} {sid})")
+    item.missing = stale + item.missing
 
 
 def is_tracked_task(project_root: str, task_path: str | None) -> bool:
     """A T03 prompt file inside ai/workspace/ is a tracked work item."""
     if not task_path or not os.path.isfile(task_path):
         return False
-    workspace = os.path.abspath(os.path.join(project_root, WORKSPACE))
-    return os.path.abspath(task_path).startswith(workspace + os.sep)
+    # L-01: symlinks resolved, as engine-mcp does.
+    workspace = os.path.realpath(os.path.join(project_root, WORKSPACE))
+    return os.path.realpath(task_path).startswith(workspace + os.sep)
 
 
 def prerun_missing(project_root: str, manifest, uuid: str) -> list[str]:
@@ -266,6 +339,10 @@ def prerun_missing(project_root: str, manifest, uuid: str) -> list[str]:
     for sid in before:
         st = manifest.stage(sid)
         missing += _missing_for(st, item, approvals)
+        mismatch = approval_mismatch(project_root, item, st, approvals)
+        if mismatch:
+            missing.append(f"{sid}: the approval does not match the current documents ({mismatch}); "
+                           f"review and re-approve (python ai/engine/src/approve.py {uuid} {sid})")
     return missing
 
 

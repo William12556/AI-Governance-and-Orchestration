@@ -62,16 +62,16 @@ Created: 2025 October 30
       - Implementation options: loop (engine), Claude Code, claude-omlx, custom agents, direct invocation
     - Communication: MCP filesystem (model-independent)
   - P00.5 Forbidden
-    - Both domains: Unrequested creation, addition, removal or change of source code and documents is forbidden
+    - Planner, worker and reviewer: Unrequested creation, addition, removal or change of source code and documents is forbidden
   - P00.6 Constraints
     - Planner: Does not exceed language model context resource budget when communicating with worker and reviewer
   - P00.7 Control
-    - Planner: Strategic coordination and validation authority
+    - Planner: Coordination and validation authority
     - Planner: Analyzes requirements and formulates design specifications
     - Planner: Creates T03 prompts with complete technical context
     - Planner: Validates worker/reviewer implementation for protocol compliance
     - Planner: Coordinates quality assurance and integration verification
-    - Worker: Tactical implementation with project awareness
+    - Worker: Implementation with project awareness
     - Worker: Generates source code with MCP filesystem access
     - Worker: Performs direct file operations in src/ directory
     - Worker: Validates protocol compliance through direct file access
@@ -126,7 +126,7 @@ python ai/engine/src/orchestrator.py --mode loop \
     - Reference implementation: loop via Python engine orchestrator (`ai/engine/`)
     - Engine provides autonomous iterative code generation within governance boundaries
     - Loop State Directory: `ai/state/` (ephemeral, per-task)
-    - Loop Entry: After human approval of T03 Prompt
+    - Loop Entry: After human approval of T03 Prompt, recorded with `ai/engine/src/approve.py` (P13.3)
     - Integration Scripts: Project-scoped scripts reside in `<project>/bin/`. Scripts are version-controlled project artifacts. Global installation (e.g. `~/bin/`) is not required.
     - Claude Desktop Interface: `engine-mcp` (`ai/engine/mcp/server.py`) provides `start_engine`, `engine_status`, `reset_engine` and the read-only `work_status` MCP tools for use within the Claude Desktop profile; in loop and worker mode `start_engine` accepts only a T03 prompt inside ai/workspace/; registers once in Claude Desktop MCP configuration; serves all downstream projects via `project_dir` parameter; reference: P10.8
     - Loop Execution: Worker/reviewer cycle until SHIP or boundary exceeded
@@ -659,7 +659,7 @@ pip list
 ```
   - P10.8 Implementation Profile Setup (Human executes)
     - Human: Select implementation profile from ai/profiles/
-    - Human: Create tactical context file at project root per selected profile
+    - Human: Create worker/reviewer context file at project root per selected profile
     - **Claude profile** (Worker and reviewer = Claude Code):
       - Install Claude Code: `npm install -g @anthropic-ai/claude-code`
       - Ensure Anthropic API key is configured
@@ -888,7 +888,7 @@ exclude_lines = [
 
   - P13.1 Purpose
     - Manage creation and lifecycle of T03 prompt documents
-    - Facilitate planner → worker and reviewer code generation communication
+    - Facilitate planner → worker/reviewer code generation communication
   - P13.2 Prompt Creation
     - Prompt documents are always worker/reviewer specific; prompt_info.target_profile declares which profile (engine, claude_code, or claude_omlx) a given prompt targets; the legacy value ael in closed documents is read as engine.
     - Planner: Reads template from ai/governance/software-engineering/templates/T03-prompt.md
@@ -915,10 +915,12 @@ exclude_lines = [
     - Planner: When source_ref references a design document (design-<uuid>, initial implementation per P04.1), coupled_docs is omitted; no change document exists to couple to
     - GitHub version control maintains complete revision history
   - P13.3 Human Handoff
-    - Planner: Verifies tactical context file exists at project root before providing command
+    - Planner: Verifies worker/reviewer context file exists at project root before providing command
     - Planner: If context file absent, generates initial context file with project context
     - Planner: Generated context file requires human approval before proceeding
     - Context file name: Defined in implementation profile (ai/profiles/)
+    - Human: Records each approval of a tracked work item with `python ai/engine/src/approve.py <uuid> <stage>` (SE: change and prompt); the command commits ai/approvals.yaml and binds the approval to the current content of the stage's documents
+    - Human: Re-approves after any edit of an approved document, or after a document with the same UUID is added (for example a prompt revised after BLOCKED); otherwise the engine refuses the run (exit 3)
     - Planner: After human approval of T03 prompt, presents worker/reviewer execution options; human selects preferred option:
 
     - **Option A — Human executes (all profiles):**
@@ -1267,6 +1269,7 @@ See [workflow.md](workflow.md).
 | 11.2 | 2026-10-01 | P10.6: ai/approvals.yaml declared as a project file (operator approvals, change-ee5357ec) |
 | 11.3 | 2026-10-01 | P00 engine-mcp: work_status tool; loop and worker runs only for T03 prompts inside ai/workspace/ (change-793992ae) |
 | 12.0 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 12.1 | 2026-10-01 | P00.4–P00.7 two-domain wording replaced; P10/P13.3 context file wording; P00.11 and P13.3 approvals recorded with approve.py and re-approval after edits; P13.1 worker/reviewer compound (audit-14e05e35 M-03, L-05, L-15; change-82dbf16a) |
 
 ---
 [Return to Table of Contents](<#table of contents>)

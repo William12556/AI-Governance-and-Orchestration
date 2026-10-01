@@ -129,10 +129,11 @@ Not verified live: the Anthropic API itself, its acceptance of strict tool schem
 | Check | Verdict |
 |---|---|
 | V-02 SE regression | Pass: gate results identical to the baseline |
-| V-04 oMLX | Pass (§4.0) |
+| V-04 oMLX | Pass (§4.0): the provider path (readiness, completions, tool calls, both roles) was exercised; the run itself ended BLOCKED by reviewer stall (§4.0, OB-01), so this verdict does not rest on a SHIP |
 | V-04 Mistral API | Pass (§5.0) |
 | V-04 Anthropic | Partial: native provider path verified against a local Anthropic-compatible endpoint; Anthropic API not run (backlog §2.0 item 12) |
 | FR-08-05 pre-run check (live) | Pass (§3.0) |
+| V-09 API key not in logs or state | Pass (§9.0 O-01) |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -142,9 +143,9 @@ Not verified live: the Anthropic API itself, its acceptance of strict tool schem
 
 | ID | Item |
 |---|---|
-| O-01 | V-09: confirm that no API key appears in `ai/state/` or `ai/logs/` after the Mistral run. |
+| O-01 | **Closed 2026-10-01.** V-09: `grep -rlF` for the Mistral key over `ai/state/` and `ai/logs/` found 0 files (NFR-05). |
 | O-02 | DI-04: read the Mistral "Included API usage" meter after the Mistral run. |
-| O-03 | Delete the `phase2-replay` branch; propagate governance 12.0 to solax-modbus `main` with `--allow-major`, then record the c8e760ee approvals there if the work item is replayed. |
+| O-03 | `phase2-replay` branch deleted 2026-10-01. Remaining: propagate governance 12.0 to solax-modbus `main` with `--allow-major`, then record the c8e760ee approvals there if the work item is replayed. |
 | O-04 | Independent audit (V-14). |
 
 [Return to Table of Contents](<#table of contents>)
@@ -155,6 +156,8 @@ Not verified live: the Anthropic API itself, its acceptance of strict tool schem
 
 | Version | Date | Description |
 |---|---|---|
+| 1.2 | 2026-10-01 | §8.0: basis of the V-04 oMLX verdict stated (audit-14e05e35 L-16) |
+| 1.1 | 2026-10-01 | O-01 closed: V-09 pass; replay branch deleted (O-03 partly done) |
 | 1.0 | 2026-10-01 | Initial report: V-02 pass, V-04 oMLX and Mistral pass, Anthropic partial; four observations; four open items |
 
 ---

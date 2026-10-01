@@ -61,6 +61,11 @@ Each requires a T06 issue → T07 change → T03 prompt triple.
 3. `bin/bootstrap.sh`: refuse, with a clear message, a release tarball without `ai/engine/` (audit-5bcd46ad H-01 option; H-01 itself resolved by release v0.1.0).
 4. Pre-existing items recorded by audit-5bcd46ad L-12: governance P10.6 says the framework repository "contains only ai/, doc/, and templates/" (inaccurate); `audit-review.yaml` tests for `.complete` containing `DURATION_LIMIT`, which the orchestrator never writes (a timeout writes `.timeout` and returns before review); `ai/profiles/README.md` links to the gitignored `docs/claude/project_information.md`.
 5. ~~`run_phase` crashes with `TypeError: 'NoneType' object is not subscriptable` at `response.choices[0]` when the endpoint returns a completion without `choices` (solax-modbus pilot run `engine_20260929-131033`, first worker call, rc=1, no BLOCKED.md). Treat a response without choices as an endpoint error: log the raw payload, retry through `_completion_with_retry`, then write BLOCKED.md. Needs a T06/T07/T03 triple. Not reproduced on the immediate rerun with the same configuration (17 tools, `engine_20260929-131551`), so the payload was most likely a transient endpoint error; the crash on it is the defect.~~ Resolved 2026-10-01 by change-53c6f252: the provider raises `ProviderError` inside the bounded retry; persistent failure ends BLOCKED.
+6. Audit-14e05e35 L-08 (NFR-04 gaps): a missing `loop:` block or `loop.state_dir` gives `KeyError`; a non-numeric `max_tokens` gives `ValueError`; config gate `timeout_seconds` is not validated; a missing config file gives a traceback. Validate and report file and field.
+7. Audit-14e05e35 L-09: strict-schema rejections and Anthropic authentication errors are retried (3 attempts, or until the readiness timeout). Treat HTTP 400/401/403 as non-retryable, or amend design §11.0 (relates to DI-05).
+8. Audit-14e05e35 L-10: `propagate.sh` creates workspace folders on the up-to-date path before confirmation and before the plan-error check; its awk parser ignores flow-style `workspace_folders` lists that `manifest.py` accepts; `migrate-layout.sh` warns on a single-quoted `'ai/state'`.
+9. Audit-14e05e35 L-11: the stage scan does not report a completed status in an active folder after closure. Design §8.1 narrowed in v1.6; implement if wanted.
+10. Audit-14e05e35 L-14 (remainder): `approve.py` accepts an `accept` approval before any loop run. Require loop completion (for example `.complete` or a SHIP record) first.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -139,6 +144,7 @@ None pending. All resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.29 | 2026-10-01 | §3.0 items 6–10: audit-14e05e35 L-08, L-09, L-10, L-11 and the L-14 accept remainder (change-82dbf16a scope decision) |
 | 1.28 | 2026-10-01 | §2.0 item 12: deferred live Anthropic API check; §5.0 item 9 recurrence in the Phase 2 replay |
 | 1.27 | 2026-10-01 | §2.0 item 8 L-01, L-02 resolved; item 9 partly done (change-793992ae) |
 | 1.26 | 2026-10-01 | §5.0 items 7 and 8 resolved by change-bdc6820f; L-09 (§2.0 item 8) resolved by the same change |

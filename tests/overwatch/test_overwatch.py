@@ -75,7 +75,7 @@ def snapshot() -> "overwatch.Snapshot":
         ],
         engine_state=overwatch.EngineState(status="running", iteration=4, task_ref="task"),
         budget=overwatch.BudgetState(present=True, status="warn", initial_pct=61.5),
-        phase="Tactical execution",
+        phase="Loop execution",
         alerts=[
             overwatch.Alert("violation", "FR-02-03", "Prompt has no coupled change",
                             document="prompt-1a2b3c4d-x.md"),
@@ -131,7 +131,7 @@ def test_render_shows_workflow_state(renderer, snapshot) -> None:
     """Phase, engine status/iteration, and budget status all reach the page."""
     out = renderer.render(snapshot)
 
-    assert "Tactical execution" in out
+    assert "Loop execution" in out
     assert "RUNNING" in out
     assert "Iteration 4" in out
     assert "WARN" in out
@@ -165,7 +165,7 @@ def test_embedded_json_round_trip(renderer, snapshot) -> None:
     """The embedded JSON parses and carries the snapshot's phase."""
     data = _embedded_json(renderer.render(snapshot))
 
-    assert data["phase"] == "Tactical execution"
+    assert data["phase"] == "Loop execution"
     assert data["scan_time"] == "2026-08-21T10:30:00"
     assert len(data["documents"]) == 3
     assert data["engine_state"]["status"] == "running"

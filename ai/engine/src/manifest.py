@@ -137,6 +137,10 @@ def load_manifest(path: str) -> Manifest:
         if f.startswith("/") or ".." in f.split("/"):
             raise _err(path, "workspace_folders", f"'{f}' must be a relative path inside ai/workspace/")
     writable = _str_list(path, data, "writable_paths", required=False)
+    for w in writable:  # change-82dbf16a (L-03)
+        parts = [x for x in w.split("/") if x]
+        if w.startswith("/") or ".." in parts or not parts or parts == ["."]:
+            raise _err(path, "writable_paths", f"'{w}' must be a relative path below the project root")
 
     model_dir = os.path.dirname(path)
     run_types = data.get("run_types")

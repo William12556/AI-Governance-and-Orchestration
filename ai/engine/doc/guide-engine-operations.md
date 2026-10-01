@@ -40,12 +40,14 @@ State files reside in `ai/state/` (configured via `loop.state_dir` in `config.ya
 | `iteration.txt` | Orchestrator | Current outer loop cycle number |
 | `work-summary.txt` | Worker | Summary of work done this iteration |
 | `work-complete.txt` | Worker | Signals worker phase is complete |
-| `review-result.txt` | Reviewer | `SHIP` or `REVISE` |
-| `review-feedback.txt` | Reviewer | Specific feedback for next worker iteration |
+| `review-result.txt` | Orchestrator | Cleared before each review phase; the verdict is the reviewer's final response (`SHIP` or `REVISE`) |
+| `review-feedback.txt` | Orchestrator | Feedback for the next worker iteration, from the reviewer's final response or a gate |
 | `.complete` | Orchestrator | Completion marker (see §5.0 for content variants) |
 | `BLOCKED.md` | Worker | Unrecoverable failure details; seeds T06 issue |
 | `context-budget.md` | Orchestrator | Context window sizing report for planner |
 | `engine_<timestamp>.LOG` | Orchestrator | Full debug log; preserved across reset |
+
+The worker may write `work-summary.txt`, `work-complete.txt` and `BLOCKED.md` only; writes to the other engine files are refused (change-82dbf16a).
 
 ### 2.2 Audit Loop additions
 
@@ -124,7 +126,7 @@ context:
 
 For audit runs, set `max_iterations` to at least the number of items in `audit-index.md`.
 
-**Role-to-model binding (change-53c6f252):** without a `roles:` block, both roles use the `omlx:` block above. With `roles:`, each role names a provider from `providers:` and a model. Provider kinds are `omlx`, `openai_compatible` (for example the Mistral API) and `anthropic`. Remote providers read their key from the variable named in `api_key_env`. Set it for the engine process only. Context windows are resolved per role; API models need an entry under `context.model_context_windows`. `ai/engine/config.template.yaml` holds a commented example. CLI precedence: `--worker-model` / `--reviewer-model`, then `--model`, then the configured model.
+**Role-to-model binding (change-53c6f252):** without a `roles:` block, both roles use the `omlx:` block above. With `roles:`, each role names a provider from `providers:` and a model. Provider kinds are `omlx`, `openai_compatible` (for example the Mistral API) and `anthropic`. Remote providers read their key from the variable named in `api_key_env`. Set it for the engine process only. Context windows are resolved per role; API models need an entry under `context.model_context_windows`. `ai/engine/config.template.yaml` holds a commented example. CLI precedence with `roles:`: `--worker-model` / `--reviewer-model`, then `--model`, then `roles.<role>.model`. Without `roles:` (legacy `omlx:` block): `--worker-model` / `--reviewer-model`, then `omlx.worker_model` / `omlx.reviewer_model`, then `--model`, then `omlx.default_model`.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -190,7 +192,7 @@ The `engine end rc=N` line is always written to the `.LOG` file on any clean exi
 python ai/engine/src/approve.py <uuid> <stage>   # e.g. approve.py 1a2b3c4d prompt
 ```
 
-The command appends the entry and commits `ai/approvals.yaml` alone. Uncommitted edits to the file are ignored. Free-text tasks and prompt files outside `ai/workspace/` are not tracked.
+The command appends the entry and commits `ai/approvals.yaml` alone. Uncommitted edits to the file are ignored. The entry records the git blob hash of each document of the approved stage (change-82dbf16a). When a document of an approved stage is edited, or another document with the same UUID is added, the pre-run check reports that the approval no longer matches; review the documents and run `approve.py` again. Record an approval after the document is final, including its status field. Free-text tasks and prompt files outside `ai/workspace/` are not tracked.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -248,7 +250,7 @@ Recipes are YAML files. The `instructions` field is injected as the system promp
 
 The governance model's `manifest.yaml` maps each run type (`loop`, `audit`) to a recipe pair. A recipe path resolves against the model folder first (`ai/governance/<model>/`), then `ai/engine/recipes/`. The loop recipes are in `ai/engine/recipes/`; the SE audit recipes are in `ai/governance/software-engineering/recipes/`. The orchestrator selects the `audit` run type when `audit-index.md` is present in the state directory, otherwise `loop`.
 
-Gates: the loop stage's gates come from the manifest (SE: `syntax`, `pytest`, `reviewer`). Each result is logged as `gate=<name> type=<type> result=<result>`. A failing command gate overrides SHIP. Override a command gate or the interpreter for `{python}` under `gates:` in `ai/config.yaml` (see the template). After SHIP the engine writes `awaiting-approval.md`; for a T03 prompt task that ends BLOCKED, `BLOCKED.md` names the stage to return to (change-e58fd295).
+Gates: the loop stage's gates come from the manifest (SE: `syntax`, `pytest`, `reviewer`). Each result is logged as `gate=<name> type=<type> result=<result>`. A failing command gate overrides SHIP. A command gate that cannot run (`UNCHECKED`, for example a wrong `gates.python`) ends the run BLOCKED and `BLOCKED.md` names the gate. A gate with nothing to check is not applicable and is listed in `awaiting-approval.md` (change-82dbf16a). Override a command gate or the interpreter for `{python}` under `gates:` in `ai/config.yaml` (see the template). After SHIP the engine writes `awaiting-approval.md`; for a T03 prompt task that ends BLOCKED, `BLOCKED.md` names the stage to return to (change-e58fd295).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -317,6 +319,8 @@ curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 
 **Remediation:** If the file is a genuine deliverable, add it to `deliverable.files` in the prompt and rerun. Directory creation on the way to a declared file is allowed. The reviewer receives the deliverables as absolute paths in a `[DELIVERABLES]` block.
 
+Related refusals (change-82dbf16a): `write refused: … is an engine signal file` (the worker wrote an engine-owned state file); `write refused: tool '…' was called without a recognised path argument`; `tool refused tool=… reason=…` in the log (a tool not offered to the phase, or any write tool in the review phase). Paths are compared after symlink resolution.
+
 [Return to Table of Contents](<#table of contents>)
 
 ---
@@ -336,6 +340,7 @@ curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 | 1.8 | 2026-10-01 | §8.7: write outside the declared scope (change-bdc6820f) |
 | 1.9 | 2026-10-01 | §5.0: pre-run check (exit 3), stage tracking and approve.py (change-ee5357ec) |
 | 1.10 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 1.11 | 2026-10-01 | §2.1 state file writers, §3.0 legacy model precedence, §5.0 content-bound approvals, §7.0 UNCHECKED and not-applicable gates, §8.7 refusals (change-82dbf16a; audit-14e05e35 H-01, H-02, H-03, M-01, M-02, L-06, L-07) |
 
 ---
 

@@ -139,17 +139,21 @@ def run_command_gate(name: str, spec: dict, targets: list[str], project_root: st
     """
     Run one command gate and return its block.
 
-    spec: {command, python, timeout_seconds}. Exit 0 PASS, non-zero FAIL,
-    not runnable (missing executable, timeout, exception) UNCHECKED.
+    spec: {command, python, timeout_seconds, scrub_env}. Exit 0 PASS, non-zero
+    FAIL, not runnable (missing executable, timeout, exception) UNCHECKED.
+    scrub_env names environment variables removed for the gate process
+    (change-82dbf16a, M-05).
     """
     command = spec.get("command") or (DEFAULT_PYTEST_COMMAND if name == PYTEST_GATE else "")
     python = spec.get("python") or sys.executable
     timeout = spec.get("timeout_seconds") or DEFAULT_TIMEOUT_SECONDS
     argv = build_command(command, python, project_root, targets)
+    scrub = set(spec.get("scrub_env") or ())
+    env = {k: v for k, v in os.environ.items() if k not in scrub} if scrub else None
     log.info("%s gate: running %s", name, argv)
     try:
         proc = subprocess.run(argv, capture_output=True, text=True,
-                              cwd=project_root or None, timeout=timeout)
+                              cwd=project_root or None, timeout=timeout, env=env)
         status = "PASS" if proc.returncode == 0 else "FAIL"
         output = proc.stdout + proc.stderr
     except Exception as exc:

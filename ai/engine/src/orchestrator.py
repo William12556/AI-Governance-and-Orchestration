@@ -1006,6 +1006,18 @@ def format_tool_signatures(tools: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def _dispatch_refusal(name: str, offered: set[str], is_worker_phase: bool) -> str | None:
+    """
+    change-82dbf16a (H-03): a tool call is dispatched only when the tool was
+    offered to this phase; a review phase never dispatches a write tool.
+    """
+    if name not in offered:
+        return f"tool '{name}' is not available in this phase"
+    if not is_worker_phase and is_write_tool(name):
+        return f"tool '{name}' writes; the review phase is read-only"
+    return None
+
+
 async def run_phase(
     client: Any,
     mcp: MCPClient,
@@ -1040,6 +1052,10 @@ async def run_phase(
     is_worker_phase = "REVIEW" not in phase_label.upper()
     # F5: review phase gets read-only tool subset; worker gets full toolset
     tools = mcp.get_openai_tools(readonly=not is_worker_phase)
+    # change-82dbf16a (H-03): only offered tools are dispatched; (H-01) the
+    # worker never writes engine signal files.
+    _offered = {t["function"]["name"] for t in tools}
+    _protected = S.signal_files(state_dir) if is_worker_phase else frozenset()
 
     # Build real tool name list and inject into recipe system prompt
     tool_list = format_tool_signatures(tools)
@@ -1219,15 +1235,27 @@ async def run_phase(
             console.print(f"[yellow]  call →[/yellow]  [bold]{escape(tc['name'])}[/bold][dim]({escape(json.dumps(tc['arguments']))})[/dim]")
             log.debug("tool call: %s args=%s", tc["name"], json.dumps(tc["arguments"]))
 
+            # change-82dbf16a (H-03): refuse tools not offered to this phase and
+            # every write tool in a review phase, before any other check.
+            _refusal = _dispatch_refusal(tc["name"], _offered, is_worker_phase)
+            if _refusal:
+                log.warning("tool refused tool=%s phase=%s reason=%s",
+                            tc["name"], phase_label or "-", _refusal)
             # F4 / change-bdc6820f: pre-dispatch write scope validation (FR-05-01, FR-05-04)
-            _violation = S.check(tc["name"], tc["arguments"], project_root, write_scope) if project_root else None
+            _violation = (S.check(tc["name"], tc["arguments"], project_root, write_scope, _protected)
+                          if project_root and not _refusal else None)
             _scope_err = _violation.message if _violation else None
             if _violation:
                 log.warning("write rejected tool=%s path=%s reason=%s",
                             tc["name"], _violation.path, _violation.reason)
             # F21: Pre-dispatch audit-report.md append-only validation
-            _report_err = _validate_audit_report_write(tc["name"], tc["arguments"], state_dir)
-            if _scope_err:
+            _report_err = (_validate_audit_report_write(tc["name"], tc["arguments"], state_dir)
+                           if not _refusal else None)
+            if _refusal:
+                console.print(f"[red][engine] tool refused: {escape(_refusal[:200])}[/red]")
+                result = f"Error: {_refusal}"
+                _scope_err = _refusal
+            elif _scope_err:
                 log.warning("scope violation: %s", _scope_err)
                 console.print(f"[red][engine] scope violation: {escape(_scope_err[:200])}[/red]")
                 result = f"Error: {_scope_err}"
@@ -1771,9 +1799,15 @@ def _extract_deliverables(state_dir: str, log: logging.Logger) -> set[str]:
     return deliverables
 
 
-def _deliverables_block_for(state_dir: str, log: logging.Logger) -> str:
-    """[DELIVERABLES] block listing this cycle's deliverables as absolute paths."""
-    deliverables = sorted(_extract_deliverables(state_dir, log))
+def _deliverables_block_for(state_dir: str, log: logging.Logger,
+                            declared: "set[str] | frozenset[str]" = frozenset()) -> str:
+    """
+    [DELIVERABLES] block listing this cycle's deliverables as absolute paths:
+    those the worker reported, merged with the prompt's declared deliverable
+    files that exist (change-82dbf16a, L-13).
+    """
+    deliverables = sorted(_extract_deliverables(state_dir, log)
+                          | {p for p in declared if os.path.isfile(p)})
     if not deliverables:
         return ""
     lines = "\n".join(f"  - {p}" for p in deliverables)
@@ -1812,6 +1846,7 @@ async def run_loop(
     gates: list[str] | None = None,
     gate_specs: dict[str, dict] | None = None,
     write_scope: "S.WriteScope | None" = None,
+    gate_outcomes: dict[str, str] | None = None,
 ) -> int:
     """
     Full loop: worker/reviewer cycle until SHIP, max_iterations, or deadline.
@@ -1821,7 +1856,8 @@ async def run_loop(
     (change-53c6f252, FR-04-05). gates lists the loop stage's gates and
     gate_specs the command gate specifications from the manifest and
     ai/config.yaml; omitted, the historical syntax, pytest and reviewer gates
-    run (change-e58fd295).
+    run (change-e58fd295). gate_outcomes, when given, receives the last
+    cycle's status per gate (PASS, FAIL, UNCHECKED or SKIPPED; change-82dbf16a).
     """
     gate_list = list(gates) if gates else list(_DEFAULT_LOOP_GATES)
     gate_specs = gate_specs or {}
@@ -1961,7 +1997,9 @@ async def run_loop(
         # during its phase; without this clear the `if not existing_feedback:` guard
         # freezes cycle 1's feedback for the whole run, so later reviewers are
         # discarded and F12 stall detection compares the file to itself.
-        clear_state(state_dir, "work-complete.txt", "review-feedback.txt")
+        # change-82dbf16a (H-01): review-result.txt is cleared too, so only this
+        # cycle's review phase can supply a verdict file.
+        clear_state(state_dir, "work-complete.txt", "review-feedback.txt", "review-result.txt")
         console.print("\n[bold blue]▶ REVIEW PHASE[/bold blue]")
 
         # F6: syntax gate; F6b and change-e58fd295: declared command gates.
@@ -1980,6 +2018,25 @@ async def run_loop(
                 _res = _run_command_gate(_g, gate_specs.get(_g, {}), state_dir, log, project_root)
             _log_gate(log, _g, "command", G.gate_status(_res))
             _command_results.append((_g, _res))
+        if gate_outcomes is not None:
+            gate_outcomes.clear()
+            if "syntax" in gate_list:
+                gate_outcomes["syntax"] = G.gate_status(_syntax_result)
+            gate_outcomes.update((_g, G.gate_status(_res)) for _g, _res in _command_results)
+
+        # change-82dbf16a (M-02, FR-03-02 v1.3): a gate that cannot run ends the
+        # run BLOCKED, naming the gate; SHIP is not possible without it.
+        _not_run = [(_g, _res) for _g, _res in _command_results if G.gate_status(_res) == "UNCHECKED"]
+        if _not_run:
+            _names = ", ".join(_g for _g, _ in _not_run)
+            write_state(state_dir, "BLOCKED.md",
+                        "# BLOCKED\n\n"
+                        f"Gate could not run: {_names}. Check the gate command and "
+                        "gates.python in ai/config.yaml.\n\n"
+                        + "\n".join(_res for _, _res in _not_run))
+            log.error("BLOCKED: gate could not run: %s", _names)
+            console.print(f"[red][engine] BLOCKED: gate could not run: {escape(_names)}[/red]")
+            return 1
 
         # F16: Prepend [ENGINE RUNTIME CONTEXT] to review_task for consistent framing
         _review_header = (
@@ -1991,7 +2048,8 @@ async def run_loop(
         review_task = _review_header + f"Review the work in state directory '{state_dir}'."
         # change-bdc6820f (FR-05-03): absolute deliverable paths, so the reviewer
         # does not resolve relative paths against the state directory.
-        _deliverables_block = _deliverables_block_for(state_dir, log)
+        _deliverables_block = _deliverables_block_for(
+            state_dir, log, write_scope.files if write_scope is not None else frozenset())
         if _deliverables_block:
             review_task = _deliverables_block + "\n" + review_task
         # Prepend gate results to review_task (syntax first, then command gates in order)
@@ -2186,6 +2244,10 @@ def _resolve_gate_specs(manifest, config: dict) -> dict[str, dict]:
     python = gcfg.get("python") or sys.executable
     if os.sep in python and not os.path.isabs(python):
         python = os.path.abspath(python)  # relative to the project root (cwd)
+    # change-82dbf16a (M-05): provider key variables are removed from the gate
+    # environment, so project tests never see them.
+    scrub = sorted({p["api_key_env"] for p in (config.get("providers") or {}).values()
+                    if isinstance(p, dict) and isinstance(p.get("api_key_env"), str)})
     specs: dict[str, dict] = {}
     for name, g in manifest.gates.items():
         override = gcfg.get(name) or {}
@@ -2195,6 +2257,7 @@ def _resolve_gate_specs(manifest, config: dict) -> dict[str, dict]:
             "command": override.get("command") or g["command"],
             "timeout_seconds": override.get("timeout_seconds") or g.get("timeout_seconds", G.DEFAULT_TIMEOUT_SECONDS),
             "python": python,
+            "scrub_env": scrub,
         }
     return specs
 
@@ -2211,20 +2274,43 @@ def _work_item_uuid(task: str | None) -> str | None:
 
 
 def _write_awaiting_approval(state_dir: str, manifest, loop_stage_id: str,
-                             work_item: str | None, log: logging.Logger) -> None:
-    """After SHIP: record that operator approval is awaited (FR-03-05)."""
+                             work_item: str | None, log: logging.Logger,
+                             not_applicable: list[str] | None = None) -> None:
+    """
+    After SHIP: record that operator approval is awaited (FR-03-05). Gates
+    that had nothing to check in the final cycle are listed as not applicable
+    (change-82dbf16a, M-02).
+    """
     stage = manifest.next_approval_stage(loop_stage_id)
     if stage is None:
         return
     item = work_item or "untracked task (no prompt UUID)"
+    na = ""
+    if not_applicable:
+        na = ("\nGates not applicable in the final cycle (nothing to check): "
+              f"{', '.join(not_applicable)}\n")
     write_state(state_dir, "awaiting-approval.md",
                 "# Awaiting approval\n\n"
                 f"Work item: {item}\n"
                 f"Stage: {stage.id}\n\n"
                 "The loop shipped. The engine does not pass human approval gates; "
-                "the operator reviews the result and records the approval.\n")
+                "the operator reviews the result and records the approval.\n" + na)
     log.info("awaiting approval: work item=%s stage=%s", item, stage.id)
     console.print(f"[blue][engine] awaiting operator approval: {escape(item)} → {escape(stage.id)}[/blue]")
+
+
+def _finish_run(mode: str, rc: int, state_dir: str, manifest, loop_stage, work_item: str | None,
+                gate_outcomes: dict[str, str], since: float, log: logging.Logger) -> None:
+    """
+    After a loop or worker run: SHIP in loop mode records the awaited approval
+    with the gates that were not applicable; a failed loop or worker run names
+    the stage to return to (change-82dbf16a, M-02 and L-12).
+    """
+    if mode == "loop" and rc == 0:
+        _write_awaiting_approval(state_dir, manifest, loop_stage.id, work_item, log,
+                                 [g for g, st in gate_outcomes.items() if st == "SKIPPED"])
+    elif mode in ("loop", "worker") and rc != 0:
+        _annotate_blocked_return(state_dir, loop_stage, work_item, since, log)
 
 
 def _annotate_blocked_return(state_dir: str, loop_stage, work_item: str | None,
@@ -2526,6 +2612,7 @@ async def main_async(args: argparse.Namespace) -> int:
                                        max_completion_tokens=max_completion_tokens,
                                        max_tool_result_chars=max_tool_result_chars)
         else:  # loop
+            _gate_outcomes: dict[str, str] = {}
             rc = await run_loop(worker_b.provider, mcp, worker_b.model, reviewer_b.model,
                                 work_recipe, rev_recipe, task, max_iter, phase_max_iter,
                                 state_dir, log,
@@ -2535,6 +2622,7 @@ async def main_async(args: argparse.Namespace) -> int:
                                 gates=loop_stage.gates,
                                 gate_specs=gate_specs,
                                 write_scope=write_scope,
+                                gate_outcomes=_gate_outcomes,
                                 budget_warn_pct=budget_warn,
                                 budget_abort_pct=budget_abort,
                                 mcp_error_threshold=mcp_error_thresh,
@@ -2547,9 +2635,8 @@ async def main_async(args: argparse.Namespace) -> int:
                                 max_tool_result_chars=max_tool_result_chars)
             if rc == 0:
                 _archive_audit_artifacts(state_dir, args.task, log)
-                _write_awaiting_approval(state_dir, manifest, loop_stage.id, work_item, log)
-            else:
-                _annotate_blocked_return(state_dir, loop_stage, work_item, _run_started, log)
+        _finish_run(args.mode, rc, state_dir, manifest, loop_stage, work_item,
+                    _gate_outcomes if args.mode == "loop" else {}, _run_started, log)
     finally:
         log.info("engine end rc=%d", rc)
         await mcp.close()
