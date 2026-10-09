@@ -88,11 +88,10 @@ Execution → Results → Issue Creation (if needed) → Closure
 **Process:**
 1. Generate pytest files from T04 documentation
 2. Create test files with `test_*.py` naming convention
-3. Place in appropriate directory:
-   - Component tests: `tests/<component>/test_*.py`
-   - Validation scripts: `tests/test_*.py` (root level)
-4. Implement test cases per T04 specifications
-5. Use pytest or unittest per `pyproject.toml`
+3. Place under `tests/`, flat or in optional component subdirectories (`tests/<component>/test_*.py`); every file under `tests/` is permanent
+4. Name the file after the behaviour under test and record the covered issue and change UUIDs in the module docstring
+5. Implement test cases per T04 specifications
+6. Use pytest or unittest per `pyproject.toml`
 
 **Outputs:**
 - Executable pytest files
@@ -128,7 +127,7 @@ pytest -v tests/
 
 **Targeted Validation:**
 - Execute minimal test for specific fix
-- Create ephemeral script at `tests/` root
+- Run the permanent test written for the fix alone, by node id or `-k`
 - Quick verification cycle
 - Purpose: Confirm specific bug fix
 
@@ -168,7 +167,7 @@ pytest -v tests/
 1. Progress through validation stages
 2. Update traceability matrix
 3. Move to document closure workflow
-4. Archive to respective `closed/` subfolders
+4. Archive governance documents to their `closed/` subfolders; pytest files stay in `tests/` (P15.11)
 
 **Tests Fail:**
 1. Create issue document via P03
@@ -367,7 +366,7 @@ class Test<Domain>Requirements:
 **Characteristics:**
 - **Scope:** All unit and integration tests
 - **Lifecycle:** Permanent test suite
-- **Location:** `tests/<component>/` directories
+- **Location:** All of `tests/`
 - **Frequency:** Every code change
 
 **Purpose:**
@@ -450,31 +449,27 @@ tests/
 │   └── test_<application>.py
 ├── acceptance/                  # Acceptance tests
 │   └── test_<domain>_requirements.py
-├── performance/                 # Performance tests
-│   └── test_<component>_performance.py
-└── test_validation_<uuid>.py    # Ephemeral validation (removed post-verification)
+└── performance/                 # Performance tests
+    └── test_<component>_performance.py
 ```
 
-### Permanent vs. Ephemeral Tests
+Subdirectories are optional; a flat `tests/` is equally valid (P15.3).
 
-**Permanent Tests:**
-- Location: `tests/<component>/` subdirectories
-- Lifecycle: Maintained long-term
-- Purpose: Regression suite
-- Management: Version controlled, never deleted
+### Test Lifecycle
 
-**Ephemeral Tests:**
-- Location: `tests/` root level
-- Lifecycle: Removed post-verification
-- Purpose: Targeted fix validation
-- Naming: `test_validation_<issue_uuid>.py`
+- Every file under `tests/` is permanent and part of the regression suite.
+- Test files are never moved to a `closed/` folder; git history preserves prior versions.
+- A T04 closes only after the full suite passes; its `notes` field records the pytest path(s) and the commit.
+- After the T04 closes, a test file is changed or removed only under a new P03 issue and P04 change.
+- One-off diagnostic scripts run outside the repository (for example a temporary directory on the target platform) and are not committed.
 
 ### Test Naming Conventions
 
 **Files:**
 - Unit tests: `test_<module_name>.py`
 - Integration tests: `test_<integration_scenario>.py`
-- Validation scripts: `test_validation_<issue_uuid>.py`
+- Name files after the behaviour under test, never after a document UUID
+- Record the covered issue and change UUIDs in the module docstring
 
 **Classes:**
 - `TestClassName` (CamelCase)
@@ -500,16 +495,17 @@ Progressive validation employs graduated testing during debug cycles:
 **Purpose:** Verify specific fix works
 
 **Process:**
-1. Create minimal ephemeral test at `tests/` root
-2. Execute only test relevant to fix
+1. Write the permanent test for the fix under `tests/`
+2. Execute only that test, by node id or `-k`
 3. Verify issue resolved
 
 **Example:**
 ```python
-# tests/test_validation_a1b2c3d4.py
+# tests/test_<behaviour>.py
+"""<Behaviour under test>. Covers issue-a1b2c3d4 and change-a1b2c3d4."""
 
 def test_<specific_fix>():
-    """Validate issue a1b2c3d4: <description>."""
+    """<Expected behaviour>."""
     instance = <ClassName>(param="test_value")
     result = instance.operate()
 
@@ -596,27 +592,11 @@ Human Acceptance
 Document Closure
 ```
 
-### Script Lifecycle Management
+### Diagnostic Scripts
 
-**Creation:**
-- Targeted validation requires ephemeral script
-- Create at `tests/` root
-- Reference issue UUID in filename
-
-**Execution:**
-- Run during targeted validation stage
-- May be reused in integration stage
-- Not included in regression suite
-
-**Removal:**
-- After regression validation passes
-- Human acceptance obtained
-- Document closure workflow initiated
-
-**Archival:**
-- Move to `deprecated/` or delete
-- Git history preserves script
-- No need for long-term retention
+- Targeted validation uses the permanent test written for the fix, not a separate script.
+- A diagnostic needed only once (for example a measurement on the target platform) runs outside the repository and is not committed.
+- Nothing under `tests/` is removed at document closure.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -1014,7 +994,7 @@ Planner identifies:
 | **Assertion** | Statement verifying expected test outcome |
 | **Code Coverage** | Metric measuring percentage of code exercised by tests |
 | **Coupling** | Relationship between documents tracked via UUID references |
-| **Ephemeral Test** | Temporary validation script removed after verification |
+| **Diagnostic Script** | One-off script run outside the repository and not committed |
 | **Fixture** | Reusable test setup providing consistent test environment |
 | **Integration Test** | Test verifying component boundary interactions |
 | **Iteration** | Document version number incremented during debug cycles |
@@ -1026,7 +1006,6 @@ Planner identifies:
 | **Target Platform** | Deployment environment defined in project design documents |
 | **Traceability** | Bidirectional linking between requirements, design, code, tests |
 | **Unit Test** | Test verifying single component in isolation |
-| **Validation Script** | Temporary test verifying specific fix |
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -1042,6 +1021,7 @@ Planner identifies:
 | 1.3 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 | 1.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.5 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 1.6 | 2026-10-09 | Aligned with governance 12.3: all of tests/ is permanent; ephemeral validation scripts retired; diagnostics outside the repository; subdirectories optional; behaviour naming with UUIDs in the module docstring |
 
 ---
 
