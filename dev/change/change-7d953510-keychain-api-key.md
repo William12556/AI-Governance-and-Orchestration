@@ -5,7 +5,7 @@ change_info:
   id: "change-7d953510"
   title: "Provider API key from the macOS Keychain (api_key_keychain)"
   date: "2026-10-14"
-  status: "proposed"
+  status: "approved"
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -136,6 +136,9 @@ version_history:
   - version: "1.0"
     date: "2026-10-14"
     changes: ["Initial change record"]
+  - version: "1.1"
+    date: "2026-10-14"
+    changes: ["Approved by the operator, including the FR-04-07 wording; requirements-14e05e35 v1.5 and design-14e05e35 v1.12 updated"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

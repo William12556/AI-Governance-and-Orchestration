@@ -127,7 +127,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | FR-04-04 | The native Anthropic implementation uses strict tool use and caches the static prompt prefix [1]. |
 | FR-04-05 | The context window is resolved per role. This supersedes the single resolution in FR-AEL-008 (backlog §2.0-10). |
 | FR-04-06 | Each provider implementation supplies its own readiness check and context-window resolution. The live oMLX query (FR-AEL-008, FR-AEL-009) is retained for `omlx`. |
-| FR-04-07 | API keys are read from environment variables only. |
+| FR-04-07 | API keys are read from environment variables or, on macOS, from the login Keychain through `/usr/bin/security`. Keys are never read from tracked files (v1.5; change-7d953510). |
 | FR-04-08 | The existing `omlx:` configuration block remains valid and binds both roles to oMLX. |
 | FR-04-09 | Tool call IDs the engine generates are 9 alphanumeric characters. This matches the IDs Mistral itself issues and is a compatibility convention: other clients report 9 characters as required [4], while `mistral-medium-2604` also accepted 12 characters on 2026-10-01 (`dev/reports/report-14e05e35-mistral-api-hypothesis.md`). |
 
@@ -330,6 +330,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.5 | 2026-10-14 | FR-04-07 amended: login Keychain as a second key source on macOS (issue-7d953510, change-7d953510; approved by the operator). |
 | 1.4 | 2026-10-01 | Phase 2 closure: status; §6.1 Verification Results added (V-03 deviation and V-04 partial accepted by the operator). |
 | 1.3 | 2026-10-01 | FR-03-02 amended: UNCHECKED gates block; gates with nothing to check are not applicable and listed at approval (audit-14e05e35 M-02, operator decision). |
 | 1.2 | 2026-10-01 | From report-14e05e35 (Mistral API test): FR-04-09 rationale reworded as a compatibility convention; OQ-03 `name` field answered (not needed); V-04 uses pinned model IDs. |
