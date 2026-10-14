@@ -5,13 +5,13 @@ issue_info:
   id: "issue-7d953510"
   title: "Engine cannot read a provider API key from the macOS Keychain"
   date: "2026-10-14"
-  status: "resolved"
+  status: "open"
   severity: "medium"
   type: "enhancement"
-  iteration: 2
+  iteration: 3
   coupled_docs:
     change_ref: "change-7d953510"
-    change_iteration: 2
+    change_iteration: 3
 
 source:
   origin: "user_report"
@@ -58,6 +58,10 @@ analysis:
     Keychain output that is not valid text; iteration 1 lets it propagate
     unwrapped, and its object attribute holds the raw output
     (report-7d953510 §6.0 item 2; NFR-05).
+    Iteration 3: raise ... from None suppresses display but leaves
+    __context__ bound to the TimeoutExpired or UnicodeDecodeError holding the
+    raw output; tests lack kind anthropic, an empty api_key_env variable and
+    a __context__ assertion (audit-7d953510 L-01, L-03).
 
 resolution:
   approach: "Optional api_key_keychain provider key read through /usr/bin/security; see change-7d953510."
@@ -77,6 +81,9 @@ version_history:
   - version: "1.2"
     date: "2026-10-14"
     changes: ["Status resolved: change-7d953510 implemented (iteration 2, d4c1cdb) (P03.7; audit-7d953510 L-04)"]
+  - version: "1.3"
+    date: "2026-10-14"
+    changes: ["Iteration 3 from audit-7d953510 L-01, L-03; status open until iteration 3 is implemented"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

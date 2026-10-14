@@ -7,10 +7,10 @@ prompt_info:
   source_ref: "change-7d953510"
   target_profile: "claude_code"  # Claude Code cloud session (operator decision 2026-10-14)
   date: "2026-10-14"
-  iteration: 2
+  iteration: 3
   coupled_docs:
     change_ref: "change-7d953510"
-    change_iteration: 2
+    change_iteration: 3
 
 context:
   purpose: >
@@ -20,6 +20,9 @@ context:
     Iteration 2: wrap a UnicodeDecodeError from the Keychain lookup in a
     ConfigError (FR-F; design-14e05e35 v1.13 §11.0; report-7d953510 §6.0
     item 2).
+    Iteration 3: raise Keychain lookup errors after the try statement so no
+    __context__ holds the raw output, and add three tests (FR-G, FR-H;
+    dev/audit/audit-7d953510-strategic-2026-10-14.md L-01, L-02, L-03).
   integration: >
     providers._api_key(name, pcfg, kind) is called once per provider by
     make_provider(), which build_role_bindings() calls at engine startup.
@@ -33,10 +36,10 @@ context:
     - "dev/requirements/requirements-14e05e35-engine-generalisation.md FR-04-07, NFR-05, NFR-06"
     - "CLAUDE.md; ai/governance/software-engineering/governance.md; ai/governance/software-engineering/primer.md"
   constraints:
-    - "Iteration 2 only. Iteration 1 (FR-A to FR-E, tests T1 to T14) is implemented in commit 9b4cb23 and verified; do not change its behaviour, messages or tests. Implement FR-F and T15 only."
+    - "Iteration 3 only. Iterations 1 and 2 (FR-A to FR-F, tests T1 to T15) are implemented in commits 9b4cb23 and d4c1cdb and audited; do not change their behaviour, messages or tests. Implement FR-G, FR-H and T16 to T18 only."
     - "Execution environment: Claude Code cloud (Linux container, repository clone). There is no macOS, no /usr/bin/security, no Keychain, no oMLX and no Mistral or Anthropic API key. Do not attempt a live run, do not start the engine or engine-mcp, and do not call any network endpoint other than package installation."
     - "Source changes are limited to ai/engine/src/providers.py and tests/engine/test_providers.py."
-    - "Governance changes are limited to: moving this prompt to dev/prompt/closed/, and updating the existing report named in deliverable.files (iteration 2 section)."
+    - "Governance changes are limited to: moving this prompt to dev/prompt/closed/, and updating the existing report named in deliverable.files (iteration 3 section)."
     - "Do not edit the issue, change, requirements or design documents, ai/config.yaml, ai/engine/config.template.yaml, ai/engine/doc/, ai/profiles/ or README files; the planner updates those after review."
     - "No new dependencies; standard library only (subprocess, sys)."
     - "The key value must never appear in a log record, an exception message, an exception's chained cause or context, or a test failure message."
@@ -58,6 +61,8 @@ specification:
       - "FR-D The final fallback error for a non-omlx kind with no key source becomes: 'providers.<name>: api_key_env or api_key_keychain is required for kind <kind>'. This is the only message whose text changes; update any existing test that asserts the old text."
       - "FR-E A literal api_key together with api_key_keychain: step 2 wins, so the literal-key restriction for remote endpoints is not reached. No warning is added."
       - "FR-F (iteration 2) In _keychain_secret, a UnicodeDecodeError raised by subprocess.run (Keychain output not valid text in the locale encoding) → ConfigError 'providers.<name>.api_key_keychain: Keychain item for service <service> is not valid text' from None. Catch UnicodeDecodeError specifically, not ValueError or Exception."
+      - "FR-G (iteration 3; audit L-01) In _keychain_secret, no ConfigError may carry a __context__. Each except branch (subprocess.TimeoutExpired, OSError, UnicodeDecodeError) only assigns its existing message to a local variable; after the try statement, if that variable is set, raise ConfigError(message) from None. Messages, the order of the except branches and the from None stay as they are, so __cause__ is None, __suppress_context__ is True and __context__ is None. Do not bind the exception to a name."
+      - "FR-H (iteration 3; audit L-02) In the _keychain_secret docstring, replace 'macOS login Keychain' with 'the user's Keychain search list (normally the login Keychain)'. No other docstring or comment changes."
     technical:
       language: "Python"
       version: "3.10+ (repository convention 3.11+)"
@@ -83,6 +88,7 @@ design:
         - "Run subprocess.run([_SECURITY, 'find-generic-password', '-s', service, '-w'], capture_output=True, text=True, timeout=_KEYCHAIN_TIMEOUT, check=False)."
         - "OSError (includes FileNotFoundError) → ConfigError 'providers.<name>.api_key_keychain: <_SECURITY> is not available' from None."
         - "Iteration 2: UnicodeDecodeError → ConfigError per FR-F, from None. Its object attribute holds the raw output, so the cause must not be chained."
+        - "Iteration 3: per FR-G, the three wrapped failures are raised after the try statement, not inside the except blocks."
         - "subprocess.TimeoutExpired → ConfigError 'providers.<name>.api_key_keychain: lookup for service <service> timed out after 10 s (Keychain locked or access dialog unanswered)' from None. TimeoutExpired carries captured output, so the cause must not be chained."
         - "returncode != 0 → ConfigError 'providers.<name>.api_key_keychain: no readable Keychain item for service <service> (security exit <code>)'. Include neither stdout nor stderr."
         - "value = stdout.rstrip('\\n'); empty → ConfigError 'providers.<name>.api_key_keychain: Keychain item for service <service> is empty'."
@@ -123,11 +129,14 @@ testing:
     - { scenario: "T13 make_provider kind openai_compatible with api_key_keychain", expected: "OpenAICompatProvider built with the Keychain value as api_key (inject a stub client or monkeypatch AsyncOpenAI; no network)" }
     - { scenario: "T14 secret absence", expected: "for T2, T3 and T13, the secret string is absent from every caplog record message and argument" }
     - { scenario: "T15 (iteration 2) subprocess.run raises UnicodeDecodeError('utf-8', SECRET.encode() + b'\\xff', len(SECRET), len(SECRET) + 1, 'invalid start byte')", expected: "ConfigError mentioning 'not valid text' and the service; __cause__ is None and __suppress_context__ is True; secret absent from str(error)" }
+    - { scenario: "T16 (iteration 3, L-01) parametrized over subprocess.TimeoutExpired(['/usr/bin/security'], 10, output=SECRET, stderr=SECRET), FileNotFoundError(2, 'No such file or directory') and the T15 UnicodeDecodeError", expected: "ConfigError with __context__ is None, __cause__ is None and __suppress_context__ is True; secret absent from str(error)" }
+    - { scenario: "T17 (iteration 3, L-03) make_provider('anthropic', {'kind': 'anthropic', 'api_key_keychain': SERVICE}) with anthropic.AsyncAnthropic replaced by a capturing fake, following test_make_provider_passes_base_url_to_anthropic", expected: "AnthropicProvider built; the fake received api_key == SECRET; INFO record 'key source keychain:<service>'; secret absent from all records" }
+    - { scenario: "T18 (iteration 3, L-03) monkeypatch.setenv('MISTRAL_API_KEY', '') (a) with api_key_env and api_key_keychain, (b) with api_key_env only", expected: "(a) Keychain value returned, source label keychain:<service>; (b) the existing ConfigError 'providers.<name>: environment variable MISTRAL_API_KEY is not set'; subprocess.run not called in (b)" }
   edge_cases:
     - "Tests must pass on Linux and macOS: monkeypatch P.sys.platform to 'darwin' and P.subprocess.run to a fake in every Keychain test; never invoke the real security binary."
     - "Use monkeypatch.delenv(..., raising=False) where a variable must be absent; the container environment is not assumed clean."
   validation:
-    - "Baseline before any edit: python3 -m pytest tests/engine tests/overwatch -q; record passed/failed/skipped counts in the report (iteration 1 final on Linux: 321 passed, 1 skipped)."
+    - "Baseline before any edit: python3 -m pytest tests/engine tests/overwatch -q; record passed/failed/skipped counts in the report (iteration 2 final on Linux: 322 passed, 1 skipped)."
     - "After the change: same command; no new failures; new tests pass."
     - "python3 ai/engine/src/linter.py dev and python3 ai/engine/src/protocol_checker.py dev; record results; new findings caused by this work are fixed, pre-existing findings are listed, not fixed."
 
@@ -143,12 +152,12 @@ deliverable:
     - { path: "tests/engine/test_providers.py", content: "modified" }
     - path: "dev/reports/report-7d953510-keychain-api-key.md"
       content: >
-        Iteration 2: update the existing report. Add a section '8.0 Iteration
-        2' before Version History (with a table-of-contents entry and Return
+        Iteration 3: update the existing report. Add a section '9.0 Iteration
+        3' before Version History (with a table-of-contents entry and Return
         to Table of Contents link) holding: change summary, baseline and final
         test counts, governance check results, deviations (or 'None'), open
         points, starting commit and new commit hashes. Update the status line
-        to name iteration 2. Add Version History row 1.1. Leave §1.0 to §7.0
+        to name iteration 3. Add Version History row 1.2. Leave §1.0 to §8.0
         unchanged. Iteration 1 format, kept for reference: new file. Obsidian Markdown: 'Created: <year> <month> <day>' line, table of
         contents, numbered sections, Return to Table of Contents links,
         Version History table, final line 'Copyright (c) 2026 William Watson.
@@ -160,11 +169,12 @@ deliverable:
         the cloud environment; 7.0 Starting commit and commit hashes pushed to main.
 
 success_criteria:
-  - "T1–T14 unchanged and passing; T15 present and passing"
+  - "T1–T15 unchanged and passing; T16–T18 present and passing"
+  - "No ConfigError raised by _keychain_secret has a __context__ (FR-G)"
   - "Full suite: no failures beyond the recorded baseline"
   - "git diff <starting commit>..HEAD touches only providers.py, test_providers.py, the report and the prompt move"
   - "No log or exception path in the diff can carry the key value"
-  - "Commits pushed to main; report §8.0 lists the iteration 2 starting commit and the new commit hashes"
+  - "Commits pushed to main; report §9.0 lists the iteration 3 starting commit and the new commit hashes"
 
 notes: "The planner verifies the pushed commits by direct source review and runs the live validation on macOS before closing the issue and change."
 ```
