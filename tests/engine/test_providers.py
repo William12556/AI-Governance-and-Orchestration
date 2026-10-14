@@ -1,5 +1,8 @@
 """Tests for providers.py and its orchestrator wiring (change-53c6f252, design-14e05e35 §3.0, §4.0).
 
+Keychain key source: issue-7d953510, change-7d953510 (FR-04-07). The security
+binary is never run: subprocess.run and sys.platform are monkeypatched.
+
 No network, API key or model is used: providers get fake clients, and role
 bindings use a stub factory unless the test targets make_provider itself.
 """
@@ -7,7 +10,9 @@ bindings use a stub factory unless the test targets make_provider itself.
 import argparse
 import asyncio
 import json
+import logging
 import re
+import subprocess
 from types import SimpleNamespace
 
 import pytest
@@ -433,3 +438,192 @@ def test_make_provider_passes_base_url_to_anthropic(monkeypatch):
                                      "api_key": "local", "strict_tools": False})
     assert prov.base_url == "http://127.0.0.1:8000" and prov.strict_tools is False
     assert captured == {"api_key": "local", "base_url": "http://127.0.0.1:8000"}
+
+
+# --- Keychain key source (issue-7d953510, change-7d953510) ---------------------------
+
+SECRET = "sk-test-SECRET-7d953510"
+SERVICE = "ai-go-mistral"
+REMOTE = {"kind": "openai_compatible", "base_url": "https://api.mistral.ai/v1"}
+
+
+class _FakeRun:
+    """Stand-in for subprocess.run that records its calls."""
+
+    def __init__(self, stdout=SECRET + "\n", returncode=0, stderr="", exc=None):
+        self.stdout, self.returncode, self.stderr, self.exc = stdout, returncode, stderr, exc
+        self.calls = []
+
+    def __call__(self, argv, **kw):
+        self.calls.append((argv, kw))
+        if self.exc is not None:
+            raise self.exc
+        return subprocess.CompletedProcess(argv, self.returncode, self.stdout, self.stderr)
+
+
+@pytest.fixture
+def keychain(monkeypatch):
+    """Pretend to be macOS and replace subprocess.run; never runs the real security binary."""
+    def install(**kw):
+        fake = _FakeRun(**kw)
+        monkeypatch.setattr(P.sys, "platform", "darwin")
+        monkeypatch.setattr(P.subprocess, "run", fake)
+        return fake
+    return install
+
+
+@pytest.fixture
+def engine_log(caplog, monkeypatch):
+    """Capture INFO records of the 'engine' logger once, whatever its propagation setting."""
+    caplog.set_level(logging.INFO, logger="engine")
+    monkeypatch.setattr(P.log, "propagate", False)
+    P.log.addHandler(caplog.handler)
+    yield caplog
+    P.log.removeHandler(caplog.handler)
+
+
+def _assert_secret_absent(records):
+    for r in records:
+        assert SECRET not in r.getMessage()
+        assert SECRET not in str(r.msg)
+        assert all(SECRET not in str(a) for a in (r.args or ()))
+
+
+def _source_lines(records):
+    return [r.getMessage() for r in records if "key source" in r.getMessage()]
+
+
+def test_keychain_t1_env_wins_and_security_not_called(keychain, engine_log, monkeypatch):
+    fake = keychain()
+    monkeypatch.setenv("MISTRAL_API_KEY", "env-value")
+    pcfg = dict(REMOTE, api_key_env="MISTRAL_API_KEY", api_key_keychain=SERVICE)
+    assert P._api_key("mistral", pcfg, "openai_compatible") == "env-value"
+    assert fake.calls == []
+    assert _source_lines(engine_log.records) == ["providers.mistral: key source env:MISTRAL_API_KEY"]
+
+
+def test_keychain_t2_used_when_env_unset(keychain, engine_log, monkeypatch):
+    keychain()
+    monkeypatch.delenv("MISTRAL_API_KEY", raising=False)
+    pcfg = dict(REMOTE, api_key_env="MISTRAL_API_KEY", api_key_keychain=SERVICE)
+    assert P._api_key("mistral", pcfg, "openai_compatible") == SECRET
+    assert _source_lines(engine_log.records) == [f"providers.mistral: key source keychain:{SERVICE}"]
+    _assert_secret_absent(engine_log.records)  # T14
+
+
+def test_keychain_t3_only_source_and_command(keychain, engine_log):
+    fake = keychain()
+    assert P._api_key("mistral", dict(REMOTE, api_key_keychain=SERVICE), "openai_compatible") == SECRET
+    (argv, kw), = fake.calls
+    assert argv == ["/usr/bin/security", "find-generic-password", "-s", SERVICE, "-w"]
+    assert kw["timeout"] == 10 and kw["check"] is False
+    assert kw["capture_output"] is True and kw["text"] is True
+    _assert_secret_absent(engine_log.records)  # T14
+
+
+def test_keychain_t4_trailing_newline_stripped(keychain):
+    keychain(stdout="secret\n")
+    assert P._keychain_secret("mistral", SERVICE) == "secret"
+
+
+def test_keychain_t5_nonzero_exit_omits_output(keychain):
+    keychain(returncode=44, stdout=SECRET, stderr="The specified item could not be found")
+    with pytest.raises(P.ConfigError) as ei:
+        P._keychain_secret("mistral", SERVICE)
+    msg = str(ei.value)
+    assert "exit 44" in msg and SERVICE in msg and "providers.mistral.api_key_keychain" in msg
+    assert "could not be found" not in msg and SECRET not in msg
+
+
+def test_keychain_t6_timeout_is_not_chained(keychain):
+    exc = subprocess.TimeoutExpired(["/usr/bin/security"], 10, output=SECRET, stderr=SECRET)
+    keychain(exc=exc)
+    with pytest.raises(P.ConfigError) as ei:
+        P._keychain_secret("mistral", SERVICE)
+    err = ei.value
+    assert "timed out" in str(err) and SERVICE in str(err)
+    assert err.__cause__ is None and err.__suppress_context__ is True
+    assert SECRET not in str(err)
+
+
+def test_keychain_t7_empty_output(keychain):
+    keychain(stdout="\n")
+    with pytest.raises(P.ConfigError, match="empty"):
+        P._keychain_secret("mistral", SERVICE)
+
+
+def test_keychain_t8_macos_only(monkeypatch):
+    calls = []
+    monkeypatch.setattr(P.sys, "platform", "linux")
+    monkeypatch.setattr(P.subprocess, "run", lambda *a, **k: calls.append(a))
+    with pytest.raises(P.ConfigError, match="macOS only"):
+        P._api_key("mistral", dict(REMOTE, api_key_keychain=SERVICE), "openai_compatible")
+    assert calls == []
+
+
+def test_keychain_t9_security_missing(keychain):
+    keychain(exc=FileNotFoundError(2, "No such file or directory"))
+    with pytest.raises(P.ConfigError, match="not available") as ei:
+        P._keychain_secret("mistral", SERVICE)
+    assert ei.value.__cause__ is None and ei.value.__suppress_context__ is True
+
+
+@pytest.mark.parametrize("bad", ["", 123, None])
+@pytest.mark.parametrize("env_set", [False, True])
+def test_keychain_t10_invalid_service_rejected(bad, env_set, keychain, monkeypatch):
+    fake = keychain()
+    if env_set:
+        monkeypatch.setenv("MISTRAL_API_KEY", "env-value")
+    else:
+        monkeypatch.delenv("MISTRAL_API_KEY", raising=False)
+    pcfg = dict(REMOTE, api_key_env="MISTRAL_API_KEY", api_key_keychain=bad)
+    with pytest.raises(P.ConfigError) as ei:
+        P._api_key("mistral", pcfg, "openai_compatible")
+    assert str(ei.value) == "providers.mistral.api_key_keychain: must be a non-empty string"
+    assert fake.calls == []
+
+
+def test_keychain_t11_no_key_source_message():
+    with pytest.raises(P.ConfigError) as ei:
+        P._api_key("mistral", dict(REMOTE), "openai_compatible")
+    assert str(ei.value) == ("providers.mistral: api_key_env or api_key_keychain is required "
+                             "for kind openai_compatible")
+
+
+def test_keychain_t12_wins_over_literal_key_on_remote_endpoint(keychain):
+    keychain()
+    pcfg = dict(REMOTE, api_key="literal", api_key_keychain=SERVICE)
+    assert P._api_key("mistral", pcfg, "openai_compatible") == SECRET
+
+
+def test_keychain_t13_make_provider_passes_key(keychain, engine_log, monkeypatch):
+    import openai
+
+    captured = {}
+
+    class FakeAsyncOpenAI:
+        def __init__(self, **kw):
+            captured.update(kw)
+
+    keychain()
+    monkeypatch.delenv("MISTRAL_API_KEY", raising=False)
+    monkeypatch.setattr(openai, "AsyncOpenAI", FakeAsyncOpenAI)
+    prov = P.make_provider("mistral", dict(REMOTE, api_key_keychain=SERVICE))
+    assert isinstance(prov, P.OpenAICompatProvider) and isinstance(prov.client, FakeAsyncOpenAI)
+    assert captured == {"base_url": REMOTE["base_url"], "api_key": SECRET}
+    _assert_secret_absent(engine_log.records)  # T14
+
+
+def test_keychain_t14_secret_absent_from_logs(keychain, engine_log, monkeypatch):
+    """T14 aggregate: T2, T3 and T13 paths in one run; no record carries the secret."""
+    import openai
+
+    keychain()
+    monkeypatch.delenv("MISTRAL_API_KEY", raising=False)
+    monkeypatch.setattr(openai, "AsyncOpenAI", lambda **kw: object())
+    P._api_key("a", dict(REMOTE, api_key_env="MISTRAL_API_KEY", api_key_keychain=SERVICE),
+               "openai_compatible")
+    P._api_key("b", dict(REMOTE, api_key_keychain=SERVICE), "openai_compatible")
+    P.make_provider("c", dict(REMOTE, api_key_keychain=SERVICE))
+    assert len(_source_lines(engine_log.records)) == 3
+    _assert_secret_absent(engine_log.records)
