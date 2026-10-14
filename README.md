@@ -52,11 +52,11 @@ Items marked *Planned* do not yet exist.
 
 ### 2.2 Model Choice per Role
 
-| Role | Anthropic | Mistral AI | Open-weight (local) |
-|---|---|---|---|
-| Planner | Claude Desktop | Mistral Vibe (*Planned*) | MCP-capable client with a local server (*Planned*) |
-| Worker and reviewer (engine) | Anthropic API (*Planned*) | Mistral API (*Planned*) | oMLX; LM Studio or other OpenAI-compatible server (*Planned*) |
-| Worker (manual) | Claude Code | Mistral Vibe (*Planned*) | Claude Code with oMLX |
+| Role                         | Anthropic                 | Mistral AI               | Open-weight (local)                                           |
+| ---------------------------- | ------------------------- | ------------------------ | ------------------------------------------------------------- |
+| Planner                      | Claude Desktop            | Mistral Vibe (*Planned*) | MCP-capable client with a local server (*Planned*)            |
+| Worker and reviewer (engine) | Anthropic API (*Planned*) | Mistral API (*Planned*)  | oMLX; LM Studio or other OpenAI-compatible server (*Planned*) |
+| Worker (manual)              | Claude Code               | Mistral Vibe (*Planned*) | Claude Code with oMLX                                         |
 
 Today the engine's worker and reviewer may use different models, but both must be served by the same oMLX server. Assigning a role to a frontier provider sends task content to that provider.
 
