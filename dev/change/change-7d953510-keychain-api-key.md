@@ -7,10 +7,10 @@ change_info:
   date: "2026-10-14"
   status: "approved"
   priority: "medium"
-  iteration: 1
+  iteration: 2
   coupled_docs:
     issue_ref: "issue-7d953510"
-    issue_iteration: 1
+    issue_iteration: 2
 
 source:
   type: "issue"
@@ -24,6 +24,9 @@ scope:
     api_key_keychain when configured; then the existing literal-key and omlx
     rules. Each source is consulted only when configured. The engine logs the
     source that supplied the key, never the key.
+    Iteration 2 (report-7d953510 §6.0 item 2): Keychain output that is not
+    valid text raises a ConfigError from None instead of an unwrapped
+    UnicodeDecodeError, whose object attribute holds the raw output.
   affected_components:
     - { name: "providers", file_path: "ai/engine/src/providers.py", change_type: "modify" }
     - { name: "tests", file_path: "tests/engine/test_providers.py", change_type: "modify" }
@@ -101,18 +104,21 @@ testing_requirements:
     - { scenario: "security binary missing", expected_result: "ConfigError" }
     - { scenario: "api_key_keychain not a non-empty string", expected_result: "ConfigError" }
     - { scenario: "successful lookup with caplog", expected_result: "source label logged; secret absent from all log records" }
+    - { scenario: "Iteration 2: subprocess.run raises UnicodeDecodeError", expected_result: "ConfigError naming provider and service; not chained; secret absent from the message" }
   regression_scope: ["tests/engine/test_providers.py existing key tests", "full test suite"]
   validation_criteria:
     - "Full suite passes offline"
-    - "Live: one loop run with roles on providers.mistral, api_key_keychain: ai-go-mistral, no MISTRAL_API_KEY in the environment; started once from the CLI and once through engine-mcp start_engine"
-    - "V-09 scan: key absent from ai/state/ logs and state files after the live run"
+    - "Live, CLI (operator decision 2026-10-14, replaces the CLI loop run): provider readiness with api_key_keychain: ai-go-mistral and MISTRAL_API_KEY unset; log shows 'key source keychain:ai-go-mistral' and 'model ready: mistral-medium-2604'"
+    - "Live, engine-mcp: one loop run through start_engine at the next real Mistral work item, with api_key_keychain: ai-go-mistral and no MISTRAL_API_KEY in the engine-mcp environment"
+    - "V-09 scan: key absent from ai/state/ logs and state files after that run"
 
 implementation:
   effort_estimate: "2-3 hours"
   implementation_steps:
     - { step: "providers.py and tests (prompt-7d953510)", owner: "Claude Code" }
+    - { step: "Iteration 2: UnicodeDecodeError handling and test (prompt-7d953510 iteration 2)", owner: "Claude Code" }
     - { step: "requirements-14e05e35 FR-04-07 amendment and version history", owner: "planner" }
-    - { step: "design-14e05e35 §3.0 Keys row, §11.0 error rows, version history", owner: "planner" }
+    - { step: "design-14e05e35 §3.0 Keys row, §11.0 error rows, version history; iteration 2: undecodable output in the §11.0 row", owner: "planner" }
     - { step: "config.template.yaml commented example; guide §3.0 note", owner: "planner" }
     - { step: "mistral_api.md §4.0 rewritten for api_key_keychain with service ai-go-mistral; §5.0 stale 'unverified' note corrected", owner: "planner" }
     - { step: "Operator: set api_key_keychain in ai/config.yaml (config-only, no triple)", owner: "operator" }
@@ -139,6 +145,13 @@ version_history:
   - version: "1.1"
     date: "2026-10-14"
     changes: ["Approved by the operator, including the FR-04-07 wording; requirements-14e05e35 v1.5 and design-14e05e35 v1.12 updated"]
+  - version: "1.2"
+    date: "2026-10-14"
+    changes:
+      - "Iteration 1 implemented in Claude Code cloud (commit 9b4cb23; report b70c5bb): 321 passed, 1 skipped on Linux; planner source review passed; operator run on macOS 322 passed"
+      - "Live CLI check passed: key source keychain:ai-go-mistral, model ready: mistral-medium-2604"
+      - "Planner documents updated: config.template.yaml, guide-engine-operations v1.16, mistral_api.md v1.2"
+      - "Iteration 2 approved by the operator: UnicodeDecodeError handling (report-7d953510 §6.0 item 2); live validation reduced to the CLI readiness check plus one engine-mcp loop run at the next real Mistral work item"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

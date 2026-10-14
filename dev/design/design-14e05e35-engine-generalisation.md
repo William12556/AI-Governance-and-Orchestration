@@ -333,7 +333,7 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 |---|---|
 | Missing or invalid manifest or configuration | Stop before any model call; message names file and field (NFR-04). |
 | Missing API key environment variable | Stop at startup naming the variable; the value is never logged (NFR-05). |
-| Keychain lookup fails (not macOS, `security` missing, non-zero exit, timeout, empty item) | Stop at startup naming the provider and service; the message holds the exit code at most, never the command output (NFR-05; change-7d953510). |
+| Keychain lookup fails (not macOS, `security` missing, non-zero exit, timeout, output not valid text, empty item) | Stop at startup naming the provider and service; the message holds the exit code at most, never the command output (NFR-05; change-7d953510). |
 | Provider not ready within the readiness timeout | `BLOCKED.md`, as today. |
 | Anthropic rejects a tool schema under strict mode | Stop at the first call with the API message; the operator sets `strict_tools: false`. |
 | Pre-run check fails | No run; exit code 3; message lists missing evidence and approvals. |
@@ -437,6 +437,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.13 | 2026-10-14 | §11.0: Keychain output that is not valid text is a lookup failure (change-7d953510 iteration 2). |
 | 1.12 | 2026-10-14 | §3.0 Keys, §11.0: `api_key_keychain` key source (change-7d953510; FR-04-07 v1.5). |
 | 1.11 | 2026-10-01 | Phase 2 closure: status. |
 | 1.10 | 2026-10-01 | Fourth follow-up audit (change-82dbf16a iteration 5): §6.0 non-regular state entries removed or BLOCKED, regular `.complete` only for `shipped`; §8.4 tracked task without bytes refused. |

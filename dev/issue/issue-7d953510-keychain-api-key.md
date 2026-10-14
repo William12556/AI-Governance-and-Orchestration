@@ -8,10 +8,10 @@ issue_info:
   status: "open"
   severity: "medium"
   type: "enhancement"
-  iteration: 1
+  iteration: 2
   coupled_docs:
     change_ref: "change-7d953510"
-    change_iteration: 1
+    change_iteration: 2
 
 source:
   origin: "user_report"
@@ -54,6 +54,10 @@ analysis:
     still states reviewer verdict parsing and tool calling are unverified for
     mistral-medium-2604, although report-14e05e35-live-verification §5.0
     records a SHIP after one cycle.
+    Iteration 2: subprocess.run(..., text=True) raises UnicodeDecodeError for
+    Keychain output that is not valid text; iteration 1 lets it propagate
+    unwrapped, and its object attribute holds the raw output
+    (report-7d953510 §6.0 item 2; NFR-05).
 
 resolution:
   approach: "Optional api_key_keychain provider key read through /usr/bin/security; see change-7d953510."
@@ -67,6 +71,9 @@ version_history:
   - version: "1.0"
     date: "2026-10-14"
     changes: ["Initial issue"]
+  - version: "1.1"
+    date: "2026-10-14"
+    changes: ["Iteration 2: undecodable Keychain output not wrapped (report-7d953510 §6.0 item 2); iteration 1 implemented (9b4cb23) and verified on macOS (322 passed; live CLI readiness check passed)"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
