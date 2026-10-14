@@ -5,7 +5,7 @@ change_info:
   id: "change-7d953510"
   title: "Provider API key from the macOS Keychain (api_key_keychain)"
   date: "2026-10-14"
-  status: "approved"  # iteration 3 approved 2026-10-14 (audit-7d953510 L-01, L-03)
+  status: "implemented"  # verified pending: follow-up audit, engine-mcp loop run, V-09 scan
   priority: "medium"
   iteration: 3
   coupled_docs:
@@ -173,6 +173,12 @@ version_history:
     changes:
       - "audit-7d953510 (643d77c): 0 critical, 0 high, 1 medium, 7 low. Operator decisions: M-01 accepted as DI-06 instance (out_of_scope rationale corrected, risk added); L-01 and L-03 fixed in iteration 3; L-02, L-04 to L-07 fixed in documents (3a47a12, 810d7f8)"
       - "Iteration 3 approved; status approved; follow-up audit required after implementation"
+  - version: "1.5"
+    date: "2026-10-14"
+    changes:
+      - "Iteration 3 implemented in Claude Code cloud (commit 45a8ac0; report §9.0 in 7674d9f): 327 passed, 1 skipped on Linux; T16 failed against the iteration 2 source and passes now"
+      - "Planner source review passed: each except branch only assigns its message; ConfigError raised from None after the try statement (no __context__); messages and branch order unchanged; T16 to T18 as specified; scope limited to providers.py, test_providers.py, report and prompt move. Recorded deviation (FR-H docstring wording, duplicate 'the' avoided) accepted"
+      - "Status implemented. Outstanding before verified and closure: follow-up audit of iteration 3 (P02.8.2), one engine-mcp loop run with api_key_keychain and no MISTRAL_API_KEY, V-09 scan"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

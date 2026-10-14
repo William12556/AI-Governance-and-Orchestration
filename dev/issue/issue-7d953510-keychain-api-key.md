@@ -5,7 +5,7 @@ issue_info:
   id: "issue-7d953510"
   title: "Engine cannot read a provider API key from the macOS Keychain"
   date: "2026-10-14"
-  status: "open"
+  status: "resolved"
   severity: "medium"
   type: "enhancement"
   iteration: 3
@@ -84,6 +84,9 @@ version_history:
   - version: "1.3"
     date: "2026-10-14"
     changes: ["Iteration 3 from audit-7d953510 L-01, L-03; status open until iteration 3 is implemented"]
+  - version: "1.4"
+    date: "2026-10-14"
+    changes: ["Status resolved: change-7d953510 iteration 3 implemented (45a8ac0) (P03.7)"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
