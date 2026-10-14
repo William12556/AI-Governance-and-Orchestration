@@ -423,6 +423,10 @@ def _keychain_secret(name: str, service: str) -> str:
                           f"unanswered)") from None
     except OSError:
         raise ConfigError(f"{key}: {_SECURITY} is not available") from None
+    except UnicodeDecodeError:
+        # The error's object attribute holds the raw output; do not chain it
+        raise ConfigError(f"{key}: Keychain item for service {service} is not valid "
+                          f"text") from None
     if result.returncode != 0:
         raise ConfigError(f"{key}: no readable Keychain item for service {service} "
                           f"(security exit {result.returncode})")
