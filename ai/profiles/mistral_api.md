@@ -68,7 +68,7 @@ Any frontier model with sufficient reasoning capability may substitute. The plan
 - Network access to `https://api.mistral.ai`
 - Engine dependencies installed: `pip install -r ai/engine/requirements.txt`
 
-**API key:** on macOS the engine reads the key from the login Keychain service named in `api_key_keychain`, through `/usr/bin/security` (change-7d953510). Elsewhere, or as an override, it reads the environment variable named in `api_key_env`; when both are configured, a set variable wins and the Keychain is the fallback. A literal `api_key` is rejected for non-local endpoints. The run log records the source (`key source keychain:<service>` or `key source env:<VAR>`), never the key.
+**API key:** on macOS the engine reads the key from the Keychain service named in `api_key_keychain`, searched in the user's Keychain search list (normally the login Keychain), through `/usr/bin/security` (change-7d953510). Elsewhere, or as an override, it reads the environment variable named in `api_key_env`; when both are configured, a set variable wins and the Keychain is the fallback. A literal `api_key` is rejected for non-local endpoints. The run log records the source (`key source keychain:<service>` or `key source env:<VAR>`), never the key.
 
 1. Store the key (once). With no value after `-w`, `security` prompts for it, so the key is not written to shell history. Add `-U` to replace an existing entry. The service name must match `api_key_keychain`; this profile uses `ai-go-mistral`.
 
@@ -97,10 +97,13 @@ Notes:
 **Model id verification:** for kind `openai_compatible`, the engine readiness check requires the configured model id to be listed by the endpoint. Confirm the id before the first run:
 
 ```bash
-MISTRAL_API_KEY="$(security find-generic-password -a "$USER" -s ai-go-mistral -w)" \
-  sh -c 'curl -s -H "Authorization: Bearer $MISTRAL_API_KEY" https://api.mistral.ai/v1/models' \
+security find-generic-password -a "$USER" -s ai-go-mistral -w \
+  | sed 's/^/Authorization: Bearer /' \
+  | curl -s -H @- https://api.mistral.ai/v1/models \
   | grep -o '"id":"mistral-medium[^"]*"'
 ```
+
+The header is passed to `curl` on standard input (`-H @-`), so the key does not appear in any process argument list.
 
 **Engine config** (`ai/config.yaml`):
 
@@ -109,7 +112,7 @@ providers:
   mistral:
     kind: openai_compatible
     base_url: "https://api.mistral.ai/v1"
-    api_key_keychain: ai-go-mistral   # macOS login Keychain service
+    api_key_keychain: ai-go-mistral   # macOS Keychain service
     # api_key_env: MISTRAL_API_KEY    # optional per-run override; required off macOS
 
 roles:
@@ -214,6 +217,7 @@ The API key is not stored in `ai/config.yaml` or any tracked file.
 | 1.0 | 2026-10-02 | Initial document; Mistral API profile with Mistral Medium 3.5 as worker and reviewer via engine `openai_compatible` provider |
 | 1.1 | 2026-10-02 | §4.0: macOS Keychain storage and per-invocation key injection |
 | 1.2 | 2026-10-14 | §4.0: engine reads the key from the Keychain (`api_key_keychain`, change-7d953510); service name corrected to `ai-go-mistral`; per-run override kept. §5.0: reviewer verdict and tool calling verified (report-14e05e35 §5.0). §6.0: key prerequisite |
+| 1.3 | 2026-10-14 | §4.0: Keychain search list wording (audit-7d953510 L-02); model id check passes the header on stdin, not in argv (L-07) |
 
 ---
 

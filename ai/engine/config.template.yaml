@@ -12,7 +12,8 @@ omlx:
 # Without a roles: block, both roles use the omlx: block above (legacy binding).
 # To bind roles to other providers, uncomment and edit. A remote provider reads
 # its key from the environment variable named in api_key_env, or on macOS from
-# the login Keychain service named in api_key_keychain (change-7d953510). With
+# the Keychain service named in api_key_keychain, searched in the user's
+# Keychain search list, normally the login Keychain (change-7d953510). With
 # both, a set variable wins and the Keychain is the fallback. Never export the
 # variable globally (a global MISTRAL_API_KEY overrides Mistral Vibe's own key).
 # Keep api_key_keychain commented out unless it has a value: an empty value is
@@ -27,7 +28,7 @@ omlx:
 #     kind: openai_compatible
 #     base_url: "https://api.mistral.ai/v1"
 #     api_key_env: MISTRAL_API_KEY     # optional when api_key_keychain is set
-#     api_key_keychain: ai-go-mistral  # macOS login Keychain service name
+#     api_key_keychain: ai-go-mistral  # macOS Keychain service name
 #   anthropic:
 #     kind: anthropic
 #     api_key_env: ANTHROPIC_API_KEY
