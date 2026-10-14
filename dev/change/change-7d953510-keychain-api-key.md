@@ -1,0 +1,146 @@
+Created: 2026 October 14
+
+```yaml
+change_info:
+  id: "change-7d953510"
+  title: "Provider API key from the macOS Keychain (api_key_keychain)"
+  date: "2026-10-14"
+  status: "proposed"
+  priority: "medium"
+  iteration: 1
+  coupled_docs:
+    issue_ref: "issue-7d953510"
+    issue_iteration: 1
+
+source:
+  type: "issue"
+  reference: "issue-7d953510"
+  description: "Let the engine load a remote provider key from the login Keychain, so CLI and engine-mcp runs work without exporting the key."
+
+scope:
+  summary: >
+    New optional provider key api_key_keychain (a Keychain service name). Key
+    resolution order: api_key_env when configured and set; then
+    api_key_keychain when configured; then the existing literal-key and omlx
+    rules. Each source is consulted only when configured. The engine logs the
+    source that supplied the key, never the key.
+  affected_components:
+    - { name: "providers", file_path: "ai/engine/src/providers.py", change_type: "modify" }
+    - { name: "tests", file_path: "tests/engine/test_providers.py", change_type: "modify" }
+    - { name: "config template", file_path: "ai/engine/config.template.yaml", change_type: "modify" }
+    - { name: "operations guide", file_path: "ai/engine/doc/guide-engine-operations.md", change_type: "modify" }
+    - { name: "Mistral API profile", file_path: "ai/profiles/mistral_api.md", change_type: "modify" }
+    - { name: "requirements", file_path: "dev/requirements/requirements-14e05e35-engine-generalisation.md", change_type: "modify" }
+    - { name: "design", file_path: "dev/design/design-14e05e35-engine-generalisation.md", change_type: "modify" }
+  affected_designs:
+    - { design_ref: "design-14e05e35", sections: ["§3.0 Keys", "§11.0 Error Handling", "Version History"] }
+  out_of_scope:
+    - "Keychain account selection (-a); the service name identifies the item"
+    - "Other platforms' secret stores; api_key_env remains the portable source"
+    - "Changes to orchestrator subprocess scrubbing (a Keychain key never enters the environment)"
+    - "ai/engine/README.md oMLX-only wording (separate document-only fix)"
+
+rational:
+  problem_statement: "Keys are accepted from environment variables only (FR-04-07); engine-mcp runs cannot receive a per-process key."
+  proposed_solution: "Read the key with /usr/bin/security find-generic-password -s <service> -w at provider construction."
+  alternatives_considered:
+    - option: "keyring library"
+      reason_rejected: "New dependency for one macOS call; on macOS it uses the same Keychain"
+    - option: "Wrapper script injecting the variable"
+      reason_rejected: "Does not reach engine-mcp runs"
+    - option: "Mutually exclusive api_key_env and api_key_keychain"
+      reason_rejected: "Removes the documented per-process override with no safety gain, since a source is read only when configured"
+    - option: "Mapping {service, account}"
+      reason_rejected: "Account is not needed to identify the operator's item; a string is simpler"
+  benefits:
+    - "No key in shell history, environment or tracked files"
+    - "CLI and engine-mcp runs use one mechanism"
+    - "No new dependency"
+  risks:
+    - risk: "Keychain access dialog unanswered during an unattended run"
+      mitigation: "10 s timeout; ConfigError names the likely cause"
+    - risk: "Locked login Keychain (SSH session)"
+      mitigation: "Non-zero exit becomes a ConfigError; guide documents security unlock-keychain"
+    - risk: "Key leakage through logs or errors (NFR-05)"
+      mitigation: "Only service name, exit code and source label are logged or raised; tests assert the secret is absent"
+
+technical_details:
+  current_behavior: "_api_key(): api_key_env → literal api_key (omlx or local base_url) → 'local' for omlx → ConfigError."
+  proposed_behavior: >
+    _api_key(): (1) api_key_env configured and its variable set → env;
+    (2) api_key_keychain configured → Keychain; (3) api_key_env configured,
+    variable unset, no Keychain source → existing ConfigError; (4) existing
+    literal-key and omlx rules unchanged.
+  implementation_approach: "New helper _keychain_secret(name, service); _api_key() calls it; INFO log line 'providers.<name>: key source <label>'."
+  code_changes:
+    - component: "providers"
+      file: "ai/engine/src/providers.py"
+      change_summary: "Add _keychain_secret(); extend _api_key() resolution order and source logging"
+      functions_affected: ["_api_key", "_keychain_secret (new)"]
+  interface_changes:
+    - interface: "providers.<name>.api_key_keychain (ai/config.yaml)"
+      change_type: "contract"
+      details: "Optional non-empty string: Keychain generic-password service name"
+      backward_compatible: "yes"
+
+dependencies:
+  external:
+    - { library: "none", version_change: "none", impact: "Uses /usr/bin/security (macOS base system)" }
+
+testing_requirements:
+  test_approach: "pytest with monkeypatched subprocess.run, sys.platform and environment; no network, no real Keychain (NFR-06)"
+  test_cases:
+    - { scenario: "api_key_env set and api_key_keychain configured", expected_result: "env value used; security not called" }
+    - { scenario: "api_key_env configured but unset, api_key_keychain configured", expected_result: "Keychain value used" }
+    - { scenario: "api_key_keychain only", expected_result: "Keychain value used; argv is ['/usr/bin/security','find-generic-password','-s',<service>,'-w']" }
+    - { scenario: "security returns trailing newline", expected_result: "newline stripped" }
+    - { scenario: "non-zero exit", expected_result: "ConfigError naming provider, service and exit code" }
+    - { scenario: "timeout", expected_result: "ConfigError mentioning locked Keychain or unanswered access dialog" }
+    - { scenario: "empty output", expected_result: "ConfigError" }
+    - { scenario: "sys.platform not darwin", expected_result: "ConfigError; security not called" }
+    - { scenario: "security binary missing", expected_result: "ConfigError" }
+    - { scenario: "api_key_keychain not a non-empty string", expected_result: "ConfigError" }
+    - { scenario: "successful lookup with caplog", expected_result: "source label logged; secret absent from all log records" }
+  regression_scope: ["tests/engine/test_providers.py existing key tests", "full test suite"]
+  validation_criteria:
+    - "Full suite passes offline"
+    - "Live: one loop run with roles on providers.mistral, api_key_keychain: ai-go-mistral, no MISTRAL_API_KEY in the environment; started once from the CLI and once through engine-mcp start_engine"
+    - "V-09 scan: key absent from ai/state/ logs and state files after the live run"
+
+implementation:
+  effort_estimate: "2-3 hours"
+  implementation_steps:
+    - { step: "providers.py and tests (prompt-7d953510)", owner: "Claude Code" }
+    - { step: "requirements-14e05e35 FR-04-07 amendment and version history", owner: "planner" }
+    - { step: "design-14e05e35 §3.0 Keys row, §11.0 error rows, version history", owner: "planner" }
+    - { step: "config.template.yaml commented example; guide §3.0 note", owner: "planner" }
+    - { step: "mistral_api.md §4.0 rewritten for api_key_keychain with service ai-go-mistral; §5.0 stale 'unverified' note corrected", owner: "planner" }
+    - { step: "Operator: set api_key_keychain in ai/config.yaml (config-only, no triple)", owner: "operator" }
+    - { step: "Live validation; P08 audit in an independent session", owner: "operator" }
+  rollback_procedure: "Revert the commit; api_key_env continues to work unchanged."
+  deployment_notes: "First Keychain read may show a macOS access dialog for /usr/bin/security; answer it from an interactive CLI run before relying on engine-mcp."
+
+traceability:
+  requirements: ["FR-04-07 (amended)", "NFR-05", "NFR-06", "V-09"]
+  design: "design-14e05e35 §3.0, §11.0"
+  related_changes:
+    - { change_ref: "change-53c6f252", relationship: "extends key handling" }
+    - { change_ref: "change-43091424", relationship: "literal-key rule retained" }
+
+notes: >
+  Proposed FR-04-07 wording: "API keys are read from environment variables or,
+  on macOS, from the login Keychain through /usr/bin/security. Keys are never
+  read from tracked files."
+
+version_history:
+  - version: "1.0"
+    date: "2026-10-14"
+    changes: ["Initial change record"]
+
+metadata:
+  copyright: "Copyright (c) 2026 William Watson. MIT License."
+  template_version: "1.0"
+  schema_type: "t07_change"
+```
+
+Copyright (c) 2026 William Watson. MIT License.
