@@ -36,7 +36,7 @@ context:
     - "No new dependencies; standard library only (subprocess, sys)."
     - "The key value must never appear in a log record, an exception message, an exception's chained cause or context, or a test failure message."
     - "Existing behaviour and messages for api_key_env, literal api_key and kind omlx stay unchanged, except the single error message named in specification.requirements.functional."
-    - "Work on the session branch. Commit and push the branch; do not merge into main and do not rewrite history."
+    - "Work directly on main (CLAUDE.md §4.0). Record the starting commit hash before any edit. Commit to main and push; do not create branches, force-push or rewrite history."
     - "Stop condition: if any requirement conflicts with existing code or tests, or cannot be met without touching a file outside the scope, do not improvise. Implement the unaffected parts, record the conflict in report §5.0 and §6.0, and stop."
     - "Stop condition: if the baseline suite has failures, do not fix them; record them and judge the final run against the baseline."
 
@@ -143,16 +143,16 @@ deliverable:
         names); 4.0 Governance checks; 5.0 Deviations from this prompt (or
         'None'); 6.0 Open points for the planner, including that the live
         validation (CLI and engine-mcp, change-7d953510) was not possible in
-        the cloud environment; 7.0 Branch and commit hashes.
+        the cloud environment; 7.0 Starting commit and commit hashes pushed to main.
 
 success_criteria:
   - "T1–T14 present and passing"
   - "Full suite: no failures beyond the recorded baseline"
-  - "git diff main...HEAD touches only providers.py, test_providers.py, the report and the prompt move"
+  - "git diff <starting commit>..HEAD touches only providers.py, test_providers.py, the report and the prompt move"
   - "No log or exception path in the diff can carry the key value"
-  - "Branch pushed; report §7.0 names it"
+  - "Commits pushed to main; report §7.0 lists the starting commit and the new commit hashes"
 
-notes: "The planner verifies the branch by direct source review and runs the live validation on macOS before closing the issue and change."
+notes: "The planner verifies the pushed commits by direct source review and runs the live validation on macOS before closing the issue and change."
 ```
 
 Copyright (c) 2026 William Watson. MIT License.
