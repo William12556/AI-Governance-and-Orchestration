@@ -2,7 +2,7 @@ Created: 2026 October 14
 
 # Completion Report — Provider API Key from the macOS Keychain
 
-> **Status:** Implemented. Prompt `prompt-7d953510` closed
+> **Status:** Iteration 2 implemented. Prompt `prompt-7d953510` closed
 > (`dev/prompt/closed/`). Issue `issue-7d953510` and change `change-7d953510`
 > remain active pending planner review and live validation.
 
@@ -17,6 +17,7 @@ Created: 2026 October 14
 [5.0 Deviations from the Prompt](<#5.0 deviations from the prompt>)
 [6.0 Open Points for the Planner](<#6.0 open points for the planner>)
 [7.0 Commits](<#7.0 commits>)
+[8.0 Iteration 2](<#8.0 iteration 2>)
 [Version History](<#version history>)
 
 ---
@@ -177,11 +178,73 @@ Work was committed directly to `main`.
 
 ---
 
+## 8.0 Iteration 2
+
+**Change summary.** FR-F, raised as §6.0 item 2. `_keychain_secret()` in
+`ai/engine/src/providers.py` now catches `UnicodeDecodeError` from
+`subprocess.run` and raises ConfigError
+`providers.<name>.api_key_keychain: Keychain item for service <service> is not
+valid text` `from None`. Only `UnicodeDecodeError` is caught, not `ValueError`
+or `Exception`. The error's `object` attribute holds the raw output, so the
+cause is not chained. No other function, behaviour or message changed. One
+test was added to `tests/engine/test_providers.py`:
+`test_keychain_t15_undecodable_output_is_not_chained` (T15). It checks the
+message, the service name, `__cause__ is None`,
+`__suppress_context__ is True` and the absence of the secret from the error
+text. T15 fails against the iteration 1 source and passes after the change.
+
+**Test results.** Command: `python3 -m pytest tests/engine tests/overwatch -q`
+(Python 3.13.16).
+
+| Run | Passed | Failed | Skipped |
+|---|---|---|---|
+| Baseline (before any edit) | 321 | 0 | 1 |
+| Final | 322 | 0 | 1 |
+
+The skip is the pre-existing one recorded in §3.0. T1–T14 are unchanged and
+pass.
+
+**Governance checks.**
+
+| Check | Baseline | Final |
+|---|---|---|
+| `python3 ai/engine/src/linter.py dev` | 0 errors, 95 warnings | 0 errors, 95 warnings |
+| `python3 ai/engine/src/protocol_checker.py dev` | 0 errors, 0 warnings | 0 errors, 0 warnings |
+
+The 95 linter warnings are the pre-existing ones described in §4.0; this
+iteration adds none. The prompt's own warning (missing `metadata.schema_type`)
+moved with the file to `dev/prompt/closed/`, as in iteration 1.
+
+**Deviations.** None.
+
+**Open points for the planner.**
+
+1. Live validation (CLI and engine-mcp, change-7d953510) remains outstanding,
+   as in §6.0 item 1; the cloud environment has no macOS, Keychain or Mistral
+   key.
+2. §6.0 items 3 to 5 are unchanged. §6.0 item 2 is resolved by this
+   iteration; §6.0 is left as written for iteration 1.
+3. The design, requirements and change documents were not edited, per the
+   prompt's constraints.
+
+**Commits.** Work was committed directly to `main`.
+
+| Item | Hash |
+|---|---|
+| Starting commit | `8c13a7f93b8f578208b6dd541d582678e9391506` |
+| `feat(engine)`: providers.py and T15 | `d4c1cdb250a12fab3b719012219350ee8b1d3638` |
+| `docs(dev)`: this section and the prompt move | The commit that adds this section; a commit cannot record its own hash. Read it with `git log -1 -- dev/reports/report-7d953510-keychain-api-key.md`. |
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-10-14 | Initial report |
+| 1.1 | 2026-10-14 | §8.0 Iteration 2 (FR-F, T15); status line names iteration 2 |
 
 ---
 
