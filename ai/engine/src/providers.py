@@ -402,7 +402,8 @@ def _is_local(base_url: str | None) -> bool:
 
 def _keychain_secret(name: str, service: str) -> str:
     """
-    Read one generic-password secret from the macOS login Keychain (change-7d953510).
+    Read one generic-password secret from the user's Keychain search list
+    (normally the login Keychain) (change-7d953510).
 
     Runs '/usr/bin/security find-generic-password -s <service> -w'. Every failure
     raises ConfigError naming the provider, the service and, for a non-zero exit,
@@ -412,21 +413,22 @@ def _keychain_secret(name: str, service: str) -> str:
     key = f"providers.{name}.api_key_keychain"
     if sys.platform != "darwin":
         raise ConfigError(f"{key}: supported on macOS only; use api_key_env")
+    error = None
     try:
         result = subprocess.run([_SECURITY, "find-generic-password", "-s", service, "-w"],
                                 capture_output=True, text=True, timeout=_KEYCHAIN_TIMEOUT,
                                 check=False)
     except subprocess.TimeoutExpired:
         # TimeoutExpired carries captured output; do not chain it
-        raise ConfigError(f"{key}: lookup for service {service} timed out after "
-                          f"{_KEYCHAIN_TIMEOUT} s (Keychain locked or access dialog "
-                          f"unanswered)") from None
+        error = (f"{key}: lookup for service {service} timed out after "
+                 f"{_KEYCHAIN_TIMEOUT} s (Keychain locked or access dialog unanswered)")
     except OSError:
-        raise ConfigError(f"{key}: {_SECURITY} is not available") from None
+        error = f"{key}: {_SECURITY} is not available"
     except UnicodeDecodeError:
         # The error's object attribute holds the raw output; do not chain it
-        raise ConfigError(f"{key}: Keychain item for service {service} is not valid "
-                          f"text") from None
+        error = f"{key}: Keychain item for service {service} is not valid text"
+    if error:
+        raise ConfigError(error) from None
     if result.returncode != 0:
         raise ConfigError(f"{key}: no readable Keychain item for service {service} "
                           f"(security exit {result.returncode})")

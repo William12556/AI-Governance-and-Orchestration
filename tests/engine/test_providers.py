@@ -639,3 +639,54 @@ def test_keychain_t15_undecodable_output_is_not_chained(keychain):
     assert "not valid text" in str(err) and SERVICE in str(err)
     assert err.__cause__ is None and err.__suppress_context__ is True
     assert SECRET not in str(err)
+
+
+def _undecodable():
+    return UnicodeDecodeError("utf-8", SECRET.encode() + b"\xff", len(SECRET), len(SECRET) + 1,
+                              "invalid start byte")
+
+
+@pytest.mark.parametrize("make_exc", [
+    lambda: subprocess.TimeoutExpired(["/usr/bin/security"], 10, output=SECRET, stderr=SECRET),
+    lambda: FileNotFoundError(2, "No such file or directory"),
+    _undecodable,
+], ids=["timeout", "missing", "undecodable"])
+def test_keychain_t16_errors_carry_no_context(make_exc, keychain):
+    keychain(exc=make_exc())
+    with pytest.raises(P.ConfigError) as ei:
+        P._keychain_secret("mistral", SERVICE)
+    err = ei.value
+    assert err.__context__ is None
+    assert err.__cause__ is None and err.__suppress_context__ is True
+    assert SECRET not in str(err)
+
+
+def test_keychain_t17_make_provider_passes_key_to_anthropic(keychain, engine_log, monkeypatch):
+    captured = {}
+
+    class FakeAnthropic:
+        def __init__(self, **kw):
+            captured.update(kw)
+
+    import types
+    import sys as _sys
+    keychain()
+    monkeypatch.setitem(_sys.modules, "anthropic", types.SimpleNamespace(AsyncAnthropic=FakeAnthropic))
+    prov = P.make_provider("anthropic", {"kind": "anthropic", "api_key_keychain": SERVICE})
+    assert isinstance(prov, P.AnthropicProvider)
+    assert captured["api_key"] == SECRET
+    assert _source_lines(engine_log.records) == [f"providers.anthropic: key source keychain:{SERVICE}"]
+    _assert_secret_absent(engine_log.records)
+
+
+def test_keychain_t18_empty_env_variable_counts_as_unset(keychain, engine_log, monkeypatch):
+    fake = keychain()
+    monkeypatch.setenv("MISTRAL_API_KEY", "")
+    pcfg = dict(REMOTE, api_key_env="MISTRAL_API_KEY", api_key_keychain=SERVICE)
+    assert P._api_key("mistral", pcfg, "openai_compatible") == SECRET
+    assert _source_lines(engine_log.records) == [f"providers.mistral: key source keychain:{SERVICE}"]
+    fake.calls.clear()
+    with pytest.raises(P.ConfigError) as ei:
+        P._api_key("mistral", dict(REMOTE, api_key_env="MISTRAL_API_KEY"), "openai_compatible")
+    assert str(ei.value) == "providers.mistral: environment variable MISTRAL_API_KEY is not set"
+    assert fake.calls == []
