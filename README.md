@@ -55,10 +55,10 @@ Items marked *Planned* do not yet exist.
 | Role                         | Anthropic                 | Mistral AI               | Open-weight (local)                                           |
 | ---------------------------- | ------------------------- | ------------------------ | ------------------------------------------------------------- |
 | Planner                      | Claude Desktop            | Mistral Vibe (*Planned*) | MCP-capable client with a local server (*Planned*)            |
-| Worker and reviewer (engine) | Anthropic API (*Planned*) | Mistral API (*Planned*)  | oMLX; LM Studio or other OpenAI-compatible server (*Planned*) |
+| Worker and reviewer (engine) | Anthropic API (live check pending) | Mistral API              | oMLX; LM Studio or other OpenAI-compatible server (*Planned*) |
 | Worker (manual)              | Claude Code               | Mistral Vibe (*Planned*) | Claude Code with oMLX                                         |
 
-Today the engine's worker and reviewer may use different models, but both must be served by the same oMLX server. Assigning a role to a frontier provider sends task content to that provider.
+The engine's worker and reviewer are each bound to a provider and a model in `ai/config.yaml` (`providers:` and `roles:`; [operations guide](ai/engine/doc/guide-engine-operations.md) §3.0), so the two roles may use different providers. The Anthropic API provider has been exercised only against a local Anthropic-compatible endpoint so far. Assigning a role to a frontier provider sends task content to that provider.
 
 ### 2.3 Other Planned Items
 
@@ -77,7 +77,7 @@ Today the engine's worker and reviewer may use different models, but both must b
 | Python | 3.11+ |
 | Git | Any recent version |
 | Planner | Claude Desktop with the `Filesystem` and `mcp-ripgrep` MCP servers |
-| Local inference | oMLX with a supported model |
+| Inference | oMLX with a supported model for local roles; a Mistral or Anthropic API key for API roles ([Mistral API profile](ai/profiles/mistral_api.md)) |
 | Node.js | Required for `npx`, which runs the engine's filesystem MCP server |
 
 [Return to Table of Contents](<#table of contents>)
@@ -182,6 +182,7 @@ This framework is experimental, serving as a learning exercise in AI agent gover
 | 3.9 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 4.0 | 2026-09-29 | Simplified to user content; reframed for AI-G&O pivot (governance models, planner/worker/reviewer roles, provider choice per D-16); Status section marks planned items; developer content moved to docs/guide-install.md §3.0; RATIONALE.md link and motivation paragraph removed; profile table and requirements condensed |
 | 4.1 | 2026-09-29 | Review corrections: leading blank line removed; scope sentence (D-01, D-02); planner client wording matches §2.2; Node.js requirement; web interface wording; engine-mcp and overwatch documentation rows |
+| 4.2 | 2026-10-14 | §2.2: Mistral API engine roles available, Anthropic API live check pending, per-role provider binding replaces the single-oMLX statement; §3.0: inference row covers API roles |
 
 ---
 
