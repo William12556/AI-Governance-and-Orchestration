@@ -627,3 +627,15 @@ def test_keychain_t14_secret_absent_from_logs(keychain, engine_log, monkeypatch)
     P.make_provider("c", dict(REMOTE, api_key_keychain=SERVICE))
     assert len(_source_lines(engine_log.records)) == 3
     _assert_secret_absent(engine_log.records)
+
+
+def test_keychain_t15_undecodable_output_is_not_chained(keychain):
+    exc = UnicodeDecodeError("utf-8", SECRET.encode() + b"\xff", len(SECRET), len(SECRET) + 1,
+                             "invalid start byte")
+    keychain(exc=exc)
+    with pytest.raises(P.ConfigError) as ei:
+        P._keychain_secret("mistral", SERVICE)
+    err = ei.value
+    assert "not valid text" in str(err) and SERVICE in str(err)
+    assert err.__cause__ is None and err.__suppress_context__ is True
+    assert SECRET not in str(err)
