@@ -40,7 +40,7 @@ scope:
     - { name: "requirements", file_path: "dev/requirements/requirements-14e05e35-engine-generalisation.md", change_type: "modify" }
     - { name: "design", file_path: "dev/design/design-14e05e35-engine-generalisation.md", change_type: "modify" }
   affected_designs:
-    - { design_ref: "design-14e05e35", sections: ["§3.0 Keys", "§11.0 Error Handling", "Version History"] }
+    - { design_ref: "design-14e05e35", sections: ["§3.0 Keys", "§6.0 Gates", "§11.0 Error Handling", "§14.0 DI-04, DI-06", "Version History"] }
   out_of_scope:
     - "Keychain account selection (-a); the service name identifies the item"
     - "Other platforms' secret stores; api_key_env remains the portable source"
@@ -129,7 +129,7 @@ implementation:
     - { step: "Iteration 3: raise Keychain errors after the try statement; T16 to T18 (prompt-7d953510 iteration 3)", owner: "Claude Code" }
     - { step: "Follow-up audit of iteration 3 (P02.8.2)", owner: "independent session" }
     - { step: "requirements-14e05e35 FR-04-07 amendment and version history", owner: "planner" }
-    - { step: "design-14e05e35 §3.0 Keys row, §11.0 error rows, version history; iteration 2: undecodable output in the §11.0 row", owner: "planner" }
+    - { step: "design-14e05e35 §3.0 Keys row, §11.0 error rows, version history; iteration 2: undecodable output in the §11.0 row; audit-7d953510: §14.0 DI-04 guidance (L-06), §6.0 gate row and §14.0 DI-06 (M-01 acceptance)", owner: "planner" }
     - { step: "config.template.yaml commented example; guide §3.0 note", owner: "planner" }
     - { step: "mistral_api.md §4.0 rewritten for api_key_keychain with service ai-go-mistral; §5.0 stale 'unverified' note corrected", owner: "planner" }
     - { step: "Operator: set api_key_keychain in ai/config.yaml (config-only, no triple)", owner: "operator" }
@@ -179,6 +179,12 @@ version_history:
       - "Iteration 3 implemented in Claude Code cloud (commit 45a8ac0; report §9.0 in 7674d9f): 327 passed, 1 skipped on Linux; T16 failed against the iteration 2 source and passes now"
       - "Planner source review passed: each except branch only assigns its message; ConfigError raised from None after the try statement (no __context__); messages and branch order unchanged; T16 to T18 as specified; scope limited to providers.py, test_providers.py, report and prompt move. Recorded deviation (FR-H docstring wording, duplicate 'the' avoided) accepted"
       - "Status implemented. Outstanding before verified and closure: follow-up audit of iteration 3 (P02.8.2), one engine-mcp loop run with api_key_keychain and no MISTRAL_API_KEY, V-09 scan"
+  - version: "1.6"
+    date: "2026-10-14"
+    changes:
+      - "Follow-up audit dev/audit/audit-7d953510-followup-2026-10-14.md (57b9cb7): L-01, L-02, L-03 closed; no regression (327 passed, 1 skipped); no new key path; M-01 acceptance accurately documented; 1 low finding"
+      - "F-01 fixed: affected_designs and the planner design step list §6.0 and §14.0 DI-04, DI-06"
+      - "Outstanding before verified and closure: engine-mcp loop run with api_key_keychain and no MISTRAL_API_KEY, V-09 scan"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
