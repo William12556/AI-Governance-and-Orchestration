@@ -5,7 +5,7 @@ change_info:
   id: "change-7d953510"
   title: "Provider API key from the macOS Keychain (api_key_keychain)"
   date: "2026-10-14"
-  status: "approved"
+  status: "implemented"  # verified pending: engine-mcp loop run, V-09 scan, P08 audit
   priority: "medium"
   iteration: 2
   coupled_docs:
@@ -152,6 +152,11 @@ version_history:
       - "Live CLI check passed: key source keychain:ai-go-mistral, model ready: mistral-medium-2604"
       - "Planner documents updated: config.template.yaml, guide-engine-operations v1.16, mistral_api.md v1.2"
       - "Iteration 2 approved by the operator: UnicodeDecodeError handling (report-7d953510 §6.0 item 2); live validation reduced to the CLI readiness check plus one engine-mcp loop run at the next real Mistral work item"
+  - version: "1.3"
+    date: "2026-10-14"
+    changes:
+      - "Iteration 2 implemented in Claude Code cloud (commit d4c1cdb; report §8.0 in 7756552): 322 passed, 1 skipped on Linux; planner source review passed (UnicodeDecodeError caught specifically, from None; T15 checks cause, context and secret absence; scope limited to providers.py, test_providers.py, report and prompt move)"
+      - "Status implemented. Outstanding before verified and closure: one engine-mcp loop run with api_key_keychain and no MISTRAL_API_KEY, V-09 scan, P08 audit in an independent session"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
