@@ -2,7 +2,7 @@ Created: 2026 October 14
 
 # Completion Report — Provider API Key from the macOS Keychain
 
-> **Status:** Iteration 2 implemented. Prompt `prompt-7d953510` closed
+> **Status:** Iteration 3 implemented. Prompt `prompt-7d953510` closed
 > (`dev/prompt/closed/`). Issue `issue-7d953510` and change `change-7d953510`
 > remain active pending planner review and live validation.
 
@@ -18,6 +18,7 @@ Created: 2026 October 14
 [6.0 Open Points for the Planner](<#6.0 open points for the planner>)
 [7.0 Commits](<#7.0 commits>)
 [8.0 Iteration 2](<#8.0 iteration 2>)
+[9.0 Iteration 3](<#9.0 iteration 3>)
 [Version History](<#version history>)
 
 ---
@@ -239,12 +240,91 @@ moved with the file to `dev/prompt/closed/`, as in iteration 1.
 
 ---
 
+## 9.0 Iteration 3
+
+**Change summary.** FR-G and FR-H, from
+`dev/audit/audit-7d953510-strategic-2026-10-14.md` L-01 to L-03.
+
+- FR-G (L-01): in `_keychain_secret()` the three `except` branches
+  (`subprocess.TimeoutExpired`, `OSError`, `UnicodeDecodeError`) now only
+  assign their unchanged message to the local variable `error`; after the
+  `try` statement, `if error: raise ConfigError(error) from None`. The
+  exception is not bound to a name, and the branch order and messages are
+  unchanged. A ConfigError raised this way has `__cause__ is None`,
+  `__suppress_context__ is True` and `__context__ is None`.
+- FR-H (L-02): the `_keychain_secret()` docstring now reads "Read one
+  generic-password secret from the user's Keychain search list (normally the
+  login Keychain) (change-7d953510)." See Deviations.
+
+Three tests were added to `tests/engine/test_providers.py`:
+
+| Test | Scenario |
+|---|---|
+| `test_keychain_t16_errors_carry_no_context` (T16, parametrized `timeout`, `missing`, `undecodable`) | `__context__`, `__cause__` and `__suppress_context__` for the three wrapped failures; secret absent from the error text |
+| `test_keychain_t17_make_provider_passes_key_to_anthropic` (T17) | `make_provider` kind `anthropic` with `api_key_keychain`; fake `AsyncAnthropic` receives the secret; source line `keychain:<service>`; secret absent from records |
+| `test_keychain_t18_empty_env_variable_counts_as_unset` (T18) | `MISTRAL_API_KEY=''`: (a) with `api_key_keychain`, Keychain value and source line; (b) without, the existing "environment variable MISTRAL_API_KEY is not set" error and no `subprocess.run` call |
+
+T16 fails against the iteration 2 source (3 failed: each ConfigError carried a
+`__context__`) and passes after the change. T17 and T18 cover existing
+behaviour and pass on both.
+
+**Test results.** Command: `python3 -m pytest tests/engine tests/overwatch -q`
+(Python 3.13.16).
+
+| Run | Passed | Failed | Skipped |
+|---|---|---|---|
+| Baseline (before any edit) | 322 | 0 | 1 |
+| Final | 327 | 0 | 1 |
+
+The five new results are T16 (three cases), T17 and T18. The skip is the
+pre-existing one recorded in §3.0. T1–T15 are unchanged and pass.
+
+**Governance checks.**
+
+| Check | Baseline | Final |
+|---|---|---|
+| `python3 ai/engine/src/linter.py dev` | 0 errors, 95 warnings | 0 errors, 95 warnings |
+| `python3 ai/engine/src/protocol_checker.py dev` | 0 errors, 0 warnings | 0 errors, 0 warnings |
+
+The 95 linter warnings are the pre-existing ones described in §4.0; this
+iteration adds none. The prompt's own warning (missing `metadata.schema_type`)
+moved with the file to `dev/prompt/closed/`.
+
+**Deviations.** One wording detail. FR-H says to replace "macOS login
+Keychain" with "the user's Keychain search list (normally the login
+Keychain)". The docstring read "from the macOS login Keychain", so a literal
+replacement would give "from the the user's ...". The preceding "the" was
+included in the replaced text, and the line was wrapped to two lines. No other
+docstring or comment changed.
+
+**Open points for the planner.**
+
+1. Live validation (CLI and engine-mcp, change-7d953510) remains outstanding,
+   as in §6.0 item 1; the cloud environment has no macOS, Keychain or API key.
+2. §6.0 items 3 to 5 and the iteration 2 open points are unchanged; §1.0 to
+   §8.0 are left as written.
+3. The design, requirements, change and issue documents were not edited, per
+   the prompt's constraints.
+
+**Commits.** Work was committed directly to `main`.
+
+| Item | Hash |
+|---|---|
+| Starting commit | `4ca557714d2d69fb6e065d296be0b574373062af` |
+| `feat(engine)`: providers.py and T16 to T18 | `45a8ac0e96e5b25976f84107a35b72e00d08e913` |
+| `docs(dev)`: this section and the prompt move | The commit that adds this section; a commit cannot record its own hash. Read it with `git log -1 -- dev/reports/report-7d953510-keychain-api-key.md`. |
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-10-14 | Initial report |
 | 1.1 | 2026-10-14 | §8.0 Iteration 2 (FR-F, T15); status line names iteration 2 |
+| 1.2 | 2026-10-14 | §9.0 Iteration 3 (FR-G, FR-H, T16–T18); status line names iteration 3 |
 
 ---
 
