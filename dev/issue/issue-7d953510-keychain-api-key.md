@@ -5,13 +5,13 @@ issue_info:
   id: "issue-7d953510"
   title: "Engine cannot read a provider API key from the macOS Keychain"
   date: "2026-10-14"
-  status: "resolved"
+  status: "open"
   severity: "medium"
   type: "enhancement"
-  iteration: 3
+  iteration: 4
   coupled_docs:
     change_ref: "change-7d953510"
-    change_iteration: 3
+    change_iteration: 4
 
 source:
   origin: "user_report"
@@ -62,6 +62,12 @@ analysis:
     __context__ bound to the TimeoutExpired or UnicodeDecodeError holding the
     raw output; tests lack kind anthropic, an empty api_key_env variable and
     a __context__ assertion (audit-7d953510 L-01, L-03).
+    Iteration 4: in a real run the 'key source' INFO record is lost.
+    orchestrator.main_async calls build_role_bindings before setup_logging,
+    so the 'engine' logger has no handler and an effective level of WARNING
+    when the record is emitted (GTach engine-mcp run 1e00fd66,
+    engine_20261014-150813.LOG). Unit tests attach their own handler and
+    did not show this.
 
 resolution:
   approach: "Optional api_key_keychain provider key read through /usr/bin/security; see change-7d953510."
@@ -87,6 +93,9 @@ version_history:
   - version: "1.4"
     date: "2026-10-14"
     changes: ["Status resolved: change-7d953510 iteration 3 implemented (45a8ac0) (P03.7)"]
+  - version: "1.5"
+    date: "2026-10-15"
+    changes: ["Iteration 4 from the GTach live run: key source line missing from the run log; status open until iteration 4 is implemented"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

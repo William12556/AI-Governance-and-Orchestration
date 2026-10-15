@@ -110,7 +110,7 @@ gates:
 
 | Rule | Behaviour |
 |---|---|
-| Keys | `api_key_env` names an environment variable. `api_key_keychain` names a Keychain service in the user's Keychain search list (normally the login Keychain), read with `/usr/bin/security find-generic-password -s <service> -w` (macOS only, 10 s timeout). Order: `api_key_env` when configured and set, then `api_key_keychain` when configured; each source is read only when configured. The source label (`env:<VAR>` or `keychain:<service>`) is logged at INFO, never the key (change-7d953510). A literal `api_key` is accepted only for `kind: omlx` or a provider whose `base_url` is on this machine (no secret; change-43091424). |
+| Keys | `api_key_env` names an environment variable. `api_key_keychain` names a Keychain service in the user's Keychain search list (normally the login Keychain), read with `/usr/bin/security find-generic-password -s <service> -w` (macOS only, 10 s timeout). Order: `api_key_env` when configured and set, then `api_key_keychain` when configured; each source is read only when configured. The source label (`env:<VAR>` or `keychain:<service>`) is logged at INFO, never the key (change-7d953510). Bindings are resolved before the run log exists; records emitted on the `engine` logger during resolution are held in memory and written to the run log once it is created, and a run that stops before then writes no log (change-7d953510 iteration 4). A literal `api_key` is accepted only for `kind: omlx` or a provider whose `base_url` is on this machine (no secret; change-43091424). |
 | Legacy | Without `roles:`, both roles use a provider built from the `omlx:` block; worker model = `omlx.worker_model` or `omlx.default_model`; reviewer model = `omlx.reviewer_model` or `omlx.default_model` (FR-04-08). |
 | CLI | `--worker-model`, `--reviewer-model` and `--model` override the model within the role's provider. |
 | Model IDs | Roles use pinned model IDs, not `-latest` aliases, so runs are reproducible. Devstral is not available on the Mistral API (deprecated); a tested Mistral API model is `mistral-medium-2604` (`dev/reports/report-14e05e35-mistral-api-hypothesis.md`). Model choice per role is an operator decision. |
@@ -437,6 +437,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.16 | 2026-10-15 | §3.0 Keys: binding-time log records reach the run log (change-7d953510 iteration 4). |
 | 1.15 | 2026-10-14 | §6.0 gate row and §14.0 DI-06: a Keychain key is readable by gate code (audit-7d953510 M-01, accepted by the operator). |
 | 1.14 | 2026-10-14 | §3.0 Keys: Keychain search list wording (audit-7d953510 L-02); §14.0 DI-04 guidance (2) points to `api_key_keychain` (L-06). |
 | 1.13 | 2026-10-14 | §11.0: Keychain output that is not valid text is a lookup failure (change-7d953510 iteration 2). |

@@ -5,12 +5,12 @@ change_info:
   id: "change-7d953510"
   title: "Provider API key from the macOS Keychain (api_key_keychain)"
   date: "2026-10-14"
-  status: "implemented"  # verified pending: follow-up audit, engine-mcp loop run, V-09 scan
+  status: "approved"  # iteration 4 approved 2026-10-15 (key source log line)
   priority: "medium"
-  iteration: 3
+  iteration: 4
   coupled_docs:
     issue_ref: "issue-7d953510"
-    issue_iteration: 3
+    issue_iteration: 4
 
 source:
   type: "issue"
@@ -31,7 +31,13 @@ scope:
     after the try statement, so the ConfigError carries no __context__ holding
     the raw output; tests for kind anthropic, an api_key_env variable set to
     an empty string, and __context__ is None.
+    Iteration 4 (GTach live run 1e00fd66): log records emitted on the 'engine'
+    logger while main_async resolves the role bindings are captured by a
+    temporary in-memory handler and written to the run log after
+    setup_logging, so the 'key source' line reaches the run log. A run that
+    stops before setup_logging still writes no state.
   affected_components:
+    - { name: "orchestrator", file_path: "ai/engine/src/orchestrator.py", change_type: "modify" }  # iteration 4
     - { name: "providers", file_path: "ai/engine/src/providers.py", change_type: "modify" }
     - { name: "tests", file_path: "tests/engine/test_providers.py", change_type: "modify" }
     - { name: "config template", file_path: "ai/engine/config.template.yaml", change_type: "modify" }
@@ -114,6 +120,8 @@ testing_requirements:
     - { scenario: "Iteration 3: timeout, OSError and UnicodeDecodeError", expected_result: "ConfigError.__context__ is None" }
     - { scenario: "Iteration 3: make_provider kind anthropic with api_key_keychain", expected_result: "AnthropicProvider built with the Keychain value" }
     - { scenario: "Iteration 3: api_key_env variable set to an empty string", expected_result: "treated as unset: Keychain used when configured, otherwise the existing 'not set' error" }
+    - { scenario: "Iteration 4: bindings resolved, then setup_logging and replay", expected_result: "run log file contains 'providers.<name>: key source <label>' with the record's original time" }
+    - { scenario: "Iteration 4: configuration error during binding resolution", expected_result: "no state directory and no log file; the 'engine' logger's handlers and level are as before the call" }
   regression_scope: ["tests/engine/test_providers.py existing key tests", "full test suite"]
   validation_criteria:
     - "Full suite passes offline"
@@ -128,6 +136,8 @@ implementation:
     - { step: "Iteration 2: UnicodeDecodeError handling and test (prompt-7d953510 iteration 2)", owner: "Claude Code" }
     - { step: "Iteration 3: raise Keychain errors after the try statement; T16 to T18 (prompt-7d953510 iteration 3)", owner: "Claude Code" }
     - { step: "Follow-up audit of iteration 3 (P02.8.2)", owner: "independent session" }
+    - { step: "Iteration 4: capture and replay of binding-time log records in main_async; tests (prompt-7d953510 iteration 4)", owner: "Claude Code" }
+    - { step: "Follow-up audit of iteration 4 (P02.8.2)", owner: "independent session" }
     - { step: "requirements-14e05e35 FR-04-07 amendment and version history", owner: "planner" }
     - { step: "design-14e05e35 §3.0 Keys row, §11.0 error rows, version history; iteration 2: undecodable output in the §11.0 row; audit-7d953510: §14.0 DI-04 guidance (L-06), §6.0 gate row and §14.0 DI-06 (M-01 acceptance)", owner: "planner" }
     - { step: "config.template.yaml commented example; guide §3.0 note", owner: "planner" }
@@ -185,6 +195,17 @@ version_history:
       - "Follow-up audit dev/audit/audit-7d953510-followup-2026-10-14.md (57b9cb7): L-01, L-02, L-03 closed; no regression (327 passed, 1 skipped); no new key path; M-01 acceptance accurately documented; 1 low finding"
       - "F-01 fixed: affected_designs and the planner design step list §6.0 and §14.0 DI-04, DI-06"
       - "Outstanding before verified and closure: engine-mcp loop run with api_key_keychain and no MISTRAL_API_KEY, V-09 scan"
+  - version: "1.7"
+    date: "2026-10-14"
+    changes:
+      - "Live engine-mcp run in GTach (work item 72f95f73, run 1e00fd66, log engine_20261014-150813.LOG): both roles mistral:mistral-medium-2604; provider block with api_key_keychain only; MISTRAL_API_KEY absent from the Claude Desktop config, launchd and the engine-mcp process; authenticated model list succeeded; SHIP after one cycle. Key source Keychain: pass by inference from the configuration"
+      - "V-09: no copy of the key in GTach ai/state/ (operator scan with the key passed on a file descriptor). Pass"
+      - "Defect found: the 'key source' INFO line is not in the run log. orchestrator.main_async resolves the role bindings (line 2393) before setup_logging (line 2466), so the record is emitted before any handler exists. The documented log check (guide §3.0, mistral_api.md §4.0) cannot succeed. Status stays implemented pending the operator's decision"
+  - version: "1.8"
+    date: "2026-10-15"
+    changes:
+      - "Iteration 4 approved by the operator: capture binding-time records and write them to the run log after setup_logging. Moving setup_logging before build_role_bindings was rejected because a refused run (configuration error, pre-run check exit 3) must write no state (FR-08-05). Design v1.16 §3.0. Follow-up audit required after implementation"
+      - "Worker helper files under writable tests/ (GTach run) recorded as dev/backlog.md §5.0 item 10; outside this change"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

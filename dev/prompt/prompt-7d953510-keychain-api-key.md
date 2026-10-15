@@ -7,10 +7,10 @@ prompt_info:
   source_ref: "change-7d953510"
   target_profile: "claude_code"  # Claude Code cloud session (operator decision 2026-10-14)
   date: "2026-10-14"
-  iteration: 3
+  iteration: 4
   coupled_docs:
     change_ref: "change-7d953510"
-    change_iteration: 3
+    change_iteration: 4
 
 context:
   purpose: >
@@ -23,6 +23,11 @@ context:
     Iteration 3: raise Keychain lookup errors after the try statement so no
     __context__ holds the raw output, and add three tests (FR-G, FR-H;
     dev/audit/audit-7d953510-strategic-2026-10-14.md L-01, L-02, L-03).
+    Iteration 4: the 'key source' INFO record is lost in a real run, because
+    main_async resolves the role bindings before setup_logging. Capture the
+    records emitted during binding resolution and write them to the run log
+    once it exists (FR-I; design-14e05e35 v1.16 §3.0; GTach engine-mcp run
+    1e00fd66, engine_20261014-150813.LOG).
   integration: >
     providers._api_key(name, pcfg, kind) is called once per provider by
     make_provider(), which build_role_bindings() calls at engine startup.
@@ -36,10 +41,11 @@ context:
     - "dev/requirements/requirements-14e05e35-engine-generalisation.md FR-04-07, NFR-05, NFR-06"
     - "CLAUDE.md; ai/governance/software-engineering/governance.md; ai/governance/software-engineering/primer.md"
   constraints:
-    - "Iteration 3 only. Iterations 1 and 2 (FR-A to FR-F, tests T1 to T15) are implemented in commits 9b4cb23 and d4c1cdb and audited; do not change their behaviour, messages or tests. Implement FR-G, FR-H and T16 to T18 only."
+    - "Iteration 4 only. Iterations 1 to 3 (FR-A to FR-H, tests T1 to T18) are implemented in commits 9b4cb23, d4c1cdb and 45a8ac0 and audited; do not change their behaviour, messages or tests. Implement FR-I and T19 to T21 only. providers.py is not changed in this iteration."
     - "Execution environment: Claude Code cloud (Linux container, repository clone). There is no macOS, no /usr/bin/security, no Keychain, no oMLX and no Mistral or Anthropic API key. Do not attempt a live run, do not start the engine or engine-mcp, and do not call any network endpoint other than package installation."
-    - "Source changes are limited to ai/engine/src/providers.py and tests/engine/test_providers.py."
-    - "Governance changes are limited to: moving this prompt to dev/prompt/closed/, and updating the existing report named in deliverable.files (iteration 3 section)."
+    - "Source changes are limited to ai/engine/src/orchestrator.py and tests/engine/test_providers.py."
+    - "FR-08-05 must hold: a run refused before setup_logging (configuration error, manifest error, pre-run check exit 3) writes no state directory and no log file. Do not move setup_logging or archive_prior_logs."
+    - "Governance changes are limited to: moving this prompt to dev/prompt/closed/, and updating the existing report named in deliverable.files (iteration 4 section)."
     - "Do not edit the issue, change, requirements or design documents, ai/config.yaml, ai/engine/config.template.yaml, ai/engine/doc/, ai/profiles/ or README files; the planner updates those after review."
     - "No new dependencies; standard library only (subprocess, sys)."
     - "The key value must never appear in a log record, an exception message, an exception's chained cause or context, or a test failure message."
@@ -63,6 +69,7 @@ specification:
       - "FR-F (iteration 2) In _keychain_secret, a UnicodeDecodeError raised by subprocess.run (Keychain output not valid text in the locale encoding) → ConfigError 'providers.<name>.api_key_keychain: Keychain item for service <service> is not valid text' from None. Catch UnicodeDecodeError specifically, not ValueError or Exception."
       - "FR-G (iteration 3; audit L-01) In _keychain_secret, no ConfigError may carry a __context__. Each except branch (subprocess.TimeoutExpired, OSError, UnicodeDecodeError) only assigns its existing message to a local variable; after the try statement, if that variable is set, raise ConfigError(message) from None. Messages, the order of the except branches and the from None stay as they are, so __cause__ is None, __suppress_context__ is True and __context__ is None. Do not bind the exception to a name."
       - "FR-H (iteration 3; audit L-02) In the _keychain_secret docstring, replace 'macOS login Keychain' with 'the user's Keychain search list (normally the login Keychain)'. No other docstring or comment changes."
+      - "FR-I (iteration 4) In orchestrator.py add a module-level class _RecordBuffer(logging.Handler) whose emit() appends each record to a list attribute 'records', and a function _resolve_bindings_capturing(config, args) that: gets logging.getLogger('engine'); saves its current level; adds a _RecordBuffer with level DEBUG; sets the logger level to DEBUG; returns (build_role_bindings(config, args), buffer.records); and in a finally block removes the buffer and restores the saved level, so the logger is unchanged whether resolution succeeds or raises. In main_async replace 'bindings = build_role_bindings(config, args)' with 'bindings, _binding_records = _resolve_bindings_capturing(config, args)' inside the existing try/except ConfigError (message and return 1 unchanged). Immediately after 'log = setup_logging(state_dir)' and before the 'engine start' log line, write the captured records with 'for _record in _binding_records: log.handle(_record)'. The buffer must be removed before setup_logging runs, because setup_logging adds its FileHandler only when the logger has no handlers. Do not change propagate, setup_logging, providers.py or any message."
     technical:
       language: "Python"
       version: "3.10+ (repository convention 3.11+)"
@@ -132,11 +139,14 @@ testing:
     - { scenario: "T16 (iteration 3, L-01) parametrized over subprocess.TimeoutExpired(['/usr/bin/security'], 10, output=SECRET, stderr=SECRET), FileNotFoundError(2, 'No such file or directory') and the T15 UnicodeDecodeError", expected: "ConfigError with __context__ is None, __cause__ is None and __suppress_context__ is True; secret absent from str(error)" }
     - { scenario: "T17 (iteration 3, L-03) make_provider('anthropic', {'kind': 'anthropic', 'api_key_keychain': SERVICE}) with anthropic.AsyncAnthropic replaced by a capturing fake, following test_make_provider_passes_base_url_to_anthropic", expected: "AnthropicProvider built; the fake received api_key == SECRET; INFO record 'key source keychain:<service>'; secret absent from all records" }
     - { scenario: "T18 (iteration 3, L-03) monkeypatch.setenv('MISTRAL_API_KEY', '') (a) with api_key_env and api_key_keychain, (b) with api_key_env only", expected: "(a) Keychain value returned, source label keychain:<service>; (b) the existing ConfigError 'providers.<name>: environment variable MISTRAL_API_KEY is not set'; subprocess.run not called in (b)" }
+    - { scenario: "T19 (iteration 4) _resolve_bindings_capturing with a config binding both roles to an openai_compatible provider with api_key_env: MISTRAL_API_KEY, the variable set to SECRET (monkeypatch.setenv), and openai.AsyncOpenAI replaced by a fake as in T13", expected: "returns bindings for worker and reviewer and a record list with exactly one message 'providers.<name>: key source env:MISTRAL_API_KEY'; afterwards the 'engine' logger's handlers and level equal their values before the call" }
+    - { scenario: "T20 (iteration 4) _resolve_bindings_capturing with a provider whose api_key_env variable is unset and no other key source", expected: "ConfigError 'providers.<name>: environment variable MISTRAL_API_KEY is not set' propagates; the 'engine' logger's handlers and level equal their values before the call" }
+    - { scenario: "T21 (iteration 4) isolate the 'engine' logger with monkeypatch.setattr(logging.getLogger('engine'), 'handlers', []) and restore its level and propagate with monkeypatch; run T19's resolution, then orch.setup_logging(<tmp state dir>), replay the records with log.handle, flush and close the FileHandler", expected: "the engine_*.LOG file in the tmp state dir contains 'providers.<name>: key source env:MISTRAL_API_KEY' and does not contain SECRET" }
   edge_cases:
     - "Tests must pass on Linux and macOS: monkeypatch P.sys.platform to 'darwin' and P.subprocess.run to a fake in every Keychain test; never invoke the real security binary."
     - "Use monkeypatch.delenv(..., raising=False) where a variable must be absent; the container environment is not assumed clean."
   validation:
-    - "Baseline before any edit: python3 -m pytest tests/engine tests/overwatch -q; record passed/failed/skipped counts in the report (iteration 2 final on Linux: 322 passed, 1 skipped)."
+    - "Baseline before any edit: python3 -m pytest tests/engine tests/overwatch -q; record passed/failed/skipped counts in the report (iteration 3 final on Linux: 327 passed, 1 skipped)."
     - "After the change: same command; no new failures; new tests pass."
     - "python3 ai/engine/src/linter.py dev and python3 ai/engine/src/protocol_checker.py dev; record results; new findings caused by this work are fixed, pre-existing findings are listed, not fixed."
 
@@ -148,16 +158,16 @@ deliverable:
     - "Close this prompt with git mv dev/prompt/prompt-7d953510-keychain-api-key.md dev/prompt/closed/; leave the issue and change documents active"
     - "Commits: Conventional Commits; source as feat(engine), report and prompt move as docs(dev)"
   files:
-    - { path: "ai/engine/src/providers.py", content: "modified" }
+    - { path: "ai/engine/src/orchestrator.py", content: "modified (iteration 4)" }
     - { path: "tests/engine/test_providers.py", content: "modified" }
     - path: "dev/reports/report-7d953510-keychain-api-key.md"
       content: >
-        Iteration 3: update the existing report. Add a section '9.0 Iteration
-        3' before Version History (with a table-of-contents entry and Return
+        Iteration 4: update the existing report. Add a section '10.0 Iteration
+        4' before Version History (with a table-of-contents entry and Return
         to Table of Contents link) holding: change summary, baseline and final
         test counts, governance check results, deviations (or 'None'), open
         points, starting commit and new commit hashes. Update the status line
-        to name iteration 3. Add Version History row 1.2. Leave §1.0 to §8.0
+        to name iteration 4. Add Version History row 1.3. Leave §1.0 to §9.0
         unchanged. Iteration 1 format, kept for reference: new file. Obsidian Markdown: 'Created: <year> <month> <day>' line, table of
         contents, numbered sections, Return to Table of Contents links,
         Version History table, final line 'Copyright (c) 2026 William Watson.
@@ -169,12 +179,12 @@ deliverable:
         the cloud environment; 7.0 Starting commit and commit hashes pushed to main.
 
 success_criteria:
-  - "T1–T15 unchanged and passing; T16–T18 present and passing"
-  - "No ConfigError raised by _keychain_secret has a __context__ (FR-G)"
+  - "T1–T18 unchanged and passing; T19–T21 present and passing"
+  - "The 'key source' record reaches the run log file (T21); a refused run still writes no state (existing test_main_async_stops_on_configuration_error passes unchanged)"
   - "Full suite: no failures beyond the recorded baseline"
-  - "git diff <starting commit>..HEAD touches only providers.py, test_providers.py, the report and the prompt move"
+  - "git diff <starting commit>..HEAD touches only orchestrator.py, test_providers.py, the report and the prompt move"
   - "No log or exception path in the diff can carry the key value"
-  - "Commits pushed to main; report §9.0 lists the iteration 3 starting commit and the new commit hashes"
+  - "Commits pushed to main; report §10.0 lists the iteration 4 starting commit and the new commit hashes"
 
 notes: "The planner verifies the pushed commits by direct source review and runs the live validation on macOS before closing the issue and change."
 ```
