@@ -5,7 +5,7 @@ change_info:
   id: "change-7d953510"
   title: "Provider API key from the macOS Keychain (api_key_keychain)"
   date: "2026-10-14"
-  status: "approved"  # iteration 5 approved 2026-10-15 (test-only; audit F-01, F-02)
+  status: "implemented"  # iteration 5 implemented 2026-10-15 (e1667de)
   priority: "medium"
   iteration: 5
   coupled_docs:
@@ -229,6 +229,13 @@ version_history:
       - "F-03 (audit written by the implementing session, not an independent one): accepted by the operator as a recorded deviation. Grounds: independent planner source review (v1.9), concrete probes and mutation tests in the audit, and the pending GTach live run as independent evidence"
       - "F-01 (main_async replay untested) and F-02 (T19 and T20 level assertions depend on test order): fixed in iteration 5, test-only, approved by the operator. Planner review only; no follow-up audit because no source changes"
       - "Audit §7.0 item 1 noted: a WARNING emitted during binding resolution is discarded on a refused run. None is emitted today; outside this change"
+  - version: "1.11"
+    date: "2026-10-15"
+    changes:
+      - "Iteration 5 implemented in a new Claude Code cloud session on branch claude/beautiful-davinci-xgnvyg (test e1667de; report §11.0 in 041cf82), starting from f29ed6e: 331 passed, 1 skipped on Linux; mutation M1 (no replay) fails T22, M4 (no level restore) fails T19 and T20; linter 0 errors, 95 pre-existing warnings; protocol checker 0 findings"
+      - "Planner review of the branch passed: only tests/engine/test_providers.py, the report and the prompt move changed; nothing under ai/; T22 runs main_async to 'engine start' with a free-text task and asserts one run log, the key source line before 'engine start' and no key; T19 and T20 changed only by the NOTSET baseline. Audit F-01 and F-02 closed"
+      - "Report §11.0 open point 3 noted: T22 depends on locate_manifest finding the repository's manifest, as the engine does"
+      - "Status implemented. Outstanding before verified and closure: one GTach engine-mcp run whose run log shows 'providers.mistral: key source keychain:ai-go-mistral' before 'engine start'"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
