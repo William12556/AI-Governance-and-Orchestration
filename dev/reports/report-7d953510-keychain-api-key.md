@@ -2,7 +2,7 @@ Created: 2026 October 14
 
 # Completion Report — Provider API Key from the macOS Keychain
 
-> **Status:** Iteration 4 implemented. Prompt `prompt-7d953510` closed
+> **Status:** Iteration 5 (test-only) implemented. Prompt `prompt-7d953510` closed
 > (`dev/prompt/closed/`). Issue `issue-7d953510` and change `change-7d953510`
 > remain active pending planner review and live validation.
 
@@ -20,6 +20,7 @@ Created: 2026 October 14
 [8.0 Iteration 2](<#8.0 iteration 2>)
 [9.0 Iteration 3](<#9.0 iteration 3>)
 [10.0 Iteration 4](<#10.0 iteration 4>)
+[11.0 Iteration 5](<#11.0 iteration 5>)
 [Version History](<#version history>)
 
 ---
@@ -408,6 +409,101 @@ moved with the file to `dev/prompt/closed/`.
 
 ---
 
+## 11.0 Iteration 5
+
+**Change summary.** Test-only (FR-J, FR-K; audit-7d953510-followup-iteration4
+F-01, F-02). Only `tests/engine/test_providers.py` changed; nothing under
+`ai/` was touched.
+
+- FR-J: new test `test_keychain_t22_main_async_writes_key_source_before_engine_start`
+  (T22). It writes `config.yaml` in the `project` fixture's temporary
+  directory with `ENV_ONLY`'s providers and roles plus
+  `loop: {state_dir: ai/state/t22, max_iterations: 1}`, sets
+  `MISTRAL_API_KEY` to the secret, replaces `openai.AsyncOpenAI` through
+  `_fake_openai`, and runs `orch.main_async` in loop mode with a free-text
+  task. `orch._select_recipe_set` is monkeypatched to raise the test-local
+  `_StopAfterStart`, which the test expects. The manifest step did not stop
+  the run: `locate_manifest` finds the repository's installed manifest, so
+  no manifest monkeypatch was needed. The `engine` logger is isolated as in
+  T21 (handlers `[]`; level and propagate restored by monkeypatch) and its
+  FileHandler is flushed and closed in a `finally` block. Assertions:
+  exactly one `engine_*.LOG` in the state directory; it contains
+  `ENV_SOURCE_LINE`; the first such line precedes the first line containing
+  `engine start`; no line contains the secret.
+- FR-K: T19 and T20 set the `engine` logger level to `logging.NOTSET` with
+  `monkeypatch.setattr(logger, "level", logging.NOTSET)` before taking the
+  `before` state; the before/after comparison is unchanged. Nothing else in
+  T19 or T20 changed.
+
+T1–T18 and T21 are unchanged. Failure messages of T22 show only line
+indices, booleans or the source line constant; the mutation runs below
+contained no occurrence of the secret.
+
+**Test results.** Command: `python3 -m pytest tests/engine tests/overwatch -q`
+(Python 3.13.16).
+
+| Run | Passed | Failed | Skipped |
+|---|---|---|---|
+| Baseline (before any edit) | 330 | 0 | 1 |
+| Final | 331 | 0 | 1 |
+
+The skip is the pre-existing one recorded in §3.0. T19–T22 also pass when
+run together with `-k "t19 or t20 or t21 or t22"`.
+
+**Mutation check.** Run in two temporary git worktrees of the starting
+commit, each holding the iteration 5 test file and one mutated
+`orchestrator.py`; full suite in each; both worktrees removed afterwards
+(`git worktree list` shows only the main checkout). Not committed.
+
+| Mutation | Result |
+|---|---|
+| M1: replay loop (`for _record in _binding_records: log.handle(_record)`) deleted from `main_async` | 1 failed, 330 passed, 1 skipped; the failure is T22 (`assert source and start`, no source line in the run log) |
+| M4: `logger.setLevel(saved_level)` deleted from `_resolve_bindings_capturing` | 2 failed, 329 passed, 1 skipped; the failures are T19 and T20 (level 10 after the call, 0 before) |
+
+The stop condition on FR-J did not apply: T22 fails with M1, and reaching
+`engine start` needed no change under `ai/`.
+
+**Governance checks.**
+
+| Check | Baseline | Final |
+|---|---|---|
+| `python3 ai/engine/src/linter.py dev` | 0 errors, 95 warnings | 0 errors, 95 warnings |
+| `python3 ai/engine/src/protocol_checker.py dev` | 0 errors, 0 warnings | 0 errors, 0 warnings |
+
+The 95 linter warnings are the pre-existing ones described in §4.0; this
+iteration adds none. The prompt's own warning (missing `metadata.schema_type`)
+moved with the file to `dev/prompt/closed/`.
+
+**Deviations.** None.
+
+**Open points for the planner.**
+
+1. Live validation remains outstanding: a CLI and an engine-mcp run on macOS
+   should show `providers.<name>: key source ...` in `engine_*.LOG` before
+   the `engine start` line. The cloud environment has no macOS, Keychain or
+   API key.
+2. §10.0 open point 2 is addressed by T22. §10.0 open points 3 and 4 are
+   unchanged.
+3. T22 relies on `locate_manifest` finding the repository's installed
+   governance manifest; if a second governance model is installed, the
+   manifest step fails before `engine start` and T22 fails with a
+   `ManifestError`-driven return of 1 instead of `_StopAfterStart`.
+4. §1.0 to §10.0 are left as written. The issue, change, requirements and
+   design documents were not edited, per the prompt's constraints.
+
+**Commits.** Committed to the session branch `claude/beautiful-davinci-xgnvyg`
+and pushed; not merged into `main`, no pull request opened.
+
+| Item | Hash |
+|---|---|
+| Starting commit (`main`) | `f29ed6e69f11eddcf4e9cebbb027cd1bf8857511` |
+| `test(engine)`: T22 and the T19, T20 NOTSET change | `e1667def0be2ce30491b493cb20f8e7cf643bc15` |
+| `docs(dev)`: this section and the prompt move | The commit that adds this section; a commit cannot record its own hash. Read it with `git log -1 -- dev/reports/report-7d953510-keychain-api-key.md`. |
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
@@ -416,6 +512,7 @@ moved with the file to `dev/prompt/closed/`.
 | 1.1 | 2026-10-14 | §8.0 Iteration 2 (FR-F, T15); status line names iteration 2 |
 | 1.2 | 2026-10-14 | §9.0 Iteration 3 (FR-G, FR-H, T16–T18); status line names iteration 3 |
 | 1.3 | 2026-10-15 | §10.0 Iteration 4 (FR-I, T19–T21); status line names iteration 4 |
+| 1.4 | 2026-10-15 | §11.0 Iteration 5 (FR-J, FR-K, T22; T19 and T20 from NOTSET); status line names iteration 5 |
 
 ---
 
