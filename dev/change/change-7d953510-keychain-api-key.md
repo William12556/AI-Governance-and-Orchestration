@@ -5,12 +5,12 @@ change_info:
   id: "change-7d953510"
   title: "Provider API key from the macOS Keychain (api_key_keychain)"
   date: "2026-10-14"
-  status: "implemented"  # iteration 4 implemented 2026-10-15 (050e5ec)
+  status: "approved"  # iteration 5 approved 2026-10-15 (test-only; audit F-01, F-02)
   priority: "medium"
-  iteration: 4
+  iteration: 5
   coupled_docs:
     issue_ref: "issue-7d953510"
-    issue_iteration: 4
+    issue_iteration: 5
 
 source:
   type: "issue"
@@ -36,6 +36,11 @@ scope:
     temporary in-memory handler and written to the run log after
     setup_logging, so the 'key source' line reaches the run log. A run that
     stops before setup_logging still writes no state.
+    Iteration 5 (audit-7d953510-followup-iteration4 F-01, F-02; test-only):
+    a test runs main_async past setup_logging and asserts the run log holds
+    the 'key source' line before 'engine start' and not the key; T19 and T20
+    start from a logger level other than DEBUG so that restoration is
+    checked. No source change.
   affected_components:
     - { name: "orchestrator", file_path: "ai/engine/src/orchestrator.py", change_type: "modify" }  # iteration 4
     - { name: "providers", file_path: "ai/engine/src/providers.py", change_type: "modify" }
@@ -122,6 +127,8 @@ testing_requirements:
     - { scenario: "Iteration 3: api_key_env variable set to an empty string", expected_result: "treated as unset: Keychain used when configured, otherwise the existing 'not set' error" }
     - { scenario: "Iteration 4: bindings resolved, then setup_logging and replay", expected_result: "run log file contains 'providers.<name>: key source <label>' with the record's original time" }
     - { scenario: "Iteration 4: configuration error during binding resolution", expected_result: "no state directory and no log file; the 'engine' logger's handlers and level are as before the call" }
+    - { scenario: "Iteration 5: main_async run stopped after 'engine start'", expected_result: "engine_*.LOG holds the 'key source' line before 'engine start' and not the key; the test fails when the replay loop in main_async is removed" }
+    - { scenario: "Iteration 5: T19 and T20 with the 'engine' logger level set to NOTSET first", expected_result: "level restored to NOTSET; the tests fail when the helper does not restore the level" }
   regression_scope: ["tests/engine/test_providers.py existing key tests", "full test suite"]
   validation_criteria:
     - "Full suite passes offline"
@@ -137,7 +144,9 @@ implementation:
     - { step: "Iteration 3: raise Keychain errors after the try statement; T16 to T18 (prompt-7d953510 iteration 3)", owner: "Claude Code" }
     - { step: "Follow-up audit of iteration 3 (P02.8.2)", owner: "independent session" }
     - { step: "Iteration 4: capture and replay of binding-time log records in main_async; tests (prompt-7d953510 iteration 4)", owner: "Claude Code" }
-    - { step: "Follow-up audit of iteration 4 (P02.8.2)", owner: "independent session" }
+    - { step: "Follow-up audit of iteration 4 (P02.8.2)", owner: "independent session" }  # done by the implementing session; deviation accepted (v1.10)
+    - { step: "Iteration 5: main_async run log test; T19 and T20 level baseline (prompt-7d953510 iteration 5)", owner: "Claude Code" }
+    - { step: "Planner review of iteration 5 (test-only; no follow-up audit)", owner: "planner" }
     - { step: "requirements-14e05e35 FR-04-07 amendment and version history", owner: "planner" }
     - { step: "design-14e05e35 §3.0 Keys row, §11.0 error rows, version history; iteration 2: undecodable output in the §11.0 row; audit-7d953510: §14.0 DI-04 guidance (L-06), §6.0 gate row and §14.0 DI-06 (M-01 acceptance)", owner: "planner" }
     - { step: "config.template.yaml commented example; guide §3.0 note", owner: "planner" }
@@ -213,6 +222,13 @@ version_history:
       - "Planner source review passed: _RecordBuffer and _resolve_bindings_capturing as specified; buffer removed and level restored in finally, so setup_logging still adds its FileHandler; records replayed after setup_logging and before 'engine start'; setup_logging, archive_prior_logs, propagate and providers.py unchanged; FR-08-05 holds; replayed record holds provider name and label only; T19 to T21 as specified; scope limited to orchestrator.py, test_providers.py, report and prompt move. The planner did not re-run the suite (package index unreachable from the planner's container)"
       - "Accepted report observations: the main_async wiring is covered by review and the live run, not by a test; a WARNING emitted during binding resolution would go to the run log instead of stderr (none is emitted today)"
       - "Status implemented. Outstanding before verified and closure: follow-up audit of iteration 4 (P02.8.2); one GTach engine-mcp run whose run log shows 'providers.mistral: key source keychain:ai-go-mistral' before 'engine start'"
+  - version: "1.10"
+    date: "2026-10-15"
+    changes:
+      - "Follow-up audit dev/audit/audit-7d953510-followup-iteration4-2026-10-15.md (1561b38): FR-I confirmed by probes through main_async; FR-08-05 holds; no new key path; 0 critical, 0 high, 0 medium, 3 low"
+      - "F-03 (audit written by the implementing session, not an independent one): accepted by the operator as a recorded deviation. Grounds: independent planner source review (v1.9), concrete probes and mutation tests in the audit, and the pending GTach live run as independent evidence"
+      - "F-01 (main_async replay untested) and F-02 (T19 and T20 level assertions depend on test order): fixed in iteration 5, test-only, approved by the operator. Planner review only; no follow-up audit because no source changes"
+      - "Audit §7.0 item 1 noted: a WARNING emitted during binding resolution is discarded on a refused run. None is emitted today; outside this change"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

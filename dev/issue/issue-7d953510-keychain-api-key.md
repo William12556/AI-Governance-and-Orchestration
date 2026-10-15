@@ -5,13 +5,13 @@ issue_info:
   id: "issue-7d953510"
   title: "Engine cannot read a provider API key from the macOS Keychain"
   date: "2026-10-14"
-  status: "resolved"
+  status: "open"
   severity: "medium"
   type: "enhancement"
-  iteration: 4
+  iteration: 5
   coupled_docs:
     change_ref: "change-7d953510"
-    change_iteration: 4
+    change_iteration: 5
 
 source:
   origin: "user_report"
@@ -68,6 +68,10 @@ analysis:
     when the record is emitted (GTach engine-mcp run 1e00fd66,
     engine_20261014-150813.LOG). Unit tests attach their own handler and
     did not show this.
+    Iteration 5: no test runs main_async past setup_logging, so removing
+    the replay loop leaves the suite passing; T19 and T20 compare DEBUG with
+    DEBUG in a full run, so a helper that does not restore the level passes
+    (audit-7d953510-followup-iteration4 F-01, F-02).
 
 resolution:
   approach: "Optional api_key_keychain provider key read through /usr/bin/security; see change-7d953510."
@@ -99,6 +103,9 @@ version_history:
   - version: "1.6"
     date: "2026-10-15"
     changes: ["Status resolved: change-7d953510 iteration 4 implemented (050e5ec) (P03.7)"]
+  - version: "1.7"
+    date: "2026-10-15"
+    changes: ["Iteration 5 from audit-7d953510-followup-iteration4 F-01, F-02 (test-only); status open until iteration 5 is implemented"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
