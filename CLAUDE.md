@@ -30,7 +30,7 @@ This repository is the framework itself, not a project consuming it. This file g
 
 ## 4.0 Repository Conventions
 
-**Branches:** No fixed naming scheme observed; commits made directly to `main`.
+**Branches:** Claude Code cloud sessions commit to their session branch and push it; they do not merge into `main`. The operator merges into `main` fast-forward only after planner review, then deletes the branch.
 **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:`) with a descriptive body.
 
 ## 5.0 Governance
@@ -55,6 +55,7 @@ Source-code changes (`ai/engine/`, `ai/src/`, `bin/`) require the standard T06 i
 | 0.4 | 2026-09-25 | Review corrections: description reflects the pivot; technology stack adds OpenAI SDK; target platform covers ai/engine/; pytest install, governance checks and release commands added; ai/workspace/ statement corrected; layout row added |
 | 0.5 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 0.6 | 2026-10-01 | Technology stack: optional Anthropic SDK (change-82dbf16a, audit-14e05e35 L-07) |
+| 0.7 | 2026-10-15 | Branches: cloud sessions work on their session branch; operator merges fast-forward only after planner review |
 
 ---
 
