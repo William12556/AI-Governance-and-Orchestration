@@ -109,6 +109,9 @@ version_history:
   - version: "1.8"
     date: "2026-10-15"
     changes: ["Status resolved: change-7d953510 iteration 5 implemented (e1667de) (P03.7)"]
+  - version: "1.9"
+    date: "2026-10-15"
+    changes: ["Verified: GTach live run 200d9389 shows 'key source keychain:ai-go-mistral' before 'engine start'; V-09 pass; change-7d953510 verified"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

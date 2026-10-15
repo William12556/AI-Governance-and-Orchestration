@@ -5,7 +5,7 @@ change_info:
   id: "change-7d953510"
   title: "Provider API key from the macOS Keychain (api_key_keychain)"
   date: "2026-10-14"
-  status: "implemented"  # iteration 5 implemented 2026-10-15 (e1667de)
+  status: "verified"  # live run 200d9389 (GTach) 2026-10-15
   priority: "medium"
   iteration: 5
   coupled_docs:
@@ -236,6 +236,12 @@ version_history:
       - "Planner review of the branch passed: only tests/engine/test_providers.py, the report and the prompt move changed; nothing under ai/; T22 runs main_async to 'engine start' with a free-text task and asserts one run log, the key source line before 'engine start' and no key; T19 and T20 changed only by the NOTSET baseline. Audit F-01 and F-02 closed"
       - "Report §11.0 open point 3 noted: T22 depends on locate_manifest finding the repository's manifest, as the engine does"
       - "Status implemented. Outstanding before verified and closure: one GTach engine-mcp run whose run log shows 'providers.mistral: key source keychain:ai-go-mistral' before 'engine start'"
+  - version: "1.12"
+    date: "2026-10-15"
+    changes:
+      - "Live engine-mcp run in GTach after propagation (GTach 1f9fd2d): run 200d9389, mode reviewer on the accepted 72f95f73 state, engine_20261015-080341.LOG. First line 'providers.mistral: key source keychain:ai-go-mistral' (08:03:40.962), followed by 'engine start mode=reviewer worker=mistral:mistral-medium-2604 reviewer=mistral:mistral-medium-2604' (08:03:41.196); SHIP; rc 0; no tracked GTach file changed. Key source Keychain: pass (direct evidence)"
+      - "V-09: no copy of the key in GTach ai/state/ (operator scan with the key passed on a file descriptor). Pass"
+      - "All validation criteria met. Status verified. Closure awaits operator acceptance (P00.14.4)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
