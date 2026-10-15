@@ -715,6 +715,7 @@ def _engine_logger_state():
 def test_keychain_t19_bindings_capture_key_source_record(orch, monkeypatch):
     monkeypatch.setenv("MISTRAL_API_KEY", SECRET)
     _fake_openai(monkeypatch)
+    monkeypatch.setattr(logging.getLogger("engine"), "level", logging.NOTSET)
     before = _engine_logger_state()
     bindings, records = orch._resolve_bindings_capturing(ENV_ONLY, _args())
     assert set(bindings) == {"worker", "reviewer"}
@@ -725,6 +726,7 @@ def test_keychain_t19_bindings_capture_key_source_record(orch, monkeypatch):
 
 def test_keychain_t20_logger_restored_on_configuration_error(orch, monkeypatch):
     monkeypatch.delenv("MISTRAL_API_KEY", raising=False)
+    monkeypatch.setattr(logging.getLogger("engine"), "level", logging.NOTSET)
     before = _engine_logger_state()
     with pytest.raises(P.ConfigError) as ei:
         orch._resolve_bindings_capturing(ENV_ONLY, _args())
@@ -751,3 +753,44 @@ def test_keychain_t21_key_source_record_written_to_run_log(orch, monkeypatch, tm
     text = log_file.read_text()
     assert ENV_SOURCE_LINE in text
     assert SECRET not in text
+
+
+# --- main_async writes the key source record to the run log (iteration 5, FR-J) ------
+
+class _StopAfterStart(Exception):
+    """Raised in place of recipe selection to stop main_async after 'engine start'."""
+
+
+def test_keychain_t22_main_async_writes_key_source_before_engine_start(orch, project, monkeypatch):
+    import yaml
+
+    logger = logging.getLogger("engine")
+    monkeypatch.setattr(logger, "handlers", [])
+    monkeypatch.setattr(logger, "level", logger.level)
+    monkeypatch.setattr(logger, "propagate", logger.propagate)
+    monkeypatch.setenv("MISTRAL_API_KEY", SECRET)
+    _fake_openai(monkeypatch)
+
+    def stop(state_dir):
+        raise _StopAfterStart
+
+    monkeypatch.setattr(orch, "_select_recipe_set", stop)
+    config = project / "config.yaml"
+    config.write_text(yaml.safe_dump(dict(ENV_ONLY, loop={"state_dir": "ai/state/t22", "max_iterations": 1})))
+    args = argparse.Namespace(config=str(config), mode="loop", task="check the key source line",
+                              model=None, worker_model=None, reviewer_model=None,
+                              max_iterations=None, duration=None)
+    try:
+        with pytest.raises(_StopAfterStart):
+            asyncio.run(orch.main_async(args))
+    finally:
+        for handler in list(logger.handlers):
+            handler.flush()
+            handler.close()
+    (log_file,) = (project / "ai" / "state" / "t22").glob("engine_*.LOG")
+    lines = log_file.read_text().splitlines()
+    source = [i for i, line in enumerate(lines) if ENV_SOURCE_LINE in line]
+    start = [i for i, line in enumerate(lines) if "engine start" in line]
+    assert source and start
+    assert source[0] < start[0]
+    assert not any(SECRET in line for line in lines)
