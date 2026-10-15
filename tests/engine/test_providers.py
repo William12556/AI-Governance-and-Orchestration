@@ -690,3 +690,64 @@ def test_keychain_t18_empty_env_variable_counts_as_unset(keychain, engine_log, m
         P._api_key("mistral", dict(REMOTE, api_key_env="MISTRAL_API_KEY"), "openai_compatible")
     assert str(ei.value) == "providers.mistral: environment variable MISTRAL_API_KEY is not set"
     assert fake.calls == []
+
+
+# --- key source record reaches the run log (change-7d953510 iteration 4, FR-I) -------
+
+ENV_ONLY = {
+    "providers": {"mistral": dict(REMOTE, api_key_env="MISTRAL_API_KEY")},
+    "roles": {"worker": {"provider": "mistral", "model": "mistral-medium-2604"},
+              "reviewer": {"provider": "mistral", "model": "mistral-medium-2604"}},
+}
+ENV_SOURCE_LINE = "providers.mistral: key source env:MISTRAL_API_KEY"
+
+
+def _fake_openai(monkeypatch):
+    import openai
+    monkeypatch.setattr(openai, "AsyncOpenAI", lambda **kw: object())
+
+
+def _engine_logger_state():
+    logger = logging.getLogger("engine")
+    return list(logger.handlers), logger.level
+
+
+def test_keychain_t19_bindings_capture_key_source_record(orch, monkeypatch):
+    monkeypatch.setenv("MISTRAL_API_KEY", SECRET)
+    _fake_openai(monkeypatch)
+    before = _engine_logger_state()
+    bindings, records = orch._resolve_bindings_capturing(ENV_ONLY, _args())
+    assert set(bindings) == {"worker", "reviewer"}
+    assert [r.getMessage() for r in records] == [ENV_SOURCE_LINE]
+    _assert_secret_absent(records)
+    assert _engine_logger_state() == before
+
+
+def test_keychain_t20_logger_restored_on_configuration_error(orch, monkeypatch):
+    monkeypatch.delenv("MISTRAL_API_KEY", raising=False)
+    before = _engine_logger_state()
+    with pytest.raises(P.ConfigError) as ei:
+        orch._resolve_bindings_capturing(ENV_ONLY, _args())
+    assert str(ei.value) == "providers.mistral: environment variable MISTRAL_API_KEY is not set"
+    assert _engine_logger_state() == before
+
+
+def test_keychain_t21_key_source_record_written_to_run_log(orch, monkeypatch, tmp_path):
+    logger = logging.getLogger("engine")
+    monkeypatch.setattr(logger, "handlers", [])
+    monkeypatch.setattr(logger, "level", logger.level)
+    monkeypatch.setattr(logger, "propagate", logger.propagate)
+    monkeypatch.setenv("MISTRAL_API_KEY", SECRET)
+    _fake_openai(monkeypatch)
+    _, records = orch._resolve_bindings_capturing(ENV_ONLY, _args())
+    state_dir = tmp_path / "state"
+    log = orch.setup_logging(str(state_dir))
+    for record in records:
+        log.handle(record)
+    for handler in list(log.handlers):
+        handler.flush()
+        handler.close()
+    (log_file,) = state_dir.glob("engine_*.LOG")
+    text = log_file.read_text()
+    assert ENV_SOURCE_LINE in text
+    assert SECRET not in text
