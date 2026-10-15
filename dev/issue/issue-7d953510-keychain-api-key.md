@@ -5,7 +5,7 @@ issue_info:
   id: "issue-7d953510"
   title: "Engine cannot read a provider API key from the macOS Keychain"
   date: "2026-10-14"
-  status: "open"
+  status: "resolved"
   severity: "medium"
   type: "enhancement"
   iteration: 4
@@ -96,6 +96,9 @@ version_history:
   - version: "1.5"
     date: "2026-10-15"
     changes: ["Iteration 4 from the GTach live run: key source line missing from the run log; status open until iteration 4 is implemented"]
+  - version: "1.6"
+    date: "2026-10-15"
+    changes: ["Status resolved: change-7d953510 iteration 4 implemented (050e5ec) (P03.7)"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

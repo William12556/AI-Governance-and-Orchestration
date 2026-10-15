@@ -5,7 +5,7 @@ change_info:
   id: "change-7d953510"
   title: "Provider API key from the macOS Keychain (api_key_keychain)"
   date: "2026-10-14"
-  status: "approved"  # iteration 4 approved 2026-10-15 (key source log line)
+  status: "implemented"  # iteration 4 implemented 2026-10-15 (050e5ec)
   priority: "medium"
   iteration: 4
   coupled_docs:
@@ -206,6 +206,13 @@ version_history:
     changes:
       - "Iteration 4 approved by the operator: capture binding-time records and write them to the run log after setup_logging. Moving setup_logging before build_role_bindings was rejected because a refused run (configuration error, pre-run check exit 3) must write no state (FR-08-05). Design v1.16 §3.0. Follow-up audit required after implementation"
       - "Worker helper files under writable tests/ (GTach run) recorded as dev/backlog.md §5.0 item 10; outside this change"
+  - version: "1.9"
+    date: "2026-10-15"
+    changes:
+      - "Iteration 4 implemented in Claude Code cloud (commit 050e5ec; report §10.0 in dffbf0b): 330 passed, 1 skipped on Linux; linter 0 errors, 95 pre-existing warnings; protocol checker 0 findings"
+      - "Planner source review passed: _RecordBuffer and _resolve_bindings_capturing as specified; buffer removed and level restored in finally, so setup_logging still adds its FileHandler; records replayed after setup_logging and before 'engine start'; setup_logging, archive_prior_logs, propagate and providers.py unchanged; FR-08-05 holds; replayed record holds provider name and label only; T19 to T21 as specified; scope limited to orchestrator.py, test_providers.py, report and prompt move. The planner did not re-run the suite (package index unreachable from the planner's container)"
+      - "Accepted report observations: the main_async wiring is covered by review and the live run, not by a test; a WARNING emitted during binding resolution would go to the run log instead of stderr (none is emitted today)"
+      - "Status implemented. Outstanding before verified and closure: follow-up audit of iteration 4 (P02.8.2); one GTach engine-mcp run whose run log shows 'providers.mistral: key source keychain:ai-go-mistral' before 'engine start'"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
