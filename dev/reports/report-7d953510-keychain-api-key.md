@@ -2,7 +2,7 @@ Created: 2026 October 14
 
 # Completion Report — Provider API Key from the macOS Keychain
 
-> **Status:** Iteration 3 implemented. Prompt `prompt-7d953510` closed
+> **Status:** Iteration 4 implemented. Prompt `prompt-7d953510` closed
 > (`dev/prompt/closed/`). Issue `issue-7d953510` and change `change-7d953510`
 > remain active pending planner review and live validation.
 
@@ -19,6 +19,7 @@ Created: 2026 October 14
 [7.0 Commits](<#7.0 commits>)
 [8.0 Iteration 2](<#8.0 iteration 2>)
 [9.0 Iteration 3](<#9.0 iteration 3>)
+[10.0 Iteration 4](<#10.0 iteration 4>)
 [Version History](<#version history>)
 
 ---
@@ -318,6 +319,95 @@ docstring or comment changed.
 
 ---
 
+## 10.0 Iteration 4
+
+**Change summary.** FR-I. The `key source` INFO record was lost in a real run
+because `main_async` resolves the role bindings before `setup_logging`, when
+the `engine` logger has no handler and no level. Changes in
+`ai/engine/src/orchestrator.py` only; `providers.py` is unchanged.
+
+- `_RecordBuffer(logging.Handler)` (new, module level): `emit()` appends each
+  record to the list attribute `records`.
+- `_resolve_bindings_capturing(config, args)` (new): saves the `engine`
+  logger's level, adds a `_RecordBuffer` at DEBUG, sets the logger to DEBUG,
+  returns `(build_role_bindings(config, args), buffer.records)`, and in a
+  `finally` block removes the buffer and restores the level.
+- `main_async`: `bindings, _binding_records = _resolve_bindings_capturing(config, args)`
+  inside the existing `try/except ConfigError` (message and `return 1`
+  unchanged); immediately after `log = setup_logging(state_dir)` and before
+  the `engine start` line, `for _record in _binding_records: log.handle(_record)`.
+
+`setup_logging`, `archive_prior_logs` and `propagate` are unchanged. The
+buffer is removed before `setup_logging` runs, so its FileHandler is still
+added. A refused run still writes no state:
+`test_main_async_stops_on_configuration_error` passes unchanged. The
+replayed record carries the format string and the provider name and label
+as arguments; it holds no key value.
+
+Three tests were added to `tests/engine/test_providers.py`:
+
+| Test | Scenario |
+|---|---|
+| `test_keychain_t19_bindings_capture_key_source_record` (T19) | Both roles bound to `mistral` (`api_key_env: MISTRAL_API_KEY`, set to the secret; fake `AsyncOpenAI`); bindings for worker and reviewer; records are exactly `providers.mistral: key source env:MISTRAL_API_KEY`; secret absent from the records; `engine` handlers and level unchanged |
+| `test_keychain_t20_logger_restored_on_configuration_error` (T20) | Variable unset, no other source; the existing "environment variable MISTRAL_API_KEY is not set" ConfigError propagates; `engine` handlers and level unchanged |
+| `test_keychain_t21_key_source_record_written_to_run_log` (T21) | `engine` handlers isolated with `monkeypatch.setattr(..., "handlers", [])`, level and propagate restored by monkeypatch; T19 resolution, `orch.setup_logging(<tmp>)`, replay with `log.handle`, flush and close; `engine_*.LOG` contains the source line and not the secret |
+
+**Test results.** Command: `python3 -m pytest tests/engine tests/overwatch -q`
+(Python 3.13.16).
+
+| Run | Passed | Failed | Skipped |
+|---|---|---|---|
+| Baseline (before any edit) | 327 | 0 | 1 |
+| Final | 330 | 0 | 1 |
+
+The skip is the pre-existing one recorded in §3.0. T1–T18 are unchanged and
+pass. T19–T21 also pass when run alone (`-k t19`, `-k t20`, `-k t21`).
+
+**Governance checks.**
+
+| Check | Baseline | Final |
+|---|---|---|
+| `python3 ai/engine/src/linter.py dev` | 0 errors, 95 warnings | 0 errors, 95 warnings |
+| `python3 ai/engine/src/protocol_checker.py dev` | 0 errors, 0 warnings | 0 errors, 0 warnings |
+
+The 95 linter warnings are the pre-existing ones described in §4.0; this
+iteration adds none. The prompt's own warning (missing `metadata.schema_type`)
+moved with the file to `dev/prompt/closed/`.
+
+**Deviations.** None.
+
+**Open points for the planner.**
+
+1. Live validation remains outstanding: a CLI and an engine-mcp run on macOS
+   should show `providers.<name>: key source ...` in `engine_*.LOG`, before
+   the `engine start` line. The cloud environment has no macOS, Keychain or
+   API key.
+2. T19 to T21 exercise `_resolve_bindings_capturing` and the replay after
+   `setup_logging`; the two-line wiring in `main_async` is covered by source
+   review and the live run, not by a test that runs `main_async` to the
+   `engine start` line.
+3. A replayed record keeps its original timestamp, so the source line is
+   timestamped slightly before `engine start`.
+4. While the buffer is attached, a WARNING or higher record on the `engine`
+   logger during resolution goes to the buffer and then the run log, instead
+   of to stderr through `logging.lastResort`. No such record is emitted by
+   `build_role_bindings` or `make_provider` today.
+5. §6.0 items 3 to 5 and the earlier iterations' open points are unchanged;
+   §1.0 to §9.0 are left as written. The issue, change, requirements and
+   design documents were not edited, per the prompt's constraints.
+
+**Commits.** Work was committed directly to `main`.
+
+| Item | Hash |
+|---|---|
+| Starting commit | `fc6845f78eb97b50e21a4efeb14de30e03414427` |
+| `feat(engine)`: orchestrator.py and T19 to T21 | `050e5ec323f428b307f7a7050494e5b79b9b8502` |
+| `docs(dev)`: this section and the prompt move | The commit that adds this section; a commit cannot record its own hash. Read it with `git log -1 -- dev/reports/report-7d953510-keychain-api-key.md`. |
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
@@ -325,6 +415,7 @@ docstring or comment changed.
 | 1.0 | 2026-10-14 | Initial report |
 | 1.1 | 2026-10-14 | §8.0 Iteration 2 (FR-F, T15); status line names iteration 2 |
 | 1.2 | 2026-10-14 | §9.0 Iteration 3 (FR-G, FR-H, T16–T18); status line names iteration 3 |
+| 1.3 | 2026-10-15 | §10.0 Iteration 4 (FR-I, T19–T21); status line names iteration 4 |
 
 ---
 
