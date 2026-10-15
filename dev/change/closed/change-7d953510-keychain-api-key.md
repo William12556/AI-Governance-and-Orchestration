@@ -242,6 +242,10 @@ version_history:
       - "Live engine-mcp run in GTach after propagation (GTach 1f9fd2d): run 200d9389, mode reviewer on the accepted 72f95f73 state, engine_20261015-080341.LOG. First line 'providers.mistral: key source keychain:ai-go-mistral' (08:03:40.962), followed by 'engine start mode=reviewer worker=mistral:mistral-medium-2604 reviewer=mistral:mistral-medium-2604' (08:03:41.196); SHIP; rc 0; no tracked GTach file changed. Key source Keychain: pass (direct evidence)"
       - "V-09: no copy of the key in GTach ai/state/ (operator scan with the key passed on a file descriptor). Pass"
       - "All validation criteria met. Status verified. Closure awaits operator acceptance (P00.14.4)"
+  - version: "2.0"
+    date: "2026-10-15"
+    changes:
+      - "Closed on operator acceptance (P00.14.4); moved to dev/change/closed/ with the issue and the three 7d953510 audits"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

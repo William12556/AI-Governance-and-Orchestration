@@ -5,7 +5,7 @@ issue_info:
   id: "issue-7d953510"
   title: "Engine cannot read a provider API key from the macOS Keychain"
   date: "2026-10-14"
-  status: "resolved"
+  status: "closed"
   severity: "medium"
   type: "enhancement"
   iteration: 5
@@ -112,6 +112,9 @@ version_history:
   - version: "1.9"
     date: "2026-10-15"
     changes: ["Verified: GTach live run 200d9389 shows 'key source keychain:ai-go-mistral' before 'engine start'; V-09 pass; change-7d953510 verified"]
+  - version: "2.0"
+    date: "2026-10-15"
+    changes: ["Closed on operator acceptance (P00.14.4); moved to dev/issue/closed/"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
