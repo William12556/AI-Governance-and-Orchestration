@@ -208,7 +208,7 @@ def test_work_status_validates_project(tmp_path):
 
 
 def test_overwatch_reads_configured_state_dir(tmp_path):
-    sys.path.insert(0, os.path.join(REPO, "ai", "src"))
+    sys.path.insert(0, os.path.join(REPO, "ai", "webui", "src"))
     import overwatch
     (tmp_path / "ai").mkdir()
     assert overwatch.resolve_paths(tmp_path).engine_state == tmp_path / "ai" / "state"

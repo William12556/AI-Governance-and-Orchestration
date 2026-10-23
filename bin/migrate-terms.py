@@ -115,7 +115,7 @@ def apply(root: str, changes: dict) -> None:
 
 def scan(project: str) -> int:
     """Report occurrences in a downstream project's own files (outside framework folders)."""
-    framework = {os.path.join("ai", d) for d in ("engine", "governance", "profiles", "src")}
+    framework = {os.path.join("ai", d) for d in ("engine", "governance", "profiles", "core", "webui")}
     count = 0
     for dirpath, dirnames, filenames in os.walk(project):
         rel_dir = os.path.relpath(dirpath, project)

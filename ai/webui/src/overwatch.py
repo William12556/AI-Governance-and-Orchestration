@@ -14,7 +14,7 @@ Each scan cycle writes two files and reads everything else read-only:
     <project>/ai/dashboard-alerts.md  alert summary (overwritten)
 
 Usage:
-    python ai/src/overwatch.py [--project PATH] [--interval N]
+    python ai/webui/src/overwatch.py [--project PATH] [--interval N]
 
 The rendered page carries a <meta http-equiv="refresh"> tag matching the
 scan interval, so an open browser tab re-reads the file as it is rewritten.

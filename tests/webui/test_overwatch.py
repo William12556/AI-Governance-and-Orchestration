@@ -1,4 +1,4 @@
-"""Unit tests for ai/src/overwatch.py (Project Overwatch FR-01).
+"""Unit tests for ai/webui/src/overwatch.py (Project Overwatch FR-01).
 
 Fixtures are constructed directly as Snapshot/DocumentRecord/Alert
 instances rather than by scanning a real project tree — the data layer
@@ -19,7 +19,7 @@ from pathlib import Path
 
 import pytest
 
-_SRC = Path(__file__).resolve().parents[2] / "ai" / "src" / "overwatch.py"
+_SRC = Path(__file__).resolve().parents[2] / "ai" / "webui" / "src" / "overwatch.py"
 _spec = importlib.util.spec_from_file_location("overwatch", _SRC)
 assert _spec and _spec.loader
 overwatch = importlib.util.module_from_spec(_spec)
