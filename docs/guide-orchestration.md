@@ -155,6 +155,7 @@ Setup instructions: P10.8 in `ai/governance/software-engineering/governance.md`
 | 1.3 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 1.4 | 2026-10-01 | Overwatch phase label: Loop execution (audit-14e05e35 M-03, change-82dbf16a) |
 | 1.5 | 2026-10-01 | State files: review-result.txt not read (change-82dbf16a iteration 2, audit-14e05e35 follow-up, F-06) |
+| 1.6 | 2026-10-23 | Overwatch command path: ai/src/overwatch.py → ai/webui/src/overwatch.py (change-14cf601f) |
 
 ---
 

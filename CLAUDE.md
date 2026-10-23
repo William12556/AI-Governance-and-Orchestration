@@ -57,6 +57,7 @@ Source-code changes (`ai/engine/`, `ai/webui/`, `bin/`) require the standard T06
 | 0.6 | 2026-10-01 | Technology stack: optional Anthropic SDK (change-82dbf16a, audit-14e05e35 L-07) |
 | 0.7 | 2026-10-15 | Branches: cloud sessions work on their session branch; operator merges fast-forward only after planner review |
 | 0.8 | 2026-10-23 | §5.0: pointers to dev/README.md and dev/task.md |
+| 0.9 | 2026-10-23 | Component layout: ai/src/ → ai/webui/, ai/core/ added to layout; overwatch install, test and docstring paths updated (change-14cf601f) |
 
 ---
 
