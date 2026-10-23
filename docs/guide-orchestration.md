@@ -118,7 +118,7 @@ A read-only monitor for a downstream project's governance state, rendered to a s
 - Output: `overwatch.html` (project root, auto-refreshing) and `ai/dashboard-alerts.md`
 
 ```bash
-python ai/src/overwatch.py [--project PATH] [--interval N]
+python ai/webui/src/overwatch.py [--project PATH] [--interval N]
 ```
 
 The govwatch TUI is retired (change-5bcd46ad).

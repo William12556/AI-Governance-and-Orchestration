@@ -55,9 +55,9 @@ function and adds nine further panels.
 
 | Aspect | Decision |
 |---|---|
-| Deliverable | `ai/src/overwatch.py` (single module, coexists with `govwatch.py` until retirement — §14.0) |
-| Dependency manifest | `ai/src/requirements-overwatch.txt` |
-| Runtime location (downstream) | `ai/src/overwatch.py`, run from project root |
+| Deliverable | `ai/webui/src/overwatch.py` (single module, coexists with `govwatch.py` until retirement — §14.0) |
+| Dependency manifest | `ai/webui/requirements.txt` |
+| Runtime location (downstream) | `ai/webui/src/overwatch.py`, run from project root |
 | Libraries | `pyyaml` only. No `textual`, no `rich`, no web framework — see §3.1 |
 | Write target | `overwatch.html` (project root) and `dashboard-alerts.md` (unchanged from `govwatch`) only |
 | Python | 3.11+ |
@@ -149,9 +149,10 @@ Single file, internal separation by class — same convention `govwatch`
 established.
 
 ```
-ai/src/
-├── overwatch.py                    # all classes + main()
-└── requirements-overwatch.txt      # pyyaml
+ai/webui/
+├── src/
+│   └── overwatch.py                # all classes + main()
+└── requirements.txt                # pyyaml
 ```
 
 [Return to Table of Contents](<#table of contents>)
@@ -339,7 +340,7 @@ one") in place of the standard gap list. No separate code path.
 | `--project PATH` | cwd | project root override, unchanged from `govwatch` |
 | `--interval N` | 5 | scan/refresh interval in seconds, unchanged from `govwatch` |
 
-Invocation: `python ai/src/overwatch.py` from project root.
+Invocation: `python ai/webui/src/overwatch.py` from project root.
 
 ### 8.2 Browser Interaction
 
@@ -457,8 +458,8 @@ not an unhandled exception.
 
 ## 14.0 Propagation and Coexistence with govwatch
 
-`ai/src/` propagates wholesale via `bin/propagate.sh`; no script change is
-required for `overwatch.py` or `requirements-overwatch.txt` to propagate,
+`ai/webui/` propagates wholesale via `bin/propagate.sh`; no script change is
+required for `overwatch.py` or `requirements.txt` to propagate,
 matching `govwatch`'s own precedent (design-govwatch.md §14.0/OQ-05).
 
 During the period between `overwatch.py`'s FR-01 shipping and the
@@ -498,6 +499,7 @@ bounded interval, not an open-ended dual-maintenance commitment.
 | 0.2 | 2026-09-23 | Requirements link updated to requirements-0c6aedee-project-overwatch.md (P00.10 naming); OQ-10 marked resolved |
 | 0.3 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 | 0.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 0.5 | 2026-10-23 | Component layout: ai/src/overwatch.py → ai/webui/src/overwatch.py, ai/src/requirements-overwatch.txt → ai/webui/requirements.txt (change-14cf601f); §14.0 govwatch coexistence statement unchanged |
 
 ---
 

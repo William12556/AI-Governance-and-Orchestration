@@ -7,18 +7,18 @@ Created: 2026 July 02
 **Name:** AI-Governance-and-Orchestration
 **Description:** Governance and orchestration framework for AI agents with frontier and open-weight models. Governance models are loadable packages; software engineering is the one currently provided.
 **Technology stack:** Python 3.11+; OpenAI Python SDK, MCP Python SDK, PyYAML, Rich (engine, engine-mcp); Anthropic Python SDK (optional, `anthropic` provider kind); PyYAML (overwatch)
-**Target platform:** macOS 14+ (Apple Silicon) required for the MLX/oMLX worker/reviewer profile; the framework tooling itself (`ai/src/`, `ai/engine/`) is otherwise platform-agnostic Python.
+**Target platform:** macOS 14+ (Apple Silicon) required for the MLX/oMLX worker/reviewer profile; the framework tooling itself (`ai/webui/`, `ai/engine/`) is otherwise platform-agnostic Python.
 
-This repository is the framework itself, not a project consuming it. This file governs Claude Code sessions editing `ai/engine/`, `ai/src/`, or other framework source, invoked via a `dev/` T03 prompt.
+This repository is the framework itself, not a project consuming it. This file governs Claude Code sessions editing `ai/engine/`, `ai/webui/`, or other framework source, invoked via a `dev/` T03 prompt.
 
 ## 2.0 Commands
 
 | Action | Command |
 |---|---|
 | Install (engine) | `pip install -r ai/engine/requirements.txt` |
-| Install (overwatch) | `pip install -r ai/src/requirements-overwatch.txt` |
+| Install (overwatch) | `pip install -r ai/webui/requirements.txt` |
 | Install (tests) | `pip install pytest` |
-| Test | `python3 -m pytest tests/engine tests/overwatch -v` in the engine environment. Also verify changes against the T03 prompt's success criteria and direct source review. |
+| Test | `python3 -m pytest tests/engine tests/webui -v` in the engine environment. Also verify changes against the T03 prompt's success criteria and direct source review. |
 | Governance checks | `python3 ai/engine/src/linter.py dev` and `python3 ai/engine/src/protocol_checker.py dev`; no code linter configured |
 | Release | `bin/release.sh <version>` publishes the `ai/` tarball installed by `bin/bootstrap.sh`; not a Python package |
 
@@ -26,7 +26,7 @@ This repository is the framework itself, not a project consuming it. This file g
 
 - Python 3.11+, PEP 8
 - Type hints on new functions
-- Docstrings matching existing module convention (see `ai/src/overwatch.py`, `ai/engine/src/orchestrator.py`)
+- Docstrings matching existing module convention (see `ai/webui/src/overwatch.py`, `ai/engine/src/orchestrator.py`)
 
 ## 4.0 Repository Conventions
 
@@ -41,9 +41,9 @@ This repository is the framework itself, not a project consuming it. This file g
 | Primer | `ai/governance/software-engineering/primer.md` |
 | Framework dev artefacts (issues, changes, prompts, design, requirements, proposals, reports) | `dev/` — this repository has no `ai/workspace/`; each downstream project keeps its own. Rules: `dev/README.md`; open work: `dev/task.md` |
 | Templates | `ai/governance/software-engineering/templates/` |
-| Layout | Framework-owned `ai/engine/`, `ai/governance/<model>/`, `ai/profiles/`, `ai/src/`; see `dev/proposals/proposal-5bcd46ad-ai-go-pivot.md` §4.0–5.0 |
+| Layout | Framework-owned `ai/engine/`, `ai/core/`, `ai/webui/`, `ai/governance/<model>/`, `ai/profiles/`; see `dev/proposals/proposal-5bcd46ad-ai-go-pivot.md` §4.0–5.0 |
 
-Source-code changes (`ai/engine/`, `ai/src/`, `bin/`) require the standard T06 issue → T07 change → T03 prompt workflow (P04.1) unless they qualify for the trivial change exemption (P04.12). Read `ai/governance/software-engineering/governance.md` and `ai/governance/software-engineering/primer.md` before implementing any T03 prompt.
+Source-code changes (`ai/engine/`, `ai/webui/`, `bin/`) require the standard T06 issue → T07 change → T03 prompt workflow (P04.1) unless they qualify for the trivial change exemption (P04.12). Read `ai/governance/software-engineering/governance.md` and `ai/governance/software-engineering/primer.md` before implementing any T03 prompt.
 
 ## Version History
 

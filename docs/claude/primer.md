@@ -95,7 +95,7 @@ determines the worker/reviewer context file name, skills directory, and engine c
 governance state to a self-contained browser page. Run from the project root:
 
 ```bash
-python ai/src/overwatch.py [--project PATH] [--interval N]
+python ai/webui/src/overwatch.py [--project PATH] [--interval N]
 ```
 
 Provides: inferred workflow phase, two-tier compliance alerts (coupling
@@ -334,6 +334,7 @@ any document.
 | 0.17 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 0.18 | 2026-10-01 | §2.0 three agent roles replace the two-domain table; §2.1 heading; context file wording; §4.0 approvals recorded with approve.py (audit-14e05e35 M-03, change-82dbf16a, L-15) |
 | 0.19 | 2026-10-23 | Synced with governance v12.4: §3.0 and §6.1 task register holds all open work with a Status keyword (P00.20) |
+| 0.20 | 2026-10-23 | Overwatch command path: ai/src/overwatch.py → ai/webui/src/overwatch.py (change-14cf601f) |
 
 ---
 

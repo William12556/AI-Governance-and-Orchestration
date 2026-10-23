@@ -581,7 +581,7 @@ test.txt
      - Create skeleton trace-traceability-matrix-master.md in ai/workspace/trace/
   - P10.6 Project folder structure
     - ai/ holds framework files plus only the project files declared in the layout below (config.yaml, context.md, task.md, approvals.yaml, state/, logs/, dashboard-alerts.md, workspace/)
-    - Framework-owned folders: ai/engine/, ai/governance/<model>/, ai/profiles/, ai/src/; propagation replaces their contents. All other ai/ content is project-owned (proposal-5bcd46ad)
+    - Framework-owned folders: ai/engine/, ai/core/, ai/webui/, ai/governance/<model>/, ai/profiles/; propagation replaces their contents. All other ai/ content is project-owned (proposal-5bcd46ad)
     - A project in the pre-5bcd46ad layout (ai/ael/, ai/governance.md) is migrated once with bin/migrate-layout.sh before propagation
     - Any other project file belongs outside ai/; bin/propagate.sh relocates such files, and retired framework files, to ai-local/ and logs them in ai-local/RELOCATED.md
     - bin/propagate.sh never deletes a file; a locally edited framework file is copied to ai-local/ before it is overwritten; the human deletes relocated files after review
@@ -593,7 +593,8 @@ test.txt
         │   ├── governance/
         │   │   └── software-engineering/  # Framework-owned: governance model (this document, templates)
         │   ├── profiles/             # Framework-owned: model profiles
-        │   ├── src/                  # Framework-owned: overwatch
+        │   ├── core/                 # Framework-owned: shared code (reserved)
+        │   ├── webui/                # Framework-owned: central UI component (current module: overwatch)
         │   ├── config.yaml           # Engine configuration (project-owned, git-tracked)
         │   ├── context.md            # engine profile only — worker/reviewer context (team shared)
         │   ├── task.md                # open-work register (git-tracked)
@@ -1268,6 +1269,7 @@ See [workflow.md](workflow.md).
 | 12.2 | 2026-10-01 | P00.11 state files: review-result.txt not read; P13.3 task file must be the approved prompt in ai/workspace/prompt/ (change-82dbf16a iteration 2, audit-14e05e35 follow-up) |
 | 12.3 | 2026-10-09 | P15.3, P15.7, P15.10, P15.11, P15.15, P15.18: every file under tests/ is permanent and is never archived; ephemeral validation scripts retired; diagnostics run outside the repository; component subdirectories optional; test files named by behaviour with covered UUIDs in the module docstring; T04 closes after a full-suite pass with pytest path and commit in notes; closed tests change only under P03/P04 (sourced from GTach). Non-breaking. |
 | 12.4 | 2026-10-23 | P00.20: task register holds all open work (open triples, items not yet raised, deferred and parked items) in a four-column table with a leading Status keyword (sourced from GTach). P11.7 (framework-development requirements) and the P10.6 framework-repository notes removed; they apply only to the framework repository and are kept there. P11.7 reserved. Non-breaking. |
+| 12.5 | 2026-10-23 | P10.6: framework source organised by component; ai/src/ replaced by ai/webui/ (Overwatch) and ai/core/ (reserved) (change-14cf601f). Non-breaking. |
 
 ---
 [Return to Table of Contents](<#table of contents>)
