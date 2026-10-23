@@ -2,7 +2,7 @@ Created: 2026 September 16
 
 # Proposal: Protocol and Template Reordering with Positional Decoupling
 
-**Status:** Implemented — governance v10.0, commit `b3369f5`. Remains active: proposals have no closed/ subfolder under P00.14.5, and `ai/governance.md` cites this path.
+**Status:** Closed 2026-10-23. Immutable. Implemented in governance v10.0, commit `b3369f5`.
 **UUID:** `eb782f83`
 **Target:** governance v10.0
 
@@ -562,6 +562,7 @@ convention.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.8 | 2026-10-23 | Closed under P00.14.4 and moved to `dev/proposals/closed/`; status line updated |
 | 1.7 | 2026-09-22 | Amended under change-9b8f1c47 from the strategic audit. §6.3 adds a CON-08 exception register recording three departures previously argued in prose rather than registered: the two clause rewrites that landed before the baseline tag (F-05) and the Category A link repair that reversed OQ-7 (F-01). OQ-7 restated as resolved-then-reversed. |
 | 1.6 | 2026-09-22 | §8.0 phase table corrected: the migration tooling is initial implementation from an approved design and requires no issue or change document (primer §7.0). Phase 3 is the `e36a35d3` triple for the five Python modules; Phase 4a is its coupled T04 prompt. |
 | 1.5 | 2026-09-22 | OQ-1, OQ-2 and OQ-3 resolved per the recommendations of 2026-09-22: alias appendix inside `governance.md`; continuous integration reserved in Band A as `P05`; `P16` named as reserved for Execution with authoring deferred. All open questions on this proposal are now closed. |
