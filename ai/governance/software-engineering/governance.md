@@ -268,11 +268,11 @@ python ai/engine/src/orchestrator.py --mode loop \
     - Auto-generation: Planner creates initial context file during project initialization or when absent
     - Implementation: Context file name and update mechanism defined in implementation profile (ai/profiles/)
   - P00.20 Task Register
-    - Location: `ai/task.md` (project root, git-tracked)
-    - Purpose: single-file index of open work items, cross-referencing document-class UUIDs (issue, change, prompt)
+    - Location: `ai/task.md` (git-tracked)
+    - Purpose: single register of all open work: open triples, items not yet raised as a triple, and deferred or parked items; cross-references document-class UUIDs (issue, change, prompt)
+    - Format: one table with the columns ID, Item, Status and References; Status starts with one keyword (`Active`, `Planned`, `Open — not raised`, `Deferred`, `Parked`), followed by free text
     - Exempt from P00.10 naming convention and P00.14 lifecycle management: no UUID, no master suffix, no closed/ archival
-    - Row removed in place once the referenced document triple's closed/ records the outcome; git history preserves prior state
-    - Planner: adds a row when a T06/T07/T03 triple opens; removes the row when the triple closes
+    - Planner: adds a row when work is identified; updates Status as it changes; removes the row once the outcome is recorded (a closed triple, or an explicit drop); git history preserves prior state
     - Framework ships a skeleton `ai/task.md`; `bin/propagate.sh` excludes it from overwrite and seeds it only when absent in the target, per `context.md` treatment
 
 [Return to Table of Contents](<#table of contents>)
@@ -580,8 +580,6 @@ test.txt
   - P10.5 Traceability Matrix
      - Create skeleton trace-traceability-matrix-master.md in ai/workspace/trace/
   - P10.6 Project folder structure
-    - Note: This structure applies to projects using the framework, not to the AI-Governance-and-Orchestration repository itself
-    - The governance framework repository contains only ai/, doc/, and templates/ directories
     - ai/ holds framework files plus only the project files declared in the layout below (config.yaml, context.md, task.md, approvals.yaml, state/, logs/, dashboard-alerts.md, workspace/)
     - Framework-owned folders: ai/engine/, ai/governance/<model>/, ai/profiles/, ai/src/; propagation replaces their contents. All other ai/ content is project-owned (proposal-5bcd46ad)
     - A project in the pre-5bcd46ad layout (ai/ael/, ai/governance.md) is migrated once with bin/migrate-layout.sh before propagation
@@ -777,10 +775,7 @@ exclude_lines = [
     - Planner: Performs impact analysis across design/code/test
     - Planner: Updates traceability matrix
     - Human: Approves changes
-  - P11.7 Framework Development Requirements
-    - Scope: requirements for extending AI-G&O itself, held in dev/requirements/
-    - Format: prose with FR/NFR/CON tables; the T01 YAML template is not used
-    - T01 applies to downstream project requirements, where a local model consumes them
+  - P11.7 Reserved for future use
 
 [Return to Table of Contents](<#table of contents>)
 ## P12 Design
@@ -1272,6 +1267,7 @@ See [workflow.md](workflow.md).
 | 12.1 | 2026-10-01 | P00.4–P00.7 two-domain wording replaced; P10/P13.3 context file wording; P00.11 and P13.3 approvals recorded with approve.py and re-approval after edits; P13.1 worker/reviewer compound (audit-14e05e35 M-03, L-05, L-15; change-82dbf16a) |
 | 12.2 | 2026-10-01 | P00.11 state files: review-result.txt not read; P13.3 task file must be the approved prompt in ai/workspace/prompt/ (change-82dbf16a iteration 2, audit-14e05e35 follow-up) |
 | 12.3 | 2026-10-09 | P15.3, P15.7, P15.10, P15.11, P15.15, P15.18: every file under tests/ is permanent and is never archived; ephemeral validation scripts retired; diagnostics run outside the repository; component subdirectories optional; test files named by behaviour with covered UUIDs in the module docstring; T04 closes after a full-suite pass with pytest path and commit in notes; closed tests change only under P03/P04 (sourced from GTach). Non-breaking. |
+| 12.4 | 2026-10-23 | P00.20: task register holds all open work (open triples, items not yet raised, deferred and parked items) in a four-column table with a leading Status keyword (sourced from GTach). P11.7 (framework-development requirements) and the P10.6 framework-repository notes removed; they apply only to the framework repository and are kept there. P11.7 reserved. Non-breaking. |
 
 ---
 [Return to Table of Contents](<#table of contents>)

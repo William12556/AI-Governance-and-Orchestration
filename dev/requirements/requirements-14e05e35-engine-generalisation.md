@@ -253,7 +253,7 @@ Recorded at Phase 2 closure, 2026-10-01.
 | Planner client integration | Backlog §2.0-11 (proposal OQ-05) |
 | LM Studio as a provider | Future possibility (proposal OQ-06) |
 | Overwatch FR-02 to FR-10 | Parked (D-12) |
-| Mistral Vibe manual profile | `dev/todo.md`, standalone documentation task |
+| Mistral Vibe manual profile | `dev/task.md`, standalone documentation task |
 | Reviewer false REVISE (backlog §5.0-9) | Model-quality observation; not an engine requirement |
 | `run_phase` crash on a response without `choices` (backlog §3.0-5) | Defect; fixed separately |
 
@@ -330,6 +330,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.7 | 2026-10-23 | Out-of-scope table: dev/todo.md → dev/task.md (register consolidation). No change in meaning. |
 | 1.6 | 2026-10-14 | FR-04-07 wording: Keychain search list instead of login Keychain (audit-7d953510 L-02); no change in meaning for a default setup. |
 | 1.5 | 2026-10-14 | FR-04-07 amended: login Keychain as a second key source on macOS (issue-7d953510, change-7d953510; approved by the operator). |
 | 1.4 | 2026-10-01 | Phase 2 closure: status; §6.1 Verification Results added (V-03 deviation and V-04 partial accepted by the operator). |

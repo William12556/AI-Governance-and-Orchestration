@@ -1,166 +1,50 @@
-Created: 2026 July 29
+Created: 2026 October 23
 
-# Task List — Unfinished Work from dev/audit (2026-07-29 Session)
+# Task List
 
-**Status: Closed 2026-09-23.** a2f9c4d1 closed at operator direction; §4.0 verification debt moved to `dev/backlog.md` §5.0; §2.0 push completed in subsequent sessions, orphaned-process check moved to `dev/backlog.md` §5.0. Retained at this path because closed triples cite it.
+Open work for extending AI-G&O. Rules: `dev/README.md` §4.0. Replaces
+`dev/todo.md` and `dev/backlog.md` (v1.34), retired 2026-10-23; their
+history is in git. The previous register, closed 2026-09-23, is
+`dev/reports/closed/task-2026-09-23.md`.
 
----
+Status keywords: `Active`, `Planned`, `Open — not raised`, `Deferred`, `Parked`.
 
-## Table of Contents
-
-[1.0 Scope](<#1.0 scope>)
-[2.0 Blocked — Operator Action Required](<#2.0 blocked — operator action required>)
-[3.0 Open Triples](<#3.0 open triples>)
-[4.0 Verification Debt](<#4.0 verification debt>)
-[5.0 Human Judgment Required](<#5.0 human judgment required>)
-[6.0 Explicitly Out of Scope (Not Tasks)](<#6.0 explicitly out of scope (not tasks)>)
-[7.0 Filing Anomaly Found During Review](<#7.0 filing anomaly found during review>)
-[Version History](<#version history>)
-
----
-
-## 1.0 Scope
-
-Consolidates the unfinished work stated in `dev/audit/report-2026-07-29-cowork-remediation.md`
-(§10.0) and `dev/audit/remediation-2026-07-29.md`. Both `dev/audit/audit-p08-2026-07-29-orchestrator-changes.md`
-and `dev/audit/report-ai-inventory-2026-06.md` are complete records with no
-outstanding action of their own.
-
-[Return to Table of Contents](<#table of contents>)
-
----
-
-## 2.0 Blocked — Operator Action Required
-
-1. **Push to `origin`.** Four to five commits made in the Cowork remediation
-   session are unpushed. The execution environment had no SSH credentials and
-   port 22 was refused.
-
-   ```bash
-   cd ~/Documents/GitHub/AI-Governance-and-Orchestration
-   git log --oneline -5
-   git push origin main
-   ```
-
-2. **Terminate the orphaned process from run `8c2040d3`** (reported PID 22391,
-   blocked in `input()` since 12:53 on 2026-07-29). Verify the process is still
-   present before acting — it may already have been reaped.
-
-   ```bash
-   kill 22391
-   ```
-
-[Return to Table of Contents](<#table of contents>)
-
----
-
-## 3.0 Open Triples
-
-`3b9e6d72`, `f5c28a04` and `d1f4a83b` were closed on 2026-07-29 at William
-Watson's explicit instruction, overriding the independent-verification /
-live-SHIP preconditions each document stated. See `operator_closure_2026_07_29`
-in each change document. The items left unverified at closure are carried
-forward in §4.0 below, not treated as resolved.
-
-| Triple | Status | Note |
-|---|---|---|
-| `a2f9c4d1` | closed (operator direction, 2026-09-23) | Static verification only; live test cases carried to `dev/backlog.md` |
-| `3b9e6d72` | closed (operator instruction) | Pass 1 and a live SHIP remain unexercised |
-| `f5c28a04` | closed (operator instruction) | 3 of 7 test cases remain unexercised |
-| `d1f4a83b` | closed (operator instruction) | N1 remains unconfirmed live |
-
-[Return to Table of Contents](<#table of contents>)
-
----
-
-## 4.0 Verification Debt
-
-- No SHIP has been observed in any live run. Two proximate causes: finding N1
-  (now fixed under `d1f4a83b`, itself unverified) and `issue-c7e9a1b3` (worker
-  tool-call efficiency, out of scope for this remediation).
-- `f5c28a04` test cases unexercised: worker writes its own `work-summary.txt`
-  then exhausts budget; deliverable created via `move_file`; `log_archive_dir`
-  unset.
-- `_normalize_verdict` pass 1 (isolated trailing verdict line) unexercised live.
-- Paths never exercised in any run: `BLOCKED` exit in `run_phase`; audit-loop
-  recipe pair; pytest gate FAIL branch and SHIP override; stall-detection
-  BLOCK at `stall_threshold`.
-
-[Return to Table of Contents](<#table of contents>)
-
----
-
-## 5.0 Human Judgment Required
-
-1. Whether `change-3b9e6d72` should close on its stated criteria alone —
-   every validation criterion is satisfied and independently re-derived, but
-   its own `issues_found` names a gating verification (a run reaching an
-   actual SHIP) that has not been met.
-2. Everything named in `prompt-p08-audit-2026-07-29.md` §9.0 and the Cowork
-   remediation prompt's §9.0 (see §6.0 below) — not attempted, not concluded
-   on.
-
-[Return to Table of Contents](<#table of contents>)
-
----
-
-## 6.0 Explicitly Out of Scope (Not Tasks)
-
-Recorded for completeness; do not action without separate instruction.
-
-- `issue-c7e9a1b3` — worker tool-call efficiency.
-- Magistral `[THINK]` instruction-delivery defect — deprioritised, documented
-  rationale on file.
-- Reviewer criterion-6 calibration — recipe-design judgment call.
-- Mistral API evaluation (neutral-framing control, complex-task reasoning
-  hypothesis) and prompt-preference/persona experiments.
-- Propagating fixes to GTach, solax-modbus, e-Paper-IP-Display. A read-only
-  audit of those three found no committed propagation damage, but
-  `ai/context.md` is unfilled (template only) in solax-modbus and
-  e-Paper-IP-Display — recommended fill before any further AEL run there, not
-  a framework defect.
-- Grammar-constrained decoding (`guided_grammar`) for the reviewer.
-- Stale deployed `ael-mcp` build resolving state to `.ael/ralph` instead of
-  `ai/state/ralph` — separate repository (`~/Documents/GitHub/ael-mcp`);
-  operational redeploy, not a source defect in this repository.
-
-[Return to Table of Contents](<#table of contents>)
-
----
-
-## 7.0 Filing Anomaly Found During Review — Resolved
-
-While reviewing `dev/audit/`, the local working tree (uncommitted) was found
-to have `issue-3b9e6d72`, `change-3b9e6d72`, `prompt-3b9e6d72`,
-`issue-d1f4a83b`, `change-d1f4a83b`, `prompt-d1f4a83b`, `issue-f5c28a04`,
-`change-f5c28a04` and `prompt-f5c28a04` already moved into their respective
-`closed/` subdirectories, while each document's own `closure_disposition`
-field stated "Left open" — contradicting the `closed/` placement.
-
-**Resolution (2026-07-29):** William Watson instructed that these three
-triples be marked closed and the filing left as-is. The three change
-documents and their coupled issue documents were updated in place — status
-fields set to `closed`/updated `closure_notes`, and an
-`operator_closure_2026_07_29` block added to each change document naming the
-items still unverified at closure. The disposition tables in
-`dev/audit/report-2026-07-29-cowork-remediation.md` and
-`dev/audit/remediation-2026-07-29.md` were updated to match. The three
-prompt documents were left unmodified — prompt documents in this project
-carry no status field, and their presence in `closed/` is consistent with the
-triple's disposition.
-
-[Return to Table of Contents](<#table of contents>)
-
----
-
-## Version History
-
-| Version | Date | Description |
-|---|---|---|
-| 1.0 | 2026-07-29 | Initial task list, consolidated from dev/audit outstanding-work sections |
-| 1.1 | 2026-07-29 | 3b9e6d72, f5c28a04 and d1f4a83b closed at operator instruction; §3.0 and §7.0 updated to reflect closure and the items still unverified at closure |
-| 1.2 | 2026-09-23 | Closed: a2f9c4d1 closed at operator direction; remaining items moved to dev/backlog.md |
-| 1.3 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
+| ID | Item | Status | References |
+| --- | --- | --- | --- |
+| `5bcd46ad` | Downstream migration to the new layout: e-Paper-IP-Display and pi-netconfig remain. Procedure: `bin/migrate-layout.sh <root>` (dry run), `--apply`, `bin/propagate.sh --allow-major <root>`; update old paths in CLAUDE.md / AGENTS.md / .gitignore; pin `@j0hanz/filesystem-mcp@2.5.0` in `ai/config.yaml`; add `reviewer_model`; gitignore `.claude/settings.local.json`. GTach `ai-local/retired-5bcd46ad/` (framework files only) may be deleted after review | Active — solax-modbus and GTach done | `proposal-5bcd46ad`; GTach `f67d797` onwards |
+| — | Operator: remove the `ael-mcp` entry from the Claude Desktop MCP configuration; archive the `ael-mcp` repository and the `~/mcp-ael` install | Active — operator | `audit-5bcd46ad` L-10 |
+| — | Release v0.2.0 (`bin/release.sh v0.2.0`) | Active | Phase 2 follow-up (`requirements-14e05e35`) |
+| `14e05e35` | Propagate governance 12.x with `--allow-major` to solax-modbus, GTach, e-Paper-IP-Display and pi-netconfig; then `bin/migrate-terms.py --scan` per project and re-record approvals for tracked work items with `approve.py` | Active | `report-14e05e35-live-verification` O-03 |
+| `14e05e35` | Operator: read the Mistral "Included API usage" meter | Active — operator | `design-14e05e35` DI-04; `report-14e05e35-live-verification` O-02 |
+| — | Mistral Vibe manual profile `ai/profiles/mistral-vibe.md`, alongside `claude-code.md`. Standalone documentation task; requires current facts on Vibe installation, custom providers and MCP | Planned | `proposal-5bcd46ad` OQ-01, D-16 |
+| — | Validate the REVISE → fix → SHIP convergence path. REVISE and the gate FAIL branch observed live, but no SHIP after a genuine fix (Run B2 `ael_20260924-154002`; run 4870846d does not count). Next attempt needs a different worker model or a smaller defect; copy the fixture without its header comment | Open — not raised | `change-c37198be` (closed) |
+| — | Reviewer false negatives not corrected by gate evidence: Magistral REVISE on correct work (solax-modbus `engine_20260929-131551`; Phase 2 replay, five false REVISE, stall BLOCKED). mistral-medium-2604 shipped the same work in one cycle. Options: present a PASS gate plus a deliverable diff to the reviewer, or change the reviewer model | Open — not raised | `report-14e05e35-live-verification` OB-01 |
+| — | Worker helper files under writable `tests/` (GTach run 1e00fd66, work item 72f95f73): `tests/test_changes.py` exits at import; the pytest gate ran only its target and the reviewer shipped. Options: report untracked non-deliverable files to the reviewer and in `awaiting-approval.md`; run the full suite or a collection-only pass in the pytest gate; narrow `writable_paths`. Needs T06/T07/T03 | Open — not raised | `change-bdc6820f` (write scope); `change-7d953510` |
+| — | `run_phase`: normalise (abspath) `read_paths` on the F28 wall-clock-cap early return. No observed impact | Deferred — T06 not raised | `d7f4a1c8` P08 review |
+| — | `bin/bootstrap.sh`: refuse, with a clear message, a release tarball without `ai/engine/` | Deferred — T06 not raised | `audit-5bcd46ad` H-01 option |
+| — | Pre-existing defects: `audit-review.yaml` tests for `.complete` containing `DURATION_LIMIT`, which the orchestrator never writes; `ai/profiles/README.md` links to the gitignored `docs/claude/project_information.md` | Deferred — T06 not raised | `audit-5bcd46ad` L-12 |
+| — | Config validation (NFR-04 gaps): missing `loop:` block or `loop.state_dir` gives `KeyError`; non-numeric `max_tokens` gives `ValueError`; gate `timeout_seconds` not validated; missing config file gives a traceback. Validate and report file and field | Deferred — T06 not raised | `audit-14e05e35` L-08 |
+| — | Strict-schema rejections and Anthropic authentication errors are retried. Treat HTTP 400/401/403 as non-retryable, or amend design §11.0 (relates to DI-05) | Deferred — T06 not raised | `audit-14e05e35` L-09 |
+| — | `propagate.sh` creates workspace folders on the up-to-date path before confirmation and the plan-error check; its awk parser ignores flow-style `workspace_folders` lists; `migrate-layout.sh` warns on a single-quoted `'ai/state'` | Deferred — T06 not raised | `audit-14e05e35` L-10 |
+| — | Stage scan does not report a completed status in an active folder after closure (design §8.1 narrowed in v1.6); implement if wanted | Deferred — T06 not raised | `audit-14e05e35` L-11 |
+| — | `approve.py` accepts an `accept` approval before any loop run; require loop completion (`.complete` or a SHIP record) first | Deferred — T06 not raised | `audit-14e05e35` L-14 |
+| — | A prompt path in `ai/workspace/` that is not a regular file (directory, FIFO) is classified as untracked; the CLI run starts with the path string as task text and project-root write scope; the warning wrongly says "outside ai/workspace/". Treat as tracked and refuse with exit 3 when no bytes were read; correct the warning; add a test | Deferred — T06 not raised | `audit-14e05e35` follow-up F5-01 |
+| — | Log unremovable state entries before writing `BLOCKED.md`; add tests for a real unremovable entry, the `reset_state` return value 1 and the loop-start BLOCKED | Deferred — T06 not raised | `audit-14e05e35` follow-up §6.0 notes 1, 3 |
+| — | Context-window resolution order: tier 2 (live oMLX query) precedes tier 3 (`context.model_context_windows`), so a per-model entry never overrides the live value for kind `omlx`; no setting gives Devstral 262144 and Magistral 40960 together. Decide the fix with the operator | Deferred — T06 not raised | O-03 propagation, 2026-10-02 |
+| — | Terminal status (for example `superseded`) for a test document whose target was removed: T04 template, `linter.py` `t05_test`, `protocol_checker.py` `_TERMINAL_STATUS`, governance P00.14.3; consider for T05. Propagate afterwards | Deferred — T06 not raised | Found in GTach, 2026-10-08 |
+| — | Check that validates protocol citations in source comments | Deferred | `issue-e36a35d3` analysis |
+| — | Author the five reserved protocols: P05 Continuous Integration, P16 Execution, P17 Release, P18 Deployment and Propagation, P19 Observability | Deferred | `proposal-eb782f83` §5.3 |
+| — | `.github/workflows` CI running `linter.py`, `protocol_checker.py` and pytest on push, plus a check that `docs/claude/primer.md` equals `ai/governance/software-engineering/primer.md`. Governed by P05 once authored; until then sync the primer copy manually | Deferred | gap G1; decision 7.1 |
+| — | Tests remaining with P05 CI: `bin/migrate-layout.sh`, `bin/propagate.sh` end to end | Deferred | `audit-5bcd46ad` L-08 |
+| — | Retire the numeric `schema_type` prefix in favour of the class word | Deferred | audit F-04; governance Appendix A A.5 |
+| — | Evaluate splitting `governance.md` | Deferred — Phase 3 | `proposal-5bcd46ad` OQ-03 |
+| — | Engine per project: make the pytest gate command or interpreter configurable (gate runs `sys.executable -m pytest`); resolve the context window per role (Magistral 40960 vs Devstral 262144) | Deferred | solax-modbus pilot preparation, 2026-09-29 |
+| — | Planner client integration for open-weight models: profiles or setup guidance for MCP-capable clients (Goose, Cherry Studio, BoltAI, Open WebUI, Codex CLI, OpenCode, Mistral Vibe) | Deferred — not scheduled | `proposal-5bcd46ad` OQ-05 |
+| — | Live check of the native Anthropic provider against the Anthropic API: strict tools, prompt caching and Models API readiness. Run one loop with an `ANTHROPIC_API_KEY`; set `strict_tools: false` if a schema is rejected | Deferred — no API key | `requirements-14e05e35` V-04; `change-43091424` |
+| — | Speculative decoding or prefill acceleration for prefill-heavy loops; current models incompatible, needs a compatible draft model | Deferred | `report-omlx-ael-efficiency-2026-07-15` §5.0 item 6 |
+| — | External MCP servers `mcp-ripgrep`, `mcp-git`, `mcp-sed-awk`: check for the JSON Schema draft-07 `outputSchema` declaration that breaks MCP tools in Cowork sessions; emit 2020-12 or omit `$schema` | Deferred — external | observed 2026-09-23 |
+| — | Live oMLX context-window query enhancement | Parked | — |
+| `0c6aedee` | Project Overwatch FR-02–FR-10; several items are SE-specific, to be reconsidered in the Phase 4 web GUI design. OQ-07 remains open by design | Parked | `design-project-overwatch` §9.2; `proposal-5bcd46ad` D-12 |
 
 ---
 

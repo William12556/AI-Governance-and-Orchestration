@@ -140,7 +140,7 @@ The planner owns the following functions:
 
 - Traceability matrix updates at every phase transition (P01)
 - Document lifecycle management: active → closed (P00.14)
-- Open-work register maintenance: `ai/task.md` (P00.20)
+- Open-work register maintenance: `ai/task.md`, all open work in one four-column table (P00.20)
 - Git commit after every iteration increment
 
 [Return to Table of Contents](<#table of contents>)
@@ -226,7 +226,7 @@ Document classes: `design`, `change`, `issue`, `prompt`, `test`, `result`,
 `audit`, `trace`, `requirements`.
 
 **Exempt:** `ai/task.md` (open-work register) carries no UUID and no
-lifecycle state — see P00.20.
+lifecycle state; rows carry a leading Status keyword — see P00.20.
 
 **UUID propagation:** The first document created in a workflow cycle (issue or
 change) generates the UUID. All coupled documents inherit it.
@@ -333,6 +333,7 @@ any document.
 | 0.16 | 2026-10-01 | Option B: work_status tool; tracked prompt tasks only (change-793992ae) |
 | 0.17 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 0.18 | 2026-10-01 | §2.0 three agent roles replace the two-domain table; §2.1 heading; context file wording; §4.0 approvals recorded with approve.py (audit-14e05e35 M-03, change-82dbf16a, L-15) |
+| 0.19 | 2026-10-23 | Synced with governance v12.4: §3.0 and §6.1 task register holds all open work with a Status keyword (P00.20) |
 
 ---
 

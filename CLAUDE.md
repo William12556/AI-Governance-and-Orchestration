@@ -39,7 +39,7 @@ This repository is the framework itself, not a project consuming it. This file g
 |---|---|
 | Governance | `ai/governance/software-engineering/governance.md` |
 | Primer | `ai/governance/software-engineering/primer.md` |
-| Framework dev artefacts (issues, changes, prompts, design, requirements, proposals, reports) | `dev/` — this repository has no `ai/workspace/`; each downstream project keeps its own |
+| Framework dev artefacts (issues, changes, prompts, design, requirements, proposals, reports) | `dev/` — this repository has no `ai/workspace/`; each downstream project keeps its own. Rules: `dev/README.md`; open work: `dev/task.md` |
 | Templates | `ai/governance/software-engineering/templates/` |
 | Layout | Framework-owned `ai/engine/`, `ai/governance/<model>/`, `ai/profiles/`, `ai/src/`; see `dev/proposals/proposal-5bcd46ad-ai-go-pivot.md` §4.0–5.0 |
 
@@ -56,6 +56,7 @@ Source-code changes (`ai/engine/`, `ai/src/`, `bin/`) require the standard T06 i
 | 0.5 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 0.6 | 2026-10-01 | Technology stack: optional Anthropic SDK (change-82dbf16a, audit-14e05e35 L-07) |
 | 0.7 | 2026-10-15 | Branches: cloud sessions work on their session branch; operator merges fast-forward only after planner review |
+| 0.8 | 2026-10-23 | §5.0: pointers to dev/README.md and dev/task.md |
 
 ---
 
