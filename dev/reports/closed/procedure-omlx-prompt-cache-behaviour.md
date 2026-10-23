@@ -2,6 +2,8 @@ Created: 2026 July 15
 
 # oMLX Prompt-Cache Behaviour — Test Procedure
 
+**Status:** Closed 2026-10-23. Immutable. Executed (§9.0); the resulting F25 prefix fix was implemented under c3a7f0d2 (closed).
+
 ---
 
 ## Table of Contents
@@ -184,6 +186,7 @@ Per §7.0 the outcome is **S << C and M ≈ C**: implement the F25 prefix fix �
 |---|---|---|
 | 0.1 | 2026-07-15 | Initial procedure |
 | 0.2 | 2026-07-15 | Added §9.0 Results (MCP-executed run: completions and chat endpoints); revised §5.0 and §6.0 to make `cached_tokens` the primary signal |
+| 0.3 | 2026-10-23 | Closed under P00.14.4 and moved to `dev/reports/closed/`; status line added |
 
 ---
 

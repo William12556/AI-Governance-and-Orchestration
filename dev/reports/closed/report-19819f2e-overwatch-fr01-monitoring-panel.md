@@ -2,7 +2,7 @@ Created: 2026 August 21
 
 # Completion Report — Project Overwatch FR-01 Monitoring Panel
 
-> **Status:** Implemented. T04 prompt `prompt-19819f2e` closed
+> **Status:** Closed 2026-10-23. Immutable. Implemented. T04 prompt `prompt-19819f2e` closed
 > (`dev/prompt/closed/`). No issue or change T-Doc exists — design-sourced
 > initial implementation (P03 §1.4.1, primer §7.0).
 
@@ -296,6 +296,7 @@ Deliberately not implemented, per the prompt's constraints:
 | Version | Date | Description |
 |---|---|---|
 | 0.1 | 2026-08-21 | Initial completion report for prompt-19819f2e |
+| 0.2 | 2026-10-23 | Closed under P00.14.4 and moved to `dev/reports/closed/` |
 
 ---
 

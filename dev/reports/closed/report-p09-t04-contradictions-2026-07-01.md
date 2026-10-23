@@ -2,7 +2,7 @@ Created: 2026 July 01
 
 # P09 / T04 Contradiction Analysis Report
 
-> **Status:** Findings only. No governance, template, or source change made.
+> **Status:** Closed 2026-10-23. Immutable. Findings resolved by issue-713437bc and change-713437bc (closed).
 
 ---
 
@@ -324,6 +324,7 @@ collaborative resolution.
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-07-01 | Initial report: nine findings (F1–F9) across two root causes; severity summary; resolution options; recommendation |
+| 1.1 | 2026-10-23 | Closed under P00.14.4 and moved to `dev/reports/closed/` |
 
 ---
 

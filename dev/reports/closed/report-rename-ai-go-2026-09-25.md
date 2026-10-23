@@ -2,6 +2,8 @@ Created: 2026 September 25
 
 # Report — Project Rename: LLM-G&O → AI-G&O
 
+**Status:** Closed 2026-10-23. Immutable. Rename complete.
+
 ---
 
 ## Table of Contents
@@ -125,6 +127,7 @@ Items outside the repository, for the operator:
 | Version | Date | Description |
 |---|---|---|
 | 0.1 | 2026-09-25 | Initial report |
+| 0.2 | 2026-10-23 | Closed under P00.14.4 and moved to `dev/reports/closed/`; status line added |
 
 ---
 

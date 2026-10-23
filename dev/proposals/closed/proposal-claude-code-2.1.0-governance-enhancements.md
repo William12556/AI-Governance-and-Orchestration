@@ -2,6 +2,8 @@ Created: 2026 January 11
 
 # Proposal: Claude Code 2.1.0 Governance Framework Enhancements
 
+**Status:** Closed 2026-10-23. Implemented through `dev/change/closed/change-report-claude-code-2.1.0-governance-enhancements.md`.
+
 ## Table of Contents
 
 - [Executive Summary](<#executive summary>)
@@ -627,6 +629,7 @@ VentureBeat. (2026). *Claude Code 2.1.0 arrives with smoother workflows and smar
 | ------- | ---------- | -------------------------------------------------------------- |
 | 1.0     | 2026-01-11 | Initial proposal: Claude Code 2.1.0 governance enhancements    |
 | 1.1 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
+| 1.2 | 2026-10-23 | Status line added; closed and moved to `dev/proposals/closed/` |
 
 ---
 

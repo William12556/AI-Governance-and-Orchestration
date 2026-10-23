@@ -2,9 +2,8 @@ Created: 2026 October 14
 
 # Completion Report — Provider API Key from the macOS Keychain
 
-> **Status:** Iteration 5 (test-only) implemented. Prompt `prompt-7d953510` closed
-> (`dev/prompt/closed/`). Issue `issue-7d953510` and change `change-7d953510`
-> remain active pending planner review and live validation.
+> **Status:** Closed 2026-10-23. Immutable. Iteration 5 (test-only) implemented.
+> Issue, change and prompt 7d953510 and their audits are in their `closed/` folders.
 
 ---
 
@@ -513,6 +512,7 @@ and pushed; not merged into `main`, no pull request opened.
 | 1.2 | 2026-10-14 | §9.0 Iteration 3 (FR-G, FR-H, T16–T18); status line names iteration 3 |
 | 1.3 | 2026-10-15 | §10.0 Iteration 4 (FR-I, T19–T21); status line names iteration 4 |
 | 1.4 | 2026-10-15 | §11.0 Iteration 5 (FR-J, FR-K, T22; T19 and T20 from NOTSET); status line names iteration 5 |
+| 1.5 | 2026-10-23 | Closed under P00.14.4 and moved to `dev/reports/closed/`; status line updated |
 
 ---
 

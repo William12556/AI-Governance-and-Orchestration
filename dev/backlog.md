@@ -47,6 +47,7 @@ and `dev/reports/closed/report-eb782f83-pre-migration-baseline.md`.
 10. Phase 2 engine inputs found while preparing the solax-modbus pilot (2026-09-29): the pytest gate runs `sys.executable -m pytest`, so the project's test dependencies must be installed in the interpreter that runs the engine (engine-mcp inherits its own interpreter); make the gate command or interpreter configurable per project. The context window is resolved once for the worker model and also applied to the reviewer phase; resolve it per role (Magistral 40960 vs Devstral 262144).
 11. Planner client integration for open-weight models (proposal-5bcd46ad OQ-05): profiles or setup guidance for MCP-capable clients such as Goose, Cherry Studio, BoltAI, Open WebUI, Codex CLI, OpenCode and Mistral Vibe. Not scheduled; until then the user integrates a client on their own.
 12. Live check of the native Anthropic provider against the Anthropic API (requirements-14e05e35 V-04): not run in Phase 2 for lack of an API key (operator, 2026-10-01). The conversion path was run live against oMLX's Anthropic-compatible endpoint (change-43091424); strict tools, prompt caching and Models API readiness remain unverified live. Run one loop with an ANTHROPIC_API_KEY when available; set strict_tools: false if a tool schema is rejected.
+13. Speculative decoding or prefill acceleration for prefill-heavy loops (`dev/reports/closed/report-omlx-ael-efficiency-2026-07-15.md` §5.0 item 6). Deferred: the current models are incompatible (report §3.0 finding 3.10); needs a compatible draft model.
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -149,6 +150,7 @@ None pending. All resolved 2026-09-23:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-09-23 | Initial backlog; deferred items moved from dev/todo.md and dev/task.md §4.0 |
+| 1.34 | 2026-10-23 | §2.0 item 13: speculative decoding, carried from report-omlx-ael-efficiency on its closure |
 | 1.33 | 2026-10-15 | §5.0 item 10: worker helper files under writable `tests/` (GTach run 1e00fd66) |
 | 1.32 | 2026-10-08 | §3.0 item 14: terminal status (for example `superseded`) for test documents whose target was removed |
 | 1.31 | 2026-10-02 | §3.0 item 13: context-window resolution order (O-03 propagation) |

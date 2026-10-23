@@ -1,7 +1,7 @@
 # Proposal: Replace Sequence Numbering with UUID-Based Document Coupling
 
 **Created:** 2025-12-12  
-**Status:** Draft  
+**Status:** Superseded 2026-10-23. UUID-based document naming is in force (governance P00.10).  
 **Author:** Claude Desktop  
 
 ---
@@ -673,6 +673,7 @@ def generate_unique_uuid(document_class: str, workspace_path: Path) -> str:
 |---------|------------|----------------|--------------------------------------|
 | 1.0     | 2025-12-12 | Claude Desktop | Initial proposal draft               |
 | 1.1 | 2026-09-25 | Claude Desktop | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
+| 1.2 | 2026-10-23 | Claude Desktop | Status Draft → Superseded; closed and moved to `dev/proposals/closed/` |
 
 ---
 

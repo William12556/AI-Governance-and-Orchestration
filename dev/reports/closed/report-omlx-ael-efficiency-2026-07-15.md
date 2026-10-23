@@ -2,6 +2,8 @@ Created: 2026 July 15
 
 # Report — oMLX/AEL Efficiency Investigation and Prompt-Cache Findings
 
+**Status:** Closed 2026-10-23. Immutable. Items 2, 4 and 7 resolved by b5e9d240, the reviewer model by a7d3f8b1, the F25 prefix fix by c3a7f0d2; item 6 moved to `dev/backlog.md` §2.0 item 13.
+
 ---
 
 ## Table of Contents
@@ -134,6 +136,7 @@ headroomlabs-ai, 2026. *Headroom* [online]. GitHub. Available at: https://github
 | 0.1 | 2026-07-15 | Initial report |
 | 0.2 | 2026-07-15 | Item 3 (tool-schema dedup) investigated via omlx MCP and rejected — `tools=` is load-bearing; outcome recorded in section 5.0 |
 | 0.3 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
+| 0.4 | 2026-10-23 | Closed under P00.14.4 and moved to `dev/reports/closed/`; status line added |
 
 ---
 
