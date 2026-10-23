@@ -1,6 +1,7 @@
 """
-Tests for engine orchestrator behaviours listed as unexercised in dev/backlog.md
-§5.0 item 5, plus defects D1 and D2 of issue-c37198be.
+Tests for engine orchestrator behaviours left unexercised by the closed triples
+a2f9c4d1, f5c28a04 and d1f4a83b (formerly dev/backlog.md §5.0 item 5, retired
+2026-10-23), plus defects D1 and D2 of issue-c37198be.
 
 No model, MCP server or network is used: run_phase is driven by a scripted
 fake completion client and a fake MCP client that performs real file writes;
