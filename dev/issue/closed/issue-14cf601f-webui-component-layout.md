@@ -5,7 +5,7 @@ issue_info:
   id: "issue-14cf601f"
   title: "Framework source layout: ai/src/ is a bare source folder at the ai/ root"
   date: "2026-10-23"
-  status: "open"
+  status: "closed"
   severity: "low"
   type: "requirement_change"
   iteration: 1
@@ -68,6 +68,9 @@ version_history:
   - version: "1.0"
     date: "2026-10-23"
     changes: ["Initial issue (abbreviated triple, operator instruction 2026-10-23)"]
+  - version: "1.1"
+    date: "2026-10-23"
+    changes: ["Closed: resolved by change-14cf601f (merged at 1a76d51); audit waived at operator direction"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

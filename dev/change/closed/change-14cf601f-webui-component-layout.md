@@ -6,7 +6,7 @@ change_info:
   title: "Component layout: move Overwatch to ai/webui/, reserve ai/core/, retire ai/src/"
   date: "2026-10-23"
   author: "William Watson"
-  status: "proposed"
+  status: "verified"
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -105,18 +105,37 @@ implementation:
   deployment_notes: "Governance 12.5 is a minor version; propagate.sh needs no --allow-major."
 
 verification:
-  implemented_date: null
-  implemented_by: null
-  verification_date: null
-  verified_by: null
-  test_results: null
+  implemented_date: "2026-10-23"
+  implemented_by: "Claude Code cloud session (Opus 5.5), branch claude/webui-component-layout"
+  verification_date: "2026-10-23"
+  verified_by: "Planner review of the session branch; operator test run"
+  test_results: >
+    Operator, macOS engine environment: python3 -m pytest tests/engine
+    tests/webui -q passed (331 passed, 1 skipped, equal to the baseline).
+    Session (reduced Linux environment): baseline and final identical;
+    tests/webui 18 passed, 1 skipped. py_compile passed; linter.py dev
+    0 errors / 96 warnings and protocol_checker.py dev 0 / 0, both equal to
+    the baseline; primer copies identical; ai/core/README.md unchanged;
+    residue search clean apart from retentions listed in
+    dev/reports/report-14cf601f-webui-component-layout.md section 4.0.
+    Merged fast-forward to main at 1a76d51.
   issues_found: []
+
+operator_closure_2026_10_23:
+  closed_by: "William Watson"
+  basis: >
+    Closed at William Watson's direction on 2026-10-23. The independent
+    audit is waived and recorded here as a waiver, not as satisfaction of the
+    requirement. Source changes were mechanical: overwatch.py docstring
+    usage line, test load paths in tests/webui/test_overwatch.py and
+    tests/engine/test_engine_mcp.py, and the framework folder set in
+    bin/migrate-terms.py scan() (src replaced by core and webui).
 
 traceability:
   design_updates:
     - design_ref: "dev/design/design-project-overwatch.md"
       sections_updated: ["paths"]
-      update_date: null
+      update_date: "2026-10-23"
   related_changes:
     - { change_ref: "change-5bcd46ad", relationship: "follows (layout migration)" }
   related_issues: ["issue-14cf601f"]
@@ -133,6 +152,10 @@ version_history:
     date: "2026-10-23"
     author: "William Watson"
     changes: ["Initial change document"]
+  - version: "0.2"
+    date: "2026-10-23"
+    author: "William Watson"
+    changes: ["Implemented via prompt-14cf601f; verification recorded; closed at operator direction with audit waived (operator_closure_2026_10_23); status proposed -> verified"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
