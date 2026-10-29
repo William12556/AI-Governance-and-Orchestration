@@ -5,7 +5,7 @@ change_info:
   id: "change-711a57d5"
   title: "Engine loop robustness (audit-caab2052 group 1; audit-14e05e35 L-09)"
   date: "2026-10-29"
-  status: "approved"  # operator 2026-10-29
+  status: "implemented"  # c328dfb, 2026-10-29
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -192,6 +192,15 @@ version_history:
   - version: "1.1"
     date: "2026-10-29"
     changes: ["Approved by the operator as drafted, including the planner's choices: MCP read timeout through ClientSession read_timeout_seconds, 30 s subprocess timeout, one engine-wide loop.mcp_timeout_seconds, M-01 check before the dispatch refusal"]
+  - version: "1.2"
+    date: "2026-10-29"
+    changes:
+      - "Implemented in Claude Code cloud on branch claude/loop-robustness-prompt-2x7au0 from 7c4e390: source a6b0379, tests 2909557, report and prompt move c328dfb (report-711a57d5 v0.1; its §7.0 omits the final hash). Merged fast-forward to main at c328dfb by the operator"
+      - "Tests: implementing session 361 passed, 1 skipped (Linux, root); operator on macOS 362 passed. Mutations M1 to M3 failed their named tests (session report)"
+      - "Planner review passed (static; the planner's container could not install packages): scope limited to the deliverable files; FR-A to FR-G as specified; two test_providers.py assertions updated for FR-C"
+      - "Review observations: malformed calls reach the MCP error threshold (3) before the F27 limit (4), recorded in design §11.0; NaN passes both timeout checks (no action); SDK error text in the FR-E BLOCKED.md is assumed key-free, as on the existing path (for the follow-up audit)"
+      - "Planner documents updated: design-14e05e35 v1.17 §3.0 and §11.0, guide-engine-operations v1.19, config.template.yaml"
+      - "Outstanding before verified: live loop run on oMLX; follow-up audit by an independent session (P02.8.2)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

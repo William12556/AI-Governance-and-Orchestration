@@ -76,6 +76,7 @@ omlx:
   api_key: "local"                        # oMLX bearer token
   default_model: "<worker-model-id>"     # worker/base model ID as reported by /v1/models
   reviewer_model: "<reviewer-model-id>"  # optional; reviewer-phase model (falls back to default_model)
+  request_timeout_seconds: 300           # optional; bound on one model request (default 300)
 
 # MCP server definitions
 mcp_servers:
@@ -100,6 +101,7 @@ loop:
   max_iterations: 5         # outer loop cycles (work+review pairs)
   phase_max_iterations: 20  # inner tool-call iterations per phase
   mcp_error_threshold: 3    # consecutive MCP errors before BLOCKED
+  mcp_timeout_seconds: 120  # optional; bound on one MCP request (default 120)
   max_tool_calls_per_iteration: 10  # tool call cap per inner iteration
   preflight_check: false    # evaluate success criteria before first worker pass
   state_dir: "ai/state"   # state directory path (relative to project root)
@@ -125,6 +127,8 @@ context:
 `max_iterations` controls outer loop cycles (one work phase + one review phase per cycle). `phase_max_iterations` controls how many times the model is called within a single phase before the phase exits. These are independent — do not conflate them in T03 notes.
 
 For audit runs, set `max_iterations` to at least the number of items in `audit-index.md`.
+
+**Timeouts (change-711a57d5):** `request_timeout_seconds` (in the `omlx:` block or in a `providers.<name>` block) bounds one model request; the engine retries a failed request up to 3 times, and the SDK does not retry on its own. HTTP 400, 401 and 403 are not retried. `loop.mcp_timeout_seconds` bounds one MCP request; a timeout reaches the worker as a tool error. If long local prefills on oMLX end in timeouts, raise `request_timeout_seconds` for that provider.
 
 **Role-to-model binding (change-53c6f252):** without a `roles:` block, both roles use the `omlx:` block above. With `roles:`, each role names a provider from `providers:` and a model. Provider kinds are `omlx`, `openai_compatible` (for example the Mistral API) and `anthropic`. Remote providers read their key from the variable named in `api_key_env`, set for the engine process only, or on macOS from the Keychain service named in `api_key_keychain`, searched in the user's Keychain search list, normally the login Keychain (change-7d953510). With both, a set variable wins and the Keychain is the fallback. The run log records the source (`key source env:<VAR>` or `key source keychain:<service>`), never the key. A Keychain key never enters the environment, so runs started through engine-mcp `start_engine` need no key variable in the engine-mcp environment. This is not isolation from gate code: tests run by the pytest gate run with your permissions and can read the Keychain item through `/usr/bin/security`, whichever source the engine uses (design-14e05e35 DI-06; audit-7d953510 M-01). Treat a SHIP as unreviewed when the cycle changed test infrastructure. On first use macOS may ask whether `/usr/bin/security` may read the item; answer it from an interactive CLI run first, since an unanswered dialog or a locked Keychain (SSH session: `security unlock-keychain`) stops the run after 10 s. Context windows are resolved per role; API models need an entry under `context.model_context_windows`. `ai/engine/config.template.yaml` holds a commented example. CLI precedence with `roles:`: `--worker-model` / `--reviewer-model`, then `--model`, then `roles.<role>.model`. Without `roles:` (legacy `omlx:` block): `--worker-model` / `--reviewer-model`, then `omlx.worker_model` / `omlx.reviewer_model`, then `--model`, then `omlx.default_model`.
 
@@ -262,7 +266,7 @@ Gates: the loop stage's gates come from the manifest (SE: `syntax`, `pytest`, `r
 
 **Symptom:** `BLOCKED.md` written; message references MCP validation errors.
 
-**Cause:** The worker issued malformed tool calls (wrong argument names or types) three consecutive times.
+**Cause:** The worker issued malformed tool calls (wrong argument names or types, or arguments that are not a JSON object) three consecutive times.
 
 **Remediation:** Read `BLOCKED.md` for the failing tool call. Verify tool parameter names against the live MCP schema. If the brief is ambiguous about file paths, clarify. Create T06 issue if the block recurs.
 
@@ -348,6 +352,7 @@ Related refusals (change-82dbf16a): `write refused: … is or contains an engine
 | 1.16 | 2026-10-14 | §3.0: `api_key_keychain` key source, precedence, source log line, first-use dialog (change-7d953510) |
 | 1.17 | 2026-10-14 | §3.0: Keychain search list wording (audit-7d953510 L-02) |
 | 1.18 | 2026-10-14 | §3.0: gate code can read a Keychain key (audit-7d953510 M-01, accepted) |
+| 1.19 | 2026-10-29 | §3.0: `request_timeout_seconds`, `loop.mcp_timeout_seconds` and timeout behaviour; §8.1: non-object arguments (change-711a57d5) |
 
 ---
 

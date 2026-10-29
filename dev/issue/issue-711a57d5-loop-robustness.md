@@ -5,7 +5,7 @@ issue_info:
   id: "issue-711a57d5"
   title: "Engine loop robustness: malformed tool arguments, budget estimate, unbounded calls, retried client errors"
   date: "2026-10-29"
-  status: "open"
+  status: "resolved"
   severity: "medium"
   type: "defect"
   iteration: 1
@@ -111,6 +111,9 @@ version_history:
   - version: "1.0"
     date: "2026-10-29"
     changes: ["Initial issue from audit-caab2052 remediation group 1 and audit-14e05e35 L-09"]
+  - version: "1.1"
+    date: "2026-10-29"
+    changes: ["Status resolved: change-711a57d5 implemented (c328dfb) (P03.7)"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
