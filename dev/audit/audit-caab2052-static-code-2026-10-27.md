@@ -113,7 +113,7 @@ Context only: `ai/engine/mcp/server.py` (344), `ai/engine/recipes/` (2 files), `
 | FR-02-03 return stage in `BLOCKED.md` | Partial | `orchestrator.py:2392-2405`. Failure exits that write no `BLOCKED.md` get no return stage (M-01, M-04) |
 | FR-03-01 three gate types | Pass | Human approval, reviewer verdict, command exit code |
 | FR-03-02 every applicable gate passes | Conflict | A command gate FAIL overrides SHIP (`orchestrator.py:2243-2266`); a syntax gate FAIL does not. Design §6.0 says the syntax gate results are "unchanged". OQ-01 |
-| FR-03-03 command, cwd and interpreter configurable | Pass | `orchestrator.py:2309-2338`; `gates.py:230-238` (`{project_root}` placeholder) |
+| FR-03-03 command, cwd and interpreter configurable | Pass | `orchestrator.py:2309-2338`; `gates.py:126-134` (`{project_root}` placeholder) |
 | FR-03-04 syntax and pytest as declared command gates | Deviates | Syntax stays built in (`manifest.py:20`), as design §6.0 states. OQ-01 |
 | FR-03-05 human approval never passed | Pass | `orchestrator.py:2352-2375` writes `awaiting-approval.md` only |
 | FR-03-06 one log line per gate per iteration | Pass | `orchestrator.py:1739-1741, 2066, 2076, 2169` |
@@ -138,7 +138,7 @@ Context only: `ai/engine/mcp/server.py` (344), `ai/engine/recipes/` (2 files), `
 | NFR-02 legacy values | Pass | `orchestrator.py:2586`; `overwatch.py:723, 787`; `providers.py:528-537` |
 | NFR-03 no provider branching in the loop | Pass | No provider kind test in `orchestrator.py` |
 | NFR-04 invalid configuration stops with file and field | Partial | Known deferred gaps (`dev/task.md`, audit-14e05e35 L-08); also L-11 |
-| NFR-05 no key in logs, state or committed files | Pass | Label-only logging (`providers.py:457, 461`); MCP children receive only `HOME, LOGNAME, PATH, SHELL, TERM, USER` plus configured `env` (mcp 1.30.0 `get_default_environment`); gate scrubbing (`gates.py:255-256`). Keychain readable by gate code is accepted (DI-06) |
+| NFR-05 no key in logs, state or committed files | Pass | Label-only logging (`providers.py:457, 461`); MCP children receive only `HOME, LOGNAME, PATH, SHELL, TERM, USER` plus configured `env` (mcp 1.30.0 `get_default_environment`); gate scrubbing (`gates.py:151-152`). Keychain readable by gate code is accepted (DI-06) |
 | NFR-06 offline tests | Pass | 331 tests, no network |
 
 ### 4.2 requirements-1c1f4ef6 (AEL baseline) and design-ael-orchestrator
@@ -201,8 +201,8 @@ Context only: `ai/engine/mcp/server.py` (344), `ai/engine/recipes/` (2 files), `
 
 - **L-01 Write classification is by name pattern.** Observed (P4); impact inferred. `is_write_tool` matches ten verbs (`scope.py:38-53`). `copy_file`, `append_file`, `save_file`, `touch`, `upload_file`, `apply_diff`, `insert_text`, `update_file`, `chmod`, `truncate`, `set_content` and `execute_command` are not write tools, so `scope.check` returns before any path test (`scope.py:200-201`). The worker is offered every tool (`orchestrator.py:1111`). The pinned `@j0hanz/filesystem-mcp@2.5.0` registers `create, delete, diff, edit, find_files, list, list_roots, move, patch, read, replace_text, search_text, stat`, all classified correctly. The gap therefore opens only with another server or version. The module docstring's "fail-closed" claim (`scope.py:6-7`) holds for names that contain a listed verb, not in general. Confidence that no current configuration is exposed: high for the template's servers.
 - **L-02 An unresolvable path is skipped, not refused.** Observed (P4). `scope.check` does `continue` when `realpath` raises (`scope.py:209-212`). A `write_file` path containing NUL passes with no violation. The MCP server will most likely reject it, but the check fails open. Severity is low because no exploit path was found.
-- **L-03 Preflight `grep` has no option terminator and no timeout.** Observed (P4). `["grep", "-qF", pattern, path]` (`orchestrator.py:1644-1647`) treats a pattern that starts with `-` as an option. P4: the criterion "a.txt contains '--version'" was reported SATISFIED for a file that does not contain the text. The pattern comes from a planner-authored prompt. The same call and the `py_compile` calls (`orchestrator.py:1428, 1497, 1623`; `gates.py:171`) have no timeout, so a FIFO or a very slow file blocks the phase.
-- **L-12 `py_compile` writes outside the write scope.** Inferred, high confidence (PEP 3147 behaviour of `python -m py_compile`). The syntax gate compiles every existing `.py` path named in `work-summary.txt`, including paths outside the project (`gates.py:157-172`). The post-write and edit-failure checks do the same for worker-written files (`orchestrator.py:1428, 1497`). Each run writes `__pycache__/*.pyc` beside the source, which the write scope does not authorise. To verify, run the gate on a deliverable in a read-only-scoped folder and list `__pycache__/`.
+- **L-03 Preflight `grep` has no option terminator and no timeout.** Observed (P4). `["grep", "-qF", pattern, path]` (`orchestrator.py:1644-1647`) treats a pattern that starts with `-` as an option. P4: the criterion "a.txt contains '--version'" was reported SATISFIED for a file that does not contain the text. The pattern comes from a planner-authored prompt. The same call and the `py_compile` calls (`orchestrator.py:1428, 1497, 1623`; `gates.py:67`) have no timeout, so a FIFO or a very slow file blocks the phase.
+- **L-12 `py_compile` writes outside the write scope.** Inferred, high confidence (PEP 3147 behaviour of `python -m py_compile`). The syntax gate compiles every existing `.py` path named in `work-summary.txt`, including paths outside the project (`gates.py:53-68`). The post-write and edit-failure checks do the same for worker-written files (`orchestrator.py:1428, 1497`). Each run writes `__pycache__/*.pyc` beside the source, which the write scope does not authorise. To verify, run the gate on a deliverable in a read-only-scoped folder and list `__pycache__/`.
 - **Triaged, not counted:**
   - bandit B324 (SHA-1, `stages.py:86`) is required for the git blob format. Approval binding therefore rests on SHA-1. A chosen-prefix collision is outside this project's single-user threat model.
   - bandit B310 (`providers.py:98`): the URL comes from operator configuration.
@@ -245,7 +245,7 @@ See §4.0. Departures not covered by a finding: FR-03-02/FR-03-04 against design
   - Unused imports: `mcp_client.py:11` (`uuid`) and `orchestrator.py:71` (`Rule`).
   - Unused variables: `orchestrator.py:1183` (`pct_str`) and `protocol_checker.py:153` (`by_id`).
   - f-strings without placeholders: `orchestrator.py:1321` and `providers.py:535`.
-  - The pytest default command at `gates.py:251` is unreachable through the engine, because `manifest.py:165-166` requires a command.
+  - The pytest default command at `gates.py:147` is unreachable through the engine, because `manifest.py:165-166` requires a command.
   - Stale docstring test paths: `linter.py:13` and `protocol_checker.py:14` name test files that do not exist.
   - mypy reports 11 errors. The substantive one is `stages.py:296`: `approvals = set()` where a dict is declared, which works only because the empty set is never indexed. The others are `orchestrator.py:686` (sentinel typed as `object`), `orchestrator.py:1644` (bytes against str) and `orchestrator.py:2465-2472` (`str | None`).
   - ruff 0.17.3 with its default rule set reports 97 issues (47 fixable), mostly annotation style (UP045 ×27) and blind `except` (BLE001 ×14). No pyflakes error indicates a runtime defect.
@@ -273,7 +273,7 @@ Critical: none. High: none. Medium: M-01 to M-06. Low: L-01 to L-19.
 | M-06 | Medium | `providers.py:124, 321`; `orchestrator.py:475-505`; `mcp_client.py:53, 101` | No configurable timeout; retries multiply to up to 9 × 600 s; caps cannot interrupt | Observed constants; inferred behaviour | Set explicit SDK timeout and `max_retries`; wrap MCP calls in `asyncio.wait_for` |
 | L-01 | Low | `scope.py:38-53, 200-201` | Write tools are recognised by name verbs; several write verbs are missing | Observed: P4; pinned server unaffected | Classify the configured server's tools explicitly, and refuse unclassified tools in the worker phase |
 | L-02 | Low | `scope.py:209-212` | A path whose resolution raises is skipped | Observed: P4 (NUL path allowed) | Refuse instead of `continue` |
-| L-03 | Low | `orchestrator.py:1644-1647, 1428, 1497, 1623`; `gates.py:171` | Preflight `grep` lacks `--`; subprocesses lack timeouts | Observed: P4 | Add `--` and a timeout to each call |
+| L-03 | Low | `orchestrator.py:1644-1647, 1428, 1497, 1623`; `gates.py:67` | Preflight `grep` lacks `--`; subprocesses lack timeouts | Observed: P4 | Add `--` and a timeout to each call |
 | L-04 | Low | `orchestrator.py:2341-2349, 2461` | CLI tracks tasks by name, not by location as design §8.4 states | Observed: P4 | Track every file under `ai/workspace/` and apply the task-file rule |
 | L-05 | Low | `approve.py:77-85` | Failed commit leaves the file staged; a retry duplicates the entry; the error text can be empty | Observed: P5 | Restore the file on failure; include the hook output |
 | L-06 | Low | `stages.py:128` | `HEAD:ai/approvals.yaml` resolves from the repository root | Observed: P5 | Use `HEAD:./ai/approvals.yaml` |
@@ -282,11 +282,11 @@ Critical: none. High: none. Medium: M-01 to M-06. Low: L-01 to L-19.
 | L-09 | Low | `orchestrator.py:2504-2609` | `engine end rc=N` not logged on early returns after logging starts | Observed: code | Start the `try` immediately after `setup_logging` |
 | L-10 | Low | `orchestrator.py:608-611`; `overwatch.py:890, 1071`; `approve.py:77` | Non-atomic writes of files read concurrently | Inferred, medium | Temporary file and `os.replace` |
 | L-11 | Low | `manifest.py:188`; `linter.py:250, 289`; `protocol_checker.py:86, 164` | Unhashable or non-string values raise `TypeError` | Observed: code | Type-check before membership tests |
-| L-12 | Low | `gates.py:157-172`; `orchestrator.py:1428, 1497` | `py_compile` writes `__pycache__` outside the write scope; the syntax gate compiles paths outside the project | Inferred, high | Compile in memory (`compile()`), or set `PYTHONPYCACHEPREFIX` to the state directory; limit to project paths |
+| L-12 | Low | `gates.py:53-68`; `orchestrator.py:1428, 1497` | `py_compile` writes `__pycache__` outside the write scope; the syntax gate compiles paths outside the project | Inferred, high | Compile in memory (`compile()`), or set `PYTHONPYCACHEPREFIX` to the state directory; limit to project paths |
 | L-13 | Low | `mcp_client.py:56-64` | Tool-name collisions overwrite silently; connection failures only print | Observed: code | Warn on collision; log failures; refuse a run with no tools |
 | L-14 | Low | `orchestrator.py:533-540` | Audit archive overwrites an earlier archive; uses `os.getcwd()` | Observed: code | Refuse or version an existing target; pass the project root |
 | L-15 | Low | `overwatch.py:856` | `# govwatch alerts` heading in generated output | Observed | Rename to Overwatch |
-| L-16 | Low | `mcp_client.py:11`; `orchestrator.py:71, 1183, 1321`; `protocol_checker.py:153`; `providers.py:535`; `gates.py:251`; `stages.py:296` | Dead code, stale docstrings, 11 mypy errors | Observed: ruff, mypy | Remove; correct the `stages.py:296` type |
+| L-16 | Low | `mcp_client.py:11`; `orchestrator.py:71, 1183, 1321`; `protocol_checker.py:153`; `providers.py:535`; `gates.py:147`; `stages.py:296` | Dead code, stale docstrings, 11 mypy errors | Observed: ruff, mypy | Remove; correct the `stages.py:296` type |
 | L-17 | Low | `linter.py:37-39`; `scope.py:111`; `stages.py:178, 201`; `orchestrator.py:949, 975, 1577`; `overwatch.py:48-68, 222, 1240` | Duplicated parsing and layout logic across engine and webui | Observed | Consolidate in `ai/core/` when that package is opened |
 | L-18 | Low | `orchestrator.py:55, 533, 1078-1554, 1878-2306, 2612` | Very large functions; project root implied by the working directory | Observed | Split `run_phase`/`run_loop`; pass the project root explicitly |
 | L-19 | Low | `providers.py:170, 201, 338, 376` | Provider method names and returns differ from design §4.1 | Observed | Amend the design |
@@ -308,7 +308,7 @@ Status is against the code at `24b2dfc`. "Deferred" means the item is open in `d
 | audit-14e05e35 M-02 | Non-FAIL gates do not block | Resolved | UNCHECKED blocks (`orchestrator.py:2104-2117`); SKIPPED listed (`:2387`) |
 | audit-14e05e35 M-03 | Terminology migration | Resolved in scope | No retired role term; L-15 is govwatch only |
 | audit-14e05e35 M-04 | Scan writes the git index | Resolved | `stages.py:73-75` |
-| audit-14e05e35 M-05 | Keys inherited by gates | Resolved | `orchestrator.py:2325-2326`; `gates.py:255-256` |
+| audit-14e05e35 M-05 | Keys inherited by gates | Resolved | `orchestrator.py:2325-2326`; `gates.py:151-152` |
 | audit-14e05e35 L-01 | Symlinked task untracked | Resolved | `stages.py:327-329` |
 | audit-14e05e35 L-02 | Scope uses `abspath` | Resolved | `scope.py:143-145` |
 | audit-14e05e35 L-03 | `writable_paths` unvalidated | Resolved | `manifest.py:140-143` |
@@ -462,7 +462,7 @@ findings:
       description: "L-01. Write tools recognised by name verbs only."
     - location: "scope.py:209-212"
       description: "L-02. Unresolvable path skipped."
-    - location: "orchestrator.py:1644-1647, 1428, 1497, 1623; gates.py:171"
+    - location: "orchestrator.py:1644-1647, 1428, 1497, 1623; gates.py:67"
       description: "L-03. Preflight grep lacks '--'; subprocesses lack timeouts."
     - location: "orchestrator.py:2341-2349, 2461"
       description: "L-04. CLI tracks tasks by name, not location."
@@ -480,7 +480,7 @@ findings:
       description: "L-10. Non-atomic writes."
     - location: "manifest.py:188; linter.py:250, 289; protocol_checker.py:86, 164"
       description: "L-11. TypeError on unhashable or non-string values."
-    - location: "gates.py:157-172; orchestrator.py:1428, 1497"
+    - location: "gates.py:53-68; orchestrator.py:1428, 1497"
       description: "L-12. py_compile writes outside write scope."
     - location: "mcp_client.py:56-64"
       description: "L-13. Tool collisions and connection failures unreported."
@@ -488,7 +488,7 @@ findings:
       description: "L-14. Audit archive overwrites silently."
     - location: "overwatch.py:856"
       description: "L-15. govwatch heading in output."
-    - location: "mcp_client.py:11; orchestrator.py:71, 1183, 1321; protocol_checker.py:153; providers.py:535; gates.py:251; stages.py:296"
+    - location: "mcp_client.py:11; orchestrator.py:71, 1183, 1321; protocol_checker.py:153; providers.py:535; gates.py:147; stages.py:296"
       description: "L-16. Dead code, stale docstrings, mypy errors."
     - location: "linter.py:37-39; scope.py:111; stages.py:178, 201; orchestrator.py:949, 975, 1577; overwatch.py:48-68, 222, 1240"
       description: "L-17. Duplicated parsing and layout logic (ai/core candidates)."
@@ -578,7 +578,7 @@ Recorded by the planner on 2026-10-29 on the operator's decision.
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-10-27 | Initial static code audit of ai/engine/src and ai/webui/src |
-| 1.1 | 2026-10-29 | Planner review corrections: M-03 document count 23 → 21 (two matches were narrative text); eb782f83 F-04 row relabelled deferred; register and T08 locations aligned (M-01, M-05, L-03, L-17); related_audits set to related and audit-5bcd46ad added; severity line in §6.0; §13.0 Closure Recommendation and §14.0 Operator Decisions added |
+| 1.1 | 2026-10-29 | Planner review corrections: M-03 document count 23 → 21 (two matches were narrative text); eb782f83 F-04 row relabelled deferred; register and T08 locations aligned (M-01, M-05, L-03, L-17); related_audits set to related and audit-5bcd46ad added; severity line in §6.0; all `gates.py` citations corrected (each was 104 lines too high: 126-134, 151-152, 53-68, 67, 147); §13.0 Closure Recommendation and §14.0 Operator Decisions added |
 
 ---
 
