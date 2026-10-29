@@ -437,7 +437,9 @@ def test_make_provider_passes_base_url_to_anthropic(monkeypatch):
     prov = P.make_provider("local", {"kind": "anthropic", "base_url": "http://127.0.0.1:8000",
                                      "api_key": "local", "strict_tools": False})
     assert prov.base_url == "http://127.0.0.1:8000" and prov.strict_tools is False
-    assert captured == {"api_key": "local", "base_url": "http://127.0.0.1:8000"}
+    # change-711a57d5 (M-06): the client is also built with timeout and max_retries=0.
+    assert captured == {"api_key": "local", "base_url": "http://127.0.0.1:8000",
+                        "timeout": P.DEFAULT_REQUEST_TIMEOUT_SECONDS, "max_retries": 0}
 
 
 # --- Keychain key source (issue-7d953510, change-7d953510) ---------------------------
@@ -610,7 +612,9 @@ def test_keychain_t13_make_provider_passes_key(keychain, engine_log, monkeypatch
     monkeypatch.setattr(openai, "AsyncOpenAI", FakeAsyncOpenAI)
     prov = P.make_provider("mistral", dict(REMOTE, api_key_keychain=SERVICE))
     assert isinstance(prov, P.OpenAICompatProvider) and isinstance(prov.client, FakeAsyncOpenAI)
-    assert captured == {"base_url": REMOTE["base_url"], "api_key": SECRET}
+    # change-711a57d5 (M-06): the client is also built with timeout and max_retries=0.
+    assert captured == {"base_url": REMOTE["base_url"], "api_key": SECRET,
+                        "timeout": P.DEFAULT_REQUEST_TIMEOUT_SECONDS, "max_retries": 0}
     _assert_secret_absent(engine_log.records)  # T14
 
 
