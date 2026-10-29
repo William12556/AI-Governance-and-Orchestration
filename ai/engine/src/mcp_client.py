@@ -10,6 +10,7 @@ proper AsyncExitStack teardown without anyio cancel-scope errors.
 
 import uuid
 from contextlib import AsyncExitStack
+from datetime import timedelta
 from typing import Any
 
 from mcp import ClientSession, StdioServerParameters
@@ -26,8 +27,15 @@ from scope import is_readonly_tool
 class MCPClient:
     """Manages connections to multiple MCP servers."""
 
-    def __init__(self, servers: dict[str, dict]) -> None:
+    def __init__(self, servers: dict[str, dict], timeout_seconds: float = 120.0) -> None:
+        """
+        Args:
+            servers: MCP server configurations keyed by server name.
+            timeout_seconds: Read timeout of every session request
+                (initialize, list_tools, call_tool); change-711a57d5 (M-06).
+        """
         self._servers = servers
+        self._timeout_seconds = timeout_seconds
         self._sessions: dict[str, ClientSession] = {}
         self._tools: dict[str, dict] = {}  # tool_name -> {server, description, input_schema}
         self._stack: AsyncExitStack = AsyncExitStack()
@@ -49,7 +57,12 @@ class MCPClient:
                 # Enter stdio_client context via the stack
                 read, write = await self._stack.enter_async_context(stdio_client(params))
                 # Enter ClientSession context via the stack
-                session = await self._stack.enter_async_context(ClientSession(read, write))
+                # change-711a57d5 (audit-caab2052 M-06): bound every session
+                # request; a timeout surfaces through the except branches.
+                session = await self._stack.enter_async_context(ClientSession(
+                    read, write,
+                    read_timeout_seconds=timedelta(seconds=self._timeout_seconds),
+                ))
                 await session.initialize()
                 self._sessions[name] = session
                 response = await session.list_tools()

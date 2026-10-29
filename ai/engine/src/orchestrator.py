@@ -101,6 +101,11 @@ _DEFAULT_STALL_THRESHOLD = 3
 _COMPLETION_MAX_RETRIES = 3
 _COMPLETION_INITIAL_BACKOFF = 2.0  # seconds
 _COMPLETION_BACKOFF_MULTIPLIER = 2.0
+# change-711a57d5 (audit-14e05e35 L-09): client errors a retry cannot fix
+_NON_RETRYABLE_STATUS = frozenset({400, 401, 403})
+
+# change-711a57d5 (audit-caab2052 L-03): bound on grep and py_compile subprocesses
+_SUBPROCESS_TIMEOUT_SECONDS = 30
 
 
 def _validate_write_scope(tool_name: str, arguments: dict, project_root: str,
@@ -481,6 +486,24 @@ async def _completion_with_retry(
                 "completion call failed (attempt %d/%d): %s",
                 attempt, max_retries, e,
             )
+            # change-711a57d5 (audit-14e05e35 L-09): HTTP 400/401/403 end BLOCKED
+            # at once; a retry cannot succeed.
+            _status = getattr(e, "status_code", None)
+            if _status in _NON_RETRYABLE_STATUS:
+                tb = traceback.format_exc()
+                log.error("completion call failed with HTTP %d (not retried)", _status)
+                blocked_msg = (
+                    "# BLOCKED\n\n"
+                    f"Completion call failed with HTTP {_status} (not retried).\n\n"
+                    f"Last error: {e}\n\n"
+                    f"Traceback:\n```\n{tb}\n```\n"
+                )
+                write_state(state_dir, "BLOCKED.md", blocked_msg)
+                console.print(
+                    f"[red][engine] BLOCKED: completion call failed with HTTP {_status} "
+                    f"(not retried)[/red]"
+                )
+                raise RuntimeError(f"Completion call failed: {e}") from e
             if attempt < max_retries:
                 console.print(
                     f"[yellow][engine] completion error (attempt {attempt}/{max_retries}), "
@@ -726,6 +749,13 @@ def estimate_tokens(messages: list[dict], tools: list[dict] | None = None) -> in
             for block in content:
                 if isinstance(block, dict):
                     total += len(block.get("text", "")) // 4
+        # change-711a57d5 (audit-caab2052 M-02): tool-call arguments of
+        # assistant messages count too; malformed entries are ignored.
+        for tc in m.get("tool_calls") or []:
+            fn = tc.get("function") if isinstance(tc, dict) else None
+            args = fn.get("arguments") if isinstance(fn, dict) else None
+            if isinstance(args, str):
+                total += len(args) // 4
 
     # F8: Include serialized tool schema in token estimate
     if tools:
@@ -1176,7 +1206,7 @@ async def run_phase(
 
         # Context budget check before API call
         if context_window is not None:
-            estimated = estimate_tokens(messages)
+            estimated = estimate_tokens(messages, tools)  # change-711a57d5 (M-02)
             status, fraction = check_context_budget(
                 estimated, context_window, budget_warn_pct, budget_abort_pct
             )
@@ -1292,36 +1322,49 @@ async def run_phase(
             console.print(f"[yellow]  call →[/yellow]  [bold]{escape(tc['name'])}[/bold][dim]({escape(json.dumps(tc['arguments']))})[/dim]")
             log.debug("tool call: %s args=%s", tc["name"], json.dumps(tc["arguments"]))
 
-            # change-82dbf16a (H-03): refuse tools not offered to this phase and
-            # every write tool in a review phase, before any other check.
-            _refusal = _dispatch_refusal(tc["name"], _offered, is_worker_phase)
-            if _refusal:
-                log.warning("tool refused tool=%s phase=%s reason=%s",
-                            tc["name"], phase_label or "-", _refusal)
-            # F4 / change-bdc6820f: pre-dispatch write scope validation (FR-05-01, FR-05-04)
-            _violation = (S.check(tc["name"], tc["arguments"], project_root, write_scope, _protected)
-                          if project_root and not _refusal else None)
-            _scope_err = _violation.message if _violation else None
-            if _violation:
-                log.warning("write rejected tool=%s path=%s reason=%s",
-                            tc["name"], _violation.path, _violation.reason)
-            # F21: Pre-dispatch audit-report.md append-only validation
-            _report_err = (_validate_audit_report_write(tc["name"], tc["arguments"], state_dir)
-                           if not _refusal else None)
-            if _refusal:
-                console.print(f"[red][engine] tool refused: {escape(_refusal[:200])}[/red]")
-                result = f"Error: {_refusal}"
-                _scope_err = _refusal
-            elif _scope_err:
-                log.warning("scope violation: %s", _scope_err)
-                console.print(f"[red][engine] scope violation: {escape(_scope_err[:200])}[/red]")
-                result = f"Error: {_scope_err}"
-            elif _report_err:
-                log.warning("audit-report.md overwrite blocked: %s", _report_err)
-                console.print(f"[red][engine] audit-report.md overwrite blocked[/red]")
-                result = _report_err
+            # change-711a57d5 (audit-caab2052 M-01): arguments that are not a
+            # JSON object become a tool error before any other dispatch check,
+            # so no later check indexes them.
+            if not isinstance(tc["arguments"], dict):
+                _arg_type = type(tc["arguments"]).__name__
+                _args_msg = (f"arguments for tool '{tc['name']}' must be a JSON object "
+                             f"of named arguments, got {_arg_type}")
+                log.warning("malformed tool arguments tool=%s type=%s", tc["name"], _arg_type)
+                console.print(f"[red][engine] malformed tool arguments: {escape(tc['name'])}[/red]")
+                result = f"Error: {_args_msg}"
+                _scope_err = _args_msg
+                _report_err = None
             else:
-                result = await mcp.call_tool(tc["name"], tc["arguments"])
+                # change-82dbf16a (H-03): refuse tools not offered to this phase and
+                # every write tool in a review phase, before any other check.
+                _refusal = _dispatch_refusal(tc["name"], _offered, is_worker_phase)
+                if _refusal:
+                    log.warning("tool refused tool=%s phase=%s reason=%s",
+                                tc["name"], phase_label or "-", _refusal)
+                # F4 / change-bdc6820f: pre-dispatch write scope validation (FR-05-01, FR-05-04)
+                _violation = (S.check(tc["name"], tc["arguments"], project_root, write_scope, _protected)
+                              if project_root and not _refusal else None)
+                _scope_err = _violation.message if _violation else None
+                if _violation:
+                    log.warning("write rejected tool=%s path=%s reason=%s",
+                                tc["name"], _violation.path, _violation.reason)
+                # F21: Pre-dispatch audit-report.md append-only validation
+                _report_err = (_validate_audit_report_write(tc["name"], tc["arguments"], state_dir)
+                               if not _refusal else None)
+                if _refusal:
+                    console.print(f"[red][engine] tool refused: {escape(_refusal[:200])}[/red]")
+                    result = f"Error: {_refusal}"
+                    _scope_err = _refusal
+                elif _scope_err:
+                    log.warning("scope violation: %s", _scope_err)
+                    console.print(f"[red][engine] scope violation: {escape(_scope_err[:200])}[/red]")
+                    result = f"Error: {_scope_err}"
+                elif _report_err:
+                    log.warning("audit-report.md overwrite blocked: %s", _report_err)
+                    console.print(f"[red][engine] audit-report.md overwrite blocked[/red]")
+                    result = _report_err
+                else:
+                    result = await mcp.call_tool(tc["name"], tc["arguments"])
 
             # Truncate tool result if max_tool_result_chars is configured
             if max_tool_result_chars is not None and len(result) > max_tool_result_chars:
@@ -1333,7 +1376,9 @@ async def run_phase(
             preview = result[:200] + ("..." if len(result) > 200 else "")
             console.print(f"[cyan]  result ←[/cyan]  [dim]{escape(preview)}[/dim]")
             # P3: duplicate read tracking
-            if tc["name"] in ("read", "read_file", "read_text_file"):
+            # change-711a57d5 (M-01): not for a call with malformed arguments.
+            if (tc["name"] in ("read", "read_file", "read_text_file")
+                    and isinstance(tc["arguments"], dict)):
                 # change-c37198be (D3): filesystem-mcp 2.x `read` also takes paths[].
                 _rpaths = [tc["arguments"].get("path", "")]
                 _rpaths += [p for p in tc["arguments"].get("paths") or [] if isinstance(p, str)]
@@ -1407,8 +1452,10 @@ async def run_phase(
             _tool_result_appended = False
 
             # P1c: edit pattern-not-found — targeted file-read instruction
+            # change-711a57d5 (M-01): not for a call with malformed arguments.
             _edit_pattern_failed = (
                 tc["name"] in ("edit", "edit_file")
+                and isinstance(tc["arguments"], dict)
                 and any(s in result for s in _EDIT_PATTERN_ERRORS)
             )
             if _edit_pattern_failed:
@@ -1425,12 +1472,18 @@ async def run_phase(
                     "then construct your edit pattern from what you observe."
                 )
                 if _ep_path and _ep_path.endswith(".py"):
-                    _ep_proc = subprocess.run(
-                        [sys.executable, "-m", "py_compile", _ep_path],
-                        capture_output=True,
-                        text=True,
-                    )
-                    if _ep_proc.returncode != 0:
+                    # change-711a57d5 (audit-caab2052 L-03): bounded; on timeout
+                    # the syntax addition is skipped.
+                    try:
+                        _ep_proc = subprocess.run(
+                            [sys.executable, "-m", "py_compile", _ep_path],
+                            capture_output=True,
+                            text=True,
+                            timeout=_SUBPROCESS_TIMEOUT_SECONDS,
+                        )
+                    except subprocess.TimeoutExpired:
+                        _ep_proc = None
+                    if _ep_proc is not None and _ep_proc.returncode != 0:
                         _ep_msg += (
                             f"\n\nAdditional: syntax error detected:\n\n"
                             f"{_ep_proc.stderr.strip()}"
@@ -1494,11 +1547,17 @@ async def run_phase(
                              if is_write_tool(tc["name"]) else [])
                 for _py_path in _py_paths:
                     if _py_path.endswith(".py") and os.path.isfile(_py_path):
-                        proc = subprocess.run(
-                            [sys.executable, "-m", "py_compile", _py_path],
-                            capture_output=True,
-                            text=True,
-                        )
+                        # change-711a57d5 (audit-caab2052 L-03): bounded; on
+                        # timeout the file counts as not checked.
+                        try:
+                            proc = subprocess.run(
+                                [sys.executable, "-m", "py_compile", _py_path],
+                                capture_output=True,
+                                text=True,
+                                timeout=_SUBPROCESS_TIMEOUT_SECONDS,
+                            )
+                        except subprocess.TimeoutExpired:
+                            continue
                         if proc.returncode != 0:
                             err = proc.stderr.strip()
                             log.warning("syntax error in %s: %s", _py_path, err)
@@ -1620,9 +1679,11 @@ def run_preflight_check(task: str, log: logging.Logger) -> str:
         if syntax_match:
             path = syntax_match.group(1)
             try:
+                # change-711a57d5 (L-03): bounded; a timeout is UNCHECKED below.
                 proc = subprocess.run(
                     [sys.executable, "-m", "py_compile", path],
                     capture_output=True, text=True,
+                    timeout=_SUBPROCESS_TIMEOUT_SECONDS,
                 )
                 if proc.returncode == 0:
                     lines.append(f"  [{i}] SATISFIED  {criterion}")
@@ -1641,9 +1702,12 @@ def run_preflight_check(task: str, log: logging.Logger) -> str:
                 unchecked += 1
             else:
                 try:
+                    # change-711a57d5 (audit-caab2052 L-03): '--' stops an
+                    # option-like pattern being read as a grep option; bounded.
                     proc = subprocess.run(
-                        ["grep", "-qF", pattern, path],
+                        ["grep", "-qF", "--", pattern, path],
                         capture_output=True,
+                        timeout=_SUBPROCESS_TIMEOUT_SECONDS,
                     )
                     if proc.returncode == 0:
                         lines.append(f"  [{i}] SATISFIED  {criterion}")
@@ -2483,6 +2547,14 @@ async def main_async(args: argparse.Namespace) -> int:
     # F28: phase wall-clock cap (minutes -> seconds; None disables)
     _phase_duration_min   = config["loop"].get("phase_duration_minutes")
     phase_duration_seconds = _phase_duration_min * 60 if _phase_duration_min else None
+    # change-711a57d5 (audit-caab2052 M-06): MCP request read timeout. Checked
+    # before setup_logging, so a refused run writes no state.
+    mcp_timeout           = config["loop"].get("mcp_timeout_seconds")
+    if mcp_timeout is None:
+        mcp_timeout = 120.0
+    elif isinstance(mcp_timeout, bool) or not isinstance(mcp_timeout, (int, float)) or mcp_timeout <= 0:
+        console.print("[red][engine] config error: loop.mcp_timeout_seconds: must be a positive number[/red]")
+        return 1
     model          = worker_b.model  # worker binding; used for banners and the context report
 
     # Execution controls (opt-in, default disabled)
@@ -2511,151 +2583,152 @@ async def main_async(args: argparse.Namespace) -> int:
     if _log_archive_dir:
         log.info("log archive dir: %s", _log_archive_dir)
 
-    # change-e58fd295: recipes come from the manifest's run types (FR-01-03)
-    recipe_set  = _select_recipe_set(state_dir)
-    try:
-        _work_path, _rev_path = manifest.recipe_paths(recipe_set)
-    except ManifestError as e:
-        console.print(f"[red][engine] manifest error: {escape(str(e))}[/red]")
-        return 1
-    work_recipe = load_yaml(_work_path)
-    rev_recipe  = load_yaml(_rev_path)
-    console.print(f"[blue][engine] governance model: {escape(manifest.name)} {escape(manifest.version)}; "
-                  f"recipe set: {recipe_set}[/blue]")
-    log.info("governance model: %s %s; recipe set: %s (%s, %s)", manifest.name, manifest.version,
-             recipe_set, _work_path, _rev_path)
-
-    # F29: initialize audit-report.md as zero-byte at run start (audit runs
-    # only, and only if absent) so the worker's first read/find/ls probe on
-    # a clean run returns an empty result rather than NOT_FOUND — observed
-    # to trigger unnecessary exploratory iterations before the first write.
-    # Guarded by file-absence so an in-progress run's findings are never touched.
-    if recipe_set == "audit":
-        _report_path = os.path.join(state_dir, "audit-report.md")
-        if not os.path.exists(_report_path):
-            write_state(state_dir, "audit-report.md", "")
-            log.info("audit-report.md initialized (zero-byte)")
-
-    # change-53c6f252: readiness and context window per role in use (FR-04-05, FR-04-06)
-    roles_in_use = {"worker": [worker_b], "reviewer": [reviewer_b]}.get(args.mode, [worker_b, reviewer_b])
-    readiness = config.get("readiness", {})
-    _ready: set[tuple[str, str]] = set()
-    for b in roles_in_use:
-        if (b.provider_name, b.model) in _ready:
-            continue
-        try:
-            await b.provider.await_ready(
-                b.model,
-                timeout=readiness.get("timeout_seconds", 60.0),
-                interval=readiness.get("poll_interval_seconds", 2.0),
-                echo=lambda msg, _r=b.role: console.print(f"[blue][engine] {_r}: {escape(msg)}[/blue]"),
-            )
-        except (TimeoutError, ProviderError) as e:
-            write_state(state_dir, "BLOCKED.md",
-                        f"# BLOCKED\n\n{b.role} provider '{b.provider_name}' not ready: {e}\n")
-            console.print(f"[red][engine] BLOCKED: {b.role} provider '{escape(b.provider_name)}' not ready: {escape(str(e))}[/red]")
-            log.error("provider not ready role=%s provider=%s: %s", b.role, b.provider_name, e)
-            return 1
-        _ready.add((b.provider_name, b.model))
-
-    # Resolve context window per role using the four-tier chain
-    context_windows: dict[str, int | None] = {}
-    for b in (worker_b, reviewer_b):
-        ctx = resolve_context_window(b.model, config, live_query=b.provider.live_context_window)
-        context_windows[b.role] = ctx
-        if ctx:
-            console.print(f"[blue][engine] context window ({b.role}): {ctx:,} tokens ({escape(b.model)})[/blue]")
-        else:
-            console.print(f"[yellow][engine] context window ({b.role}): unknown — budget tracking disabled[/yellow]")
-    context_window = context_windows["worker"]
-
-    # Substitute {PROJECT_ROOT} placeholders in mcp_servers before connection
-    _substitute_project_root(config)
-    mcp = MCPClient(config.get("mcp_servers", {}))
-    await mcp.connect()
-
-    # Resolve task
-    if _task_bytes is not None:
-        # universal newlines, as the text-mode read did before iteration 4
-        raw = _task_bytes.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
-        brief = extract_tactical_brief(raw, log)
-
-        # strict_tactical_brief: fail fast when engine profile has no valid brief
-        if strict_tactical_brief and not brief:
-            target_profile = extract_target_profile(raw, log)
-            if target_profile in ("engine", "ael"):  # "ael": legacy value in closed documents
-                console.print(
-                    "[red][engine] error: strict_tactical_brief enabled and target_profile is 'engine' "
-                    "but no valid tactical_brief found in task file[/red]"
-                )
-                console.print(
-                    "[red][engine]        Author a YAML block with 'tactical_brief:' as root key, "
-                    "or set strict_tactical_brief: false in config.yaml[/red]"
-                )
-                log.error(
-                    "strict_tactical_brief: target_profile='engine' but no valid tactical_brief in %s",
-                    args.task,
-                )
-                await mcp.close()
-                return 1
-
-        task = brief if brief and not brief.startswith("#") else raw
-    else:
-        task = args.task or read_state(state_dir, "task.md")
-
-    if not task:
-        console.print(f"[red][engine] error: no task provided (--task or {state_dir}/task.md)[/red]")
-        await mcp.close()
-        return 1
-
-    # change-bdc6820f: write scope from the T03 prompt's deliverables (FR-05-01)
-    project_root = os.getcwd()
-    write_scope = None
-    if _task_bytes is not None:
-        _deliverables = S.extract_deliverable_paths(raw)
-        if _deliverables is not None:
-            write_scope = S.build_write_scope(project_root, _deliverables,
-                                              manifest.writable_paths, state_dir)
-    if write_scope is not None:
-        console.print(f"[blue][engine] write scope: {escape(write_scope.describe())}[/blue]")
-        log.info("write scope: %s", write_scope.describe())
-    else:
-        log.info("write scope: project root (task is not a T03 prompt)")
-
-    # Resolve placeholders and prepend runtime context
-    task = task.replace("{STATE_DIR}", state_dir).replace("{PROJECT_ROOT}", project_root)
-    runtime_header = (
-        f"[ENGINE RUNTIME CONTEXT]\n"
-        f"state_dir (full absolute path): {state_dir}\n"
-        f"project_root (full absolute path): {project_root}\n"
-        f"Do not use 'state_dir' or 'project_root' as literal path components.\n"
-        f"[END RUNTIME CONTEXT]\n\n"
-    )
-    task = runtime_header + task
-
-    os.makedirs(state_dir, exist_ok=True)
-    write_state(state_dir, "task.md", task)
-
-    # Write context budget report for the planner
-    # F8: Include actual system prompt and tool schema in the initial estimate
-    _sys_prompt = work_recipe.get("instructions", "")
-    _tools = mcp.get_openai_tools()
-    initial_tokens = estimate_tokens([
-        {"role": "system", "content": _sys_prompt},
-        {"role": "user",   "content": task},
-    ], tools=_tools)
-    write_context_report(
-        state_dir, model, context_window,
-        initial_tokens, budget_warn, budget_abort
-    )
-    if context_window:
-        pct = (initial_tokens / context_window) * 100
-        console.print(f"[blue][engine] initial task: ~{initial_tokens:,} tokens ({pct:.1f}% of window)[/blue]")
-        console.print(f"[dim][engine] context report: {state_dir}/context-budget.md[/dim]")
-
+    # change-711a57d5 (audit-caab2052 L-09): one try/finally from here, so
+    # every exit after setup_logging logs 'engine end' and closes the client.
     rc = 1  # default: failure — ensures rc is defined even on unexpected exception
-    _run_started = time.time()  # change-e58fd295: BLOCKED.md written by this run
+    mcp = None
     try:
+        # change-e58fd295: recipes come from the manifest's run types (FR-01-03)
+        recipe_set  = _select_recipe_set(state_dir)
+        try:
+            _work_path, _rev_path = manifest.recipe_paths(recipe_set)
+        except ManifestError as e:
+            console.print(f"[red][engine] manifest error: {escape(str(e))}[/red]")
+            return 1
+        work_recipe = load_yaml(_work_path)
+        rev_recipe  = load_yaml(_rev_path)
+        console.print(f"[blue][engine] governance model: {escape(manifest.name)} {escape(manifest.version)}; "
+                      f"recipe set: {recipe_set}[/blue]")
+        log.info("governance model: %s %s; recipe set: %s (%s, %s)", manifest.name, manifest.version,
+                 recipe_set, _work_path, _rev_path)
+
+        # F29: initialize audit-report.md as zero-byte at run start (audit runs
+        # only, and only if absent) so the worker's first read/find/ls probe on
+        # a clean run returns an empty result rather than NOT_FOUND — observed
+        # to trigger unnecessary exploratory iterations before the first write.
+        # Guarded by file-absence so an in-progress run's findings are never touched.
+        if recipe_set == "audit":
+            _report_path = os.path.join(state_dir, "audit-report.md")
+            if not os.path.exists(_report_path):
+                write_state(state_dir, "audit-report.md", "")
+                log.info("audit-report.md initialized (zero-byte)")
+
+        # change-53c6f252: readiness and context window per role in use (FR-04-05, FR-04-06)
+        roles_in_use = {"worker": [worker_b], "reviewer": [reviewer_b]}.get(args.mode, [worker_b, reviewer_b])
+        readiness = config.get("readiness", {})
+        _ready: set[tuple[str, str]] = set()
+        for b in roles_in_use:
+            if (b.provider_name, b.model) in _ready:
+                continue
+            try:
+                await b.provider.await_ready(
+                    b.model,
+                    timeout=readiness.get("timeout_seconds", 60.0),
+                    interval=readiness.get("poll_interval_seconds", 2.0),
+                    echo=lambda msg, _r=b.role: console.print(f"[blue][engine] {_r}: {escape(msg)}[/blue]"),
+                )
+            except (TimeoutError, ProviderError) as e:
+                write_state(state_dir, "BLOCKED.md",
+                            f"# BLOCKED\n\n{b.role} provider '{b.provider_name}' not ready: {e}\n")
+                console.print(f"[red][engine] BLOCKED: {b.role} provider '{escape(b.provider_name)}' not ready: {escape(str(e))}[/red]")
+                log.error("provider not ready role=%s provider=%s: %s", b.role, b.provider_name, e)
+                return 1
+            _ready.add((b.provider_name, b.model))
+
+        # Resolve context window per role using the four-tier chain
+        context_windows: dict[str, int | None] = {}
+        for b in (worker_b, reviewer_b):
+            ctx = resolve_context_window(b.model, config, live_query=b.provider.live_context_window)
+            context_windows[b.role] = ctx
+            if ctx:
+                console.print(f"[blue][engine] context window ({b.role}): {ctx:,} tokens ({escape(b.model)})[/blue]")
+            else:
+                console.print(f"[yellow][engine] context window ({b.role}): unknown — budget tracking disabled[/yellow]")
+        context_window = context_windows["worker"]
+
+        # Substitute {PROJECT_ROOT} placeholders in mcp_servers before connection
+        _substitute_project_root(config)
+        mcp = MCPClient(config.get("mcp_servers", {}), timeout_seconds=mcp_timeout)
+        await mcp.connect()
+
+        # Resolve task
+        if _task_bytes is not None:
+            # universal newlines, as the text-mode read did before iteration 4
+            raw = _task_bytes.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+            brief = extract_tactical_brief(raw, log)
+
+            # strict_tactical_brief: fail fast when engine profile has no valid brief
+            if strict_tactical_brief and not brief:
+                target_profile = extract_target_profile(raw, log)
+                if target_profile in ("engine", "ael"):  # "ael": legacy value in closed documents
+                    console.print(
+                        "[red][engine] error: strict_tactical_brief enabled and target_profile is 'engine' "
+                        "but no valid tactical_brief found in task file[/red]"
+                    )
+                    console.print(
+                        "[red][engine]        Author a YAML block with 'tactical_brief:' as root key, "
+                        "or set strict_tactical_brief: false in config.yaml[/red]"
+                    )
+                    log.error(
+                        "strict_tactical_brief: target_profile='engine' but no valid tactical_brief in %s",
+                        args.task,
+                    )
+                    return 1
+
+            task = brief if brief and not brief.startswith("#") else raw
+        else:
+            task = args.task or read_state(state_dir, "task.md")
+
+        if not task:
+            console.print(f"[red][engine] error: no task provided (--task or {state_dir}/task.md)[/red]")
+            return 1
+
+        # change-bdc6820f: write scope from the T03 prompt's deliverables (FR-05-01)
+        project_root = os.getcwd()
+        write_scope = None
+        if _task_bytes is not None:
+            _deliverables = S.extract_deliverable_paths(raw)
+            if _deliverables is not None:
+                write_scope = S.build_write_scope(project_root, _deliverables,
+                                                  manifest.writable_paths, state_dir)
+        if write_scope is not None:
+            console.print(f"[blue][engine] write scope: {escape(write_scope.describe())}[/blue]")
+            log.info("write scope: %s", write_scope.describe())
+        else:
+            log.info("write scope: project root (task is not a T03 prompt)")
+
+        # Resolve placeholders and prepend runtime context
+        task = task.replace("{STATE_DIR}", state_dir).replace("{PROJECT_ROOT}", project_root)
+        runtime_header = (
+            f"[ENGINE RUNTIME CONTEXT]\n"
+            f"state_dir (full absolute path): {state_dir}\n"
+            f"project_root (full absolute path): {project_root}\n"
+            f"Do not use 'state_dir' or 'project_root' as literal path components.\n"
+            f"[END RUNTIME CONTEXT]\n\n"
+        )
+        task = runtime_header + task
+
+        os.makedirs(state_dir, exist_ok=True)
+        write_state(state_dir, "task.md", task)
+
+        # Write context budget report for the planner
+        # F8: Include actual system prompt and tool schema in the initial estimate
+        _sys_prompt = work_recipe.get("instructions", "")
+        _tools = mcp.get_openai_tools()
+        initial_tokens = estimate_tokens([
+            {"role": "system", "content": _sys_prompt},
+            {"role": "user",   "content": task},
+        ], tools=_tools)
+        write_context_report(
+            state_dir, model, context_window,
+            initial_tokens, budget_warn, budget_abort
+        )
+        if context_window:
+            pct = (initial_tokens / context_window) * 100
+            console.print(f"[blue][engine] initial task: ~{initial_tokens:,} tokens ({pct:.1f}% of window)[/blue]")
+            console.print(f"[dim][engine] context report: {state_dir}/context-budget.md[/dim]")
+
+        _run_started = time.time()  # change-e58fd295: BLOCKED.md written by this run
         if args.mode == "worker":
             # F11: Clear stale phase signals to prevent false completion on iteration 1
             _stale = os.path.join(state_dir, "work-complete.txt")
@@ -2727,7 +2800,8 @@ async def main_async(args: argparse.Namespace) -> int:
                     _gate_outcomes if args.mode == "loop" else {}, _run_started, log)
     finally:
         log.info("engine end rc=%d", rc)
-        await mcp.close()
+        if mcp is not None:
+            await mcp.close()
 
     return rc
 

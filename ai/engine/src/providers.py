@@ -42,6 +42,9 @@ _ID_ALPHABET = string.ascii_letters + string.digits
 _ID_LENGTH = 9  # FR-04-09: the format Mistral issues; a compatibility convention
 _ANTHROPIC_DEFAULT_MAX_TOKENS = 8192
 _SECURITY = "/usr/bin/security"  # macOS Keychain CLI (change-7d953510)
+# change-711a57d5 (audit-caab2052 M-06): per-call model request bound, seconds;
+# providers.<name>.request_timeout_seconds overrides it.
+DEFAULT_REQUEST_TIMEOUT_SECONDS = 300.0
 _KEYCHAIN_TIMEOUT = 10  # seconds; a locked Keychain or unanswered dialog blocks
 
 _THINK_RE = re.compile(r"<think>.*?</think>", re.DOTALL)
@@ -116,12 +119,20 @@ class OpenAICompatProvider:
     """Provider for OpenAI-compatible chat completion endpoints."""
 
     def __init__(self, kind: str = "omlx", base_url: str = "", api_key: str = "",
-                 client: Any = None):
+                 client: Any = None,
+                 timeout: float = DEFAULT_REQUEST_TIMEOUT_SECONDS) -> None:
+        """
+        timeout: per-request bound in seconds for a client built here; the SDK's
+        own retries are off, so the engine's bounded retry is the only retry
+        loop (change-711a57d5, audit-caab2052 M-06). An injected client is used
+        unchanged.
+        """
         self.kind = kind
         self.base_url = base_url
         if client is None:
             from openai import AsyncOpenAI
-            client = AsyncOpenAI(base_url=base_url, api_key=api_key)
+            client = AsyncOpenAI(base_url=base_url, api_key=api_key,
+                                 timeout=timeout, max_retries=0)
         self.client = client
 
     async def complete(self, model: str, messages: list[dict], tools: list[dict] | None,
@@ -306,16 +317,20 @@ class AnthropicProvider:
     kind = "anthropic"
 
     def __init__(self, api_key: str = "", max_tokens: int = _ANTHROPIC_DEFAULT_MAX_TOKENS,
-                 strict_tools: bool = True, base_url: str | None = None, client: Any = None):
+                 strict_tools: bool = True, base_url: str | None = None, client: Any = None,
+                 timeout: float = DEFAULT_REQUEST_TIMEOUT_SECONDS) -> None:
         """
         base_url: optional Anthropic-compatible endpoint other than the Anthropic
         API, for example a local oMLX server (change-43091424). Omitted, the SDK
         default (the Anthropic API) applies.
+        timeout: per-request bound in seconds for a client built here, with SDK
+        retries off (change-711a57d5, audit-caab2052 M-06).
         """
         self.base_url = base_url or None
         if client is None:
             from anthropic import AsyncAnthropic  # optional dependency, needed only here
-            kwargs: dict[str, Any] = {"api_key": api_key}
+            kwargs: dict[str, Any] = {"api_key": api_key, "timeout": timeout,
+                                      "max_retries": 0}
             if self.base_url:
                 kwargs["base_url"] = self.base_url
             client = AsyncAnthropic(**kwargs)
@@ -480,16 +495,24 @@ def make_provider(name: str, pcfg: dict) -> Any:
     kind = pcfg.get("kind")
     if kind not in KINDS:
         raise ConfigError(f"providers.{name}.kind: '{kind}' is not one of {', '.join(KINDS)}")
+    # change-711a57d5 (audit-caab2052 M-06): validated before the key lookup so
+    # the message appears whatever the key source.
+    timeout = pcfg.get("request_timeout_seconds")
+    if timeout is None:
+        timeout = DEFAULT_REQUEST_TIMEOUT_SECONDS
+    elif isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or timeout <= 0:
+        raise ConfigError(f"providers.{name}.request_timeout_seconds: must be a positive number")
     key = _api_key(name, pcfg, kind)
     if kind == "anthropic":
         return AnthropicProvider(api_key=key,
                                  max_tokens=int(pcfg.get("max_tokens") or _ANTHROPIC_DEFAULT_MAX_TOKENS),
                                  strict_tools=bool(pcfg.get("strict_tools", True)),
-                                 base_url=pcfg.get("base_url"))
+                                 base_url=pcfg.get("base_url"),
+                                 timeout=timeout)
     base_url = pcfg.get("base_url")
     if not base_url:
         raise ConfigError(f"providers.{name}.base_url: required for kind {kind}")
-    return OpenAICompatProvider(kind=kind, base_url=base_url, api_key=key)
+    return OpenAICompatProvider(kind=kind, base_url=base_url, api_key=key, timeout=timeout)
 
 
 def build_role_bindings(config: dict, args: Any = None,
@@ -513,6 +536,9 @@ def build_role_bindings(config: dict, args: Any = None,
     if "omlx" not in providers_cfg and isinstance(omlx_cfg, dict):
         providers_cfg["omlx"] = {"kind": "omlx", "base_url": omlx_cfg.get("base_url"),
                                  "api_key": omlx_cfg.get("api_key", "local")}
+        # change-711a57d5 (audit-caab2052 M-06): legacy block carries the timeout.
+        if "request_timeout_seconds" in omlx_cfg:
+            providers_cfg["omlx"]["request_timeout_seconds"] = omlx_cfg["request_timeout_seconds"]
 
     roles_cfg = config.get("roles")
     instances: dict[str, Any] = {}
