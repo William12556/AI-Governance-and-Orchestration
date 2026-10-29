@@ -18,6 +18,8 @@ Created: 2026 October 27
 [10.0 Recommended Remediation Order](<#10.0 recommended remediation order>)
 [11.0 Open Questions for the Operator](<#11.0 open questions for the operator>)
 [12.0 T08 Record](<#12.0 t08 record>)
+[13.0 Closure Recommendation](<#13.0 closure recommendation>)
+[14.0 Operator Decisions](<#14.0 operator decisions>)
 [Version History](<#version history>)
 
 ---
@@ -31,10 +33,10 @@ Created: 2026 October 27
 - **Central results:**
   - M-01: a tool call whose arguments are not a JSON object (a list, a number, or a double-encoded string) raises `AttributeError` in `run_phase`. The run ends with a traceback, no `BLOCKED.md` and no return stage. Probe-confirmed for write and read tools.
   - M-02: the per-iteration context budget counts message `content` only. Tool-call arguments in assistant messages and the tool schema are not counted, so a phase that writes large files reaches the provider's context limit without a budget abort. Probe: a 40,000-character `write_file` call is estimated at 0 tokens.
-  - M-03: `linter.py` and `protocol_checker.py` skip every document whose `schema_type` is not one of the five retired-scheme values, and report nothing. A `t07_change` document with four defects gives 0 findings. 23 closed documents in `dev/` carry such values. This is the hazard recorded in audit-eb782f83 F-04, now realised.
+  - M-03: `linter.py` and `protocol_checker.py` skip every document whose `schema_type` is not one of the five retired-scheme values, and report nothing. A `t07_change` document with four defects gives 0 findings. 21 closed documents in `dev/` carry such values. This is the hazard recorded in audit-eb782f83 F-04, now realised.
   - M-04 and M-05: Overwatch reports `RUNNING` after any run that ends without `BLOCKED.md` or `.complete`. It also raises FR-02-06 whenever a prompt is open, because the engine's `task.md` now begins with the runtime header.
 - **Tests:** 331 passed, 1 skipped (`tests/webui/test_overwatch.py:296`, skipped when run as root). `linter.py dev`: 0 errors, 96 warnings. `protocol_checker.py dev`: 0 errors, 0 warnings.
-- **Prior findings:** of 41 re-verification rows for findings that concern these files, 31 are resolved, 7 are still present (6 deferred in `dev/task.md`, 1 accepted), 1 is partly resolved and 2 are not applicable to this scope (§7.0).
+- **Prior findings:** of 41 re-verification rows for findings that concern these files, 31 are resolved, 7 are still present (6 deferred in `dev/task.md`, one of which is realised as M-03; 1 accepted), 1 is partly resolved and 2 are not applicable to this scope (§7.0).
 
 [Return to Table of Contents](<#table of contents>)
 
@@ -186,7 +188,7 @@ Context only: `ai/engine/mcp/server.py` (344), `ai/engine/recipes/` (2 files), `
 
 - **M-01 Non-object tool-call arguments crash the phase.** Observed (P1, P2). `OpenAICompatProvider.normalise` keeps any JSON value (`providers.py:150-152`). `parser.parse_tool_calls` passes `arguments` through unchecked in format 1 (`parser.py:93, 96`) and format 2 (`parser.py:110-117`). `run_phase` then calls `.get` on the value in `scope.check` (`scope.py:64, 70`, reached from `orchestrator.py:1302`), in `_validate_audit_report_write` (`orchestrator.py:275`), in read tracking (`orchestrator.py:1338`) and in edit handling (`orchestrator.py:1415`). P2 drove `run_phase` with `write_file` and `read_file` calls whose arguments are `[1, 2]`. Both raised `AttributeError`, and no `BLOCKED.md` was written. A double-encoded string, which local models emit, gives the same result (P1). The run ends with a traceback. `_finish_run` is skipped, so the FR-02-03 return stage is not recorded, and engine-mcp reports the run as neither shipped nor blocked. No write is dispatched, so the failure is safe but unhandled.
 - **M-02 The budget estimate omits tool-call arguments and the tool schema.** Observed (P4). `estimate_tokens` counts only `content` (`orchestrator.py:720-728`). In assistant messages the call payload is in `tool_calls[].function.arguments` (`orchestrator.py:1248-1256`), so it is never counted. P4: a 40,000-character `write_file` call is estimated at 0 tokens. `run_phase` calls `estimate_tokens(messages)` without `tools` (`orchestrator.py:1179`), although the docstring (F8) and design-ael §5.1 require the schema. P4: 8,000 characters of schema add 2,000 tokens when passed and 0 at `:1179`. A worker that writes large files therefore reaches the provider's context limit with no budget abort. The provider error is then retried three times and ends BLOCKED with a generic message.
-- **M-03 Governance checkers silently skip unknown schema types.** Observed (fixture, `rg`). `check_yaml` returns before any field check when `schema_type` is not in `_ID_FIELDS` (`linter.py:237-262`); the coupling pass skips the same documents (`linter.py:378`); `protocol_checker.load_workspace` drops them (`protocol_checker.py:132-133`). None of these emits a warning. A `t07_change` document with an invalid id, an invalid status, iteration 0 and a dangling issue reference gives 0 findings, while the same document as `t02_change` gives 4 errors. 23 closed documents in `dev/` use `t07_change`, `t06_issue` or `t03_prompt`. The templates still emit the retired values, so new documents are checked today. The defect is that the divergence audit-eb782f83 F-04 predicted now exists and the tools report a clean result. Retiring the numeric prefix is deferred (`dev/task.md`); this finding concerns only the missing warning.
+- **M-03 Governance checkers silently skip unknown schema types.** Observed (fixture, `rg`). `check_yaml` returns before any field check when `schema_type` is not in `_ID_FIELDS` (`linter.py:237-262`); the coupling pass skips the same documents (`linter.py:378`); `protocol_checker.load_workspace` drops them (`protocol_checker.py:132-133`). None of these emits a warning. A `t07_change` document with an invalid id, an invalid status, iteration 0 and a dangling issue reference gives 0 findings, while the same document as `t02_change` gives 4 errors. 21 closed documents in `dev/` use `t07_change`, `t06_issue` or `t03_prompt`. The templates still emit the retired values, so new documents are checked today. The defect is that the divergence audit-eb782f83 F-04 predicted now exists and the tools report a clean result. Retiring the numeric prefix is deferred (`dev/task.md`); this finding concerns only the missing warning.
 - **M-04 Runs that end without a terminal marker are shown as running.** Observed (P3, code). Overwatch sets `running` whenever `task.md` exists and neither `BLOCKED.md` nor `.complete` does (`overwatch.py:466-473`). The engine writes `task.md` at every start (`orchestrator.py:2637`) and only `--mode reset` removes it (`orchestrator.py:395-407`). These exits write neither marker: context-budget abort (`:1184-1189`, then `:2037-2039`), declined continuation after max iterations (`:1996-1997`), review-phase failure (`:2154-2156`), the `--duration` limit (`:1968-1972`, writes `.timeout`, which Overwatch does not read) and M-01. After any of these, the dashboard shows `RUNNING` until the next reset.
 - **M-05 FR-02-06 fires whenever a prompt is open.** Observed (P3). `task_ref` is the first non-empty line of `task.md` (`overwatch.py:483-489`). Since the runtime header was added, that line is always `[ENGINE RUNTIME CONTEXT]` (`orchestrator.py:2627-2634`). The FR-02-06 match on the prompt's UUID or file name (`overwatch.py:706-710`) therefore never succeeds. The task text is also the tactical brief, which need not name the prompt.
 - **L-04 CLI tracking depends on the file name.** Observed (P4). The CLI tracks a task only when its name matches `prompt-<uuid>-` (`orchestrator.py:2341-2349, 2461`). Design §8.4 tracks by resolved location in `ai/workspace/`. A T03 prompt at `ai/workspace/prompt/my-task.md` runs from the CLI with no pre-run check and no approval. engine-mcp refuses such names (`server.py` `_PROMPT_NAME`), so only direct CLI runs are affected.
@@ -259,11 +261,13 @@ See §8.0.
 
 ## 6.0 Findings Register
 
+Critical: none. High: none. Medium: M-01 to M-06. Low: L-01 to L-19.
+
 | ID | Severity | File:line | Finding | Evidence | Recommendation |
 |---|---|---|---|---|---|
-| M-01 | Medium | `orchestrator.py:1302, 1338`; `scope.py:64, 70`; `providers.py:150`; `parser.py:93, 110` | Non-object tool-call arguments raise `AttributeError` in `run_phase`; no `BLOCKED.md`, no return stage | Observed: P1, P2 | Normalise arguments to a dict at the provider boundary, or reply with a tool error for a non-object; add a test |
+| M-01 | Medium | `orchestrator.py:1302, 1338`; `scope.py:64, 70`; `providers.py:150`; `parser.py:93, 96, 110` | Non-object tool-call arguments raise `AttributeError` in `run_phase`; no `BLOCKED.md`, no return stage | Observed: P1, P2 | Normalise arguments to a dict at the provider boundary, or reply with a tool error for a non-object; add a test |
 | M-02 | Medium | `orchestrator.py:720-728, 1179` | Budget estimate omits `tool_calls` arguments and the tool schema | Observed: P4 (0 tokens for 40,000 characters) | Count arguments and pass `tools`, as design-ael §5.1 states |
-| M-03 | Medium | `linter.py:237-262, 378`; `protocol_checker.py:132` | Documents with an unrecognised `schema_type` are skipped without a warning | Observed: fixture (4 errors vs 0); 23 closed `dev/` documents | Warn on an unknown `schema_type`; decide the namespace (eb782f83 F-04) |
+| M-03 | Medium | `linter.py:237-262, 378`; `protocol_checker.py:132` | Documents with an unrecognised `schema_type` are skipped without a warning | Observed: fixture (4 errors vs 0); 21 closed `dev/` documents | Warn on an unknown `schema_type`; decide the namespace (eb782f83 F-04) |
 | M-04 | Medium | `overwatch.py:466-473`; `orchestrator.py:1189, 1997, 2156, 2637` | Failure exits leave no terminal marker; Overwatch shows `RUNNING` | Observed: P3, code | Write a terminal marker on every non-SHIP exit, or derive status from the run record or the log's `engine end` |
 | M-05 | Medium | `overwatch.py:483-489, 703-717`; `orchestrator.py:2627-2634` | FR-02-06 always fires while a prompt is open | Observed: P3 | Match against the task path recorded by the run, not the first line of `task.md` |
 | M-06 | Medium | `providers.py:124, 321`; `orchestrator.py:475-505`; `mcp_client.py:53, 101` | No configurable timeout; retries multiply to up to 9 × 600 s; caps cannot interrupt | Observed constants; inferred behaviour | Set explicit SDK timeout and `max_retries`; wrap MCP calls in `asyncio.wait_for` |
@@ -337,7 +341,7 @@ Status is against the code at `24b2dfc`. "Deferred" means the item is open in `d
 | audit-7d953510 L-02 | "Login Keychain" wording | Resolved | `providers.py:405-406` |
 | audit-7d953510 L-03 | Keychain test gaps | Resolved | `test_keychain_t16_*`, T17, T18 in `tests/engine/test_providers.py` |
 | audit-5bcd46ad L-09 | Two write classifications | Resolved | `mcp_client.py:23` imports `scope.is_readonly_tool` |
-| audit-eb782f83 F-04 | Two `schema_type` namespaces | Still present — realised | 23 closed `dev/` documents use the new scheme and are skipped by both checkers (M-03); retirement deferred |
+| audit-eb782f83 F-04 | Two `schema_type` namespaces | Still present — deferred (realised as M-03) | 21 closed `dev/` documents use the new scheme and are skipped by both checkers (M-03); retirement deferred |
 
 Totals: 41 rows, where one row groups six findings outside this scope. 31 resolved, 7 still present (6 deferred, 1 accepted), 1 partly resolved, 2 rows not applicable.
 
@@ -441,7 +445,7 @@ findings:
   critical: []
   high: []
   medium:
-    - location: "orchestrator.py:1302, 1338; scope.py:64, 70; providers.py:150; parser.py:93, 110"
+    - location: "orchestrator.py:1302, 1338; scope.py:64, 70; providers.py:150; parser.py:93, 96, 110"
       description: "M-01. Non-object tool-call arguments raise AttributeError in run_phase."
     - location: "orchestrator.py:720-728, 1179"
       description: "M-02. Budget estimate omits tool-call arguments and the tool schema."
@@ -449,7 +453,7 @@ findings:
       description: "M-03. Unknown schema_type documents skipped without warning."
     - location: "overwatch.py:466-473; orchestrator.py:1189, 1997, 2156, 2637"
       description: "M-04. Failure exits leave no terminal marker; Overwatch shows RUNNING."
-    - location: "overwatch.py:483-489, 703-717"
+    - location: "overwatch.py:483-489, 703-717; orchestrator.py:2627-2634"
       description: "M-05. FR-02-06 always fires while a prompt is open."
     - location: "providers.py:124, 321; orchestrator.py:475-505; mcp_client.py:53, 101"
       description: "M-06. No configurable timeouts; retries multiply; caps cannot interrupt."
@@ -458,7 +462,7 @@ findings:
       description: "L-01. Write tools recognised by name verbs only."
     - location: "scope.py:209-212"
       description: "L-02. Unresolvable path skipped."
-    - location: "orchestrator.py:1644-1647"
+    - location: "orchestrator.py:1644-1647, 1428, 1497, 1623; gates.py:171"
       description: "L-03. Preflight grep lacks '--'; subprocesses lack timeouts."
     - location: "orchestrator.py:2341-2349, 2461"
       description: "L-04. CLI tracks tasks by name, not location."
@@ -486,7 +490,7 @@ findings:
       description: "L-15. govwatch heading in output."
     - location: "mcp_client.py:11; orchestrator.py:71, 1183, 1321; protocol_checker.py:153; providers.py:535; gates.py:251; stages.py:296"
       description: "L-16. Dead code, stale docstrings, mypy errors."
-    - location: "linter.py; scope.py; stages.py; orchestrator.py; overwatch.py"
+    - location: "linter.py:37-39; scope.py:111; stages.py:178, 201; orchestrator.py:949, 975, 1577; overwatch.py:48-68, 222, 1240"
       description: "L-17. Duplicated parsing and layout logic (ai/core candidates)."
     - location: "orchestrator.py:55, 533, 1078-1554, 1878-2306, 2612"
       description: "L-18. Large functions; implicit working directory."
@@ -514,9 +518,11 @@ traceability:
   issue_refs: []
   related_audits:
     - audit_ref: "audit-14e05e35"
-      relationship: "follow_up"
+      relationship: "related"  # prior findings re-verified (§7.0)
     - audit_ref: "audit-7d953510"
-      relationship: "follow_up"
+      relationship: "related"  # prior findings re-verified (§7.0)
+    - audit_ref: "audit-5bcd46ad"
+      relationship: "related"  # L-09 re-verified (§7.0)
     - audit_ref: "audit-eb782f83"
       relationship: "related"  # F-04 schema_type namespace
 
@@ -527,6 +533,10 @@ version_history:
     date: "2026-10-27"
     changes:
       - "Initial static code audit"
+  - version: "1.1"
+    date: "2026-10-29"
+    changes:
+      - "Planner review corrections; closure recommendation and operator decisions added"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
@@ -538,11 +548,37 @@ metadata:
 
 ---
 
+## 13.0 Closure Recommendation
+
+- No critical or high findings. P02.8.1 therefore does not block closure on findings alone.
+- Closure requires a recorded decision for each medium finding (§14.0) and human approval.
+- Findings remediated by a source change require a follow-up audit before closure (P02.8.2).
+- OQ-01 to OQ-04 should be decided before closure. Their answers decide whether the Conflict and Deviates rows in §4.0 are resolved in code or in documents.
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
+## 14.0 Operator Decisions
+
+Recorded by the planner on 2026-10-29 on the operator's decision.
+
+| Finding | Decision | Disposition |
+|---|---|---|
+| M-01, M-02, M-06, L-03, L-09 | Remediate | First triple, together with audit-14e05e35 L-09 (HTTP 400/401/403 not retried). M-01: a non-object argument value gets a tool error reply, from one check in `run_phase`. M-06: configurable timeouts, default 300 s per model call and 120 s per MCP call; SDK retries 0, engine retry loop retained. Follow-up audit required (P02.8.2) |
+| M-03, M-04, M-05; L-01, L-02, L-04 to L-08, L-10 to L-19 | Not yet decided | Registered in `dev/task.md` by §10.0 group |
+| OQ-01 to OQ-04 | Open | Registered in `dev/task.md` |
+
+[Return to Table of Contents](<#table of contents>)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-10-27 | Initial static code audit of ai/engine/src and ai/webui/src |
+| 1.1 | 2026-10-29 | Planner review corrections: M-03 document count 23 → 21 (two matches were narrative text); eb782f83 F-04 row relabelled deferred; register and T08 locations aligned (M-01, M-05, L-03, L-17); related_audits set to related and audit-5bcd46ad added; severity line in §6.0; §13.0 Closure Recommendation and §14.0 Operator Decisions added |
 
 ---
 
