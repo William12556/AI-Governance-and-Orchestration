@@ -201,6 +201,13 @@ version_history:
       - "Review observations: malformed calls reach the MCP error threshold (3) before the F27 limit (4), recorded in design §11.0; NaN passes both timeout checks (no action); SDK error text in the FR-E BLOCKED.md is assumed key-free, as on the existing path (for the follow-up audit)"
       - "Planner documents updated: design-14e05e35 v1.17 §3.0 and §11.0, guide-engine-operations v1.19, config.template.yaml"
       - "Outstanding before verified: live loop run on oMLX; follow-up audit by an independent session (P02.8.2)"
+  - version: "1.3"
+    date: "2026-10-29"
+    changes:
+      - "Live check, accepted by the operator in place of a loop run: engine-mcp start_engine, mode reviewer, run 15c39a95 in dev/smoke on oMLX (engine_20261029-143735.LOG), after bin/propagate.sh --yes --allow-major dev/smoke (governance 11.0 to 12.5; dev/smoke engine identical to ai/engine at c328dfb)"
+      - "Result: Magistral-Small-2509-MLX-8bit loaded on first request; every model call completed within the 300 s default; filesystem MCP connected (13 tools) under the 120 s read timeout; 15 read-only tool calls, none failed; no timeout, retry or non-retryable error in the log; peak budget about 15 % of 40,960; SHIP; last log line 'engine end rc=0'"
+      - "Not exercised live: worker writes, FR-A malformed arguments, FR-E client errors (covered by T1, T2, T10, T11)"
+      - "Outstanding before verified: follow-up audit by an independent session (P02.8.2)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
