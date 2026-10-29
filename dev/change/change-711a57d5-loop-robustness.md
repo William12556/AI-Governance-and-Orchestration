@@ -5,7 +5,7 @@ change_info:
   id: "change-711a57d5"
   title: "Engine loop robustness (audit-caab2052 group 1; audit-14e05e35 L-09)"
   date: "2026-10-29"
-  status: "proposed"
+  status: "approved"  # operator 2026-10-29
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -189,6 +189,9 @@ version_history:
   - version: "1.0"
     date: "2026-10-29"
     changes: ["Initial change record"]
+  - version: "1.1"
+    date: "2026-10-29"
+    changes: ["Approved by the operator as drafted, including the planner's choices: MCP read timeout through ClientSession read_timeout_seconds, 30 s subprocess timeout, one engine-wide loop.mcp_timeout_seconds, M-01 check before the dispatch refusal"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
