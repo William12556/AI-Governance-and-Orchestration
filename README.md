@@ -34,6 +34,8 @@ The engine runs the worker and reviewer in a loop until the reviewer accepts the
 
 The main objective is choice: each role can be assigned a frontier model or an open-weight model. Anthropic and Mistral AI are treated equally; neither is preferred. oMLX is the preferred local inference server.
 
+For an example of AI-G&O in use, see [GTach](https://github.com/William12556/GTach), a Raspberry Pi OBD-II tachometer developed under the software engineering governance model.
+
 [Return to Table of Contents](<#table of contents>)
 
 ---
@@ -183,6 +185,7 @@ This framework is experimental, serving as a learning exercise in AI agent gover
 | 4.0 | 2026-09-29 | Simplified to user content; reframed for AI-G&O pivot (governance models, planner/worker/reviewer roles, provider choice per D-16); Status section marks planned items; developer content moved to docs/guide-install.md §3.0; RATIONALE.md link and motivation paragraph removed; profile table and requirements condensed |
 | 4.1 | 2026-09-29 | Review corrections: leading blank line removed; scope sentence (D-01, D-02); planner client wording matches §2.2; Node.js requirement; web interface wording; engine-mcp and overwatch documentation rows |
 | 4.2 | 2026-10-14 | §2.2: Mistral API engine roles available, Anthropic API live check pending, per-role provider binding replaces the single-oMLX statement; §3.0: inference row covers API roles |
+| 4.3 | 2026-10-31 | §1.0: added GTach as an example project |
 
 ---
 
