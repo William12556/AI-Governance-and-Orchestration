@@ -8,20 +8,20 @@ Created: 2025 October 30
 
 **Cross-cutting**
 
-- [P00 Governance (start here)](<#p00 governance (start here)>)
-- [P01 Trace](<#p01 trace>)
-- [P02 Audit](<#p02 audit>)
-- [P03 Issue](<#p03 issue>)
-- [P04 Change](<#p04 change>)
+- [P00 Governance (start here)](#p00-governance-start-here)
+- [P01 Trace](#p01-trace)
+- [P02 Audit](#p02-audit)
+- [P03 Issue](#p03-issue)
+- [P04 Change](#p04-change)
 
 **Lifecycle**
 
-- [P10 Project Initialization (Execute once)](<#p10 project initialization (execute once)>)
-- [P11 Requirements](<#p11 requirements>)
-- [P12 Design](<#p12 design>)
-- [P13 Prompt](<#p13 prompt>)
-- [P14 Quality](<#p14 quality>)
-- [P15 Test](<#p15 test>)
+- [P10 Project Initialization (Execute once)](#p10-project-initialization-execute-once)
+- [P11 Requirements](#p11-requirements)
+- [P12 Design](#p12-design)
+- [P13 Prompt](#p13-prompt)
+- [P14 Quality](#p14-quality)
+- [P15 Test](#p15-test)
 
 **Templates**
 
@@ -34,9 +34,9 @@ Created: 2025 October 30
 - [T07: Change](templates/T07-change.md)
 - [T08: Audit](templates/T08-audit.md)
 
-[Workflow](<#workflow>)
-[Version History](<#version history>)
-[Appendix A — Identifier Aliases](<#appendix a — identifier aliases>)
+- [Workflow](#workflow)
+- [Version History](#version-history)
+- [Appendix A — Identifier Aliases](#appendix-a--identifier-aliases)
 
 ---
 ###### Governance Prime Directive: Follow workflow [flowchart](workflow.md)
@@ -275,7 +275,7 @@ python ai/engine/src/orchestrator.py --mode loop \
     - Planner: adds a row when work is identified; updates Status as it changes; removes the row once the outcome is recorded (a closed triple, or an explicit drop); git history preserves prior state
     - Framework ships a skeleton `ai/task.md`; `bin/propagate.sh` excludes it from overwrite and seeds it only when absent in the target, per `context.md` treatment
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ## P01 Trace
 
@@ -301,7 +301,7 @@ python ai/engine/src/orchestrator.py --mode loop \
       - Bidirectional Navigation: Forward (Req→Design→Code→Test) and Backward (Test→Code→Design→Req)
     - Planner: Updates matrix when requirements, designs, code, or tests change
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ## P02 Audit
 
@@ -398,7 +398,7 @@ python ai/engine/src/orchestrator.py --mode loop \
       - Procedure: ai/governance/software-engineering/doc/guide-audit-loop.md
     - Both modes terminate at audit-<uuid>-<name>.md (T08) and feed remediation via P02.6 (P03)
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ## P03 Issue
 
@@ -432,7 +432,7 @@ python ai/engine/src/orchestrator.py --mode loop \
     - Planner: Validates iteration match before proceeding
     - Note: One-to-one coupling does not prevent modification of paired issue/change documents during debugging iterations
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ## P04 Change
 
@@ -502,7 +502,7 @@ python ai/engine/src/orchestrator.py --mode loop \
       - (5) Human approval obtained before implementation
     - If any criterion fails, standard T06 → T07 → T03 → engine workflow applies.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ## P10 Project Initialization (Execute once)
 
@@ -742,7 +742,7 @@ exclude_lines = [
 ]
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ## P11 Requirements
 
@@ -778,7 +778,7 @@ exclude_lines = [
     - Human: Approves changes
   - P11.7 Reserved for future use
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 ## P12 Design
 
   - P12.1 Tier 1: System Architecture
@@ -878,7 +878,7 @@ exclude_lines = [
     - Planner: Updates registry when design changes affect named elements
     - Planner: Cross-links registry document to all design documents that define its elements
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ## P13 Prompt
 
@@ -969,7 +969,7 @@ ai/workspace/report/report-<uuid>-<name>.md.
     - Planner: Documents revision rationale in prompt version_history section
     - GitHub commits provide complete change tracking and rollback capability
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ## P14 Quality
 
@@ -999,7 +999,7 @@ ai/workspace/report/report-<uuid>-<name>.md.
     - Audit scope: File-level modifications, iteration-level decisions, session-level metrics
     - Integration: Audit events linked to git commits via timestamp correlation
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ## P15 Test
 
@@ -1142,13 +1142,13 @@ pip install dist/*.whl
     | Test files under tests/ | Permanent; never archived; changed only under P03/P04 after T04 closure |
     | Diagnostic scripts | Outside the repository; never committed |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ## Workflow
 
 See [workflow.md](workflow.md).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -1270,9 +1270,10 @@ See [workflow.md](workflow.md).
 | 12.3 | 2026-10-09 | P15.3, P15.7, P15.10, P15.11, P15.15, P15.18: every file under tests/ is permanent and is never archived; ephemeral validation scripts retired; diagnostics run outside the repository; component subdirectories optional; test files named by behaviour with covered UUIDs in the module docstring; T04 closes after a full-suite pass with pytest path and commit in notes; closed tests change only under P03/P04 (sourced from GTach). Non-breaking. |
 | 12.4 | 2026-10-23 | P00.20: task register holds all open work (open triples, items not yet raised, deferred and parked items) in a four-column table with a leading Status keyword (sourced from GTach). P11.7 (framework-development requirements) and the P10.6 framework-repository notes removed; they apply only to the framework repository and are kept there. P11.7 reserved. Non-breaking. |
 | 12.5 | 2026-10-23 | P10.6: framework source organised by component; ai/src/ replaced by ai/webui/ (Overwatch) and ai/core/ (reserved) (change-14cf601f). Non-breaking. |
+| 12.6 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list. Non-breaking. |
 
 ---
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

@@ -6,14 +6,14 @@ Created: 2026 June 02
 
 ## Table of Contents
 
-[1.0 Overview](<#1.0 overview>)
-[2.0 Prerequisites](<#2.0 prerequisites>)
-[3.0 Clone and Initialise](<#3.0 clone and initialise>)
-[4.0 Select a Profile](<#4.0 select a profile>)
-[5.0 Configure engine](<#5.0 configure engine>)
-[6.0 First Run](<#6.0 first run>)
-[7.0 Next Steps](<#7.0 next steps>)
-[Version History](<#version history>)
+- [1.0 Overview](#10-overview)
+- [2.0 Prerequisites](#20-prerequisites)
+- [3.0 Clone and Initialise](#30-clone-and-initialise)
+- [4.0 Select a Profile](#40-select-a-profile)
+- [5.0 Configure engine](#50-configure-engine)
+- [6.0 First Run](#60-first-run)
+- [7.0 Next Steps](#70-next-steps)
+- [Version History](#version-history)
 
 ---
 
@@ -21,7 +21,7 @@ Created: 2026 June 02
 
 This guide covers the steps from cloning the repository to running the first engine loop in a downstream project. It assumes Apple Silicon hardware and the engine profile. For other profiles see [guide-profile-selection.md](guide-profile-selection.md).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -49,7 +49,7 @@ This guide covers the steps from cloning the repository to running the first eng
 
 Install oMLX and download Devstral before proceeding. See [setup-apple-silicon-mlx.md](setup-apple-silicon-mlx.md).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -88,7 +88,7 @@ git add .
 git commit -m "init: project from framework ai/"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -105,7 +105,7 @@ Three implementation profiles are available. For a full comparison see [guide-pr
 
 Profile documents are in `ai/profiles/`. Read the selected profile before proceeding.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -151,7 +151,7 @@ curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 
 `context-budget.md` is written automatically by the orchestrator at every startup — no separate step is required. Read `ai/state/context-budget.md` after the first run (and after any model change) before authoring T03 prompts.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -183,7 +183,7 @@ P11 Requirements → P12 Design → P13 T03 Prompt → engine → P15 Test → P
 
 The planner coordinates each step. Human approval gates are required before requirements baseline, design tier transitions, and code generation.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -195,7 +195,7 @@ The planner coordinates each step. Human approval gates are required before requ
 - `ai/governance/software-engineering/governance.md` — authoritative protocol reference
 - `ai/governance/software-engineering/workflow.md` — workflow flowchart
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -217,6 +217,7 @@ The planner coordinates each step. Human approval gates are required before requ
 | 1.11 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.12 | 2026-09-29 | Profile file name corrected: claude.md → claude-code.md |
 | 1.13 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 1.14 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
 
 ---
 

@@ -6,20 +6,20 @@ Created: 2026 March 05
 
 ## Table of Contents
 
-- [Overview](<#overview>)
-- [Hardware Requirements](<#hardware requirements>)
-- [Software Prerequisites](<#software prerequisites>)
-- [Install oMLX](<#install omlx>)
-  - [DMG Installer](<#dmg installer>)
-  - [pip](<#pip>)
-- [Download Devstral](<#download devstral>)
-  - [Devstral Small 2507 Q8](<#devstral small 2507 q8>)
-  - [Devstral Small 2507 BF16](<#devstral small 2507 bf16>)
-  - [Devstral Small 2 (2512) 6bit](<#devstral small 2 (2512) 6bit>)
-- [Start oMLX](<#start omlx>)
-- [Configure engine](<#configure engine>)
-- [Verification](<#verification>)
-- [Version History](<#version history>)
+- [Overview](#overview)
+- [Hardware Requirements](#hardware-requirements)
+- [Software Prerequisites](#software-prerequisites)
+- [Install oMLX](#install-omlx)
+  - [DMG Installer](#dmg-installer)
+  - [pip](#pip)
+- [Download Devstral](#download-devstral)
+  - [Devstral Small 2507 Q8](#devstral-small-2507-q8)
+  - [Devstral Small 2507 BF16](#devstral-small-2507-bf16)
+  - [Devstral Small 2 (2512) 6bit](#devstral-small-2-2512-6bit)
+- [Start oMLX](#start-omlx)
+- [Configure engine](#configure-engine)
+- [Verification](#verification)
+- [Version History](#version-history)
 
 ---
 
@@ -30,7 +30,7 @@ This guide covers running Devstral on Apple Silicon using the MLX framework. oML
 Model: **Devstral Small 2507** (Apache 2.0 licence)
 Quantisation: Q8 recommended; BF16 available for systems with sufficient unified memory.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -45,7 +45,7 @@ Quantisation: Q8 recommended; BF16 available for systems with sufficient unified
 
 > Devstral Small 2507 is a 22B-parameter model. Q8 quantisation requires approximately 24 GB unified memory. BF16 requires approximately 44 GB.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -55,7 +55,7 @@ Quantisation: Q8 recommended; BF16 available for systems with sufficient unified
 - **pip** — included with Python 3.11
 - **huggingface_hub** — installed in the step below
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -81,7 +81,7 @@ Verify either installation:
 omlx --help
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -111,7 +111,7 @@ snapshot_download(
 
 > Note: the HuggingFace repository name contains a known typo — `Devstral-Samll-2507-8bit` (not `Small`). Use the name exactly as shown.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -133,7 +133,7 @@ snapshot_download(
 
 > Replace `<bf16-repo-name>` with the current BF16 repository name from mlx-community. Repository names may change between model releases.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -151,7 +151,7 @@ snapshot_download(
 "
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -203,7 +203,7 @@ Engine config (`ai/config.yaml`):
 | `api_key` | `local` (value from `~/.omlx/settings.json`) |
 | `default_model` | `Devstral-Small-2-24B-Instruct-2512` |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -231,7 +231,7 @@ loop:
 
 Replace `<allowed-path>` with the project root path. Replace `api_key` with your configured oMLX API key if different from `local`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -253,7 +253,7 @@ python ai/engine/src/orchestrator.py --mode worker --task "Reply with the single
 
 A response of `OK` confirms end-to-end connectivity.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -272,6 +272,7 @@ A response of `OK` confirms end-to-end connectivity.
 | 1.8 | 2026-06-16 | Updated Devstral 2512 section: Q8 → 6bit; corrected repo MLX-8Bit → MLX-6Bit; updated memory estimate |
 | 1.9 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.10 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 1.11 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
 
 ---
 

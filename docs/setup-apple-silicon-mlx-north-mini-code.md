@@ -6,16 +6,16 @@ Created: 2026 June 26
 
 ## Table of Contents
 
-- [1.0 Overview](<#1.0 overview>)
-- [2.0 Hardware Requirements](<#2.0 hardware requirements>)
-- [3.0 Software Prerequisites](<#3.0 software prerequisites>)
-- [4.0 Install oMLX](<#4.0 install omlx>)
-- [5.0 Download North Mini Code](<#5.0 download north mini code>)
-- [6.0 Start oMLX](<#6.0 start omlx>)
-- [7.0 Configure engine](<#7.0 configure engine>)
-- [8.0 Verification](<#8.0 verification>)
-- [9.0 Known Constraints](<#9.0 known constraints>)
-- [Version History](<#version history>)
+- [1.0 Overview](#10-overview)
+- [2.0 Hardware Requirements](#20-hardware-requirements)
+- [3.0 Software Prerequisites](#30-software-prerequisites)
+- [4.0 Install oMLX](#40-install-omlx)
+- [5.0 Download North Mini Code](#50-download-north-mini-code)
+- [6.0 Start oMLX](#60-start-omlx)
+- [7.0 Configure engine](#70-configure-engine)
+- [8.0 Verification](#80-verification)
+- [9.0 Known Constraints](#90-known-constraints)
+- [Version History](#version-history)
 
 ---
 
@@ -27,9 +27,9 @@ Model: **North Mini Code 1.0** (Cohere2 mixture-of-experts; 30B total parameters
 Licence: **Apache 2.0**.
 Quantisation: 6bit.
 
-This guide is provisional. The model is under evaluation as a worker and reviewer. See [9.0 Known Constraints](<#9.0 known constraints>). For profile mappings, see `ai/profiles/mlx_north_mini_code_1_0_6bit.md`.
+This guide is provisional. The model is under evaluation as a worker and reviewer. See [9.0 Known Constraints](#90-known-constraints). For profile mappings, see `ai/profiles/mlx_north_mini_code_1_0_6bit.md`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -44,7 +44,7 @@ This guide is provisional. The model is under evaluation as a worker and reviewe
 
 > The 6bit weights occupy ~24 GB on disk and ~25 GB resident (oMLX estimate). 32 GB unified memory is the practical minimum; headroom is required for the KV cache and the operating system.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -54,7 +54,7 @@ This guide is provisional. The model is under evaluation as a worker and reviewe
 - **pip** — included with Python 3.11
 - **huggingface_hub** — installed in the step below
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -80,7 +80,7 @@ Verify either installation:
 omlx --help
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -104,7 +104,7 @@ Use Python 3.11+. The `huggingface-cli` may be unreliable on some macOS configur
 
 > Licence: Apache 2.0. Official model card: [`CohereLabs/North-Mini-Code-1.0`](https://huggingface.co/CohereLabs/North-Mini-Code-1.0). The on-disk 6bit weights are a community MLX conversion.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -142,7 +142,7 @@ brew services start omlx
 
 The server exposes an OpenAI-compatible API at `http://localhost:8000/v1`. The admin dashboard is at `http://localhost:8000/admin/dashboard`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -172,7 +172,7 @@ Replace `<allowed-path>` with the project root path. Replace `api_key` with your
 
 The `default_model` value must match the id reported by oMLX `/v1/models` exactly. The verified served id is `North-Mini-Code-1.0-6bit`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -196,9 +196,9 @@ A response of `OK` confirms end-to-end connectivity.
 
 **3. Confirm tool-call parsing (required before execution use):**
 
-Run a worker task that forces a single tool call and confirm the orchestrator parses the result rather than failing or echoing raw action-block text. This model emits Cohere-format action blocks, not Mistral-format tool calls; do not assume the parser handles them. See [9.0 Known Constraints](<#9.0 known constraints>).
+Run a worker task that forces a single tool call and confirm the orchestrator parses the result rather than failing or echoing raw action-block text. This model emits Cohere-format action blocks, not Mistral-format tool calls; do not assume the parser handles them. See [9.0 Known Constraints](#90-known-constraints).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -212,7 +212,7 @@ Run a worker task that forces a single tool call and confirm the orchestrator pa
 | Context | 256K supported context per Cohere (64K max generation). The model `config.json` reports `max_position_embeddings` 500000; 256K is the supported figure. |
 | Licence | Apache 2.0 (Cohere). |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -224,6 +224,7 @@ Run a worker task that forces a single tool call and confirm the orchestrator pa
 | 0.2 | 2026-06-26 | Added Apache 2.0 licence and 30B/3B parameter figures; referenced official CohereLabs card; corrected context to 256K per Cohere specification |
 | 0.3 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 0.4 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 0.5 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
 
 ---
 

@@ -6,13 +6,13 @@ Created: 2026 June 18
 
 ## Table of Contents
 
-[1.0 Configuration](<#1.0 configuration>)
-[2.0 State Directory](<#2.0 state directory>)
-[3.0 Invocation](<#3.0 invocation>)
-[4.0 Audit Loop](<#4.0 audit loop>)
-[5.0 overwatch](<#5.0 overwatch>)
-[6.0 engine-mcp](<#6.0 engine-mcp>)
-[Version History](<#version history>)
+- [1.0 Configuration](#10-configuration)
+- [2.0 State Directory](#20-state-directory)
+- [3.0 Invocation](#30-invocation)
+- [4.0 Audit Loop](#40-audit-loop)
+- [5.0 overwatch](#50-overwatch)
+- [6.0 engine-mcp](#60-engine-mcp)
+- [Version History](#version-history)
 
 ---
 
@@ -27,7 +27,7 @@ Created: 2026 June 18
 | `loop` | `max_iterations` (outer loop cycles), `phase_max_iterations` (inner tool-call iterations per phase), MCP error threshold, tool call cap |
 | `context` | Model directory path, context window size (or `null` to resolve from model `config.json`), warn/abort budget thresholds |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -46,7 +46,7 @@ Created: 2026 June 18
 | `.complete` | Success marker |
 | `BLOCKED.md` | Failure details; seeds T06 Issue |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -76,7 +76,7 @@ python ai/engine/src/orchestrator.py --mode loop \
 | `--duration` | Wall-clock time limit in hours (default: no limit) |
 | `--config` | Path to config.yaml |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -104,7 +104,7 @@ Without `--duration` the loop runs until all items in `audit-index.md` are marke
 
 See `docs/guide-audit-loop.md` for an overview and `ai/governance/software-engineering/doc/guide-audit-loop.md` for operational detail.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -123,7 +123,7 @@ python ai/webui/src/overwatch.py [--project PATH] [--interval N]
 
 The govwatch TUI is retired (change-5bcd46ad).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -141,7 +141,7 @@ At T03 handoff (P13.3), the human selects the execution path:
 Location: `ai/engine/mcp/server.py` (versioned with the engine; replaces the separate ael-mcp repository)
 Setup instructions: P10.8 in `ai/governance/software-engineering/governance.md`
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -156,6 +156,7 @@ Setup instructions: P10.8 in `ai/governance/software-engineering/governance.md`
 | 1.4 | 2026-10-01 | Overwatch phase label: Loop execution (audit-14e05e35 M-03, change-82dbf16a) |
 | 1.5 | 2026-10-01 | State files: review-result.txt not read (change-82dbf16a iteration 2, audit-14e05e35 follow-up, F-06) |
 | 1.6 | 2026-10-23 | Overwatch command path: ai/src/overwatch.py → ai/webui/src/overwatch.py (change-14cf601f) |
+| 1.7 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
 
 ---
 

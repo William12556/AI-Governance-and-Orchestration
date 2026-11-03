@@ -6,14 +6,14 @@ Created: 2026 June 02
 
 ## Table of Contents
 
-[1.0 Overview](<#1.0 overview>)
-[2.0 Decision Criteria](<#2.0 decision criteria>)
-[3.0 Profile Reference](<#3.0 profile reference>)
-[3.1 Engine — Automated Execution Loop](<#3.1 engine — automated execution loop>)
-[3.2 Claude Code](<#3.2 claude code>)
-[3.3 claude-omlx](<#3.3 claude-omlx>)
-[4.0 Trade-offs](<#4.0 trade-offs>)
-[Version History](<#version history>)
+- [1.0 Overview](#10-overview)
+- [2.0 Decision Criteria](#20-decision-criteria)
+- [3.0 Profile Reference](#30-profile-reference)
+- [3.1 Engine — Automated Execution Loop](#31-engine--automated-execution-loop)
+- [3.2 Claude Code](#32-claude-code)
+- [3.3 claude-omlx](#33-claude-omlx)
+- [4.0 Trade-offs](#40-trade-offs)
+- [Version History](#version-history)
 
 ---
 
@@ -29,7 +29,7 @@ Three profiles are available, defined in `ai/profiles/`:
 | `claude-code.md` | Claude Code (Anthropic API) | Manual, human-directed |
 | `claude-omlx.md` | Claude Code CLI + Devstral (local, MLX) | Manual, human-directed |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -57,7 +57,7 @@ No → you must use an MLX profile.
 | Anthropic API key available, no Apple Silicon | `claude-code.md` |
 | Anthropic API key available, Apple Silicon | `claude-code.md` or either MLX profile |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -91,7 +91,7 @@ python ai/engine/src/orchestrator.py --mode loop \
   --task ai/workspace/prompt/prompt-<uuid>-<n>.md
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -116,7 +116,7 @@ Manual profile using Claude Code as the worker and reviewer. The planner authors
 
 **Invocation:** Human pastes T03 prompt into Claude Code session.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -140,7 +140,7 @@ Manual profile using the Claude Code CLI pointed at a local oMLX endpoint. Combi
 
 **Invocation:** Human pastes T03 prompt into Claude Code session configured to use the local oMLX endpoint.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -158,7 +158,7 @@ Manual profile using the Claude Code CLI pointed at a local oMLX endpoint. Combi
 
 The engine profile is the only profile that supports the automated audit loop (`audit-work.yaml`, `audit-review.yaml`). See [guide-audit-loop.md](guide-audit-loop.md).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -174,6 +174,7 @@ The engine profile is the only profile that supports the automated audit loop (`
 | 1.5 | 2026-09-29 | Profile file name corrected: claude.md → claude-code.md |
 | 1.6 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 1.7 | 2026-10-01 | Terminology: worker/reviewer context file (audit-14e05e35 M-03, change-82dbf16a) |
+| 1.8 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
 
 ---
 

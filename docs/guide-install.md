@@ -6,10 +6,10 @@ Created: 2026 June 18
 
 ## Table of Contents
 
-[1.0 Overview](<#1.0 overview>)
-[2.0 User Install](<#2.0 user install>)
-[3.0 Developer Install](<#3.0 developer install>)
-[Version History](<#version history>)
+- [1.0 Overview](#10-overview)
+- [2.0 User Install](#20-user-install)
+- [3.0 Developer Install](#30-developer-install)
+- [Version History](#version-history)
 
 ---
 
@@ -22,7 +22,7 @@ Two installation paths are provided:
 | User install | Bootstrap a project without cloning the repository |
 | Developer install | Develop or extend the framework |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -53,7 +53,7 @@ After bootstrap:
 
 Review `config.yaml` before first use. It contains project-specific settings that must be verified manually.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -104,7 +104,7 @@ bin/release.sh <version>    # e.g. v0.1.0
 
 Archives `ai/`, creates a GitHub release, and attaches the tarball as a release asset. Requires `gh` authenticated to GitHub.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -124,6 +124,7 @@ Archives `ai/`, creates a GitHub release, and attaches the tarball as a release 
 | 0.10 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 | 0.11 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 0.12 | 2026-09-29 | §3.4 added: bin/migrate-layout.sh (moved from README); release renumbered §3.5 and its version argument shown |
+| 0.13 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
 
 ---
 

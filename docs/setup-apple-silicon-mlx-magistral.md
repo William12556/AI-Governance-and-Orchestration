@@ -6,16 +6,16 @@ Created: 2026 July 16
 
 ## Table of Contents
 
-- [1.0 Overview](<#1.0 overview>)
-- [2.0 Hardware Requirements](<#2.0 hardware requirements>)
-- [3.0 Software Prerequisites](<#3.0 software prerequisites>)
-- [4.0 Install oMLX](<#4.0 install omlx>)
-- [5.0 Download Magistral](<#5.0 download magistral>)
-- [6.0 Start oMLX](<#6.0 start omlx>)
-- [7.0 Configure engine](<#7.0 configure engine>)
-- [8.0 Verification](<#8.0 verification>)
-- [9.0 Known Constraints](<#9.0 known constraints>)
-- [Version History](<#version history>)
+- [1.0 Overview](#10-overview)
+- [2.0 Hardware Requirements](#20-hardware-requirements)
+- [3.0 Software Prerequisites](#30-software-prerequisites)
+- [4.0 Install oMLX](#40-install-omlx)
+- [5.0 Download Magistral](#50-download-magistral)
+- [6.0 Start oMLX](#60-start-omlx)
+- [7.0 Configure engine](#70-configure-engine)
+- [8.0 Verification](#80-verification)
+- [9.0 Known Constraints](#90-known-constraints)
+- [Version History](#version-history)
 
 ---
 
@@ -29,7 +29,7 @@ Quantisation: 6bit.
 
 For the worker model, see [setup-apple-silicon-mlx.md](setup-apple-silicon-mlx.md). For profile mappings, see `ai/profiles/mlx_devstral_magistral_heterogeneous.md`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -45,7 +45,7 @@ For the worker model, see [setup-apple-silicon-mlx.md](setup-apple-silicon-mlx.m
 
 > The 6bit weights occupy ~19.5 GB resident (oMLX estimate). In a heterogeneous loop the worker (Devstral 8bit, ~23.5 GB) and reviewer together require ~43 GB. On 48 GB, oMLX TTL eviction reloads the inactive model at each phase transition, adding reload latency.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -55,7 +55,7 @@ For the worker model, see [setup-apple-silicon-mlx.md](setup-apple-silicon-mlx.m
 - **pip** — included with Python 3.11
 - **huggingface_hub** — installed in the step below
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -73,7 +73,7 @@ Verify:
 omlx --help
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -97,7 +97,7 @@ Use Python 3.11+. The `huggingface-cli` may be unreliable on some macOS configur
 
 > Verify the exact repo id on HuggingFace before relying on it. The on-disk and oMLX-served id used by this project is `Magistral-Small-2509-MLX-6bit`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -114,7 +114,7 @@ omlx serve
 
 The server exposes an OpenAI-compatible API at `http://localhost:8000/v1`; the admin dashboard is at `http://localhost:8000/admin/dashboard`. For the API-key first-run wizard, see [setup-apple-silicon-mlx.md](setup-apple-silicon-mlx.md).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -137,7 +137,7 @@ context:
 
 The worker uses `default_model`; the reviewer uses `reviewer_model`. Per-role resolution precedence is CLI flag > config key > `default_model`. Each id must match the id reported by oMLX `/v1/models` exactly.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -157,9 +157,9 @@ Send a review-style prompt and confirm the response begins with a bare `SHIP` or
 
 **3. Confirm reviewer tool-calling (required before execution use):**
 
-Run one real review phase with the reviewer set to Magistral and confirm it calls read-only tools and states its verdict (`SHIP` or `REVISE: …`) as the leading token of its final response. The review phase cannot write files. Native tool-calling is expected on the `mistral3` family basis but should be confirmed end-to-end. See [9.0 Known Constraints](<#9.0 known constraints>).
+Run one real review phase with the reviewer set to Magistral and confirm it calls read-only tools and states its verdict (`SHIP` or `REVISE: …`) as the leading token of its final response. The review phase cannot write files. Native tool-calling is expected on the `mistral3` family basis but should be confirmed end-to-end. See [9.0 Known Constraints](#90-known-constraints).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -173,7 +173,7 @@ Run one real review phase with the reviewer set to Magistral and confirm it call
 | Context | `max_position_embeddings` 131072 (128K) per the model `config.json`; `sliding_window` null. oMLX does not report `max_context_window`, so the value must be set via `model_context_windows`. |
 | Licence | Apache 2.0. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -185,6 +185,7 @@ Run one real review phase with the reviewer set to Magistral and confirm it call
 | 0.2 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 0.3 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 0.4 | 2026-10-01 | §8.0 step 3: verdict from the final response; review phase cannot write (change-82dbf16a iteration 2, audit-14e05e35 follow-up, F-06) |
+| 0.5 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
 
 ---
 
