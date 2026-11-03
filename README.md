@@ -4,15 +4,15 @@
 
 ## Table of Contents
 
-[1.0 Overview](#10-overview)
-[2.0 Status](#20-status)
-[3.0 Requirements](#30-requirements)
-[4.0 Installation](#40-installation)
-[5.0 First Use](#50-first-use)
-[6.0 Documentation](#60-documentation)
-[7.0 Important Notice](#70-important-notice)
-[References](#references)
-[Version History](#version-history)
+- [1.0 Overview](#10-overview)
+- [2.0 Status](#20-status)
+- [3.0 Requirements](#30-requirements)
+- [4.0 Installation](#40-installation)
+- [5.0 First Use](#50-first-use)
+- [6.0 Documentation](#60-documentation)
+- [7.0 Important Notice](#70-important-notice)
+- [References](#references)
+- [Version History](#version-history)
 
 ---
 
@@ -187,6 +187,7 @@ This framework is experimental, serving as a learning exercise in AI agent gover
 | 4.2 | 2026-10-14 | §2.2: Mistral API engine roles available, Anthropic API live check pending, per-role provider binding replaces the single-oMLX statement; §3.0: inference row covers API roles |
 | 4.3 | 2026-10-31 | §1.0: added GTach as an example project |
 | 4.4 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors |
+| 4.5 | 2026-11-03 | Table of Contents formatted as a bulleted list |
 
 ---
 
