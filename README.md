@@ -4,15 +4,15 @@
 
 ## Table of Contents
 
-[1.0 Overview](<#1.0 overview>)
-[2.0 Status](<#2.0 status>)
-[3.0 Requirements](<#3.0 requirements>)
-[4.0 Installation](<#4.0 installation>)
-[5.0 First Use](<#5.0 first use>)
-[6.0 Documentation](<#6.0 documentation>)
-[7.0 Important Notice](<#7.0 important notice>)
-[References](<#references>)
-[Version History](<#version history>)
+[1.0 Overview](#10-overview)
+[2.0 Status](#20-status)
+[3.0 Requirements](#30-requirements)
+[4.0 Installation](#40-installation)
+[5.0 First Use](#50-first-use)
+[6.0 Documentation](#60-documentation)
+[7.0 Important Notice](#70-important-notice)
+[References](#references)
+[Version History](#version-history)
 
 ---
 
@@ -36,7 +36,7 @@ The main objective is choice: each role can be assigned a frontier model or an o
 
 For an example of AI-G&O in use, see [GTach](https://github.com/William12556/GTach), a Raspberry Pi OBD-II tachometer developed under the software engineering governance model.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -66,7 +66,7 @@ The engine's worker and reviewer are each bound to a provider and a model in `ai
 
 - Web interface for managing governance models and engine runs (*Planned*)
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -82,7 +82,7 @@ The engine's worker and reviewer are each bound to a provider and a model in `ai
 | Inference | oMLX with a supported model for local roles; a Mistral or Anthropic API key for API roles ([Mistral API profile](ai/profiles/mistral_api.md)) |
 | Node.js | Required for `npx`, which runs the engine's filesystem MCP server |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -96,7 +96,7 @@ curl -fsSL https://raw.githubusercontent.com/William12556/AI-Governance-and-Orch
 
 This creates `<project-path>/ai/` with the engine and the software engineering governance model. Review `ai/config.yaml` and `ai/context.md` before first use.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -110,7 +110,7 @@ This creates `<project-path>/ai/` with the engine and the software engineering g
 
 Full walkthrough: [docs/guide-getting-started.md](docs/guide-getting-started.md)
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -128,7 +128,7 @@ Full walkthrough: [docs/guide-getting-started.md](docs/guide-getting-started.md)
 | Software engineering governance | [ai/governance/software-engineering/governance.md](ai/governance/software-engineering/governance.md) |
 | Developers | [docs/guide-install.md](docs/guide-install.md) §3.0 (developer install, propagation, migration, release); [CLAUDE.md](CLAUDE.md); `dev/` |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -136,7 +136,7 @@ Full walkthrough: [docs/guide-getting-started.md](docs/guide-getting-started.md)
 
 This framework is experimental, serving as a learning exercise in AI agent governance and orchestration. **Actual fitness for purpose is not guaranteed.**
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -144,7 +144,7 @@ This framework is experimental, serving as a learning exercise in AI agent gover
 
 [1] HUNTLEY, G., 2026. *Everything is a loop* [online]. Available from: https://ghuntley.com/loop/ [Accessed 4 March 2026].
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -186,6 +186,7 @@ This framework is experimental, serving as a learning exercise in AI agent gover
 | 4.1 | 2026-09-29 | Review corrections: leading blank line removed; scope sentence (D-01, D-02); planner client wording matches §2.2; Node.js requirement; web interface wording; engine-mcp and overwatch documentation rows |
 | 4.2 | 2026-10-14 | §2.2: Mistral API engine roles available, Anthropic API live check pending, per-role provider binding replaces the single-oMLX statement; §3.0: inference row covers API roles |
 | 4.3 | 2026-10-31 | §1.0: added GTach as an example project |
+| 4.4 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors |
 
 ---
 
