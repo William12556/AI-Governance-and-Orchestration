@@ -6,35 +6,35 @@ Created: 2026 August 21
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Scope](<#2.0 scope>)
-[3.0 Architecture](<#3.0 architecture>)
-[3.1 Rendering Architecture — Resolution of OQ-01](<#3.1 rendering architecture — resolution of oq-01>)
-[3.2 Component Diagram](<#3.2 component diagram>)
-[3.3 Module Structure](<#3.3 module structure>)
-[4.0 Data Model](<#4.0 data model>)
-[5.0 Components](<#5.0 components>)
-[6.0 Stage Inference Logic — Resolution of OQ-05](<#6.0 stage inference logic — resolution of oq-05>)
-[7.0 Panel Specifications](<#7.0 panel specifications>)
-[7.1 Monitoring Panel (FR-01)](<#7.1 monitoring panel (fr-01)>)
-[7.2 Explain-This Overlay (FR-02)](<#7.2 explain-this overlay (fr-02)>)
-[7.3 Decision-Tree Navigator (FR-03)](<#7.3 decision-tree navigator (fr-03)>)
-[7.4 Config-as-Code Panel (FR-04)](<#7.4 config-as-code panel (fr-04)>)
-[7.5 Requirements/Design Panel (FR-05) — Resolution of OQ-04](<#7.5 requirements/design panel (fr-05) — resolution of oq-04>)
-[7.6 Stage-Gate Pipeline (FR-06)](<#7.6 stage-gate pipeline (fr-06)>)
-[7.7 Task Board (FR-07) — Resolution of OQ-06](<#7.7 task board (fr-07) — resolution of oq-06>)
-[7.8 Document Diff (FR-08) — Resolution of OQ-08](<#7.8 document diff (fr-08) — resolution of oq-08>)
-[7.9 Guided Next-Step Advisor (FR-09) — Resolution of OQ-02](<#7.9 guided next-step advisor (fr-09) — resolution of oq-02>)
-[7.10 First-Run Wizard (FR-10)](<#7.10 first-run wizard (fr-10)>)
-[8.0 Interfaces](<#8.0 interfaces>)
-[9.0 Document Parsing](<#9.0 document parsing>)
-[10.0 Error Handling](<#10.0 error handling>)
-[11.0 Non-Functional Compliance](<#11.0 non-functional compliance>)
-[12.0 Element Registry](<#12.0 element registry>)
-[13.0 Resolved Open Questions](<#13.0 resolved open questions>)
-[14.0 Propagation and Coexistence with govwatch](<#14.0 propagation and coexistence with govwatch>)
-[15.0 Requirements Traceability](<#15.0 requirements traceability>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Scope](#20-scope)
+[3.0 Architecture](#30-architecture)
+[3.1 Rendering Architecture — Resolution of OQ-01](#31-rendering-architecture--resolution-of-oq-01)
+[3.2 Component Diagram](#32-component-diagram)
+[3.3 Module Structure](#33-module-structure)
+[4.0 Data Model](#40-data-model)
+[5.0 Components](#50-components)
+[6.0 Stage Inference Logic — Resolution of OQ-05](#60-stage-inference-logic--resolution-of-oq-05)
+[7.0 Panel Specifications](#70-panel-specifications)
+[7.1 Monitoring Panel (FR-01)](#71-monitoring-panel-fr-01)
+[7.2 Explain-This Overlay (FR-02)](#72-explain-this-overlay-fr-02)
+[7.3 Decision-Tree Navigator (FR-03)](#73-decision-tree-navigator-fr-03)
+[7.4 Config-as-Code Panel (FR-04)](#74-config-as-code-panel-fr-04)
+[7.5 Requirements/Design Panel (FR-05) — Resolution of OQ-04](#75-requirementsdesign-panel-fr-05--resolution-of-oq-04)
+[7.6 Stage-Gate Pipeline (FR-06)](#76-stage-gate-pipeline-fr-06)
+[7.7 Task Board (FR-07) — Resolution of OQ-06](#77-task-board-fr-07--resolution-of-oq-06)
+[7.8 Document Diff (FR-08) — Resolution of OQ-08](#78-document-diff-fr-08--resolution-of-oq-08)
+[7.9 Guided Next-Step Advisor (FR-09) — Resolution of OQ-02](#79-guided-next-step-advisor-fr-09--resolution-of-oq-02)
+[7.10 First-Run Wizard (FR-10)](#710-first-run-wizard-fr-10)
+[8.0 Interfaces](#80-interfaces)
+[9.0 Document Parsing](#90-document-parsing)
+[10.0 Error Handling](#100-error-handling)
+[11.0 Non-Functional Compliance](#110-non-functional-compliance)
+[12.0 Element Registry](#120-element-registry)
+[13.0 Resolved Open Questions](#130-resolved-open-questions)
+[14.0 Propagation and Coexistence with govwatch](#140-propagation-and-coexistence-with-govwatch)
+[15.0 Requirements Traceability](#150-requirements-traceability)
+[Version History](#version-history)
 
 ---
 
@@ -47,7 +47,7 @@ interface for a single project governed by the AI-Governance-and-Orchestration
 framework. It reuses `govwatch`'s data layer unmodified for its monitoring
 function and adds nine further panels.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -64,7 +64,7 @@ function and adds nine further panels.
 
 Out of scope items are inherited from requirements §7.0 and not restated here.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -155,7 +155,7 @@ ai/webui/
 └── requirements.txt                # pyyaml
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -175,7 +175,7 @@ Extends `govwatch`'s dataclasses (`ProjectPaths`, `DocumentRecord`,
 `Snapshot` gains three fields: `tasks: list[TaskRow]`, `configs:
 list[ConfigFile]`, `stages: list[StageToken]`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -195,7 +195,7 @@ list[ConfigFile]`, `stages: list[StageToken]`.
 `GovwatchApp` (the `textual.App` subclass) has no counterpart — it is
 discarded, not ported (§3.1).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -220,7 +220,7 @@ a large real-world document population beyond the examples reviewed during
 requirements elicitation (GTach). Treat as a first cut, revisit once FR-06
 has real usage.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -258,8 +258,7 @@ TBD at implementation) read-only text blocks, one per file.
 ### 7.5 Requirements/Design Panel (FR-05) — Resolution of OQ-04
 
 **Decision: full content, not a summary.** Framework documents are already
-concise (numbered-section convention`
-practice); an extraction/summarisation heuristic would add complexity and
+concise (numbered-section convention); an extraction/summarisation heuristic would add complexity and
 risk of misrepresentation for no clear benefit at single-project scale.
 Rendered as read-only text.
 
@@ -327,7 +326,7 @@ detected, has `AdvisorEngine` emit its bootstrap-specific guidance (e.g.
 "no requirements document exists yet — ask the Strategic Domain to author
 one") in place of the standard gap list. No separate code path.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -359,7 +358,7 @@ type="application/json" id="snapshot">` block carrying the full serialised
 Unchanged from `govwatch` (design-govwatch.md §8.3), with an added
 "## Next Steps" section carrying `AdvisorEngine` output, `none` when empty.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -381,7 +380,7 @@ elicitation. `ID` is either an 8-hex UUID or the literal `—`.
 rendered as-is. Parse failure produces a WARNING alert (NFR-04 pattern),
 not an unhandled exception.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -395,7 +394,7 @@ not an unhandled exception.
 | `overwatch.html` write failure | Logged to stderr; scan continues; next cycle retries |
 | Git unavailable for diff (§7.8) | Falls back to direct comparison; if that also fails, `DiffResult.error` is shown in-panel |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -411,7 +410,7 @@ not an unhandled exception.
 | NFR-06 | Localhost/file-based only; no network exposure — no server exists to expose (§3.1) |
 | NFR-07 | Dependency footprint: `pyyaml` only. Stated explicitly per requirements' deferral of this to design |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -432,7 +431,7 @@ not an unhandled exception.
 | `EXPLANATIONS` | constant | alert-code/element-id → explanation text map (§7.2) |
 | `DECISION_TREE` | constant | nested dict, §7.3 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -452,7 +451,7 @@ not an unhandled exception.
 | OQ-10 | Not a design question. Resolved 2026-09-23: `requirements-govwatch.md` archived to `dev/requirements/closed/`. |
 | OQ-11 | Resolved in requirements v0.2 — tool named Project Overwatch. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -467,7 +466,7 @@ retirement criteria in OQ-09 being met, `govwatch.py` and `overwatch.py`
 coexist in `ai/src/` and propagate together. This is a deliberate,
 bounded interval, not an open-ended dual-maintenance commitment.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -487,7 +486,7 @@ bounded interval, not an open-ended dual-maintenance commitment.
 | FR-10 First-Run Wizard | §7.10 |
 | NFR-01..07 | §11.0 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -500,6 +499,7 @@ bounded interval, not an open-ended dual-maintenance commitment.
 | 0.3 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 | 0.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 0.5 | 2026-10-23 | Component layout: ai/src/overwatch.py → ai/webui/src/overwatch.py, ai/src/requirements-overwatch.txt → ai/webui/requirements.txt (change-14cf601f); §14.0 govwatch coexistence statement unchanged |
+| 0.6 | 2026-11-04 | §7.5: reference to the retired Obsidian guideline removed; internal links changed from Obsidian anchor syntax to GitHub heading anchors |
 
 ---
 
