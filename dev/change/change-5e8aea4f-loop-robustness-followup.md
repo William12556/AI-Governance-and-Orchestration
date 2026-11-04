@@ -5,7 +5,7 @@ change_info:
   id: "change-5e8aea4f"
   title: "Engine loop robustness follow-up (audit-711a57d5 F-01 to F-05)"
   date: "2026-11-04"
-  status: "proposed"
+  status: "approved"  # operator, 2026-11-04
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -167,12 +167,15 @@ traceability:
   related_issues:
     - { issue_ref: "issue-5e8aea4f", relationship: "source" }
 
-notes: "F-05 decision and the choice to redact only keys from api_key_env or api_key_keychain await operator approval of this change."
+notes: "F-05 decision (redact) and the choice to redact only keys from api_key_env or api_key_keychain approved by the operator with this change (2026-11-04)."
 
 version_history:
   - version: "1.0"
     date: "2026-11-04"
     changes: ["Initial change record"]
+  - version: "1.1"
+    date: "2026-11-04"
+    changes: ["Approved by the operator as drafted, including the planner's scope additions (numeric 'paths', non-string 'path' in the edit-pattern branch), redaction limited to keys from api_key_env or api_key_keychain, and redaction of the readiness check messages"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
