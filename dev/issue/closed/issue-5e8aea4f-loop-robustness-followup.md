@@ -5,7 +5,7 @@ issue_info:
   id: "issue-5e8aea4f"
   title: "Engine loop robustness follow-up: non-string read paths, MCP close race, non-finite timeouts, test gaps, API key in error text"
   date: "2026-11-04"
-  status: "open"
+  status: "closed"
   severity: "medium"
   type: "defect"
   iteration: 1
@@ -116,6 +116,15 @@ version_history:
   - version: "1.0"
     date: "2026-11-04"
     changes: ["Initial issue from audit-711a57d5 F-01 to F-05"]
+  - version: "1.1"
+    date: "2026-11-04"
+    changes: ["Status resolved: change-5e8aea4f implemented (06632d1) (P03.7)"]
+  - version: "1.2"
+    date: "2026-11-04"
+    changes: ["Verified: macOS suite 384 passed and follow-up audit-5e8aea4f; change-5e8aea4f verified on operator approval"]
+  - version: "1.3"
+    date: "2026-11-04"
+    changes: ["Closed on operator acceptance (P00.14.4); moved to dev/issue/closed/. Residual findings of audit-5e8aea4f are registered in dev/task.md"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

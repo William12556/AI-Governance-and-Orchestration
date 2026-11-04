@@ -115,7 +115,7 @@ gates:
 | CLI | `--worker-model`, `--reviewer-model` and `--model` override the model within the role's provider. |
 | Model IDs | Roles use pinned model IDs, not `-latest` aliases, so runs are reproducible. Devstral is not available on the Mistral API (deprecated); a tested Mistral API model is `mistral-medium-2604` (`dev/reports/report-14e05e35-mistral-api-hypothesis.md`). Model choice per role is an operator decision. |
 | Gates | `gates.<name>` overrides the command gate of that name declared in the manifest (FR-03-03). |
-| Timeouts | `request_timeout_seconds` per provider (default 300 s, also accepted in the legacy `omlx:` block) bounds each model request. The SDK's own retries are off, so the engine's bounded retry (3 attempts) is the only retry. `loop.mcp_timeout_seconds` (default 120 s) bounds each MCP request (initialize, list_tools, call_tool). An invalid value stops the run before any state is written (change-711a57d5). |
+| Timeouts | `request_timeout_seconds` per provider (default 300 s, also accepted in the legacy `omlx:` block) bounds each model request. The SDK's own retries are off, so the engine's bounded retry (3 attempts) is the only retry. `loop.mcp_timeout_seconds` (default 120 s) bounds each MCP request (initialize, list_tools, call_tool). Both must be positive finite numbers; an invalid value, including NaN or infinity, stops the run before any state is written (change-711a57d5; change-5e8aea4f). |
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -343,6 +343,9 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 | Model request times out or fails with a retryable error | Up to 3 attempts with backoff, then `BLOCKED.md` (change-711a57d5). |
 | Model request fails with HTTP 400, 401 or 403 | Not retried; `BLOCKED.md` names the status (change-711a57d5; audit-14e05e35 L-09). |
 | MCP request exceeds `loop.mcp_timeout_seconds` | Tool error to the worker, or the server is skipped at connection; run continues (change-711a57d5). |
+| Read call whose `path` is not a string or whose `paths` is not a list | Dispatched as usual; read tracking ignores the value; run continues (change-5e8aea4f). |
+| Closing the MCP client raises (for example a late answer after a timeout) | Warning printed; the run's exit status is unchanged (change-5e8aea4f). |
+| Provider error text on the completion or readiness path | A key from `api_key_env` or `api_key_keychain` is replaced by `API-KEY-REDACTED` before the text is logged, printed, written to `BLOCKED.md` or raised. Literal keys (kind `omlx` or a local `base_url`) are not secrets and are not replaced (NFR-05; change-5e8aea4f). |
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -442,6 +445,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.18 | 2026-11-04 | §3.0 Timeouts: finite values; §11.0 non-string read paths, MCP close errors, API key redaction in error text (change-5e8aea4f). |
 | 1.17 | 2026-10-29 | §3.0 Timeouts row; §11.0 malformed tool arguments, model request timeouts, non-retryable client errors, MCP request timeouts (change-711a57d5). |
 | 1.16 | 2026-10-15 | §3.0 Keys: binding-time log records reach the run log (change-7d953510 iteration 4). |
 | 1.15 | 2026-10-14 | §6.0 gate row and §14.0 DI-06: a Keychain key is readable by gate code (audit-7d953510 M-01, accepted by the operator). |

@@ -2,6 +2,8 @@
 
 Created: 2026 November 4
 
+> **Status:** Closed 2026-11-04. Immutable. Issue and change 5e8aea4f are in their `closed/` folders; audit-5e8aea4f stays active until its F-01 to F-04 are remediated.
+
 **UUID:** `5e8aea4f`
 **Prompt:** `dev/prompt/closed/prompt-5e8aea4f-loop-robustness-followup.md` (iteration 1)
 **Change:** `dev/change/change-5e8aea4f-loop-robustness-followup.md` (iteration 1)
@@ -161,6 +163,7 @@ Not merged into `main`; no pull request opened.
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-04 | Initial report |
+| 1.1 | 2026-11-04 | Closed under P00.14.4 and moved to `dev/reports/closed/`; status line added |
 
 ---
 

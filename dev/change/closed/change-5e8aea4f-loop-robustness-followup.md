@@ -5,7 +5,7 @@ change_info:
   id: "change-5e8aea4f"
   title: "Engine loop robustness follow-up (audit-711a57d5 F-01 to F-05)"
   date: "2026-11-04"
-  status: "approved"  # operator, 2026-11-04
+  status: "verified"  # audit-5e8aea4f; operator approval 2026-11-04
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -176,6 +176,26 @@ version_history:
   - version: "1.1"
     date: "2026-11-04"
     changes: ["Approved by the operator as drafted, including the planner's scope additions (numeric 'paths', non-string 'path' in the edit-pattern branch), redaction limited to keys from api_key_env or api_key_keychain, and redaction of the readiness check messages"]
+  - version: "1.2"
+    date: "2026-11-04"
+    changes:
+      - "Implemented in Claude Code cloud on branch claude/quirky-cerf-lm3sl1 from 1120296: source b88957b, tests e1496a9, report and prompt move 06632d1 (report-5e8aea4f v1.0). Merged fast-forward to main at 06632d1 by the operator"
+      - "Tests: implementing session 383 passed, 1 skipped (Linux, root); operator on macOS 384 passed (full suite with the pinned packages, including test_engine_mcp.py). Mutations M4, M5, M6, M15, N1 to N4 and N1b each fail at least one test (session report)"
+      - "Planner review passed (static; the planner's container could not install packages): scope limited to the deliverable files; FR-A to FR-D as specified; report deviations 1 to 4 accepted (T17b adds file_path so the call passes the scope check; T27 adds an echoing case; T21 split; extra mutation N1b)"
+      - "Planner documents updated: design-14e05e35 v1.18 §3.0 and §11.0, guide-engine-operations v1.22 §3.0"
+  - version: "1.3"
+    date: "2026-11-04"
+    changes:
+      - "Follow-up audit dev/audit/audit-5e8aea4f-followup-2026-11-04.md (independent session, audited at 06632d1): audit-711a57d5 F-01 to F-05 closed; FR-A to FR-E compliant; NFR-05 holds on the completion and readiness paths within the approved scope; no regression; 0 critical, 0 high, 0 medium, 4 low new findings, none blocking this change"
+      - "Audit recommendation 'one full suite run with the pinned packages before verified' is met by the operator's macOS run (384 passed)"
+      - "New findings F-01 to F-04 registered in dev/task.md for one later triple"
+      - "All validation criteria met. Outstanding before verified and closure: operator approval"
+  - version: "1.4"
+    date: "2026-11-04"
+    changes: ["Status verified on operator approval (2026-11-04)"]
+  - version: "1.5"
+    date: "2026-11-04"
+    changes: ["Closed on operator acceptance (P00.14.4); moved to dev/change/closed/ with the issue and report-5e8aea4f. audit-711a57d5 closed and moved to dev/audit/closed/; audit-5e8aea4f stays active until its F-01 to F-04 are remediated"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

@@ -335,6 +335,7 @@ metadata:
 - **audit-caab2052 as a whole (P02.8.1):** there are no critical or high findings. Closure still requires the open decisions recorded in its §13.0 and §14.0: M-03, M-04 and M-05, the remaining low findings and OQ-01 to OQ-04. Then human approval. This audit does not change that position.
 - **change-711a57d5:** may move from `implemented` to `verified` on human approval. The live check (operator-reported) and this audit were its two outstanding items.
 - **New findings:** none is critical or high. F-01 is medium and pre-existing; it should be scheduled, not used to block. F-02 to F-04 are small engine and test changes that can share one triple with F-01. F-05 needs an operator decision. F-06 is a one-line document correction.
+- **Closure (2026-11-04):** F-01 to F-05 closed by change-5e8aea4f (F-05 by redaction, operator decision), verified by follow-up audit-5e8aea4f; F-06 closed by `8e9b6c8`. No finding remains open. Closed on operator approval (P02.8.1) and moved to `dev/audit/closed/`.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -345,6 +346,7 @@ metadata:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-10-29 | Initial strategic follow-up audit of change-711a57d5 |
+| 1.1 | 2026-11-04 | §11.0: closure recorded (F-01 to F-05 by change-5e8aea4f, F-06 by 8e9b6c8); closed on operator approval |
 
 ---
 
