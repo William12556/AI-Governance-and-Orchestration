@@ -1,4 +1,5 @@
-"""Tests for engine loop robustness (change-711a57d5, prompt-711a57d5 T1 to T16)."""
+"""Tests for engine loop robustness (change-711a57d5, prompt-711a57d5 T1 to T16;
+change-5e8aea4f, prompt-5e8aea4f T17 to T28)."""
 
 import argparse
 import asyncio
@@ -405,12 +406,321 @@ def test_t15_manifest_error_after_setup_logging_logs_engine_end(orch, project, m
     assert constructed == []
 
 
+async def _not_ready(self, model, **kw):
+    """Readiness stub that fails at once (prompt-5e8aea4f T24)."""
+    raise TimeoutError("stubbed readiness")
+
+
 @pytest.mark.parametrize("value", [0, -1, "x", True])
 def test_t16_invalid_mcp_timeout_stops_before_state(orch, project, monkeypatch, capsys, value):
     import openai
 
     monkeypatch.setattr(openai, "AsyncOpenAI", lambda **kw: object())
+    # T24: a removed validation fails at once instead of after the readiness wait
+    monkeypatch.setattr(P.OpenAICompatProvider, "await_ready", _not_ready)
     config = _legacy_config(project, "ai/state/t16", mcp_timeout_seconds=value)
     assert asyncio.run(orch.main_async(_main_args(config))) == 1
     assert not (project / "ai" / "state" / "t16").exists()
     assert "loop.mcp_timeout_seconds: must be a positive number" in capsys.readouterr().out
+
+
+# =================================================================================================
+# change-5e8aea4f (prompt-5e8aea4f T17 to T28): audit-711a57d5 follow-up findings
+# =================================================================================================
+
+class _ResultMCP(_MCP):
+    """Fake MCP client returning a fixed result per tool name (default 'ok')."""
+
+    def __init__(self, offered, results=None):
+        super().__init__(offered)
+        self.results = results or {}
+
+    async def call_tool(self, name, arguments):
+        self.calls.append((name, arguments))
+        return self.results.get(name, "ok")
+
+
+# --- FR-A (audit-711a57d5 F-01): non-string read paths -----------------------------------------
+
+def test_t17_non_string_read_paths_are_ignored(orch, project, rec_log):
+    log, _ = rec_log
+    state = str(project / "ai" / "state")
+    worker = _Script([_call("bbbbbbbb1", "read_file", {"path": ["a"]}),
+                      _call("bbbbbbbb2", "read", {"paths": 5}),
+                      P.Completion(text="done")])
+    mcp = _MCP(["read", "read_file"])
+    rc, _, _ = asyncio.run(orch.run_phase(
+        worker, mcp, "m", {"instructions": ""}, "task", 5, state, log,
+        phase_label="WORKER", project_root=str(project)))
+    assert rc == 0
+    assert mcp.calls == [("read_file", {"path": ["a"]}), ("read", {"paths": 5})]
+
+    review = _Script([_call("bbbbbbbb3", "read_file", {"path": ["a"]}),
+                      _call("bbbbbbbb4", "read_file", {"path": 5}),
+                      P.Completion(text="done")])
+    mcp = _MCP(["read_file"])
+    rc, _, read_paths = asyncio.run(orch.run_phase(
+        review, mcp, "m", {"instructions": ""}, "task", 5, state, log,
+        phase_label="REVIEW", project_root=str(project)))
+    assert rc == 0
+    assert mcp.calls == [("read_file", {"path": ["a"]}), ("read_file", {"path": 5})]
+    assert all(isinstance(p, str) for p in read_paths)
+
+
+def test_t17b_edit_pattern_with_non_string_path(orch, project, rec_log):
+    log, _ = rec_log
+    # A str file_path is added so the pre-dispatch scope check (scope.check, M-01)
+    # finds a recognised path and the call reaches the edit-pattern branch with a
+    # non-str 'path'; with 'path' alone the call is refused before dispatch.
+    args = {"path": ["a.py"], "file_path": "src/a.py"}
+    script = _Script([_call("bbbbbbbb5", "edit_file", args), P.Completion(text="done")])
+    mcp = _ResultMCP(["edit_file"], {"edit_file": "Error: edits failed to match"})
+    rc, _, _ = asyncio.run(orch.run_phase(
+        script, mcp, "m", {"instructions": ""}, "task", 5, str(project / "ai" / "state"), log,
+        phase_label="WORKER", project_root=str(project)))
+    assert rc == 0
+    assert mcp.calls == [("edit_file", args)]
+    (tool_msg,) = [m for m in script.seen[-1] if m["role"] == "tool"]
+    assert "the target file" in tool_msg["content"]
+
+
+# --- FR-B (audit-711a57d5 F-02): MCP close after a timeout -------------------------------------
+
+def test_t18_close_error_becomes_warning(capsys):
+    client = MC.MCPClient({})
+
+    async def failing_aclose():
+        raise ExceptionGroup("x", [RuntimeError("late answer")])
+
+    client._stack.aclose = failing_aclose
+    client._sessions["fs"] = object()
+    asyncio.run(client.close())
+    assert "Warning: error while closing MCP connections" in capsys.readouterr().out
+    assert client._sessions == {}
+
+
+# --- FR-C (audit-711a57d5 F-03): non-finite timeouts -------------------------------------------
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf")])
+@pytest.mark.parametrize("pcfg", [
+    {"kind": "openai_compatible", "base_url": "https://api.example.invalid/v1"},
+    {"kind": "anthropic"},
+])
+def test_t19_non_finite_request_timeout_is_a_config_error(fake_sdks, pcfg, value):
+    with pytest.raises(P.ConfigError) as ei:
+        P.make_provider("remote", dict(pcfg, request_timeout_seconds=value))
+    assert "providers.remote.request_timeout_seconds: must be a positive number" in str(ei.value)
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf")])
+def test_t20_non_finite_mcp_timeout_stops_before_state(orch, project, monkeypatch, capsys, value):
+    import openai
+
+    monkeypatch.setattr(openai, "AsyncOpenAI", lambda **kw: object())
+    monkeypatch.setattr(P.OpenAICompatProvider, "await_ready", _not_ready)
+    config = _legacy_config(project, "ai/state/t20", mcp_timeout_seconds=value)
+    assert asyncio.run(orch.main_async(_main_args(config))) == 1
+    assert not (project / "ai" / "state" / "t20").exists()
+    assert "loop.mcp_timeout_seconds: must be a positive number" in capsys.readouterr().out
+
+
+# --- FR-E (audit-711a57d5 F-04): untested behaviours M4, M5, M6, M15 ---------------------------
+
+def _compile_calls(fake):
+    return [(a, k) for a, k in fake.calls if a[1:3] == ["-m", "py_compile"]]
+
+
+def _run_t21(orch, project, log):
+    (project / "src" / "w.py").write_text("x = 1\n")
+    script = _Script([_call("cccccccc1", "edit_file", {"path": "src/e.py"}),
+                      _call("cccccccc2", "write_file", {"path": "src/w.py", "content": "x = 1\n"}),
+                      P.Completion(text="done")])
+    mcp = _ResultMCP(["edit_file", "write_file"], {"edit_file": "Error: edits failed to match"})
+    return asyncio.run(orch.run_phase(
+        script, mcp, "m", {"instructions": ""}, "task", 5, str(project / "ai" / "state"), log,
+        phase_label="WORKER", project_root=str(project)))
+
+
+def test_t21_py_compile_calls_are_bounded(orch, project, rec_log, monkeypatch):
+    log, _ = rec_log
+    fake = _RecordingRun()
+    monkeypatch.setattr(subprocess, "run", fake)
+    rc, _, _ = _run_t21(orch, project, log)
+    assert rc == 0
+    compiles = _compile_calls(fake)
+    assert [a[3] for a, _ in compiles] == ["src/e.py", "src/w.py"]
+    assert all(k["timeout"] == 30 for _, k in compiles)
+
+
+def test_t21_py_compile_timeout_does_not_stop_phase(orch, project, rec_log, monkeypatch):
+    log, _ = rec_log
+    calls = []
+
+    def timing_out(argv, **kw):
+        calls.append(list(argv))
+        raise subprocess.TimeoutExpired(argv, kw.get("timeout"))
+
+    monkeypatch.setattr(subprocess, "run", timing_out)
+    rc, _, _ = _run_t21(orch, project, log)
+    assert rc == 0
+    assert [a[3] for a in calls if a[1:3] == ["-m", "py_compile"]] == ["src/e.py", "src/w.py"]
+
+
+class _FakeMCPClient:
+    """Stand-in for MCPClient recording construction kwargs and awaited closes."""
+
+    instances: list = []
+
+    def __init__(self, servers, **kw):
+        self.kwargs = kw
+        self.closed = 0
+        _FakeMCPClient.instances.append(self)
+
+    async def connect(self):
+        pass
+
+    async def close(self):
+        self.closed += 1
+
+
+async def _ready(self, model, **kw):
+    pass
+
+
+def _run_without_task(orch, project, monkeypatch, isolated_engine_logger, state_rel, **loop):
+    import openai
+
+    monkeypatch.setattr(openai, "AsyncOpenAI", lambda **kw: object())
+    monkeypatch.setattr(P.OpenAICompatProvider, "await_ready", _ready)
+    monkeypatch.setattr(P.OpenAICompatProvider, "live_context_window", lambda self, model: None)
+    monkeypatch.setattr(_FakeMCPClient, "instances", [])
+    monkeypatch.setattr(orch, "MCPClient", _FakeMCPClient)
+    config = _legacy_config(project, state_rel, **loop)
+    args = _main_args(config)
+    args.task = None
+    rc = asyncio.run(orch.main_async(args))
+    for handler in list(isolated_engine_logger.handlers):
+        handler.flush()
+    return rc
+
+
+def test_t22_mcp_client_closed_once_on_early_return(orch, project, monkeypatch,
+                                                    isolated_engine_logger):
+    rc = _run_without_task(orch, project, monkeypatch, isolated_engine_logger, "ai/state/t22")
+    assert rc == 1
+    (client,) = _FakeMCPClient.instances
+    assert client.closed == 1
+    (log_file,) = (project / "ai" / "state" / "t22").glob("engine_*.LOG")
+    assert "engine end rc=1" in log_file.read_text().splitlines()[-1]
+
+
+def test_t23_mcp_client_gets_configured_timeout(orch, project, monkeypatch,
+                                                isolated_engine_logger):
+    rc = _run_without_task(orch, project, monkeypatch, isolated_engine_logger, "ai/state/t23",
+                           mcp_timeout_seconds=7)
+    assert rc == 1
+    (client,) = _FakeMCPClient.instances
+    assert client.kwargs["timeout_seconds"] == 7
+
+
+# --- FR-D (audit-711a57d5 F-05): key redaction ---------------------------------------------------
+
+FAKE_SECRET = "sk-test-SECRET"
+
+
+def test_t25_provider_redacts_only_a_secret_key(fake_sdks, monkeypatch):
+    monkeypatch.setenv("T5E8_KEY", FAKE_SECRET)
+    remote = P.make_provider("remote", {"kind": "openai_compatible",
+                                        "base_url": "https://api.example.invalid/v1",
+                                        "api_key_env": "T5E8_KEY"})
+    assert remote.redact(f"bad key {FAKE_SECRET}!") == f"bad key {P.REDACTED}!"
+    assert FAKE_SECRET not in repr(remote)
+    local = P.make_provider("omlx", {"kind": "omlx", "base_url": "http://127.0.0.1:8000/v1",
+                                     "api_key": "local-test-key"})
+    assert local.redact("bad key local-test-key") == "bad key local-test-key"
+
+
+class _SecretFailing(_Failing):
+    """Failing provider whose redact replaces FAKE_SECRET, as a real provider does."""
+
+    def redact(self, text):
+        return text.replace(FAKE_SECRET, P.REDACTED)
+
+
+@pytest.mark.parametrize("exc,blocked_marker", [
+    (_StatusError(f"401 invalid key {FAKE_SECRET}", 401), "not retried"),
+    (_StatusError(f"connection reset for key {FAKE_SECRET}"), "after 3 attempts"),
+])
+def test_t26_completion_errors_are_redacted(orch, tmp_path, rec_log, capsys, exc, blocked_marker):
+    log, rec = rec_log
+    with pytest.raises(RuntimeError) as ei:
+        asyncio.run(orch._completion_with_retry(_SecretFailing(exc), "m", [], None, log,
+                                                str(tmp_path), initial_backoff=0))
+    blocked = (tmp_path / "BLOCKED.md").read_text()
+    out = capsys.readouterr().out
+    assert blocked_marker in blocked
+    assert P.REDACTED in blocked and P.REDACTED in str(ei.value)
+    assert any(P.REDACTED in line for line in rec.lines)
+    for text in [blocked, str(ei.value), out, *rec.lines]:
+        assert FAKE_SECRET not in text
+
+
+def test_t26_provider_without_redact_still_works(orch, tmp_path, rec_log):
+    log, _ = rec_log
+    with pytest.raises(RuntimeError) as ei:
+        asyncio.run(orch._completion_with_retry(_Failing(_StatusError("plain")), "m", [], None,
+                                                log, str(tmp_path), initial_backoff=0))
+    assert str(ei.value) == "Completion call failed: plain"
+
+
+class _ListFails:
+    """Fake SDK client whose models.list raises an error containing FAKE_SECRET."""
+
+    def __init__(self):
+        self.models = self
+
+    async def list(self):
+        raise RuntimeError(f"401 unauthorised: key {FAKE_SECRET}")
+
+
+@pytest.mark.parametrize("make", [
+    lambda: P.OpenAICompatProvider(kind="openai_compatible", base_url="https://x.invalid/v1",
+                                   client=_ListFails(), secret=FAKE_SECRET),
+    lambda: P.AnthropicProvider(base_url="https://x.invalid", client=_ListFails(),
+                                secret=FAKE_SECRET),
+])
+@pytest.mark.parametrize("timeout", [0, 0.05])
+def test_t27_await_ready_text_is_redacted(make, timeout):
+    echoed = []
+    with pytest.raises(TimeoutError) as ei:
+        asyncio.run(make().await_ready("m", timeout=timeout, interval=0.01, echo=echoed.append))
+    assert P.REDACTED in str(ei.value) and FAKE_SECRET not in str(ei.value)
+    if timeout:
+        assert echoed
+    for line in echoed:
+        assert P.REDACTED in line and FAKE_SECRET not in line
+
+
+def test_t28_resolve_api_key_reports_secret_sources(monkeypatch):
+    remote = {"kind": "openai_compatible", "base_url": "https://api.example.invalid/v1"}
+    monkeypatch.setenv("T5E8_KEY", FAKE_SECRET)
+    env_cfg = dict(remote, api_key_env="T5E8_KEY")
+    assert P._resolve_api_key("r", env_cfg, "openai_compatible") == (FAKE_SECRET, True)
+    assert P._api_key("r", env_cfg, "openai_compatible") == FAKE_SECRET
+
+    def security(argv, **kw):
+        return subprocess.CompletedProcess(argv, 0, FAKE_SECRET + "\n", "")
+
+    monkeypatch.setattr(P.sys, "platform", "darwin")
+    monkeypatch.setattr(P.subprocess, "run", security)
+    kc_cfg = dict(remote, api_key_keychain="ai-go-test")
+    assert P._resolve_api_key("r", kc_cfg, "openai_compatible") == (FAKE_SECRET, True)
+    assert P._api_key("r", kc_cfg, "openai_compatible") == FAKE_SECRET
+
+    lit_cfg = {"kind": "omlx", "base_url": "http://127.0.0.1:8000/v1", "api_key": "local-test-key"}
+    assert P._resolve_api_key("o", lit_cfg, "omlx") == ("local-test-key", False)
+    assert P._api_key("o", lit_cfg, "omlx") == "local-test-key"
+
+    default_cfg = {"kind": "omlx", "base_url": "http://127.0.0.1:8000/v1"}
+    assert P._resolve_api_key("o", default_cfg, "omlx") == ("local", False)
+    assert P._api_key("o", default_cfg, "omlx") == "local"
