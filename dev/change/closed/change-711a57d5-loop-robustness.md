@@ -5,7 +5,7 @@ change_info:
   id: "change-711a57d5"
   title: "Engine loop robustness (audit-caab2052 group 1; audit-14e05e35 L-09)"
   date: "2026-10-29"
-  status: "implemented"  # c328dfb, 2026-10-29
+  status: "verified"  # audit-711a57d5; operator approval 2026-11-04
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -208,6 +208,16 @@ version_history:
       - "Result: Magistral-Small-2509-MLX-8bit loaded on first request; every model call completed within the 300 s default; filesystem MCP connected (13 tools) under the 120 s read timeout; 15 read-only tool calls, none failed; no timeout, retry or non-retryable error in the log; peak budget about 15 % of 40,960; SHIP; last log line 'engine end rc=0'"
       - "Not exercised live: worker writes, FR-A malformed arguments, FR-E client errors (covered by T1, T2, T10, T11)"
       - "Outstanding before verified: follow-up audit by an independent session (P02.8.2)"
+  - version: "1.4"
+    date: "2026-11-04"
+    changes:
+      - "Follow-up audit dev/audit/audit-711a57d5-followup-2026-10-29.md (b71721c): audit-caab2052 M-01, M-02, M-06, L-03, L-09 and audit-14e05e35 L-09 closed; FR-A to FR-G compliant; no regression; 0 critical, 0 high, 1 medium, 5 low new findings, none blocking this change"
+      - "All validation criteria met. Status verified on operator approval (2026-11-04)"
+      - "New findings: F-06 corrected in guide-engine-operations v1.21 (8e9b6c8); F-01 to F-05 raised as triple 5e8aea4f, F-05 with the operator decision to redact the API key from error text"
+  - version: "1.5"
+    date: "2026-11-04"
+    changes:
+      - "Closed on operator acceptance (P00.14.4); moved to dev/change/closed/ with the issue and report-711a57d5. audit-711a57d5 stays active until triple 5e8aea4f closes"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

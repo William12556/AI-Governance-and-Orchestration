@@ -2,6 +2,8 @@ Created: 2026 October 29
 
 # Implementation Report: Engine Loop Robustness
 
+> **Status:** Closed 2026-11-04. Immutable. Issue and change 711a57d5 are in their `closed/` folders; audit-711a57d5 stays active until triple 5e8aea4f closes.
+
 **UUID:** `711a57d5`
 **Prompt:** `dev/prompt/closed/prompt-711a57d5-loop-robustness.md` (iteration 1)
 **Change:** `dev/change/change-711a57d5-loop-robustness.md` (iteration 1)
@@ -153,6 +155,7 @@ The final values were taken before the report commit and the prompt move; the re
 | Version | Date | Description |
 |---|---|---|
 | 0.1 | 2026-10-29 | Initial report |
+| 0.2 | 2026-11-04 | Closed under P00.14.4 and moved to `dev/reports/closed/`; status line added |
 
 ---
 

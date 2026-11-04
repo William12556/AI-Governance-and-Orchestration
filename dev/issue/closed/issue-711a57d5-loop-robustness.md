@@ -5,7 +5,7 @@ issue_info:
   id: "issue-711a57d5"
   title: "Engine loop robustness: malformed tool arguments, budget estimate, unbounded calls, retried client errors"
   date: "2026-10-29"
-  status: "resolved"
+  status: "closed"
   severity: "medium"
   type: "defect"
   iteration: 1
@@ -114,6 +114,12 @@ version_history:
   - version: "1.1"
     date: "2026-10-29"
     changes: ["Status resolved: change-711a57d5 implemented (c328dfb) (P03.7)"]
+  - version: "1.2"
+    date: "2026-11-04"
+    changes: ["Verified: live check run 15c39a95 and follow-up audit-711a57d5 (b71721c); change-711a57d5 verified on operator approval"]
+  - version: "1.3"
+    date: "2026-11-04"
+    changes: ["Closed on operator acceptance (P00.14.4); moved to dev/issue/closed/. Residual findings of audit-711a57d5 continue in issue-5e8aea4f"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

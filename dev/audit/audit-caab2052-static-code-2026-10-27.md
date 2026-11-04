@@ -565,7 +565,7 @@ Recorded by the planner on 2026-10-29 on the operator's decision.
 
 | Finding | Decision | Disposition |
 |---|---|---|
-| M-01, M-02, M-06, L-03, L-09 | Remediate | First triple, together with audit-14e05e35 L-09 (HTTP 400/401/403 not retried). M-01: a non-object argument value gets a tool error reply, from one check in `run_phase`. M-06: configurable timeouts, default 300 s per model call and 120 s per MCP call; SDK retries 0, engine retry loop retained. Follow-up audit required (P02.8.2) |
+| M-01, M-02, M-06, L-03, L-09 | Remediate | First triple, together with audit-14e05e35 L-09 (HTTP 400/401/403 not retried). M-01: a non-object argument value gets a tool error reply, from one check in `run_phase`. M-06: configurable timeouts, default 300 s per model call and 120 s per MCP call; SDK retries 0, engine retry loop retained. Follow-up audit required (P02.8.2). **Closed 2026-11-04:** change-711a57d5 verified and closed; follow-up `audit-711a57d5` found no critical or high findings; its residual findings F-01 to F-05 continue in triple 5e8aea4f |
 | M-03, M-04, M-05; L-01, L-02, L-04 to L-08, L-10 to L-19 | Not yet decided | Registered in `dev/task.md` by §10.0 group |
 | OQ-01 to OQ-04 | Open | Registered in `dev/task.md` |
 
@@ -579,6 +579,7 @@ Recorded by the planner on 2026-10-29 on the operator's decision.
 |---|---|---|
 | 1.0 | 2026-10-27 | Initial static code audit of ai/engine/src and ai/webui/src |
 | 1.1 | 2026-10-29 | Planner review corrections: M-03 document count 23 → 21 (two matches were narrative text); eb782f83 F-04 row relabelled deferred; register and T08 locations aligned (M-01, M-05, L-03, L-17); related_audits set to related and audit-5bcd46ad added; severity line in §6.0; all `gates.py` citations corrected (each was 104 lines too high: 126-134, 151-152, 53-68, 67, 147); §13.0 Closure Recommendation and §14.0 Operator Decisions added |
+| 1.2 | 2026-11-04 | §14.0: remediation group 1 recorded as closed (change-711a57d5, audit-711a57d5) |
 
 ---
 
