@@ -128,6 +128,16 @@ class MCPClient:
 
         Tears down all stdio_client and ClientSession contexts via the
         AsyncExitStack. Must be awaited in the same task as connect().
+        An Exception raised during teardown (for example an ExceptionGroup
+        from a server answering after a timeout) is printed as a warning and
+        not raised; the sessions are cleared in every case. BaseException
+        subclasses that are not Exception (asyncio.CancelledError,
+        KeyboardInterrupt) still propagate (change-5e8aea4f, audit-711a57d5 F-02).
         """
-        await self._stack.aclose()
-        self._sessions.clear()
+        # change-5e8aea4f (audit-711a57d5 F-02): teardown never raises an Exception
+        try:
+            await self._stack.aclose()
+        except Exception as e:
+            print(f"[engine] Warning: error while closing MCP connections: {e}")
+        finally:
+            self._sessions.clear()

@@ -41,6 +41,7 @@ import datetime
 import hashlib
 import json
 import logging
+import math
 import os
 import re
 import shutil
@@ -451,6 +452,17 @@ def _truncate_tool_result(content: str, max_chars: int) -> str:
     return content[:head_len] + marker + content[-tail_len:]
 
 
+def _redact(provider: Any, text: str) -> str:
+    """
+    Replace the provider's secret key in text (change-5e8aea4f, audit-711a57d5
+    F-05; NFR-05). A provider without a callable redact returns text unchanged.
+    """
+    redact = getattr(provider, "redact", None)
+    if callable(redact):
+        return redact(text)
+    return text
+
+
 async def _completion_with_retry(
     provider,
     model: str,
@@ -481,21 +493,24 @@ async def _completion_with_retry(
         try:
             return await provider.complete(model, messages, tools, max_completion_tokens)
         except Exception as e:
+            # change-5e8aea4f (audit-711a57d5 F-05; NFR-05): the provider's key is
+            # replaced in every error text and traceback logged or written.
+            err_text = _redact(provider, str(e))
             last_error = e
             log.warning(
                 "completion call failed (attempt %d/%d): %s",
-                attempt, max_retries, e,
+                attempt, max_retries, err_text,
             )
             # change-711a57d5 (audit-14e05e35 L-09): HTTP 400/401/403 end BLOCKED
             # at once; a retry cannot succeed.
             _status = getattr(e, "status_code", None)
             if _status in _NON_RETRYABLE_STATUS:
-                tb = traceback.format_exc()
+                tb = _redact(provider, traceback.format_exc())
                 log.error("completion call failed with HTTP %d (not retried)", _status)
                 blocked_msg = (
                     "# BLOCKED\n\n"
                     f"Completion call failed with HTTP {_status} (not retried).\n\n"
-                    f"Last error: {e}\n\n"
+                    f"Last error: {err_text}\n\n"
                     f"Traceback:\n```\n{tb}\n```\n"
                 )
                 write_state(state_dir, "BLOCKED.md", blocked_msg)
@@ -503,29 +518,29 @@ async def _completion_with_retry(
                     f"[red][engine] BLOCKED: completion call failed with HTTP {_status} "
                     f"(not retried)[/red]"
                 )
-                raise RuntimeError(f"Completion call failed: {e}") from e
+                raise RuntimeError(f"Completion call failed: {err_text}") from e
             if attempt < max_retries:
                 console.print(
                     f"[yellow][engine] completion error (attempt {attempt}/{max_retries}), "
-                    f"retrying in {backoff:.1f}s: {e}[/yellow]"
+                    f"retrying in {backoff:.1f}s: {err_text}[/yellow]"
                 )
                 await asyncio.sleep(backoff)
                 backoff *= backoff_multiplier
             else:
                 # Persistent failure — BLOCK cleanly
-                tb = traceback.format_exc()
+                tb = _redact(provider, traceback.format_exc())
                 log.error("completion call persistent failure:\n%s", tb)
                 blocked_msg = (
                     "# BLOCKED\n\n"
                     f"Completion call failed after {max_retries} attempts.\n\n"
-                    f"Last error: {last_error}\n\n"
+                    f"Last error: {err_text}\n\n"
                     f"Traceback:\n```\n{tb}\n```\n"
                 )
                 write_state(state_dir, "BLOCKED.md", blocked_msg)
                 console.print(
                     f"[red][engine] BLOCKED: completion call failed after {max_retries} attempts[/red]"
                 )
-                raise RuntimeError(f"Completion call failed: {last_error}") from last_error
+                raise RuntimeError(f"Completion call failed: {err_text}") from last_error
 
     # Should not reach here, but satisfy type checker
     raise RuntimeError("Unexpected: completion retry loop exited without return or raise")
@@ -1380,8 +1395,15 @@ async def run_phase(
             if (tc["name"] in ("read", "read_file", "read_text_file")
                     and isinstance(tc["arguments"], dict)):
                 # change-c37198be (D3): filesystem-mcp 2.x `read` also takes paths[].
-                _rpaths = [tc["arguments"].get("path", "")]
-                _rpaths += [p for p in tc["arguments"].get("paths") or [] if isinstance(p, str)]
+                # change-5e8aea4f (audit-711a57d5 F-01): a non-str path or a
+                # non-list paths contributes nothing.
+                _rpaths: list[str] = []
+                _rp_path = tc["arguments"].get("path", "")
+                if isinstance(_rp_path, str):
+                    _rpaths.append(_rp_path)
+                _rp_paths = tc["arguments"].get("paths")
+                if isinstance(_rp_paths, list):
+                    _rpaths += [p for p in _rp_paths if isinstance(p, str)]
                 for _path in _rpaths:
                     if not _path:
                         continue
@@ -1460,6 +1482,9 @@ async def run_phase(
             )
             if _edit_pattern_failed:
                 _ep_path = tc["arguments"].get("path", "")
+                # change-5e8aea4f (audit-711a57d5 F-01): a non-str path is treated as ""
+                if not isinstance(_ep_path, str):
+                    _ep_path = ""
                 log.warning("edit pattern mismatch tool=%s path=%s", tc["name"], _ep_path)
                 console.print(
                     f"[yellow][engine] edit pattern mismatch: {escape(tc['name'])}: "
@@ -2552,7 +2577,9 @@ async def main_async(args: argparse.Namespace) -> int:
     mcp_timeout           = config["loop"].get("mcp_timeout_seconds")
     if mcp_timeout is None:
         mcp_timeout = 120.0
-    elif isinstance(mcp_timeout, bool) or not isinstance(mcp_timeout, (int, float)) or mcp_timeout <= 0:
+    elif (isinstance(mcp_timeout, bool) or not isinstance(mcp_timeout, (int, float))
+          or not math.isfinite(mcp_timeout) or mcp_timeout <= 0):
+        # change-5e8aea4f (audit-711a57d5 F-03): nan and inf rejected
         console.print("[red][engine] config error: loop.mcp_timeout_seconds: must be a positive number[/red]")
         return 1
     model          = worker_b.model  # worker binding; used for banners and the context report
