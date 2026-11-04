@@ -6,20 +6,20 @@ Created: 2026 October 15
 
 ## Table of Contents
 
-[1.0 Summary](<#1.0 summary>)
-[2.0 Method](<#2.0 method>)
-[3.0 Refused Runs Write No State (FR-08-05)](<#3.0 refused runs write no state (fr-08-05)>)
-[4.0 Logger State and setup_logging](<#4.0 logger state and setup_logging>)
-[5.0 Key Source Record in the Run Log](<#5.0 key source record in the run log>)
-[6.0 Key Leakage Analysis (NFR-05)](<#6.0 key leakage analysis (nfr-05)>)
-[7.0 Side Effects](<#7.0 side effects>)
-[8.0 Regression Check and Test Sensitivity](<#8.0 regression check and test sensitivity>)
-[9.0 Scope and Governance Compliance](<#9.0 scope and governance compliance>)
-[10.0 Findings](<#10.0 findings>)
-[11.0 Positive Findings](<#11.0 positive findings>)
-[12.0 T08 Record](<#12.0 t08 record>)
-[13.0 Closure Recommendation](<#13.0 closure recommendation>)
-[Version History](<#version history>)
+[1.0 Summary](#10-summary)
+[2.0 Method](#20-method)
+[3.0 Refused Runs Write No State (FR-08-05)](#30-refused-runs-write-no-state-fr-08-05)
+[4.0 Logger State and setup_logging](#40-logger-state-and-setup_logging)
+[5.0 Key Source Record in the Run Log](#50-key-source-record-in-the-run-log)
+[6.0 Key Leakage Analysis (NFR-05)](#60-key-leakage-analysis-nfr-05)
+[7.0 Side Effects](#70-side-effects)
+[8.0 Regression Check and Test Sensitivity](#80-regression-check-and-test-sensitivity)
+[9.0 Scope and Governance Compliance](#90-scope-and-governance-compliance)
+[10.0 Findings](#100-findings)
+[11.0 Positive Findings](#110-positive-findings)
+[12.0 T08 Record](#120-t08-record)
+[13.0 Closure Recommendation](#130-closure-recommendation)
+[Version History](#version-history)
 
 ---
 
@@ -34,7 +34,7 @@ Created: 2026 October 15
 - **New findings:** 0 critical, 0 high, 0 medium, 3 low (F-01 the `main_async` replay is untested; F-02 the T19 and T20 level assertions depend on test order; F-03 the auditor is not independent).
 - **Tests:** 330 passed, 1 skipped (root), matching report §10.0. Linter 0 errors and 95 warnings (pre-existing); protocol checker 0 findings.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -48,7 +48,7 @@ Created: 2026 October 15
 - **Mutation tests:** four single-line mutations of `050e5ec` in a temporary git worktree (created and removed): M1 remove the replay loop in `main_async`; M2 remove `logger.setLevel(logging.DEBUG)`; M3 remove `logger.removeHandler(buffer)`; M4 do not restore the saved level. Each was run against the full suite and against T19, T20 and T21 alone.
 - **Side effects:** a temporary worktree was created and removed. No tracked file was changed. This report is the only file added.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -64,7 +64,7 @@ The order in `main_async` is unchanged: binding resolution (line 2431), manifest
 
 `test_main_async_stops_on_configuration_error` is unchanged and passes. Records buffered before a refusal are discarded with the local variable; nothing is written. Criterion 1 is met.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -76,7 +76,7 @@ The order in `main_async` is unchanged: binding resolution (line 2431), manifest
 
 Criterion 2 is met.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -95,7 +95,7 @@ Probe of `main_async` itself, stopped after `engine start`:
 
 Criterion 3 is met in the source and by probe. The live GTach run that change-7d953510 still requires is the remaining confirmation on macOS.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -112,7 +112,7 @@ Criterion 3 is met in the source and by probe. The live GTach run that change-7d
 
 The buffer adds only one place where records are held: `main_async`'s local `_binding_records` list, which keeps label-only records for the life of the run. Criterion 4 is met.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -123,7 +123,7 @@ The buffer adds only one place where records are held: `main_async`'s local `_bi
 3. **Repeated runs in one process.** `setup_logging` never removes handlers, so a second `main_async` in the same process writes into the first run's log file. This is pre-existing: the second run's state directory is created but holds no log. Iteration 4 adds one effect: in the second run the `engine` logger already has the FileHandler and level DEBUG, so the `key source` record is written live and again by the replay. The probe found 3 `key source` lines and 2 `engine start` lines in the first log. Production runs one `main_async` per process (`main` ends with `os._exit`; engine-mcp starts the orchestrator with `subprocess.Popen`), so only tests can reach this. This is an observation only.
 4. **Child loggers.** No `engine.*` child logger exists in `ai/engine/` (`getLogger` calls use `"engine"` only), so the temporary level affects no other logger.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -143,7 +143,7 @@ The buffer adds only one place where records are held: `main_async`'s local `_bi
 - M1 survives because no test runs `main_async` past `setup_logging` (F-01).
 - M4 survives in file order because earlier tests in `test_providers.py` call `setup_logging`, which leaves the `engine` logger at DEBUG. The saved level then equals the level M4 leaves behind, so the level assertions in T19 and T20 check nothing in a normal run (F-02). They catch M4 only when run alone.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -155,7 +155,7 @@ The buffer adds only one place where records are held: `main_async`'s local `_bi
 - **Workflow:** P03 → P04 → P13 followed. Issue and change are both at iteration 4 (P04.2); issue `resolved` with change `implemented` (P03.7); the prompt is closed by `git mv`; report §10.0 records the starting commit `fc6845f`, the source commit and the test counts. Commits follow Conventional Commits with a descriptive body.
 - **Report accuracy:** the counts, governance results, open points 1 to 4 and commit hashes in report §10.0 were checked and are correct. Open point 2 (no `main_async` test) is confirmed and made concrete by M1 (F-01). Open point 4 does not mention that the buffer discards WARNING records on a refused run (§7.0 item 1).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -190,7 +190,7 @@ None.
 - Description: this audit was written by the session that implemented `050e5ec` and `dffbf0b`. The method in §2.0 limits the effect: claims were re-checked against source, and behaviour was tested with new probes and mutations. Even so, the auditor's own assumptions could be repeated in the audit.
 - Recommendation: the planner either accepts this audit and records the deviation in change-7d953510, or has a separate session repeat checks 3 and 5 (the probes in §5.0 and §7.0 are quick to reproduce). The live GTach run is independent evidence for criterion 3 in any case.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -202,7 +202,7 @@ None.
 - T21 is a real end-to-end check of the log file content, including the absence of the key, and it isolates the `engine` logger correctly with monkeypatch.
 - Report §10.0 is accurate, and its open points 2 to 4 anticipate the issues this audit confirms.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -280,7 +280,7 @@ metadata:
   schema_type: "t08_audit"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -291,7 +291,7 @@ metadata:
 - F-01 and F-02 are test-quality gaps. They do not block the change, but F-01 should be fixed before the issue is closed, because without it the fixed defect can come back without any test failing.
 - change-7d953510 should stay `implemented` until the GTach engine-mcp run shows `providers.mistral: key source keychain:ai-go-mistral` before `engine start`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

@@ -6,18 +6,18 @@ Created: 2026 October 29
 
 ## Table of Contents
 
-[1.0 Summary](<#1.0 summary>)
-[2.0 Method](<#2.0 method>)
-[3.0 Finding Closure](<#3.0 finding closure>)
-[4.0 Requirement Compliance](<#4.0 requirement compliance>)
-[5.0 Key Exposure](<#5.0 key exposure>)
-[6.0 Test Adequacy](<#6.0 test adequacy>)
-[7.0 Document Consistency](<#7.0 document consistency>)
-[8.0 Findings](<#8.0 findings>)
-[9.0 Positive Findings](<#9.0 positive findings>)
-[10.0 T08 Record](<#10.0 t08 record>)
-[11.0 Closure Recommendation](<#11.0 closure recommendation>)
-[Version History](<#version history>)
+[1.0 Summary](#10-summary)
+[2.0 Method](#20-method)
+[3.0 Finding Closure](#30-finding-closure)
+[4.0 Requirement Compliance](#40-requirement-compliance)
+[5.0 Key Exposure](#50-key-exposure)
+[6.0 Test Adequacy](#60-test-adequacy)
+[7.0 Document Consistency](#70-document-consistency)
+[8.0 Findings](#80-findings)
+[9.0 Positive Findings](#90-positive-findings)
+[10.0 T08 Record](#100-t08-record)
+[11.0 Closure Recommendation](#110-closure-recommendation)
+[Version History](#version-history)
 
 ---
 
@@ -36,7 +36,7 @@ Created: 2026 October 29
 - **Tests:** 361 passed, 1 skipped at baseline and at the end (`tests/webui/test_overwatch.py:296`, skipped as root). Against the `7c4e390` source the new module gives 26 failed and 4 passed. Mutations M1 to M3 fail their named tests. Four of 16 further mutations survive (§6.0, F-04).
 - **Governance checks:** `linter.py dev` 0 errors, 96 warnings; `protocol_checker.py dev` 0 errors, 0 warnings. Both are unchanged from the implementation report.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -58,7 +58,7 @@ Created: 2026 October 29
 - **Session branch:** `claude/funny-rubin-8fwgdh`; starting commit `c95246ce0289ff87a2e413adedb14871dbfd4f73` (equal to `origin/main` after fetch).
 - **Side effects:** probe trees, mutation copies and scripts were written to the scratchpad only. pytest created gitignored `__pycache__/` folders. `git status` was clean before this report was added. This report is the only file added.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -73,7 +73,7 @@ Created: 2026 October 29
 | caab2052 L-09 (`engine end rc=N` missing on early exits) | `orchestrator.py:2588-2590, 2801-2804`: one `try`/`finally` from the line after the log-archive message; explicit closes removed | Observed, `pe_fr_g.py`: at `7c4e390`, provider not ready, strict brief, no task and a non-UTF-8 task file end without `engine end`, and the last one leaves the client unclosed (closes `[0]`). At `c95246c` every case ends with `engine end rc=N` as the last log line, exactly once, with one close where a client exists (§4.0 FR-G). T15 | Closed |
 | 14e05e35 L-09 (HTTP 400/401/403 retried) | `orchestrator.py:105, 491-506` | Observed, `pd_keys.py`: with real SDK exceptions (`BadRequestError`, `AuthenticationError`, `PermissionDeniedError`, each with `status_code`) the FR-E path fires after one attempt for both SDKs. At `7c4e390` the same responses end through "failed after 3 attempts". T10, T11 | Closed |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -95,7 +95,7 @@ Created: 2026 October 29
 
 **Live evidence (operator-reported, not observed).** Reviewer-mode run 15c39a95 through engine-mcp in `dev/smoke` on oMLX: no timeout, retry or client error; the filesystem MCP connected; 15 read-only tool calls; SHIP; `engine end rc=0`. This is consistent with the defaults not causing spurious timeouts on that workload. Worker writes, FR-A and FR-E were not exercised live.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -115,7 +115,7 @@ Question: can the FR-E `BLOCKED.md` text (`Last error: <e>` and the traceback) c
 
 Conclusion: FR-E adds no new channel. NFR-05 holds for endpoints that do not echo credentials. For an endpoint that does, it fails at the warning line, the persistent-failure path and FR-E alike. This is pre-existing and recorded as F-05.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -149,7 +149,7 @@ Conclusion: FR-E adds no new channel. NFR-05 holds for endpoints that do not ech
 
 M4, M5, M6 and M15 show that four specified behaviours have no test: the two `run_phase` py_compile timeouts, the single close in the `finally`, and the wiring of `loop.mcp_timeout_seconds` into `MCPClient`. The probes in §4.0 confirm that the current code behaves correctly, so this is a gap in test coverage, not in the code (F-04). The default-threshold route for malformed calls (§4.0) has no test either. T2 raises the threshold to reach F27. That route is the existing MCP-error path and the probe confirms it.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -166,7 +166,7 @@ M4, M5, M6 and M15 show that four specified behaviours have no test: the two `ru
 | change-711a57d5 v1.3 | "Worst-case completion time 3 x 300 s plus backoff" | Observed for a silent endpoint (3 × 1 s at a 1 s setting). Inferred, medium confidence: httpx applies the value per connect, read, write and pool phase, so a non-streaming response that trickles bytes could exceed it. The engine does not stream (`providers.py:141`); verifiable with a server that sends one byte per interval | Accurate for the stated failure case; no finding |
 | report-711a57d5 §1.0 to §6.0 | 30 new cases; 331 → 361; M1 to M3 failing; 96 warnings; mcp 1.30.0 accepts `read_timeout_seconds`; T2 deviation; two test_providers.py assertions | Each reproduced (§3.0, §6.0; test count 1+1+2+1+2+8+1+2+1+1+2+1+1+1+1+4 = 30) | Accurate. The missing final hash in §7.0 is already recorded in change v1.2 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -221,7 +221,7 @@ None.
 - After an MCP timeout the server still completes the call. A write tool that times out may therefore land after the worker was told it failed, and its path is not recorded for manifest synthesis. This is inferred from mcp 1.30 sending no cancellation, with high confidence; the probe observed the late answer. The design's "tool error, run continues" is accurate. The reviewer sees the file on disk.
 - The two closed findings' line citations in issue-711a57d5 are at `24b2dfc`, as the issue states.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -234,7 +234,7 @@ None.
 - `request_timeout_seconds` is validated before the key lookup, so a configuration error never depends on a key being present. T6 proves the order by supplying no key source.
 - 26 of the 30 new cases fail against the pre-change source, and M1 to M3 reproduce as reported. The report's claims were accurate in every point checked, including its own open points (T2 ordering, the NFR-05 assumption).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -324,7 +324,7 @@ metadata:
   schema_type: "t08_audit"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -336,7 +336,7 @@ metadata:
 - **change-711a57d5:** may move from `implemented` to `verified` on human approval. The live check (operator-reported) and this audit were its two outstanding items.
 - **New findings:** none is critical or high. F-01 is medium and pre-existing; it should be scheduled, not used to block. F-02 to F-04 are small engine and test changes that can share one triple with F-01. F-05 needs an operator decision. F-06 is a one-line document correction.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

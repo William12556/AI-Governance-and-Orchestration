@@ -6,16 +6,16 @@ Created: 2026 September 29
 
 ## Table of Contents
 
-[1.0 Summary](<#1.0 summary>)
-[2.0 Independence and Method](<#2.0 independence and method>)
-[3.0 Verification Results](<#3.0 verification results>)
-[4.0 T08 Record](<#4.0 t08 record>)
-[5.0 Experiments](<#5.0 experiments>)
-[6.0 Recorded Findings (a) and (b)](<#6.0 recorded findings (a) and (b)>)
-[7.0 Positive Findings](<#7.0 positive findings>)
-[8.0 Closure](<#8.0 closure>)
-[References](<#references>)
-[Version History](<#version history>)
+[1.0 Summary](#10-summary)
+[2.0 Independence and Method](#20-independence-and-method)
+[3.0 Verification Results](#30-verification-results)
+[4.0 T08 Record](#40-t08-record)
+[5.0 Experiments](#50-experiments)
+[6.0 Recorded Findings (a) and (b)](#60-recorded-findings-a-and-b)
+[7.0 Positive Findings](#70-positive-findings)
+[8.0 Closure](#80-closure)
+[References](#references)
+[Version History](#version-history)
 
 ---
 
@@ -30,7 +30,7 @@ Created: 2026 September 29
   - M-01: the post-migration test suite has only been run with a stub harness. Real pytest remains outstanding. This audit could not run it either (§2.0).
 - **Recorded findings (a) and (b):** both correctly scoped as not regressions. The cause of (a) is narrowed in §6.0.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -46,7 +46,7 @@ Created: 2026 September 29
 - Scripts ran only in a VM-local clone and in throwaway targets built from `git archive pre-5bcd46ad ai`.
 - **Repository side effect, disclosed:** a read-only `git status` against the repository left an empty `.git/index.lock`, because the session could not unlink it. With the operator's deletion grant, that lock file alone was removed. `git status` then reported a clean tree. No tracked file was modified. This report is the only file added.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -72,7 +72,7 @@ Created: 2026 September 29
 - Static checks reproduced: `linter.py dev/` gives 0 errors and 93 warnings; `protocol_checker.py dev/` gives 0 findings. Both equal the recorded baseline.
 - Compliance: 12 of 14 areas pass or pass with notes (86 %). One area is partial and one is open, excluding the failed bootstrap sub-area.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -357,7 +357,7 @@ metadata:
   schema_type: "t08_audit"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -381,7 +381,7 @@ All targets were throwaway git repositories built from `git archive pre-5bcd46ad
 | Z | Python: Popen child, reference dropped, child exits | `os.kill(pid, 0)` succeeds while the child is in state `Z`; after an unrelated `subprocess.run` it raises `ProcessLookupError` (L-02, Linux) |
 | S | Import `ai/engine/mcp/server.py` with mcp 1.27 | Tools `start_engine`, `engine_status`, `reset_engine` registered; invalid `project_dir` returns a JSON error |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -399,7 +399,7 @@ All targets were throwaway git repositories built from `git archive pre-5bcd46ad
   - Writes inside the project root are permitted by F4 by design.
   - The recipe changes do not touch the CONSTRAINTS text apart from the `BLOCKED.md` name. The Phase 2 disposition (manifest write scope) is appropriate.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -412,7 +412,7 @@ All targets were throwaway git repositories built from `git archive pre-5bcd46ad
 - Requirement identifiers and historical records were preserved deliberately and documented.
 - The c37198be D3 fix handles nested `files`/`paths`/`moves` arguments consistently across the scope check, manifest, syntax check and F21 guard.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -427,7 +427,7 @@ All targets were throwaway git repositories built from `git archive pre-5bcd46ad
 - Follow-up audit: required for H-01 only if remediation changes `bin/bootstrap.sh`. Remediation that only cuts a release changes no source, so the operator may waive the follow-up (P02.8.2).
 - Approver and closure date: William Watson, 2026-09-29. Audit and remediation accepted; follow-up audit waived (see `closure` in §4.0).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -435,7 +435,7 @@ All targets were throwaway git repositories built from `git archive pre-5bcd46ad
 
 [1] WATSON, W., 2026. *ael-mcp: server.py* [online]. GitHub repository William12556/ael-mcp, blob 7587b095. Available from: https://github.com/William12556/ael-mcp/blob/main/server.py [Accessed 29 September 2026].
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

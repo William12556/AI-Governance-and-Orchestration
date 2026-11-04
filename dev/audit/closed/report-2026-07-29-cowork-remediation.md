@@ -10,18 +10,18 @@ of the session that authored `change-3b9e6d72`, `change-f5c28a04` and
 
 ## Table of Contents
 
-[1.0 Scope and Method](<#1.0 scope and method>)
-[2.0 Disposition Table](<#2.0 disposition table>)
-[3.0 Task Group A — Housekeeping](<#3.0 task group a — housekeeping>)
-[4.0 Task Group B — Live Runs](<#4.0 task group b — live runs>)
-[5.0 Task Group C — Independent Verification](<#5.0 task group c — independent verification>)
-[6.0 New Findings](<#6.0 new findings>)
-[7.0 Task Group D — Remediation](<#7.0 task group d — remediation>)
-[8.0 Task Group E — Closure](<#8.0 task group e — closure>)
-[9.0 Commits](<#9.0 commits>)
-[10.0 Outstanding Work — Explicit Statement](<#10.0 outstanding work — explicit statement>)
-[11.0 Operator Actions Required](<#11.0 operator actions required>)
-[Version History](<#version history>)
+[1.0 Scope and Method](#10-scope-and-method)
+[2.0 Disposition Table](#20-disposition-table)
+[3.0 Task Group A — Housekeeping](#30-task-group-a--housekeeping)
+[4.0 Task Group B — Live Runs](#40-task-group-b--live-runs)
+[5.0 Task Group C — Independent Verification](#50-task-group-c--independent-verification)
+[6.0 New Findings](#60-new-findings)
+[7.0 Task Group D — Remediation](#70-task-group-d--remediation)
+[8.0 Task Group E — Closure](#80-task-group-e--closure)
+[9.0 Commits](#90-commits)
+[10.0 Outstanding Work — Explicit Statement](#100-outstanding-work--explicit-statement)
+[11.0 Operator Actions Required](#110-operator-actions-required)
+[Version History](#version-history)
 
 ---
 
@@ -57,7 +57,7 @@ Everything listed as out of scope in the prompt's §9.0 was left untouched:
 calibration, the Mistral API evaluation, propagation to downstream projects,
 canonical policy documents, and grammar-constrained decoding.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -81,7 +81,7 @@ unverified at closure are recorded in each change document's
 `operator_closure_2026_07_29` block and consolidated in `dev/task.md`. This
 is disclosed rather than represented as a passing re-verification.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -128,7 +128,7 @@ session went through the orchestrator's own `ai/state/ralph/ael_*.LOG`.
 `~/Documents/GitHub/ael-mcp` was not touched, and no redeploy or restart was
 attempted.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -213,7 +213,7 @@ reason.
 copied `ael_20260729-125446.LOG` in `dev/smoke-n1`. Backlog item 3.1 is
 discharged.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -269,7 +269,7 @@ recorded as missing: no earlier test target contained a nested `workspace/` or
 `config.yaml`, so the behavioural effect of anchoring had never been shown.
 `bash -n` clean; `set -euo pipefail` present. **No findings.**
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -343,7 +343,7 @@ blocks indefinitely. Run `8c2040d3` logged `max iterations 3 reached without
 SHIP` at 12:53:26 and never reached `AEL end`; `ael_status` reported
 `pid_alive: true` thereafter with the MCP servers still held.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -428,7 +428,7 @@ William Watson rather than acted on. It does bear on §10.3 item 4: the reviewer
 may object to an orchestrator-supplied manifest on principle, in which case N1's
 append will meet the same objection.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -456,7 +456,7 @@ clear.
 
 `d1f4a83b`, for the reason in §7.3.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -482,7 +482,7 @@ logs already destroyed by the `*.log` pattern.
 
 **Nothing has been pushed.** See §3.1 and §11.0.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -541,7 +541,7 @@ run did not ship, it is recorded as not shipping. No absence of evidence has
 been converted into a passing result anywhere in this report or in any document
 it amends.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -568,7 +568,7 @@ already been removed; its run logs are preserved at
 `dev/audit/logs-2026-07-29/`. `dev/smoke` is left in its post-run state with
 `ai/logs/` populated, as the harness intends.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

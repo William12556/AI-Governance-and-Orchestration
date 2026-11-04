@@ -6,20 +6,20 @@ Created: 2026 June 08
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Scope](<#2.0 scope>)
-[3.0 Constraints](<#3.0 constraints>)
-[4.0 Functional Requirements](<#4.0 functional requirements>)
-[4.1 FR-01 Workflow State Panel](<#4.1 fr-01 workflow state panel>)
-[4.2 FR-02 Compliance Alerts Panel](<#4.2 fr-02 compliance alerts panel>)
-[4.3 FR-03 Document Registry Panel](<#4.3 fr-03 document registry panel>)
-[4.4 FR-04 Notification](<#4.4 fr-04 notification>)
-[4.5 FR-05 Invocation](<#4.5 fr-05 invocation>)
-[5.0 Non-Functional Requirements](<#5.0 non-functional requirements>)
-[6.0 Document Parsing Assumptions](<#6.0 document parsing assumptions>)
-[7.0 Out of Scope](<#7.0 out of scope>)
-[8.0 Open Questions](<#8.0 open questions>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Scope](#20-scope)
+[3.0 Constraints](#30-constraints)
+[4.0 Functional Requirements](#40-functional-requirements)
+[4.1 FR-01 Workflow State Panel](#41-fr-01-workflow-state-panel)
+[4.2 FR-02 Compliance Alerts Panel](#42-fr-02-compliance-alerts-panel)
+[4.3 FR-03 Document Registry Panel](#43-fr-03-document-registry-panel)
+[4.4 FR-04 Notification](#44-fr-04-notification)
+[4.5 FR-05 Invocation](#45-fr-05-invocation)
+[5.0 Non-Functional Requirements](#50-non-functional-requirements)
+[6.0 Document Parsing Assumptions](#60-document-parsing-assumptions)
+[7.0 Out of Scope](#70-out-of-scope)
+[8.0 Open Questions](#80-open-questions)
+[Version History](#version-history)
 
 ---
 
@@ -32,7 +32,7 @@ status via a terminal user interface (TUI). It also detects and reports
 deviations from governance protocol that may indicate Strategic Domain model
 drift.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -48,7 +48,7 @@ It does not write to governance artefacts.
 `ai/src/` is a general-purpose tools directory, distinct from `ai/ael/src/`
 (AEL orchestrator modules). `govwatch` has no runtime dependency on AEL modules.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -64,7 +64,7 @@ It does not write to governance artefacts.
 | CON-06 | Run from downstream project root. Path resolution relative to invocation directory. |
 | CON-07 | The single permitted write target is `dashboard-alerts.md` in the project root. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -81,7 +81,7 @@ It does not write to governance artefacts.
 | FR-01-05 | Display context budget status (OK, WARN, ABORT) when `context-budget.md` is present in `.ael/ralph/`. |
 | FR-01-06 | Refresh state at a configurable polling interval. Default: 5 seconds. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -120,7 +120,7 @@ The compliance engine performs two tiers of checks: filename/structure checks
 | FR-02-14 | Display timestamp of last compliance scan. |
 | FR-02-15 | Display total VIOLATION and WARNING counts. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -134,7 +134,7 @@ The compliance engine performs two tiers of checks: filename/structure checks
 | FR-03-04 | Display a to-do list of open T03 (issue) documents. Each entry shows the issue name (derived from filename) and iteration number. |
 | FR-03-05 | Distinguish between coupled and uncoupled documents visually. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -147,7 +147,7 @@ The compliance engine performs two tiers of checks: filename/structure checks
 | FR-04-03 | Write the same alert summary to `dashboard-alerts.md` in the project root on each compliance scan. This file is the sole permitted write target. |
 | FR-04-04 | `dashboard-alerts.md` must be overwritten (not appended) on each scan to reflect current state only. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -161,7 +161,7 @@ The compliance engine performs two tiers of checks: filename/structure checks
 | FR-05-04 | Perform a startup check: verify expected workspace directory structure exists. Exit with a clear error message if the target directory does not appear to be a valid framework project. |
 | FR-05-05 | Provide keyboard shortcut `Q` to quit. `R` to force immediate refresh. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -176,7 +176,7 @@ The compliance engine performs two tiers of checks: filename/structure checks
 | NFR-05 | The tool must handle an absent `.ael/ralph/` directory gracefully (AEL status: Idle). |
 | NFR-06 | All dependency installation via `pip install -r ai/src/requirements-govwatch.txt`. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -192,7 +192,7 @@ during implementation.
 | `tactical_brief` is a YAML fenced block with `tactical_brief:` as root key | T04 | `tactical_brief:` |
 | Required fields are identifiable as empty or containing a placeholder beginning with `#` | T02, T03 | All required fields |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -206,7 +206,7 @@ during implementation.
 - Semantic drift detection (requires model interrogation)
 - Traceability matrix validation (T05/T06 linkage checking)
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -220,7 +220,7 @@ during implementation.
 | OQ-04 | Should `dashboard-alerts.md` be added to `.gitignore` in downstream projects? |
 | OQ-05 | Verify `sync-skel.sh` includes `ai/src/` in its sync scope. The `ai/src/` directory is new; it may not be present in the current script. If absent, the directory and its contents will not propagate to `skel/` or downstream projects. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -278,7 +278,7 @@ Two-tier architecture is intentional:
 This tiered approach provides graceful degradation: a malformed document does
 not prevent the rest of the compliance scan from completing.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

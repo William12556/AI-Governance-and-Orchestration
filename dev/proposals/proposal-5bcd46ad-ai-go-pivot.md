@@ -10,16 +10,16 @@ Created: 2026 September 25
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Decisions](<#2.0 decisions>)
-[3.0 Terminology](<#3.0 terminology>)
-[4.0 Target Layout](<#4.0 target layout>)
-[5.0 Ownership Boundary](<#5.0 ownership boundary>)
-[6.0 Backlog Disposition](<#6.0 backlog disposition>)
-[7.0 Phases](<#7.0 phases>)
-[8.0 Open Questions](<#8.0 open questions>)
-[References](<#references>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Decisions](#20-decisions)
+[3.0 Terminology](#30-terminology)
+[4.0 Target Layout](#40-target-layout)
+[5.0 Ownership Boundary](#50-ownership-boundary)
+[6.0 Backlog Disposition](#60-backlog-disposition)
+[7.0 Phases](#70-phases)
+[8.0 Open Questions](#80-open-questions)
+[References](#references)
+[Version History](#version-history)
 
 ---
 
@@ -29,7 +29,7 @@ Reorient AI-G&O from a software engineering (SE) framework to a general framewor
 
 This document records the decisions of the 2026-09-25 brainstorming session and the target structure. It follows the project rename (`dev/reports/report-rename-ai-go-2026-09-25.md`).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -45,7 +45,7 @@ This document records the decisions of the 2026-09-25 brainstorming session and 
 | D-06 | Stage flow is linear, plus one rule: on BLOCKED, return to a named stage. |
 | D-07 | Any agent role, including the planner, may be bound to any model, frontier or open-weight. The planner runs in a chat client, not in the engine (D-16). |
 | D-08 | `ai/ael/` is renamed `ai/engine/`. The term AEL is retired. |
-| D-09 | Terms per [3.0 Terminology](<#3.0 terminology>). The term Ralph Loop is retired. |
+| D-09 | Terms per [3.0 Terminology](#30-terminology). The term Ralph Loop is retired. |
 | D-10 | Project configuration moves from `ai/ael/config.yaml` to `ai/config.yaml`. |
 | D-11 | govwatch is retired. |
 | D-12 | Project Overwatch FR-02 to FR-10 are parked. |
@@ -54,7 +54,7 @@ This document records the decisions of the 2026-09-25 brainstorming session and 
 | D-15 | ael-mcp is adapted as engine-mcp and moved into this repository. A rebuild is deferred to Phase 2. |
 | D-16 | Provider choice at every level; Anthropic and Mistral AI have equal weight, neither preferred. Planner: Claude Desktop, Mistral Vibe, or an MCP-capable client with a local open-weight model. Manual tactical profile: Claude Code or Mistral Vibe. Engine worker and reviewer: each bound separately to the Anthropic API, the Mistral API, or a local OpenAI-compatible server (oMLX; LM Studio a possible future provider, OQ-06). |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -71,7 +71,7 @@ This document records the decisions of the 2026-09-25 brainstorming session and 
 | gate | Check that must pass: human approval, reviewer verdict or command exit code | — |
 | profile | Per-model configuration (tool-call behaviour, context window) | unchanged |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -124,7 +124,7 @@ ai/
 └── workspace/                project-owned; subfolders from the manifest (P2)
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -135,7 +135,7 @@ ai/
 - This resolves backlog §2.0 item 7.
 - Propagation still never deletes. Existing downstream projects move to the new layout once, through a migration script.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -149,7 +149,7 @@ ai/
 | §2.0-4 CI and primer identity check | Deferred; paths updated |
 | §2.0-5 `schema_type` prefix | Deferred |
 | §2.0-6 Split `governance.md` | Deferred to Phase 3 (OQ-03) |
-| §2.0-7 Project files out of `ai/` | Resolved by [5.0 Ownership Boundary](<#5.0 ownership boundary>) |
+| §2.0-7 Project files out of `ai/` | Resolved by [5.0 Ownership Boundary](#50-ownership-boundary) |
 | §3.0 Source and tooling fixes | Unaffected |
 | §5.0-2 REVISE → SHIP convergence | Retried in the migration's verification run |
 | §5.0-7 Restrict worker writes | Phase 2 (manifest write scope) |
@@ -157,7 +157,7 @@ ai/
 | §8.0-2 Stale ael-mcp build | Folded into the migration (D-15) |
 | §9.0 Parked items | Unaffected |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -172,7 +172,7 @@ ai/
 
 Phases 2 to 4 each require their own requirements and design documents.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -187,7 +187,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 | OQ-05 | Which client hosts an open-weight planner? The oMLX built-in chat has no MCP support. Resolved 2026-09-30: any client that accepts a custom OpenAI-compatible endpoint and MCP servers may host the planner; the choice and setup are left to the user. Options, documented only and not tested: Goose (desktop and CLI) [4], Cherry Studio and BoltAI (desktop) [8], Open WebUI (web; Streamable HTTP MCP only, stdio via mcpo) [9], Claude Code (via `ANTHROPIC_BASE_URL`, as in the `claude-omlx` profile), Codex CLI [5], OpenCode [6], Mistral Vibe [2], OpenClaw [7]. Further clients: [10]. Framework integration (profiles, setup guidance) is future work (backlog §2.0 item 11). | Resolved |
 | OQ-06 | LM Studio as an engine provider reverses its 2026-03-11 deprecation. The engine's live context-window query and readiness check are oMLX-specific. Resolved 2026-09-30: LM Studio is excluded from Phase 2 and noted as a possible future provider. | Resolved |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -213,7 +213,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 
 [10] PUNKPEYE, 2026. *awesome-mcp-clients* [online]. Available from: https://github.com/punkpeye/awesome-mcp-clients [Accessed 30 September 2026].
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

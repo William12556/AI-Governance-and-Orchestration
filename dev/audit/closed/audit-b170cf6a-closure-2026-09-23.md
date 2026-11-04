@@ -6,14 +6,14 @@ Created: 2026 September 23
 
 ## Table of Contents
 
-[1.0 Summary](<#1.0 summary>)
-[2.0 Independence and Method](<#2.0 independence and method>)
-[3.0 Status of B1 to B5](<#3.0 status of b1 to b5>)
-[4.0 New Routes Introduced by Iteration 3](<#4.0 new routes introduced by iteration 3>)
-[5.0 T08 Record](<#5.0 t08 record>)
-[6.0 Experiments](<#6.0 experiments>)
-[7.0 Closure Recommendation](<#7.0 closure recommendation>)
-[Version History](<#version history>)
+[1.0 Summary](#10-summary)
+[2.0 Independence and Method](#20-independence-and-method)
+[3.0 Status of B1 to B5](#30-status-of-b1-to-b5)
+[4.0 New Routes Introduced by Iteration 3](#40-new-routes-introduced-by-iteration-3)
+[5.0 T08 Record](#50-t08-record)
+[6.0 Experiments](#60-experiments)
+[7.0 Closure Recommendation](#70-closure-recommendation)
+[Version History](#version-history)
 
 ---
 
@@ -25,7 +25,7 @@ Created: 2026 September 23
 - **New findings:** 0 critical, 0 high, 0 medium, 0 low, and 2 information items.
 - **Recommendation (stop rule):** No finding is medium or higher, so closure of change-b170cf6a and issue-b170cf6a is recommended. The lifecycle steps are listed in §7.0 and have not been performed.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -42,7 +42,7 @@ Created: 2026 September 23
   - The operator's `macos_results` for iteration 3 are taken as operator evidence: (1) prompt race on a real `ai/`, (2) prompt race on a symlinked `ai/`, (3) `sort -z` supported. Check (2) records rc=3 but not the message. Because the prompt was reached, the pre-plan snapshot, including `readlink -- ai`, succeeded on macOS.
   - B2 (a post-plan edit), B3 (an injected failure), B4 and B5 have no macOS evidence.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -83,7 +83,7 @@ Created: 2026 September 23
   - The workaround is to restore permissions. `--yes` also works but drops the prompt guard.
 - **Recommendation: accept** for this change (disposition `accepted`, severity `low`). A fix is optional and can be a separate triple. The minimal form would be for `snapshot()` to record only the entry and type of `workspace`, `state` and `logs`, pruned as `list0` does. That change would also remove the P-N4 surprise (exit 3 on AEL writes) and the read cost of large `logs/` trees. It changes guard behaviour, so it would need its own check.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -103,7 +103,7 @@ Created: 2026 September 23
 - Every construct is available in bash 3.2: `local d l` declared apart from the assignment, so the status of `$(readlink …)` is kept; `: >`, `printf`, `[[ -L/-d/-e/-f ]]`, `{ …; } >>`, backslash-continued `&&` chains in a subshell, `-t 0`, and `var="$(f)" && [[ … ]] || f`. `pipefail` exists since bash 3.0, so `find | sort -z` failures propagate.
 - External tools on macOS: `find -print0`, `-exec readlink {} \;`, `xargs -0` and `cksum` are present in BSD userland. `sort -z` is confirmed by the operator (3), and `readlink --` is implied by operator check (2). BSD `xargs` does not run `cksum` on empty input, whereas GNU `xargs` does. Either way the output is consistent within one platform, and the before and after snapshots only need to match each other.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -204,7 +204,7 @@ metadata:
   schema_type: "t08_audit"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -234,7 +234,7 @@ metadata:
 | Declined / non-TTY | Answer `n`; stdin `/dev/null` without `--yes` | Exit 0 / exit 2 | — |
 | I1 | FIFO at `ai-local`; up to date / update | Hangs (killed at 10 s); not applied | Up to date: exit 0 / update: hangs |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -256,7 +256,7 @@ metadata:
   7. **Commit:** one git commit records the closure transition.
 - **Human approval:** pending operator decision.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

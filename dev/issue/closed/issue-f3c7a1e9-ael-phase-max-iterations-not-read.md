@@ -6,17 +6,17 @@ Created: 2026 March 24
 
 ## Table of Contents
 
-- [Issue](<#issue>)
-- [Source](<#source>)
-- [Affected Scope](<#affected scope>)
-- [Reproduction](<#reproduction>)
-- [Behavior](<#behavior>)
-- [Environment](<#environment>)
-- [Analysis](<#analysis>)
-- [Resolution](<#resolution>)
-- [Prevention](<#prevention>)
-- [Traceability](<#traceability>)
-- [Version History](<#version history>)
+- [Issue](#issue)
+- [Source](#source)
+- [Affected Scope](#affected-scope)
+- [Reproduction](#reproduction)
+- [Behavior](#behavior)
+- [Environment](#environment)
+- [Analysis](#analysis)
+- [Resolution](#resolution)
+- [Prevention](#prevention)
+- [Traceability](#traceability)
+- [Version History](#version-history)
 
 ---
 
@@ -37,7 +37,7 @@ issue_info:
     change_iteration: 1
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -63,7 +63,7 @@ source:
     independently.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -81,7 +81,7 @@ affected_scope:
   version: "governance v8.2 / AEL orchestrator current"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -112,7 +112,7 @@ reproduction:
     ✗ WORK PHASE FAILED
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -151,7 +151,7 @@ behavior:
     measure.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -167,7 +167,7 @@ environment:
   domain: "AEL orchestrator"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -202,7 +202,7 @@ analysis:
   related_issues: []
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -224,7 +224,7 @@ resolution:
     framework/ and skel/ orchestrators already correct — no changes required.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -242,7 +242,7 @@ prevention:
     verify it completes in one outer cycle rather than failing.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -256,7 +256,7 @@ traceability:
     - "change-f3c7a1e9"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

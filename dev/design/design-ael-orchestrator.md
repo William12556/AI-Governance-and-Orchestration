@@ -6,40 +6,40 @@ Created: 2026 July 09
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Scope](<#2.0 scope>)
-[3.0 Architecture](<#3.0 architecture>)
-[3.1 Component Diagram](<#3.1 component diagram>)
-[3.2 Module Structure](<#3.2 module structure>)
-[4.0 Data Model](<#4.0 data model>)
-[4.1 State Files](<#4.1 state files>)
-[4.2 Configuration Schema](<#4.2 configuration schema>)
-[5.0 Components](<#5.0 components>)
-[5.1 Context Resolution](<#5.1 context resolution>)
-[5.2 Task Resolution](<#5.2 task resolution>)
-[5.3 Phase Runner](<#5.3 phase runner>)
-[5.4 Loop Controller](<#5.4 loop controller>)
-[5.5 MCPClient](<#5.5 mcpclient>)
-[5.6 Tool Call Parser](<#5.6 tool call parser>)
-[5.7 Validation Guards](<#5.7 validation guards>)
-[5.8 Audit Support](<#5.8 audit support>)
-[5.9 Entry Point](<#5.9 entry point>)
-[6.0 Control Flow](<#6.0 control flow>)
-[6.1 Loop State Diagram](<#6.1 loop state diagram>)
-[6.2 Phase Iteration Flow](<#6.2 phase iteration flow>)
-[7.0 Context Window Resolution](<#7.0 context window resolution>)
-[8.0 Interfaces](<#8.0 interfaces>)
-[8.1 Command Line](<#8.1 command line>)
-[8.2 config.yaml Schema](<#8.2 config.yaml schema>)
-[8.3 State File Contract](<#8.3 state file contract>)
-[8.4 MCP Tool Dispatch](<#8.4 mcp tool dispatch>)
-[9.0 Boundary Conditions and Error Handling](<#9.0 boundary conditions and error handling>)
-[10.0 Non-Functional Compliance](<#10.0 non-functional compliance>)
-[11.0 Element Registry](<#11.0 element registry>)
-[12.0 Proposed Extensions (Not Implemented)](<#12.0 proposed extensions (not implemented)>)
-[13.0 Open Issues](<#13.0 open issues>)
-[14.0 Requirements Traceability](<#14.0 requirements traceability>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Scope](#20-scope)
+[3.0 Architecture](#30-architecture)
+[3.1 Component Diagram](#31-component-diagram)
+[3.2 Module Structure](#32-module-structure)
+[4.0 Data Model](#40-data-model)
+[4.1 State Files](#41-state-files)
+[4.2 Configuration Schema](#42-configuration-schema)
+[5.0 Components](#50-components)
+[5.1 Context Resolution](#51-context-resolution)
+[5.2 Task Resolution](#52-task-resolution)
+[5.3 Phase Runner](#53-phase-runner)
+[5.4 Loop Controller](#54-loop-controller)
+[5.5 MCPClient](#55-mcpclient)
+[5.6 Tool Call Parser](#56-tool-call-parser)
+[5.7 Validation Guards](#57-validation-guards)
+[5.8 Audit Support](#58-audit-support)
+[5.9 Entry Point](#59-entry-point)
+[6.0 Control Flow](#60-control-flow)
+[6.1 Loop State Diagram](#61-loop-state-diagram)
+[6.2 Phase Iteration Flow](#62-phase-iteration-flow)
+[7.0 Context Window Resolution](#70-context-window-resolution)
+[8.0 Interfaces](#80-interfaces)
+[8.1 Command Line](#81-command-line)
+[8.2 config.yaml Schema](#82-configyaml-schema)
+[8.3 State File Contract](#83-state-file-contract)
+[8.4 MCP Tool Dispatch](#84-mcp-tool-dispatch)
+[9.0 Boundary Conditions and Error Handling](#90-boundary-conditions-and-error-handling)
+[10.0 Non-Functional Compliance](#100-non-functional-compliance)
+[11.0 Element Registry](#110-element-registry)
+[12.0 Proposed Extensions (Not Implemented)](#120-proposed-extensions-not-implemented)
+[13.0 Open Issues](#130-open-issues)
+[14.0 Requirements Traceability](#140-requirements-traceability)
+[Version History](#version-history)
 
 ---
 
@@ -56,7 +56,7 @@ No prior design document existed for this component; this document is derived
 from source, not the reverse. Divergences between requirements and source are
 noted explicitly rather than reconciled silently.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -70,7 +70,7 @@ noted explicitly rather than reconciled silently.
 | Coverage | As-built only (FR-AEL-001–015, NFR-AEL-001–005). Proposed requirements (FR-AEL-P01–P12) are not present in source — see §12.0 |
 | Out of scope | oMLX inference endpoint implementation, MCP server implementations, recipe content |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -144,7 +144,7 @@ ai/engine/
 No package (`__init__.py` absent); `orchestrator.py` imports `mcp_client` and
 `parser` via `sys.path.insert(0, os.path.dirname(__file__))`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -203,7 +203,7 @@ Derived from `ai/config.yaml`. CLI flags override where noted (§8.1).
 | `context.budget_abort_pct` | float | 0.95 | Abort threshold fraction |
 | `context.model_context_windows.<model>` | int | — | Tier 3 per-model override |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -372,7 +372,7 @@ teardown to avoid MCP stdio subprocess hang). `main_async()`:
 `setup_logging()` — one `FileHandler` per process onto `engine_<timestamp>.LOG`;
 `logger.propagate = False` prevents duplicate console output via the root logger.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -412,7 +412,7 @@ structured, else Mistral/Cohere text) → truncate to `max_tool_calls_per_iterat
 → dispatch each call through the validation guards (§5.7) → append results →
 check `work-complete.txt`. No tool calls in the response ends the phase.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -432,7 +432,7 @@ This supersedes the retired standalone `budget.py` file-existence gate
 `orchestrator.py`, and `context-budget.md` is written automatically at every
 engine startup rather than by a separate script.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -477,7 +477,7 @@ request's `tools` parameter, the model's response is parsed for tool calls by
 whichever mechanism matches (§5.6), and `MCPClient.call_tool()` executes them
 against the owning stdio server session.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -501,7 +501,7 @@ against the owning stdio server session.
 | Model endpoint unreachable at startup | `await_model_ready` raises `TimeoutError` after `readiness.timeout_seconds` |
 | Unexpected exception in `main_async` | `rc` pre-initialised to 1; `finally` block always logs `engine end rc=N` before exit, so an unclean termination is distinguishable from a clean one by log inspection |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -515,7 +515,7 @@ against the owning stdio server session.
 | NFR-AEL-004 Backward compatibility | `--task <file or string>` interface retained; since change-c37198be a path-like value naming a missing file is refused (exit 1) instead of being run as free text. `extract_tactical_brief` fallback to raw document preserves behaviour for documents lacking a `tactical_brief` block |
 | NFR-AEL-005 Minimal dependencies | `requirements.txt`: `openai`, `mcp`, `pyyaml`, `rich` only — no platform-specific or optional dependencies |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -623,7 +623,7 @@ underscore denotes module-private.
 | `parse_tool_calls` | `(content: str) -> list[dict[str, Any]]` |
 | `_sanitize_json_string` | `(s: str) -> str` |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -639,7 +639,7 @@ decisions are made ahead of implementation.
 | Strategic Domain Task Authoring | FR-AEL-P01–P04 | `extract_tactical_brief()` still present and active (§5.2); task-file-as-primary-input not implemented |
 | Pipeline Mode | FR-AEL-P05–P12 | No `--mode pipeline`, no `pipeline.tasks_dir` config key, no task-queue discovery or per-task state isolation in source |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -655,7 +655,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | OI-004 | Pipeline mode behaviour on empty/no `.md` tasks directory undefined | Applies to §12.0 (not yet designed); remains open |
 | OI-005 | Write-scope check is fail-open: a write tool whose name is not in `_WRITE_TOOLS` is not scope-checked, while `mcp_client` classifies by verb pattern (fail-closed) | Resolved 2026-10-01 by change-bdc6820f: scope.py is the single, fail-closed source for write classification (audit-5bcd46ad L-09) |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -680,7 +680,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | FR-AEL-015 Duplicate read detection | §5.3, §9.0 |
 | NFR-AEL-001..005 | §10.0 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

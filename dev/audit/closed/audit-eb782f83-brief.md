@@ -11,15 +11,15 @@ Created: 2026 September 22
 
 ## Table of Contents
 
-[1.0 Purpose and Standing](<#1.0 purpose and standing>)
-[2.0 Reading Order](<#2.0 reading order>)
-[3.0 What Was Done](<#3.0 what was done>)
-[4.0 Claims To Test](<#4.0 claims to test>)
-[5.0 Known Weak Points](<#5.0 known weak points>)
-[6.0 Reproduction](<#6.0 reproduction>)
-[7.0 Out of Scope](<#7.0 out of scope>)
-[8.0 Deliverable](<#8.0 deliverable>)
-[Version History](<#version history>)
+[1.0 Purpose and Standing](#10-purpose-and-standing)
+[2.0 Reading Order](#20-reading-order)
+[3.0 What Was Done](#30-what-was-done)
+[4.0 Claims To Test](#40-claims-to-test)
+[5.0 Known Weak Points](#50-known-weak-points)
+[6.0 Reproduction](#60-reproduction)
+[7.0 Out of Scope](#70-out-of-scope)
+[8.0 Deliverable](#80-deliverable)
+[Version History](#version-history)
 
 ---
 
@@ -54,7 +54,7 @@ statement, not as instructions. Specifically:
 
 If this brief and the artefacts disagree, the artefacts are the evidence.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -76,7 +76,7 @@ changed mid-flight. Those revisions are themselves worth auditing: a criterion
 weakened after it failed is a different thing from a criterion corrected because
 it was wrong, and the documents claim the latter in each case.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -105,7 +105,7 @@ b3369f5  refactor: execute eb782f83 protocol and template renumbering
 9a1767f  fix: rehearsal findings for eb782f83; refine V-15
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -130,7 +130,7 @@ have been done.
 | C11 | Reserved identifiers carry no content | `P05`, `P06`–`P09`, `P16`–`P19` appear only in the appendix and reserved tables | A citation resolving to a reserved identifier |
 | C12 | Downstream projects are unaffected | No downstream repository was touched; pin at governance 9.16 recorded | Evidence of a downstream repository altered by this work |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -216,7 +216,7 @@ it cannot run non-interactively. Both were found after the migration, while
 regenerating `dev/smoke/ai/`. Whether they were foreseeable during design — the
 design specified template renames from the outset — is a fair question.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -247,7 +247,7 @@ Independent derivations worth performing:
 - Restore the snapshot into a scratch directory and diff it against
   `pre-eb782f83`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -264,7 +264,7 @@ Recommended, not binding.
   baseline report §7.0 and on `dev/todo.md`.
 - The nine remaining broken links in categories B, C and D.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -283,7 +283,7 @@ A report concluding that no defects were found is a legitimate outcome. So is
 one concluding that the audit could not establish a claim. The second is more
 useful than a confirmation reached by re-running the implementer's own checks.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

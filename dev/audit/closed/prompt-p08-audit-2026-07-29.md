@@ -6,15 +6,15 @@ Created: 2026 July 29
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Independence Conditions](<#2.0 independence conditions>)
-[3.0 Scope](<#3.0 scope>)
-[4.0 Method](<#4.0 method>)
-[5.0 Evidence Available](<#5.0 evidence available>)
-[6.0 Known Weak Points](<#6.0 known weak points>)
-[7.0 Deliverable](<#7.0 deliverable>)
-[8.0 Sealed Section — Open Only After Section 4.0 Is Complete](<#8.0 sealed section — open only after section 4.0 is complete>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Independence Conditions](#20-independence-conditions)
+[3.0 Scope](#30-scope)
+[4.0 Method](#40-method)
+[5.0 Evidence Available](#50-evidence-available)
+[6.0 Known Weak Points](#60-known-weak-points)
+[7.0 Deliverable](#70-deliverable)
+[8.0 Sealed Section — Open Only After Section 4.0 Is Complete](#80-sealed-section--open-only-after-section-40-is-complete)
+[Version History](#version-history)
 
 ---
 
@@ -28,7 +28,7 @@ Repository: `/Users/williamwatson/Documents/GitHub/LLM-Governance-and-Orchestrat
 
 Read `ai/primer.md` first, per standing operational instruction.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -50,7 +50,7 @@ observed, and the audit is the only remaining control.
 - The implementing session produced its own self-review. It is withheld until
   §8.0 so it cannot anchor your reading.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -92,7 +92,7 @@ added to the per-cycle pre-review `clear_state`.
 
 Three hunks: `ael/state/` → `/state/`; `/context.md` added; context seeding pass.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -115,7 +115,7 @@ Three hunks: `ael/state/` → `/state/`; `/context.md` added; context seeding pa
    audit coverage.
 7. Record findings before opening §8.0.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -140,7 +140,7 @@ The `bin/propagate.sh` change was exercised once, live, in the transcript —
 transferring `orchestrator.py` only, preserving `context.md`, excluding
 `ai/state/`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -156,7 +156,7 @@ the only issues.
 - Worker behaviour varies materially between runs at temperature 0.15; single
   runs are weak evidence.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -176,7 +176,7 @@ Write `dev/audit/audit-p08-2026-07-29-orchestrator-changes.md` containing:
 Do not implement remediation in the same session as the audit. Record findings;
 let remediation be a separate triple.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -209,7 +209,7 @@ reaches the seeding pass. Also, `--ignore-existing` is redundant inside an
 No findings were identified for `b7e3d5a9`. The self-reviewer recorded low
 confidence in that result, it being the most recently written change.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

@@ -4,25 +4,25 @@ Created: 2026 January 11
 
 ## Table of Contents
 
-- [Document Purpose](<#document purpose>)
-- [Change Summary](<#change summary>)
-- [Phase 1 Changes (Version 5.7)](<#phase 1 changes (version 5.7)>)
-  - [P00-1: Add Skills Management](<#p00-1 add skills management>)
-  - [P00-2: Add Context Optimization](<#p00-2 add context optimization>)
-  - [P01-1: Modify .gitignore](<#p01-1 modify .gitignore>)
-  - [P01-2: Add .claude Directory Structure](<#p01-2 add .claude directory structure>)
-  - [P09-1: Enhance Human Handoff](<#p09-1 enhance human handoff>)
-- [Phase 2 Changes (Version 5.8)](<#phase 2 changes (version 5.8)>)
-  - [P03-1: Add Checkpoint Strategy](<#p03-1 add checkpoint strategy>)
-  - [P06-1: Enhance Progressive Validation](<#p06-1 enhance progressive validation>)
-  - [P07-1: Add Validation Hooks](<#p07-1 add validation hooks>)
-  - [P08-1: Enhance Audit Procedure](<#p08-1 enhance audit procedure>)
-- [Phase 3 Changes (Version 6.0+)](<#phase 3 changes (version 6.0+)>)
-  - [P09-2: Add Wildcard Permissions](<#p09-2 add wildcard permissions>)
-  - [P08-2: Add Automated Audits](<#p08-2 add automated audits>)
-  - [P02-1: Add Exploration Phase](<#p02-1 add exploration phase>)
-- [Implementation Notes](<#implementation notes>)
-- [Version History](<#version history>)
+- [Document Purpose](#document-purpose)
+- [Change Summary](#change-summary)
+- [Phase 1 Changes (Version 5.7)](#phase-1-changes-version-57)
+  - [P00-1: Add Skills Management](#p00-1-add-skills-management)
+  - [P00-2: Add Context Optimization](#p00-2-add-context-optimization)
+  - [P01-1: Modify .gitignore](#p01-1-modify-gitignore)
+  - [P01-2: Add .claude Directory Structure](#p01-2-add-claude-directory-structure)
+  - [P09-1: Enhance Human Handoff](#p09-1-enhance-human-handoff)
+- [Phase 2 Changes (Version 5.8)](#phase-2-changes-version-58)
+  - [P03-1: Add Checkpoint Strategy](#p03-1-add-checkpoint-strategy)
+  - [P06-1: Enhance Progressive Validation](#p06-1-enhance-progressive-validation)
+  - [P07-1: Add Validation Hooks](#p07-1-add-validation-hooks)
+  - [P08-1: Enhance Audit Procedure](#p08-1-enhance-audit-procedure)
+- [Phase 3 Changes (Version 6.0+)](#phase-3-changes-version-60)
+  - [P09-2: Add Wildcard Permissions](#p09-2-add-wildcard-permissions)
+  - [P08-2: Add Automated Audits](#p08-2-add-automated-audits)
+  - [P02-1: Add Exploration Phase](#p02-1-add-exploration-phase)
+- [Implementation Notes](#implementation-notes)
+- [Version History](#version-history)
 
 ---
 
@@ -39,7 +39,7 @@ Each change entry specifies:
 - **Phase**: Implementation phase assignment
 - **Dependencies**: Prerequisites for implementation
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -66,7 +66,7 @@ Each change entry specifies:
 
 **Version Update**: Increment to 5.7 after Phase 1 implementation
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -109,7 +109,7 @@ Each change entry specifies:
 **Subsection Renumbering Required**: Yes
 - Current 1.1.18 Templates becomes 1.1.19
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -152,7 +152,7 @@ Each change entry specifies:
 
 **Subsection Renumbering Required**: None (end of P00 sections)
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -236,7 +236,7 @@ CLAUDE.local.md
 **Phase**: 1  
 **Dependencies**: P00-2 (Context Optimization specification)
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -285,7 +285,7 @@ CLAUDE.local.md
 **Phase**: 1  
 **Dependencies**: P00-1 (Skills Management), P00-2 (Context Optimization)
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -356,7 +356,7 @@ CLAUDE.local.md
 
 **Note**: Phase 3 wildcard permissions addition will be separate modification (see P09-2)
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -396,7 +396,7 @@ CLAUDE.local.md
 - Current 1.4.9 Maintenance Documentation becomes 1.4.10
 - Current 1.4.10 Documentation domain becomes 1.4.11
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -447,7 +447,7 @@ CLAUDE.local.md
 **Phase**: 2  
 **Dependencies**: P03-1 (Checkpoint Strategy specification)
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -494,7 +494,7 @@ CLAUDE.local.md
 **Phase**: 2  
 **Dependencies**: P00-1 (Skills Management for hook implementation)
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -538,7 +538,7 @@ CLAUDE.local.md
 **Phase**: 2  
 **Dependencies**: P07-1 (Validation Hooks specification)
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -590,7 +590,7 @@ claude --allowedTools Edit Bash(git:*) Bash(pytest:*) \
 **Phase**: 3  
 **Dependencies**: P09-1 (Enhanced Human Handoff)
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -629,7 +629,7 @@ claude --allowedTools Edit Bash(git:*) Bash(pytest:*) \
 
 **Implementation Note**: Deferred pending security assessment and container infrastructure availability
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -666,7 +666,7 @@ claude --allowedTools Edit Bash(git:*) Bash(pytest:*) \
 **Phase**: 3 (Documentation enhancement)  
 **Dependencies**: P00-1 (Skills Management for codebase analysis), P00-2 (CLAUDE.md for context)
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -765,7 +765,7 @@ claude --allowedTools Edit Bash(git:*) Bash(pytest:*) \
 - Restore P09 1.10.3 to Phase 2 version
 - Git commit: "Rollback: Removed Claude Code 2.1.0 Phase 3 enhancements"
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -777,7 +777,7 @@ claude --allowedTools Edit Bash(git:*) Bash(pytest:*) \
 
 ---
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

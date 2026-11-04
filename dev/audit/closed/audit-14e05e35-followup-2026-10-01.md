@@ -6,21 +6,21 @@ Created: 2026 October 01
 
 ## Table of Contents
 
-[1.0 Summary](<#1.0 summary>)
-[2.0 Scope and Method](<#2.0 scope and method>)
-[3.0 Verification Status](<#3.0 verification status>)
-[4.0 Findings](<#4.0 findings>)
-[5.0 Experiments](<#5.0 experiments>)
-[6.0 Observations](<#6.0 observations>)
-[7.0 T08 Record](<#7.0 t08 record>)
-[8.0 Closure Recommendation](<#8.0 closure recommendation>)
-[Version History](<#version history>)
+[1.0 Summary](#10-summary)
+[2.0 Scope and Method](#20-scope-and-method)
+[3.0 Verification Status](#30-verification-status)
+[4.0 Findings](#40-findings)
+[5.0 Experiments](#50-experiments)
+[6.0 Observations](#60-observations)
+[7.0 T08 Record](#70-t08-record)
+[8.0 Closure Recommendation](#80-closure-recommendation)
+[Version History](#version-history)
 
 ---
 
 ## 1.0 Summary
 
-- **Subject:** remediation commit `9f692dc` (change-82dbf16a, issue-82dbf16a) of [audit-14e05e35](<audit-14e05e35-phase2-2026-10-01.md>). Targeted follow-up per P02.8.2.
+- **Subject:** remediation commit `9f692dc` (change-82dbf16a, issue-82dbf16a) of [audit-14e05e35](audit-14e05e35-phase2-2026-10-01.md). Targeted follow-up per P02.8.2.
 - **Verdict:** remediation incomplete. Do not close issue-82dbf16a or change-82dbf16a yet.
 - **Verified closed:** H-03, M-01, M-02, M-03, M-04, M-05. FR-03-02 v1.3 matches the code.
 - **Partially remediated:** H-01 and H-02. The fixes work for the cases tested by the change, but each has a bypass that reproduces the original consequence:
@@ -29,7 +29,7 @@ Created: 2026 October 01
 - **Additional findings:** 2 medium (F-03, F-04), 2 low (F-05, F-06).
 - **Tests:** 257 passed, 1 skipped (root), consistent with the change record's 258 passed (§2.0).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -50,7 +50,7 @@ Created: 2026 October 01
 - **Governance checks:** `linter.py dev` 0 errors (94 warnings, not assessed); `protocol_checker.py dev` 0 errors.
 - **Side effects:** none in the repository. Probes ran only in the cloud clone and were deleted. This report is the only file added.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -68,7 +68,7 @@ Created: 2026 October 01
 | M-05 | Closed | `scrub_env` built from every configured `api_key_env` and applied in `gates.run_command_gate` (existing test). Cloud kinds require `api_key_env` (`providers.py:413`) |
 | FR-03-02 v1.3 | Consistent | Every applicable gate must pass (FAIL overrides SHIP); UNCHECKED blocks and is named; empty gates are SKIPPED and listed at approval. See §6.0 note 1 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -89,7 +89,7 @@ Created: 2026 October 01
 - Consequence: a planner with filesystem access only can run unapproved content, the case H-02 was raised for.
 - Recommendation: in the pre-run check, require the resolved task path to be one of the evidence documents of the stage before the loop stage (realpath comparison), and refuse otherwise with exit 3. Apply the same rule in engine-mcp. Add tests for a subfolder, another workspace folder and an extension variant.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.2 Medium
 
@@ -104,7 +104,7 @@ Created: 2026 October 01
 - Consequence: the worker can rewrite existing signal files, for example `task.md` (read back by a later run without `--task`, `orchestrator.py:2516`) and `mcp-run.json`. The verdict is not affected, because `review-result.txt` does not exist during the worker phase.
 - Recommendation: refuse a write call when any protected path lies under a target (`_within(p, resolved)`), not only when it equals the target.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.3 Low
 
@@ -113,7 +113,7 @@ Created: 2026 October 01
 | F-05 | `scope.py:130-137, 214` | Protected paths are compared case-sensitively. `ai/state/REVIEW-RESULT.TXT` and `ai/state/.Complete` pass the check (E-1c). On a case-insensitive APFS volume (macOS is the target platform) these name the protected files. Inference: not executed on APFS. Verdict forgery is prevented by the clear at `:2002`, which removes the same file. | Compare case-folded names under the state directory, or use `os.path.samefile` when the file exists. |
 | F-06 | `governance.md:139`; `docs/guide-orchestration.md:44`; `docs/setup-apple-silicon-mlx-magistral.md:160`; `ai/profiles/mlx_devstral_magistral_heterogeneous.md:120`; `orchestrator.py:1641-1642`; `guide-engine-operations.md:43` | Documents still say the reviewer writes `review-result.txt`. The engine guide says the verdict is the final response, while the code still reads the file first (F-01). The `_run_pytest_gate` docstring still says "Only FAIL overrides SHIP". | Correct with F-01. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -140,7 +140,7 @@ All in the cloud clone at `9f692dc`, as temporary pytest probes, deleted afterwa
 | E-4 (repeat) | `write_file` with `filename`, `file`, `directory`, `uri`, empty, `None`, list, empty `paths`, `edits` without path; symlink `tests/link` → `src` | All refused; symlink target checked |
 | E-5 (repeat) | Stat-dirty file; `scan` and `prerun_missing`; then plain `git status` | Index unchanged by the scan; changed by plain `git status` |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -154,7 +154,7 @@ No finding is raised for the following.
 4. **M-05 scope.** Only configured `api_key_env` variables are removed. Other key variables in the operator's shell reach gate processes.
 5. **`approve.py`** runs `git add` and `git commit` without `--no-optional-locks`. That is correct, because it writes the index.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -241,7 +241,7 @@ metadata:
   schema_type: "t08_audit"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -254,7 +254,7 @@ metadata:
 - **Next follow-up:** limited to F-01 to F-04 and their tests, because iteration 2 changes source (P02.8.2).
 - **Interim operating note:** until F-02 is fixed, run tracked prompts only from the prompt evidence folder (`ai/workspace/prompt/prompt-<uuid>-*.md`). Until F-01 is fixed, do not treat a SHIP as reviewed when the cycle changed `tests/conftest.py` or other test infrastructure.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

@@ -6,33 +6,33 @@ Created: 2026 June 10
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Scope](<#2.0 scope>)
-[3.0 Architecture](<#3.0 architecture>)
-[3.1 Component Diagram](<#3.1 component diagram>)
-[3.2 Module Structure](<#3.2 module structure>)
-[4.0 Data Model](<#4.0 data model>)
-[5.0 Components](<#5.0 components>)
-[5.1 Scanner](<#5.1 scanner>)
-[5.2 PhaseInference](<#5.2 phaseinference>)
-[5.3 ComplianceEngine](<#5.3 complianceengine>)
-[5.4 AlertWriter](<#5.4 alertwriter>)
-[5.5 GovwatchApp](<#5.5 govwatchapp>)
-[6.0 Phase Inference Logic](<#6.0 phase inference logic>)
-[7.0 Compliance Checks](<#7.0 compliance checks>)
-[8.0 Interfaces](<#8.0 interfaces>)
-[8.1 Command Line](<#8.1 command line>)
-[8.2 Key Bindings](<#8.2 key bindings>)
-[8.3 dashboard-alerts.md Format](<#8.3 dashboard-alerts.md format>)
-[8.4 Clipboard Payload](<#8.4 clipboard payload>)
-[9.0 Document Parsing](<#9.0 document parsing>)
-[10.0 Error Handling](<#10.0 error handling>)
-[11.0 Non-Functional Compliance](<#11.0 non-functional compliance>)
-[12.0 Element Registry](<#12.0 element registry>)
-[13.0 Resolved Open Questions](<#13.0 resolved open questions>)
-[14.0 Propagation](<#14.0 propagation>)
-[15.0 Requirements Traceability](<#15.0 requirements traceability>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Scope](#20-scope)
+[3.0 Architecture](#30-architecture)
+[3.1 Component Diagram](#31-component-diagram)
+[3.2 Module Structure](#32-module-structure)
+[4.0 Data Model](#40-data-model)
+[5.0 Components](#50-components)
+[5.1 Scanner](#51-scanner)
+[5.2 PhaseInference](#52-phaseinference)
+[5.3 ComplianceEngine](#53-complianceengine)
+[5.4 AlertWriter](#54-alertwriter)
+[5.5 GovwatchApp](#55-govwatchapp)
+[6.0 Phase Inference Logic](#60-phase-inference-logic)
+[7.0 Compliance Checks](#70-compliance-checks)
+[8.0 Interfaces](#80-interfaces)
+[8.1 Command Line](#81-command-line)
+[8.2 Key Bindings](#82-key-bindings)
+[8.3 dashboard-alerts.md Format](#83-dashboard-alertsmd-format)
+[8.4 Clipboard Payload](#84-clipboard-payload)
+[9.0 Document Parsing](#90-document-parsing)
+[10.0 Error Handling](#100-error-handling)
+[11.0 Non-Functional Compliance](#110-non-functional-compliance)
+[12.0 Element Registry](#120-element-registry)
+[13.0 Resolved Open Questions](#130-resolved-open-questions)
+[14.0 Propagation](#140-propagation)
+[15.0 Requirements Traceability](#150-requirements-traceability)
+[Version History](#version-history)
 
 ---
 
@@ -47,7 +47,7 @@ emits an alert summary to the clipboard and to `dashboard-alerts.md`.
 The tool is a single-tier component: one Python module, no AEL runtime dependency.
 A three-tier design hierarchy is not warranted.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -64,7 +64,7 @@ A three-tier design hierarchy is not warranted.
 
 Out of scope items are inherited from requirements §7.0 and not restated here.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -117,7 +117,7 @@ ai/src/
 └── requirements-govwatch.txt   # textual, rich
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -138,7 +138,7 @@ wholesale; no mutation across cycles.
 `cls` ∈ {issue, change, prompt, test, result, audit, trace, requirements, design}.
 `coupled_ref` holds the partner UUID parsed from the document body where present.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -190,7 +190,7 @@ Responsibility: `textual.App` subclass owning layout, polling timer, and binding
 - Startup runs `validate_project()`; on failure, print a clear message and exit
   non-zero before entering the TUI (FR-05-04).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -219,7 +219,7 @@ stateDiagram-v2
 
 Conditions 2–6 evaluate over open documents only (excluding `closed/`).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -273,7 +273,7 @@ initial ≥ warn threshold, else `ok`. Absent file → `unknown`.
 Colour by severity: VIOLATION red, WARNING yellow, OK green. The panel footer
 shows last-scan timestamp and total VIOLATION / WARNING counts.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -322,7 +322,7 @@ When a section has no entries, it states `none`.
 Identical content to §8.3 (FR-04-02), so a paste into Claude Desktop carries
 project name, timestamp, violations, warnings, and the inferred phase.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -360,7 +360,7 @@ FR-02-11/12 required fields are the `required` arrays of the T02/T03 schemas:
 
 A field is "unpopulated" if absent, empty string, or a value beginning with `#`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -377,7 +377,7 @@ A field is "unpopulated" if absent, empty string, or a value beginning with `#`.
 No exception from a single document aborts the scan. Tier 1 and Tier 2 are
 independently guarded.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -392,7 +392,7 @@ independently guarded.
 | NFR-05 | Absent state directory handled as idle |
 | NFR-06 | `requirements-govwatch.txt` lists `textual`, `rich` |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -421,7 +421,7 @@ UPPER_SNAKE constants.
 | `CLASS_DIRS` | constant | class → workspace subdirectory map |
 | `DEFAULT_INTERVAL` | constant | `5` |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -435,7 +435,7 @@ UPPER_SNAKE constants.
 | OQ-04 | Recommendation: add `dashboard-alerts.md` to downstream `.gitignore` — it reflects transient state and is overwritten each scan. This edits a downstream project artifact, not govwatch; requires human confirmation. Not implemented by this design. |
 | OQ-05 | No script change required. `sync-skel.sh` and `propagate.sh` both `rsync` the entire `ai/` tree recursively with explicit excludes only; a new `framework/ai/src/` propagates automatically. See §14.0. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -447,7 +447,7 @@ UPPER_SNAKE constants.
 modification to either script (OQ-05). `config.yaml` excludes are irrelevant to
 `govwatch`, which has no config file.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -462,7 +462,7 @@ modification to either script (OQ-05). `config.yaml` excludes are irrelevant to
 | FR-05 Invocation | §5.5, §8.1, §8.2 |
 | NFR-01..06 | §11.0 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

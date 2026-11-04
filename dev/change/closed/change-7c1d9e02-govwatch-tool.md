@@ -6,14 +6,14 @@ Created: 2026 June 10
 
 ## Table of Contents
 
-- [1.0 Change Information](<#1.0 change information>)
-- [2.0 Scope](<#2.0 scope>)
-- [3.0 Rationale](<#3.0 rationale>)
-- [4.0 Technical Details](<#4.0 technical details>)
-- [5.0 Testing](<#5.0 testing>)
-- [6.0 Implementation](<#6.0 implementation>)
-- [7.0 Traceability](<#7.0 traceability>)
-- [Version History](<#version history>)
+- [1.0 Change Information](#10-change-information)
+- [2.0 Scope](#20-scope)
+- [3.0 Rationale](#30-rationale)
+- [4.0 Technical Details](#40-technical-details)
+- [5.0 Testing](#50-testing)
+- [6.0 Implementation](#60-implementation)
+- [7.0 Traceability](#70-traceability)
+- [Version History](#version-history)
 
 ---
 
@@ -33,7 +33,7 @@ change_info:
     issue_iteration: 1
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -60,7 +60,7 @@ scope:
     - "Tests directory — no automated tests this iteration; validation is manual TUI run"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -93,7 +93,7 @@ rationale:
       mitigation: "Documented limitation; status derived without process inspection per NFR-03."
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -129,7 +129,7 @@ technical_details:
   interface_changes: []
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -160,7 +160,7 @@ testing:
     - "Malformed document yields WARNING, not unhandled exception (NFR-04)"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -185,7 +185,7 @@ implementation:
     scope of both scripts; no script modification required (OQ-05).
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -205,7 +205,7 @@ traceability:
       relationship: "implements"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

@@ -6,14 +6,14 @@ Created: 2026 September 23
 
 ## Table of Contents
 
-[1.0 Summary](<#1.0 summary>)
-[2.0 Independence and Method](<#2.0 independence and method>)
-[3.0 Status of A1 to A7](<#3.0 status of a1 to a7>)
-[4.0 New Routes Introduced by Iteration 2](<#4.0 new routes introduced by iteration 2>)
-[5.0 T08 Record](<#5.0 t08 record>)
-[6.0 Experiments](<#6.0 experiments>)
-[7.0 Closure Recommendation](<#7.0 closure recommendation>)
-[Version History](<#version history>)
+[1.0 Summary](#10-summary)
+[2.0 Independence and Method](#20-independence-and-method)
+[3.0 Status of A1 to A7](#30-status-of-a1-to-a7)
+[4.0 New Routes Introduced by Iteration 2](#40-new-routes-introduced-by-iteration-2)
+[5.0 T08 Record](#50-t08-record)
+[6.0 Experiments](#60-experiments)
+[7.0 Closure Recommendation](#70-closure-recommendation)
+[Version History](#version-history)
 
 ---
 
@@ -25,7 +25,7 @@ Created: 2026 September 23
 - **Medium (B1):** The new snapshot does not descend into `ai/` when `ai/` is a symlink. An edit made during the prompt is then overwritten without a backup, and the run exits 0. Iteration 1 refused the same case with exit 3, so this is a regression introduced by iteration 2.
 - **Recommendation (stop rule):** A finding is medium, so change-b170cf6a should not be closed. The fix is small and local (§7.0).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -37,7 +37,7 @@ Created: 2026 September 23
 - **Not exercised:** macOS, APFS and bash 3.2. The operator's `macos_results` (6 checks at `45ac716`) are taken as operator evidence. `/tmp/macos-check.out` is on the Mac and not reachable from the VM, so it was not read. None of the six operator checks covers the confirmation prompt, so the snapshot guard is unverified on macOS (see B3).
 - **Repository side effects:** An early read-only `git status` refreshed `.git/index` (stat data only), and a later one left an empty `.git/index.lock` because the mount did not allow the unlink. With the operator's approval, the lock was removed and the tree was confirmed clean. This report is the only file added.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -55,7 +55,7 @@ Created: 2026 September 23
 
 - **N-08 residual (C1 bytes):** recorded in the change document as accepted. It is outside A1–A7 and was not re-tested.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -75,7 +75,7 @@ Created: 2026 September 23
   - The cleanup `find` was changed from `-depth` to `-prune … | sort -rz`. Behaviour is unchanged against iteration 1. A directory at a framework file path whose relocated content leaves empty directories two or more levels deep gives exit 4 in both iterations (P-N3). This is pre-existing and was not re-audited.
   - bash 3.2 (static reading): the new constructs are 3.2-compatible. The operator's macOS check (2) exercised the new no-clobber backup path under bash 3.2 with rc=0.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -171,7 +171,7 @@ metadata:
   schema_type: "t08_audit"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -199,7 +199,7 @@ metadata:
 | P-N3 | `workflow.md/a/b/n.md` + `__pycache__` | Exit 4 | Exit 4 |
 | P-N4 | Prompt; write `state/ralph.json` | Exit 3 | — |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -212,7 +212,7 @@ metadata:
   - Closure check limited to P-B1, P-B2 and P-B3 plus one macOS prompt-race case. If these pass and nothing is medium or higher, close.
 - **Human approval:** pending operator decision.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

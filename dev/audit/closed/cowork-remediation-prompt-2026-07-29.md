@@ -6,18 +6,18 @@ Created: 2026 July 29
 
 ## Table of Contents
 
-[1.0 Purpose and Operating Mode](<#1.0 purpose and operating mode>)
-[2.0 Ground Rules](<#2.0 ground rules>)
-[3.0 Prerequisites — Run First](<#3.0 prerequisites — run first>)
-[4.0 Task Group A — Mechanical Housekeeping](<#4.0 task group a — mechanical housekeeping>)
-[5.0 Task Group B — Live Verification Chain](<#5.0 task group b — live verification chain>)
-[6.0 Task Group C — Independent Verification of the Three Open Fixes](<#6.0 task group c — independent verification of the three open fixes>)
-[7.0 Task Group D — Remediate Any New Findings](<#7.0 task group d — remediate any new findings>)
-[8.0 Task Group E — Closure](<#8.0 task group e — closure>)
-[9.0 Explicitly Out of Scope — Do Not Touch](<#9.0 explicitly out of scope — do not touch>)
-[10.0 Required Deliverable](<#10.0 required deliverable>)
-[11.0 Standing Constraints](<#11.0 standing constraints>)
-[Version History](<#version history>)
+[1.0 Purpose and Operating Mode](#10-purpose-and-operating-mode)
+[2.0 Ground Rules](#20-ground-rules)
+[3.0 Prerequisites — Run First](#30-prerequisites--run-first)
+[4.0 Task Group A — Mechanical Housekeeping](#40-task-group-a--mechanical-housekeeping)
+[5.0 Task Group B — Live Verification Chain](#50-task-group-b--live-verification-chain)
+[6.0 Task Group C — Independent Verification of the Three Open Fixes](#60-task-group-c--independent-verification-of-the-three-open-fixes)
+[7.0 Task Group D — Remediate Any New Findings](#70-task-group-d--remediate-any-new-findings)
+[8.0 Task Group E — Closure](#80-task-group-e--closure)
+[9.0 Explicitly Out of Scope — Do Not Touch](#90-explicitly-out-of-scope--do-not-touch)
+[10.0 Required Deliverable](#100-required-deliverable)
+[11.0 Standing Constraints](#110-standing-constraints)
+[Version History](#version-history)
 
 ---
 
@@ -45,7 +45,7 @@ AEL Ralph Loop implement fixes to itself. This is distinct from *using*
 evidence in §5.0 — that is testing, not delegated implementation, and is
 required.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -78,7 +78,7 @@ conversation that authored `change-3b9e6d72`, `change-f5c28a04` and
 - Never fabricate a verification result. Absence of evidence is reported as
   absence, not converted into a passing result.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -100,7 +100,7 @@ conversation that authored `change-3b9e6d72`, `change-f5c28a04` and
    `f5c28a04`, `8c1a4f5e`); the closed `b7e3d5a9` triple as the closure
    template.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -128,7 +128,7 @@ call's returned `log_path`, determine whether the currently running server
 resolves state to `.ael/ralph` or `ai/state/ralph`, and report which. Do not
 attempt to redeploy or restart the server.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -185,7 +185,7 @@ unexercised (e.g. it shipped on cycle 1 with nothing to observe across
 cycles). Two runs is the ceiling for this task — do not iterate indefinitely
 chasing a specific outcome.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -212,7 +212,7 @@ For each of the three:
   error or an unexamined assumption — matching the format of
   `dev/audit/audit-p08-2026-07-29-orchestrator-changes.md`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -232,7 +232,7 @@ For each defect found in §6.0:
   open and say so plainly in §10.0; do not force closure to reach zero open
   items.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -258,7 +258,7 @@ their corrective successors clear §6.0–§7.0 — `change-a2f9c4d1` and
   add a dated correction note in the same style rather than either closing
   prematurely or leaving the document silently stale.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -287,7 +287,7 @@ their corrective successors clear §6.0–§7.0 — `change-a2f9c4d1` and
   explicitly deferred in `change-3b9e6d72`'s own `alternatives_considered`; do
   not adopt it as part of this task.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -312,7 +312,7 @@ containing:
 - Update the status table in `dev/remediation-2026-07-29.md` to reflect final
   outcomes.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -327,7 +327,7 @@ containing:
 - Communicate in the final report with logical precision and minimal
   embellishment: point-by-point, no unsupported claims.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

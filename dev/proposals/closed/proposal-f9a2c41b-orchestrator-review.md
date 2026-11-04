@@ -9,16 +9,16 @@ Created: 2026 June 26
 
 ## Table of Contents
 
-- [1.0 Review Scope and Method](<#1.0 review scope and method>)
-- [2.0 Findings Summary](<#2.0 findings summary>)
-- [3.0 Loop Termination and Reviewer Findings](<#3.0 loop termination and reviewer findings>)
-- [4.0 Scope Containment Findings](<#4.0 scope containment findings>)
-- [5.0 Correctness and Robustness Findings](<#5.0 correctness and robustness findings>)
-- [6.0 Lower-Severity Findings](<#6.0 lower-severity findings>)
-- [7.0 Prioritized Remediation](<#7.0 prioritized remediation>)
-- [8.0 Relationship to Existing Issues](<#8.0 relationship to existing issues>)
-- [9.0 References](<#9.0 references>)
-- [Version History](<#version history>)
+- [1.0 Review Scope and Method](#10-review-scope-and-method)
+- [2.0 Findings Summary](#20-findings-summary)
+- [3.0 Loop Termination and Reviewer Findings](#30-loop-termination-and-reviewer-findings)
+- [4.0 Scope Containment Findings](#40-scope-containment-findings)
+- [5.0 Correctness and Robustness Findings](#50-correctness-and-robustness-findings)
+- [6.0 Lower-Severity Findings](#60-lower-severity-findings)
+- [7.0 Prioritized Remediation](#70-prioritized-remediation)
+- [8.0 Relationship to Existing Issues](#80-relationship-to-existing-issues)
+- [9.0 References](#90-references)
+- [Version History](#version-history)
 
 ---
 
@@ -28,7 +28,7 @@ Static review of `orchestrator.py` for correctness, control-flow logic, and the 
 
 Severity scale: **high** (causes failure, data corruption, or unbounded looping), **medium** (incorrect results or fragility under realistic input), **low** (cosmetic or narrow-condition).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -55,7 +55,7 @@ Severity scale: **high** (causes failure, data corruption, or unbounded looping)
 | F17 | low | audit | Item counting inconsistent: `startswith("- [")` vs substring `"- [ ]"` |
 | F18 | low | budget | `resolve_context_window` takes an arbitrary glob match; `config.json` value (500000) overstates usable window |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -75,7 +75,7 @@ These bear directly on the reviewer over-looping concern.
 
 **F16 — Reviewer task framing inconsistent (low).** In `run_loop`, `review_task` is plain prose lacking the `[AEL RUNTIME CONTEXT]` block the review recipe references; in single `--mode reviewer`, the reviewer is handed the worker's task text rather than a review instruction. *Fix:* prepend the runtime header to `review_task` and use a consistent review instruction across modes.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -87,7 +87,7 @@ These bear directly on the Tactical Domain scope concern.
 
 **F5 — Reviewer is not read-only (high).** Both phases receive `mcp.get_openai_tools()` — the full toolset including `write`, `edit`, `move_file`, and `delete`-capable operations. The reviewer can therefore mutate source, violating the worker/reviewer separation and enabling silent scope drift (the reviewer "fixing" rather than reporting). *Fix:* pass a read-only tool subset to the review phase (read/list/grep only).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -109,7 +109,7 @@ These bear directly on the Tactical Domain scope concern.
 
 **F14 — No completion-call error handling (medium).** `client.chat.completions.create` has no surrounding try/except; a transient oMLX error raises and aborts the entire loop with no retry. *Fix:* wrap with bounded retry/backoff; on persistent failure, BLOCK cleanly.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -119,7 +119,7 @@ These bear directly on the Tactical Domain scope concern.
 
 **F18 — Context window resolution (low).** `resolve_context_window` returns `glob(...)[0]`, an arbitrary match when multiple variant directories match the pattern, and the `config.json` `max_position_embeddings` (e.g. 500000 for North Mini Code) overstates the vendor-supported window (256K). *Fix:* match the exact model directory; allow a per-model supported-context override in `config.yaml`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -136,7 +136,7 @@ Recommended order, grouped so related fixes ship together.
 
 Each remediation that touches `orchestrator.py`, `parser.py`, or the recipes is a source change and requires a T03 issue plus T02 change before implementation. Items 1, 3, and the F12/F14 parts are orchestrator changes; the F4 allowed-dirs narrowing and the F18 override are configuration; F2 normalisation and F6/F1 fallback may also touch recipes.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -147,7 +147,7 @@ Each remediation that touches `orchestrator.py`, `parser.py`, or the recipes is 
 
 If these findings are accepted, recommend filing T03 issues per remediation group rather than per finding, to keep issue–change coupling tractable.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -159,7 +159,7 @@ If these findings are accepted, recommend filing T03 issues per remediation grou
 - Recipes: `ai/ael/recipes/ralph-work.yaml`, `ai/ael/recipes/ralph-review.yaml`
 - Related issues: `dev/issue/issue-e2b8046c-reviewer-false-revise-work-complete.md`, `dev/issue/issue-a3f1c7d9-mcp-stdio-teardown.md`
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

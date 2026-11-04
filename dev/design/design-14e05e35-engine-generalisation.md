@@ -11,23 +11,23 @@ Created: 2026 October 01
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Architecture](<#2.0 architecture>)
-[3.0 Configuration](<#3.0 configuration>)
-[4.0 Providers](<#4.0 providers>)
-[5.0 Manifest](<#5.0 manifest>)
-[6.0 Gates and Stage Flow](<#6.0 gates and stage flow>)
-[7.0 Write Scope](<#7.0 write scope>)
-[8.0 Stage Tracking and Approvals](<#8.0 stage tracking and approvals>)
-[9.0 engine-mcp](<#9.0 engine-mcp>)
-[10.0 Terminology Migration](<#10.0 terminology migration>)
-[11.0 Error Handling](<#11.0 error handling>)
-[12.0 Testing](<#12.0 testing>)
-[13.0 Implementation Plan](<#13.0 implementation plan>)
-[14.0 Open Issues](<#14.0 open issues>)
-[15.0 Requirements Traceability](<#15.0 requirements traceability>)
-[References](<#references>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Architecture](#20-architecture)
+[3.0 Configuration](#30-configuration)
+[4.0 Providers](#40-providers)
+[5.0 Manifest](#50-manifest)
+[6.0 Gates and Stage Flow](#60-gates-and-stage-flow)
+[7.0 Write Scope](#70-write-scope)
+[8.0 Stage Tracking and Approvals](#80-stage-tracking-and-approvals)
+[9.0 engine-mcp](#90-engine-mcp)
+[10.0 Terminology Migration](#100-terminology-migration)
+[11.0 Error Handling](#110-error-handling)
+[12.0 Testing](#120-testing)
+[13.0 Implementation Plan](#130-implementation-plan)
+[14.0 Open Issues](#140-open-issues)
+[15.0 Requirements Traceability](#150-requirements-traceability)
+[References](#references)
+[Version History](#version-history)
 
 ---
 
@@ -35,7 +35,7 @@ Created: 2026 October 01
 
 This document designs the Phase 2 requirements (14e05e35): a manifest-driven engine with a provider interface, declared gates, a write scope, stage tracking with operator approvals, a refactored engine-mcp and the agent-role terminology.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -73,7 +73,7 @@ bin/migrate-terms.py      NEW  framework repository only (§10.0)
 4. Run the loop as today. Model calls go through `Provider.complete()`; write tools go through `scope.check()`; gates run from the manifest.
 5. On SHIP, record that operator approval is awaited. On BLOCKED, add the return stage to `BLOCKED.md`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -117,7 +117,7 @@ gates:
 | Gates | `gates.<name>` overrides the command gate of that name declared in the manifest (FR-03-03). |
 | Timeouts | `request_timeout_seconds` per provider (default 300 s, also accepted in the legacy `omlx:` block) bounds each model request. The SDK's own retries are off, so the engine's bounded retry (3 attempts) is the only retry. `loop.mcp_timeout_seconds` (default 120 s) bounds each MCP request (initialize, list_tools, call_tool). An invalid value stops the run before any state is written (change-711a57d5). |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -170,7 +170,7 @@ The engine's message history stays in the current OpenAI chat format. Each provi
 
 Worker and reviewer phases keep separate message histories, so tool call IDs never cross providers.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -214,7 +214,7 @@ paths:
 
 The trivial exemption (P04.12) creates no documents and is not tracked; the git commit remains its record. Status values and folder names are taken from the templates at implementation time.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -231,7 +231,7 @@ Each gate result is logged as `gate=<name> type=<type> result=<PASS|FAIL|UNCHECK
 
 On BLOCKED the engine appends `Return to stage: <on_blocked>` to `BLOCKED.md` when the task belongs to a tracked work item, in loop and worker mode (FR-02-03; change-82dbf16a).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -250,7 +250,7 @@ The worker never writes the engine signal files in the state directory (`review-
 
 Before the review phase the engine injects a `[DELIVERABLES]` block listing each deliverable as an absolute path, so the reviewer does not resolve relative paths against the state directory (FR-05-03). The block merges the worker's reported deliverables with the prompt's declared `deliverable.files` that exist (change-82dbf16a).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -291,7 +291,7 @@ The engine reads approvals with `git show HEAD:ai/approvals.yaml`, so uncommitte
 
 For a T03 prompt task, the engine derives the work item and refuses to start when any stage before `implement` lacks evidence or a required approval, or when an approval no longer matches its stage's documents: a document changed, added or removed since approval, or an entry without `blobs`. The message lists what is missing (FR-08-05). Git runs with `--no-optional-locks`, so the check and `work_status` do not write the index (FR-08-06). A task file is tracked when its resolved path lies in `ai/workspace/`. A tracked task must itself be one of its work item's active evidence documents of the last stage with evidence before the loop stage, as the scan lists them (SE: `ai/workspace/prompt/prompt-<uuid>-<name>.md`, not `closed/`). The UUID comes from the task name as given; the resolved task path must equal the resolved path of one of that work item's documents. Names are matched in full (iteration 3, F2-01, F2-02). The engine reads the task file once, before the check; the blob hash of those bytes must equal the approved hash of the matched document, and the run uses only those bytes for the task text and the write scope (iteration 4, F3-02). A tracked task whose content was not read is refused (iteration 5, F4-02); otherwise the run is refused with exit 3 (change-82dbf16a iteration 2, follow-up F-02). Free-text CLI tasks are not tracked.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -306,7 +306,7 @@ Refactored in place in `ai/engine/mcp/server.py`.
 | State directory | Read from `loop.state_dir` in `ai/config.yaml`, default `ai/state` (FR-06-02). `bin/migrate-layout.sh` warns on any other value. |
 | Reaping | The server keeps the `Popen` handle per project and calls `poll()` before the liveness probe; without a handle (server restarted) it calls `os.waitpid(pid, WNOHANG)` and treats `ChildProcessError` as not a child (FR-06-03). |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -324,7 +324,7 @@ Refactored in place in `ai/engine/mcp/server.py`.
 
 Downstream projects receive the changed framework files through `bin/propagate.sh --allow-major` (FR-07-05). Occurrences in project-owned files are reported by the script's `--scan <project>` option, not rewritten.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -344,7 +344,7 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 | Model request fails with HTTP 400, 401 or 403 | Not retried; `BLOCKED.md` names the status (change-711a57d5; audit-14e05e35 L-09). |
 | MCP request exceeds `loop.mcp_timeout_seconds` | Tool error to the worker, or the server is skipped at connection; run continues (change-711a57d5). |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -364,7 +364,7 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 
 All tests run without network access or a loaded model (NFR-06). Live runs: V-02 and V-04.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -382,7 +382,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 | 6 | Terminology migration | FR-07 |
 | 7 | Live verification (V-02, V-04) and independent audit (V-14) | All |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -397,7 +397,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 | DI-04 | Mistral Pro subscription for the `mistral` provider. **Partially confirmed 2026-10-01** (`dev/reports/report-14e05e35-mistral-api-hypothesis.md` §5.0): a standard Studio key in the subscription's workspace works with pay-as-you-go disabled and no payment method; the account shows a $30 monthly included API allowance (the public pricing page states $15). Drawdown from the allowance is still to be observed after V-04. Guidance: (1) use a Studio key, not the Vibe-scoped key [5]; (2) keep the key in the macOS Keychain and let the engine read it through `api_key_keychain` (change-7d953510); a per-process `MISTRAL_API_KEY` remains an override, never exported globally [6]; (3) free-mode rate limits apply while pay-as-you-go is off and are sufficient for `mistral-medium` (1,000,000 tokens/min); some models allow 0.5 requests/s; (4) a subscription billed through Apple needs a separate payment method in the Mistral Admin Panel for pay-as-you-go. |
 | DI-05 | The error returned when the included allowance is exhausted with pay-as-you-go off is not yet known (report O-02). Once recorded, the provider treats it as non-retryable and the run ends BLOCKED naming the provider. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -416,7 +416,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 | NFR-01 to NFR-06 | §4.1, §11.0, §12.0 |
 | OQ-04 | §8.3 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -434,7 +434,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 [6] MISTRAL AI, 2026. *mistral-vibe issue 1055: MISTRAL_API_KEY silently overrides subscription-linked Vibe key* [online]. Available from: https://github.com/mistralai/mistral-vibe/issues/1055 [Accessed 1 October 2026].
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

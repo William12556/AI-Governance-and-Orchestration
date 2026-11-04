@@ -11,28 +11,28 @@ Created: 2026 September 22
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Scope](<#2.0 scope>)
-[3.0 Constraints](<#3.0 constraints>)
-[4.0 Functional Requirements](<#4.0 functional requirements>)
-[4.1 FR-01 Protocol Identity](<#4.1 fr-01 protocol identity>)
-[4.2 FR-02 Template Identity](<#4.2 fr-02 template identity>)
-[4.3 FR-03 Governance Restructuring](<#4.3 fr-03 governance restructuring>)
-[4.4 FR-04 Citation Conversion](<#4.4 fr-04 citation conversion>)
-[4.5 FR-05 Alias Appendix](<#4.5 fr-05 alias appendix>)
-[4.6 FR-06 Reserved Slots](<#4.6 fr-06 reserved slots>)
-[4.7 FR-07 Derived Artefact Regeneration](<#4.7 fr-07 derived artefact regeneration>)
-[4.8 FR-08 Primer Canonicalisation](<#4.8 fr-08 primer canonicalisation>)
-[4.9 FR-09 Smoke Harness Regeneration](<#4.9 fr-09 smoke harness regeneration>)
-[4.10 FR-10 Release](<#4.10 fr-10 release>)
-[5.0 Tooling Requirements](<#5.0 tooling requirements>)
-[6.0 Non-Functional Requirements](<#6.0 non-functional requirements>)
-[7.0 Verification Requirements](<#7.0 verification requirements>)
-[8.0 Out of Scope](<#8.0 out of scope>)
-[9.0 Open Questions](<#9.0 open questions>)
-[10.0 Traceability](<#10.0 traceability>)
-[Glossary](<#glossary>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Scope](#20-scope)
+[3.0 Constraints](#30-constraints)
+[4.0 Functional Requirements](#40-functional-requirements)
+[4.1 FR-01 Protocol Identity](#41-fr-01-protocol-identity)
+[4.2 FR-02 Template Identity](#42-fr-02-template-identity)
+[4.3 FR-03 Governance Restructuring](#43-fr-03-governance-restructuring)
+[4.4 FR-04 Citation Conversion](#44-fr-04-citation-conversion)
+[4.5 FR-05 Alias Appendix](#45-fr-05-alias-appendix)
+[4.6 FR-06 Reserved Slots](#46-fr-06-reserved-slots)
+[4.7 FR-07 Derived Artefact Regeneration](#47-fr-07-derived-artefact-regeneration)
+[4.8 FR-08 Primer Canonicalisation](#48-fr-08-primer-canonicalisation)
+[4.9 FR-09 Smoke Harness Regeneration](#49-fr-09-smoke-harness-regeneration)
+[4.10 FR-10 Release](#410-fr-10-release)
+[5.0 Tooling Requirements](#50-tooling-requirements)
+[6.0 Non-Functional Requirements](#60-non-functional-requirements)
+[7.0 Verification Requirements](#70-verification-requirements)
+[8.0 Out of Scope](#80-out-of-scope)
+[9.0 Open Questions](#90-open-questions)
+[10.0 Traceability](#100-traceability)
+[Glossary](#glossary)
+[Version History](#version-history)
 
 ---
 
@@ -48,7 +48,7 @@ used. Because the governance section number `§1.<n>` encodes a protocol's
 ordinal position, reordering invalidates every citation in the repository —
 approximately 1 185 in the live corpus.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -72,7 +72,7 @@ write to:
 
 Anything not named above is out of scope by construction.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -90,7 +90,7 @@ Anything not named above is out of scope by construction.
 | CON-08 | Pre-existing defects are not repaired. The 17 broken links catalogued in the baseline report persist. |
 | CON-09 | Python modules under `ai/` are governed as source code. Their citation edits proceed under a separate coupled issue-change-prompt triple. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -110,7 +110,7 @@ in execution order.
 | FR-01-04 | `P14` Quality retains its cross-cutting hook-auditing clauses unchanged. The protocol is not split. |
 | FR-01-05 | The mapping is bijective. Every old identifier maps to exactly one new identifier and conversely. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.2 FR-02 Template Identity
 
@@ -124,7 +124,7 @@ prompt, test, result, issue, change, audit.
 | FR-02-03 | The `T08` identifier is a fixed point. `T04` and `T05` change meaning while remaining numerically adjacent. Both conditions are handled by the atomic substitution required at TR-02. |
 | FR-02-04 | Every reference to a template filename in the migration set is updated to the new filename. Path defects in those references are not repaired (CON-08). |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.3 FR-03 Governance Restructuring
 
@@ -135,7 +135,7 @@ prompt, test, result, issue, change, audit.
 | FR-03-03 | Headings carry the citation string verbatim, for example `#### P13.2 Prompt Authoring`, so that a citation and its heading are textually identical. |
 | FR-03-04 | The protocol presentation order in `governance.md` and in its table of contents follows FR-01: Band A ascending, then Band B ascending. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.4 FR-04 Citation Conversion
 
@@ -148,7 +148,7 @@ prompt, test, result, issue, change, audit.
 | FR-04-05 | The section sign remains valid for sections of documents that are not protocols, including requirements, design, proposal and report documents. |
 | FR-04-06 | Conversion applies to every file in the migration set, including comments and docstrings in the five Python modules. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.5 FR-05 Alias Appendix
 
@@ -159,7 +159,7 @@ prompt, test, result, issue, change, audit.
 | FR-05-03 | The appendix content is generated from the same mapping table the migration script consumes, not transcribed independently. |
 | FR-05-04 | The appendix is the sole location in the live corpus where retired identifiers may appear, together with version-history entries. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.6 FR-06 Reserved Slots
 
@@ -169,7 +169,7 @@ prompt, test, result, issue, change, audit.
 | FR-06-02 | Reserved slots carry no protocol content. They are placeholders only (CON-03). |
 | FR-06-03 | Remaining unallocated identifiers in both bands are marked reserved without an intended protocol. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.7 FR-07 Derived Artefact Regeneration
 
@@ -180,7 +180,7 @@ prompt, test, result, issue, change, audit.
 | FR-07-03 | Every `workflow.md` Mermaid flowchart node carrying a citation is updated. Node identifiers, edges and flowchart topology are unchanged. |
 | FR-07-04 | `governance.md` template links in its table of contents are regenerated at their correct `templates/` paths. **Amended under change-9b8f1c47, audit finding F-01.** The original text said the missing path segment would not be repaired. Delivery repaired it: the generator derives entries from the headings and emits path-qualified filenames, and emitting a link known to be broken was not defensible. That is a reversal of OQ-7, recorded as a CON-08 exception in the proposal, not a discharge. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.8 FR-08 Primer Canonicalisation
 
@@ -191,7 +191,7 @@ prompt, test, result, issue, change, audit.
 | FR-08-03 | The nine divergences catalogued in the baseline report §3.2 resolve to the `ai/` form. |
 | FR-08-04 | The discarded version history of the `docs/` copy is retained in the baseline report §3.1 and in git history. It is not carried into the regenerated file. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.9 FR-09 Smoke Harness Regeneration
 
@@ -201,7 +201,7 @@ prompt, test, result, issue, change, audit.
 | FR-09-02 | `linter.py` and `protocol_checker.py` are executed against the regenerated copy as part of verification. |
 | FR-09-03 | The harness definition — `dev/smoke/task.md`, `dev/smoke/tests/`, `dev/smoke/config.reference.yaml` — and `dev/smoke-fixtures/` are unaffected. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.10 FR-10 Release
 
@@ -212,7 +212,7 @@ prompt, test, result, issue, change, audit.
 | FR-10-03 | The post-migration commit is tagged to mark the v10.0 boundary. |
 | FR-10-04 | The downstream pin at v9.16 is recorded, with propagation deferred to `dev/todo.md`. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -233,7 +233,7 @@ The migration instrument is source code and is governed accordingly.
 | TR-09 | A verification script implements the machine-checkable checks of §7.0 and exits non-zero on any failure. |
 | TR-10 | Substitution uses word-boundary and context rules sufficient to exclude identifier-shaped text in hashes, dates, code strings and prose. Residual false positives are caught by dry-run diff review. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -249,7 +249,7 @@ The migration instrument is source code and is governed accordingly.
 | NFR-06 | Usability | The historical corpus remains readable indefinitely through the alias appendix. |
 | NFR-07 | Maintainability | No behavioural change to any executable component. The five migrated Python modules are altered only in comments and docstrings. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -275,7 +275,7 @@ The migration instrument is source code and is governed accordingly.
 | V-16 | Semantic diff review: every hunk is an identifier, a citation or a structural heading change | Manual review of the complete diff | CON-01 |
 | V-17 | Frozen corpus byte-identical across the migration | `git diff pre-eb782f83..<migration commit> -- dev`, excluding `dev/backup/`, `dev/smoke/` and `dev/tools/`. The comparison must be bounded at both ends: unbounded, it compares the tag against the working tree, so any legitimate later edit under `dev/` fails it permanently. | CON-04, NFR-03 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -291,7 +291,7 @@ The migration instrument is source code and is governed accordingly.
 | Any change to the meaning of a protocol clause | Prohibited by CON-01 |
 | Splitting `governance.md` | `dev/todo.md`; see OQ-01 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -308,7 +308,7 @@ All four open questions are resolved as of 2026-09-22. FR-05-01 and FR-06-01
 already state the resolved positions, so no requirement text changes. The
 design document is unblocked.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -331,7 +331,7 @@ design document is unblocked.
 
 Design, test and code traceability entries are added when those documents exist.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -351,7 +351,7 @@ Design, test and code traceability entries are added when those documents exist.
 | Semantics-preserving | A change in which no clause alters meaning; only identifiers, citations and structural headings change |
 | Sentinel token | A temporary unique placeholder used during substitution so that one replacement cannot match the output of another |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

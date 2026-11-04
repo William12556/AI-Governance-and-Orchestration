@@ -10,21 +10,21 @@ Created: 2026 September 16
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Problem Statement](<#2.0 problem statement>)
-[3.0 Ratified Decisions](<#3.0 ratified decisions>)
-[4.0 Target Scheme](<#4.0 target scheme>)
-[5.0 CI/CD and DevOps Assessment](<#5.0 ci/cd and devops assessment>)
-[6.0 Scope Boundaries](<#6.0 scope boundaries>)
-[7.0 Backup and Rollback](<#7.0 backup and rollback>)
-[8.0 Implementation Procedure](<#8.0 implementation procedure>)
-[9.0 Verification Strategy](<#9.0 verification strategy>)
-[10.0 Risk Register](<#10.0 risk register>)
-[11.0 Acceptance Criteria](<#11.0 acceptance criteria>)
-[12.0 Rejected Alternatives](<#12.0 rejected alternatives>)
-[13.0 Open Questions](<#13.0 open questions>)
-[Glossary](<#glossary>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Problem Statement](#20-problem-statement)
+[3.0 Ratified Decisions](#30-ratified-decisions)
+[4.0 Target Scheme](#40-target-scheme)
+[5.0 CI/CD and DevOps Assessment](#50-cicd-and-devops-assessment)
+[6.0 Scope Boundaries](#60-scope-boundaries)
+[7.0 Backup and Rollback](#70-backup-and-rollback)
+[8.0 Implementation Procedure](#80-implementation-procedure)
+[9.0 Verification Strategy](#90-verification-strategy)
+[10.0 Risk Register](#100-risk-register)
+[11.0 Acceptance Criteria](#110-acceptance-criteria)
+[12.0 Rejected Alternatives](#120-rejected-alternatives)
+[13.0 Open Questions](#130-open-questions)
+[Glossary](#glossary)
+[Version History](#version-history)
 
 ---
 
@@ -39,7 +39,7 @@ The framework's protocols and templates accumulated organically. Their numbering
 records the order in which they were written, not the order in which they are
 used.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -94,7 +94,7 @@ Document classes are keyed by name (`issue`, `change`, `prompt`), never by
 template number. No control flow depends on either numbering. The change is
 documentation-mechanical, not behavioural.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -109,7 +109,7 @@ documentation-mechanical, not behavioural.
 | D5 | Downstream propagation | Deferred; downstream repositories pinned to v9.16 |
 | D6 | Backup | All changed files backed up prior to modification |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -214,7 +214,7 @@ than 1 185 substitutions.
 mapping for protocols, templates and citations. This appendix makes the frozen
 historical corpus (`dev/`, `closed/`) permanently readable. It is never removed.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -252,7 +252,7 @@ requires no renumbering:
 
 Authoring these protocols is **out of scope for this change** (§6.2).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -342,7 +342,7 @@ excluded them. CON-01 holds over the range the tag defines and does not hold
 over the change as a whole. The lesson is recorded in the design: a baseline tag
 must precede the first edit of any kind, not the first mechanical one.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -403,7 +403,7 @@ requiring no git reasoning under pressure. That value is unaffected by whether
 the directory is tracked. Requirement D6 is satisfied by the snapshot existing
 on disk before any write.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -439,7 +439,7 @@ convention.
 5. **Single commit.** The live-corpus migration lands as one commit, so that it
    can be reverted as one unit.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -463,7 +463,7 @@ convention.
 | V14 | Broken relative file links number 17 or fewer, and every one appears in the pre-migration baseline | Link scan compared against `report-eb782f83-pre-migration-baseline.md` §4.5 |
 | V15 | The five migrated Python modules import and execute unchanged | `linter.py` and `protocol_checker.py` run clean (V5, V6); `govwatch.py` and `overwatch.py` complete one scan cycle |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -482,7 +482,7 @@ convention.
 | R9 | Overwriting `docs/claude/primer.md` discards content unique to it | Low | Pre-migration divergence inventory establishes that no unique content exists; git history and the baseline report retain the discarded version-history table; V13 |
 | R10 | Pre-existing broken links mistaken for migration damage | Low | Baseline of 17 links captured before any work; V14 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -504,7 +504,7 @@ convention.
 9. The broken-link count is 17 or fewer and introduces no entry absent from the
    baseline report §4.5.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -519,7 +519,7 @@ convention.
 | Rewrite the historical corpus | Destroys the audit trail and roughly triples the blast radius for no operational benefit |
 | Single change combining renumbering and CI/CD protocols | Migration defects become indistinguishable from intentional edits; verification impossible |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -535,7 +535,7 @@ convention.
 | OQ-6 | Treatment of comment-only Python edits | **Resolved** — full protocol, separate coupled triple (§8.0 Phase 4a) |
 | OQ-7 | Category A template links in `governance.md` | **Resolved, then reversed in delivery.** Ruled rename-only; delivery emitted the repaired paths. Recorded as CON-08 exception E-3 in §6.3, per audit finding F-01. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -554,7 +554,7 @@ convention.
 | Semantics-preserving | A change in which no clause alters its meaning; only identifiers and citations change |
 | Sentinel token | A temporary unique placeholder substituted during migration to prevent one replacement from matching the output of another |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

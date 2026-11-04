@@ -6,13 +6,13 @@ Created: 2026 April 29
 
 ## Table of Contents
 
-- [1.0 Change Information](<#1.0 change information>)
-- [2.0 Scope](<#2.0 scope>)
-- [3.0 Rationale](<#3.0 rationale>)
-- [4.0 Technical Details](<#4.0 technical details>)
-- [5.0 Testing](<#5.0 testing>)
-- [6.0 Implementation](<#6.0 implementation>)
-- [Version History](<#version history>)
+- [1.0 Change Information](#10-change-information)
+- [2.0 Scope](#20-scope)
+- [3.0 Rationale](#30-rationale)
+- [4.0 Technical Details](#40-technical-details)
+- [5.0 Testing](#50-testing)
+- [6.0 Implementation](#60-implementation)
+- [Version History](#version-history)
 
 ---
 
@@ -32,7 +32,7 @@ change_info:
     issue_iteration: 1
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -57,7 +57,7 @@ scope:
     - "downstream project copies — inherit via standard propagation"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -92,7 +92,7 @@ rationale:
         interrupts uniformly.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -124,7 +124,7 @@ technical_details:
       new: "except BaseException: (same comment as framework)"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -152,7 +152,7 @@ testing:
     - "Orchestrator exits with rc=0 or SHIP state"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -189,7 +189,7 @@ traceability:
       relationship: "same MCP client code path; different failure mode"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

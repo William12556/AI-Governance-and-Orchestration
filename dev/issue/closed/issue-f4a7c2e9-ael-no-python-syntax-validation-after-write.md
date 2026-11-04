@@ -6,15 +6,15 @@ Created: 2026 March 27
 
 ## Table of Contents
 
-- [1.0 Issue Information](<#1.0 issue information>)
-- [2.0 Source](<#2.0 source>)
-- [3.0 Affected Scope](<#3.0 affected scope>)
-- [4.0 Reproduction](<#4.0 reproduction>)
-- [5.0 Behavior](<#5.0 behavior>)
-- [6.0 Environment](<#6.0 environment>)
-- [7.0 Analysis](<#7.0 analysis>)
-- [8.0 Resolution](<#8.0 resolution>)
-- [Version History](<#version history>)
+- [1.0 Issue Information](#10-issue-information)
+- [2.0 Source](#20-source)
+- [3.0 Affected Scope](#30-affected-scope)
+- [4.0 Reproduction](#40-reproduction)
+- [5.0 Behavior](#50-behavior)
+- [6.0 Environment](#60-environment)
+- [7.0 Analysis](#70-analysis)
+- [8.0 Resolution](#80-resolution)
+- [Version History](#version-history)
 
 ---
 
@@ -35,7 +35,7 @@ issue_info:
     change_iteration: 1
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -56,7 +56,7 @@ source:
     only on manual inspection of the written file.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -74,7 +74,7 @@ affected_scope:
   version: "AEL orchestrator as of 2026-03-27"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -104,7 +104,7 @@ reproduction:
     SyntaxError: '(' was never closed  (or equivalent at import time)
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -132,7 +132,7 @@ behavior:
     loop run. Correct errors in place using Filesystem MCP tools.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -150,7 +150,7 @@ environment:
   domain: "framework/ai/ael"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -200,7 +200,7 @@ analysis:
       relationship: "same fix location (run_phase tool dispatch loop)"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -269,7 +269,7 @@ metadata:
   schema_type: "t03_issue"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

@@ -6,13 +6,13 @@ Created: 2026 June 15
 
 ## Table of Contents
 
-- [1.0 Change Information](<#1.0 change information>)
-- [2.0 Scope](<#2.0 scope>)
-- [3.0 Rationale](<#3.0 rationale>)
-- [4.0 Technical Details](<#4.0 technical details>)
-- [5.0 Testing](<#5.0 testing>)
-- [6.0 Implementation](<#6.0 implementation>)
-- [Version History](<#version history>)
+- [1.0 Change Information](#10-change-information)
+- [2.0 Scope](#20-scope)
+- [3.0 Rationale](#30-rationale)
+- [4.0 Technical Details](#40-technical-details)
+- [5.0 Testing](#50-testing)
+- [6.0 Implementation](#60-implementation)
+- [Version History](#version-history)
 
 ---
 
@@ -32,7 +32,7 @@ change_info:
     issue_iteration: 1
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -63,7 +63,7 @@ scope:
     - "_STATE_FILES list — unchanged (file names, not the directory)"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -89,7 +89,7 @@ rationale:
         equally reliable. Favours technical simplicity over feature complexity.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -124,7 +124,7 @@ technical_details:
         log_path example.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -153,7 +153,7 @@ testing:
     - "All three tools operate on ai/state/ralph/"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -195,7 +195,7 @@ metadata:
   schema_type: "t02_change"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

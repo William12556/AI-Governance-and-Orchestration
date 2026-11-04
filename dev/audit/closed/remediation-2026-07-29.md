@@ -51,15 +51,15 @@ session that produced changes `a2f9c4d1`, `b7e3d5a9` and `e4b1a7c3`.
 
 ## Table of Contents
 
-[0.0 Status](<#0.0 status>)
-[1.0 Blocking Closure](<#1.0 blocking closure>)
-[2.0 New Defects Without Triples](<#2.0 new defects without triples>)
-[3.0 Verification Debt](<#3.0 verification debt>)
-[4.0 Housekeeping](<#4.0 housekeeping>)
-[5.0 Deferred Investigation](<#5.0 deferred investigation>)
-[6.0 Suggested Sequence](<#6.0 suggested sequence>)
-[7.0 Downstream Audit Result](<#7.0 downstream audit result>)
-[Version History](<#version history>)
+[0.0 Status](#00-status)
+[1.0 Blocking Closure](#10-blocking-closure)
+[2.0 New Defects Without Triples](#20-new-defects-without-triples)
+[3.0 Verification Debt](#30-verification-debt)
+[4.0 Housekeeping](#40-housekeeping)
+[5.0 Deferred Investigation](#50-deferred-investigation)
+[6.0 Suggested Sequence](#60-suggested-sequence)
+[7.0 Downstream Audit Result](#70-downstream-audit-result)
+[Version History](#version-history)
 
 ---
 
@@ -109,7 +109,7 @@ against scratch targets, and `3b9e6d72` at unit level across fifteen cases.
 `f5c28a04` is **not** verified end to end — that requires the live three-cycle
 run described at §3.2, which was blocked behind 2.1 and is now unblocked.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -169,7 +169,7 @@ The audit identified two claims the code does not support:
 Both must be corrected in `change-a2f9c4d1` as part of the remediation triple.
 Correcting the record is as much a deliverable as correcting the code.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -218,7 +218,7 @@ in this session went through log files instead.
 **Severity:** low. Same repository as 2.2. Returns 1 when the state directory
 does not exist; resetting nothing should be a no-op success.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -254,7 +254,7 @@ GTach, solax-modbus, e-Paper-IP-Display: check for leaked `ai/state/` and for
 `ai/context.md` overwritten with the unfilled template. A precondition of
 `change-e4b1a7c3`'s own deployment notes.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -278,7 +278,7 @@ Inside an `if [[ ! -f ]]` branch. Harmless; style only.
 `config.yaml`, `workspace/`, `dashboard-alerts.md` are unanchored while
 `/state/` and `/context.md` are anchored. Predates `e4b1a7c3`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -324,7 +324,7 @@ narration token counts and tool-call efficiency. Persona, recursive-thinking
 and hermeneutic-circle instructions assessed as unsuitable for a 24B quantised
 worker and not recommended for testing.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -347,7 +347,7 @@ Item 3 before item 4 is deliberate. Fixing F1/F3 without fixing verdict parsing
 yields another run that cannot ship, and therefore cannot verify the fix
 end-to-end.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -386,7 +386,7 @@ Claude Code profile and has a populated `CLAUDE.md`.
 before any further AEL run there. No action is required in the framework, and
 nothing blocks propagation.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

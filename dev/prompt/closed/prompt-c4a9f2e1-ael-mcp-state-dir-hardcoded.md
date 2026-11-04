@@ -6,14 +6,14 @@ Created: 2026 June 15
 
 ## Table of Contents
 
-- [1.0 Prompt Information](<#1.0 prompt information>)
-- [2.0 Context](<#2.0 context>)
-- [3.0 Specification](<#3.0 specification>)
-- [4.0 Deliverable](<#4.0 deliverable>)
-- [5.0 Testing](<#5.0 testing>)
-- [6.0 Tactical Brief](<#6.0 tactical brief>)
-- [7.0 Success Criteria](<#7.0 success criteria>)
-- [Version History](<#version history>)
+- [1.0 Prompt Information](#10-prompt-information)
+- [2.0 Context](#20-context)
+- [3.0 Specification](#30-specification)
+- [4.0 Deliverable](#40-deliverable)
+- [5.0 Testing](#50-testing)
+- [6.0 Tactical Brief](#60-tactical-brief)
+- [7.0 Success Criteria](#70-success-criteria)
+- [Version History](#version-history)
 
 ---
 
@@ -35,7 +35,7 @@ Tactical Domain: Claude Code, operating in the ael-mcp repository
 (William12556/ael-mcp), not the framework repository. Read each target file
 before editing and apply only the changes specified.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -58,7 +58,7 @@ context:
     - "Operate in the ael-mcp repository, not the framework repository"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -88,7 +88,7 @@ specification:
       - "mcp remains the only dependency"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -104,7 +104,7 @@ deliverable:
     - path: "DESIGN.md"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -122,7 +122,7 @@ testing:
     - "start_ael writes the run record to ai/state/ralph/ (if smoke-tested)"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -149,7 +149,7 @@ tactical_brief: |
   imports cleanly.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -164,7 +164,7 @@ success_criteria:
   - "No change to _STATE_FILES, tool signatures, or process logic"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

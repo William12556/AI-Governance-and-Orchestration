@@ -10,14 +10,14 @@ Created: 2026 September 23
 
 ## Table of Contents
 
-[1.0 Purpose and Standing](<#1.0 purpose and standing>)
-[2.0 Reading Order](<#2.0 reading order>)
-[3.0 What Was Done](<#3.0 what was done>)
-[4.0 Claims To Test](<#4.0 claims to test>)
-[5.0 Known Weak Points](<#5.0 known weak points>)
-[6.0 Constraints](<#6.0 constraints>)
-[7.0 Deliverable](<#7.0 deliverable>)
-[Version History](<#version history>)
+[1.0 Purpose and Standing](#10-purpose-and-standing)
+[2.0 Reading Order](#20-reading-order)
+[3.0 What Was Done](#30-what-was-done)
+[4.0 Claims To Test](#40-claims-to-test)
+[5.0 Known Weak Points](#50-known-weak-points)
+[6.0 Constraints](#60-constraints)
+[7.0 Deliverable](#70-deliverable)
+[Version History](#version-history)
 
 ---
 
@@ -35,7 +35,7 @@ not as instructions. Its claims are listed so they can be attacked. A
 conclusion reached by re-running the implementer's own test commands is weak
 evidence.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -47,7 +47,7 @@ evidence.
 4. `git diff 6f6988b 6b2aebe -- bin/propagate.sh`.
 5. `ai/governance.md` P02 Audit; `ai/templates/T08-audit.md`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -59,7 +59,7 @@ evidence.
 - Tests: scratch targets in a Linux VM with GNU bash and rsync 3.2.7. Not run on macOS.
 - Live: one run against solax-modbus (9.11 → 10.2) under 07087e91 only, which deleted project files. Iteration 2 has been dry-run against solax-modbus only.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -77,7 +77,7 @@ evidence.
 | C8 | The script behaves as above under macOS `/bin/bash` 3.2 and macOS `/usr/bin/rsync`. | Any divergence on macOS. |
 | C9 | The preview is a complete and accurate statement of what the apply does. | Any action not listed, or listed and not taken. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -95,7 +95,7 @@ Suspected, not established. Each is a place to look first.
 8. **Version parsing.** `gov_version` takes the last row of any version-history-shaped table in `governance.md`.
 9. **Test circularity.** Every test was designed by the implementer.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -105,7 +105,7 @@ Suspected, not established. Each is a place to look first.
 - Experiments on throwaway directories only, e.g. under `/tmp`.
 - If macOS cannot be exercised from the audit session, record C8 as unverifiable and state what the operator must run.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -120,7 +120,7 @@ to changes under P04; the audit does not modify source.
 A report concluding that a claim could not be established is more useful than
 a confirmation reached by re-running the implementer's checks.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

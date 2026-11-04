@@ -11,27 +11,27 @@ Created: 2026 September 30
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Scope](<#2.0 scope>)
-[3.0 Constraints](<#3.0 constraints>)
-[4.0 Functional Requirements](<#4.0 functional requirements>)
-[4.1 FR-01 Governance Model Manifest](<#4.1 fr-01 governance model manifest>)
-[4.2 FR-02 Stage Flow](<#4.2 fr-02 stage flow>)
-[4.3 FR-03 Gates](<#4.3 fr-03 gates>)
-[4.4 FR-04 Role-to-Model Binding](<#4.4 fr-04 role-to-model binding>)
-[4.5 FR-05 Write Scope](<#4.5 fr-05 write scope>)
-[4.6 FR-06 engine-mcp](<#4.6 fr-06 engine-mcp>)
-[4.7 FR-07 Terminology](<#4.7 fr-07 terminology>)
-[4.8 FR-08 Stage Tracking](<#4.8 fr-08 stage tracking>)
-[5.0 Non-Functional Requirements](<#5.0 non-functional requirements>)
-[6.0 Verification Requirements](<#6.0 verification requirements>)
-[6.1 Verification Results](<#6.1 verification results>)
-[7.0 Out of Scope](<#7.0 out of scope>)
-[8.0 Open Questions](<#8.0 open questions>)
-[9.0 Traceability](<#9.0 traceability>)
-[Glossary](<#glossary>)
-[References](<#references>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Scope](#20-scope)
+[3.0 Constraints](#30-constraints)
+[4.0 Functional Requirements](#40-functional-requirements)
+[4.1 FR-01 Governance Model Manifest](#41-fr-01-governance-model-manifest)
+[4.2 FR-02 Stage Flow](#42-fr-02-stage-flow)
+[4.3 FR-03 Gates](#43-fr-03-gates)
+[4.4 FR-04 Role-to-Model Binding](#44-fr-04-role-to-model-binding)
+[4.5 FR-05 Write Scope](#45-fr-05-write-scope)
+[4.6 FR-06 engine-mcp](#46-fr-06-engine-mcp)
+[4.7 FR-07 Terminology](#47-fr-07-terminology)
+[4.8 FR-08 Stage Tracking](#48-fr-08-stage-tracking)
+[5.0 Non-Functional Requirements](#50-non-functional-requirements)
+[6.0 Verification Requirements](#60-verification-requirements)
+[6.1 Verification Results](#61-verification-results)
+[7.0 Out of Scope](#70-out-of-scope)
+[8.0 Open Questions](#80-open-questions)
+[9.0 Traceability](#90-traceability)
+[Glossary](#glossary)
+[References](#references)
+[Version History](#version-history)
 
 ---
 
@@ -41,7 +41,7 @@ This document states the requirements for Phase 2 of the AI-G&O pivot: generalis
 
 It states what the engine must do. How it does it (manifest schema fields, adapter structure) belongs in the Phase 2 design document.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -58,7 +58,7 @@ In scope:
 
 The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-005 remain in force unless a requirement below supersedes them.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -74,7 +74,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | CON-06 | The ownership boundary holds: propagation replaces framework-owned folders, seeds only absent project-owned files, and never deletes. | Proposal §5.0 |
 | CON-07 | pip only; the only new runtime dependency is the `anthropic` SDK. | NFR-AEL-005 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -92,7 +92,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | FR-01-06 | The SE audit recipes move from `ai/engine/recipes/` to `ai/governance/software-engineering/recipes/` (proposal §4.1). Engine-generic recipes remain in `ai/engine/recipes/`. |
 | FR-01-07 | The manifest may declare additional paths the worker may write in every task (FR-05-01). |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.2 FR-02 Stage Flow
 
@@ -102,7 +102,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | FR-02-02 | The engine runs only stages owned by the loop. Planner and human stages are outside the engine (CON-03). |
 | FR-02-03 | On BLOCKED, the engine writes the manifest's return stage for the current stage into `BLOCKED.md`, so the planner knows where to resume. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.3 FR-03 Gates
 
@@ -115,7 +115,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | FR-03-05 | The engine never marks a human approval gate as passed. It ends the run and records that approval is awaited. |
 | FR-03-06 | Every gate result is logged per iteration with gate name, type and outcome. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.4 FR-04 Role-to-Model Binding
 
@@ -131,7 +131,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | FR-04-08 | The existing `omlx:` configuration block remains valid and binds both roles to oMLX. |
 | FR-04-09 | Tool call IDs the engine generates are 9 alphanumeric characters. This matches the IDs Mistral itself issues and is a compatibility convention: other clients report 9 characters as required [4], while `mistral-medium-2604` also accepted 12 characters on 2026-10-01 (`dev/reports/report-14e05e35-mistral-api-hypothesis.md`). |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.5 FR-05 Write Scope
 
@@ -142,7 +142,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | FR-05-03 | The reviewer resolves every deliverable path against the project root, not the state directory (backlog §5.0-8). |
 | FR-05-04 | Every rejected write is logged with tool, path and reason. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.6 FR-06 engine-mcp
 
@@ -152,7 +152,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | FR-06-02 | engine-mcp reads `loop.state_dir` from the project configuration. `bin/migrate-layout.sh` warns when a non-standard `state_dir` remains (audit-5bcd46ad L-01). |
 | FR-06-03 | engine-mcp reaps its finished child before the liveness check, so `pid_alive` is false once a run has ended (audit-5bcd46ad L-02). |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.7 FR-07 Terminology
 
@@ -164,7 +164,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | FR-07-04 | The change is made by a script that plans by default and applies on request, as `bin/migrate-layout.sh` does. |
 | FR-07-05 | The governance version takes a major increment; downstream projects receive it through `bin/propagate.sh --allow-major`. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.8 FR-08 Stage Tracking
 
@@ -180,7 +180,7 @@ The engine determines each work item's stage from its documents, so the record c
 | FR-08-06 | engine-mcp provides a read-only status tool that lists each work item's current stage, missing evidence and awaited approvals. |
 | FR-08-07 | A document whose status contradicts its location is reported, not corrected. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -195,7 +195,7 @@ The engine determines each work item's stage from its documents, so the record c
 | NFR-05 | Security | API keys never appear in logs, state files or committed files. |
 | NFR-06 | Testability | Each requirement group has pytest tests that run without network access or a loaded model. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -239,7 +239,7 @@ Recorded at Phase 2 closure, 2026-10-01.
 | V-13 | Pass | 303 passed (offline runner, change-82dbf16a iteration 5); auditor run 302 passed, 1 skipped as root, 303 as non-root |
 | V-14 | Pass | `dev/audit/audit-14e05e35-phase2-2026-10-01.md` and five follow-up audits; remediation issue- and change-82dbf16a closed 2026-10-01 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -257,7 +257,7 @@ Recorded at Phase 2 closure, 2026-10-01.
 | Reviewer false REVISE (backlog §5.0-9) | Model-quality observation; not an engine requirement |
 | `run_phase` crash on a response without `choices` (backlog §3.0-5) | Defect; fixed separately |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -270,7 +270,7 @@ Recorded at Phase 2 closure, 2026-10-01.
 | OQ-02 | Test files are often not listed in `deliverable.files`. Must prompts list them, or may the manifest declare additional writable paths (for example `tests/`)? **Resolved 2026-09-30:** the manifest declares them (FR-01-07, FR-05-01). | Resolved |
 | OQ-03 | Does the Mistral API support tool calls fully through the OpenAI-compatible client, or does it need its own implementation? **Resolved 2026-09-30:** the OpenAI-compatible implementation serves Mistral [2]. Tool definitions, tool calls and tool results have the same shape [3]. Differences: tool call IDs must be 9 alphanumeric characters (FR-04-09) [4]; forced tool use is `any`, not `required` (the engine does not set `tool_choice`); tool results need no `name` field (tested 2026-10-01, `dev/reports/report-14e05e35-mistral-api-hypothesis.md`). | Resolved |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -292,7 +292,7 @@ Recorded at Phase 2 closure, 2026-10-01.
 
 Design, test and code traceability entries are added when those documents exist.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -308,7 +308,7 @@ Design, test and code traceability entries are added when those documents exist.
 | Run type | A named pair of worker and reviewer recipes, for example `loop` or `audit` |
 | Worker, reviewer | The agent roles the engine runs in the loop; formerly the Tactical Domain |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -322,7 +322,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 [4] MISTRAL AI, 2026. *mistral-vibe issue 1075: Error with tool ID format* [online]. Available from: https://github.com/mistralai/mistral-vibe/issues/1075 [Accessed 30 September 2026].
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

@@ -6,15 +6,15 @@ Created: 2026 April 29
 
 ## Table of Contents
 
-- [1.0 Issue Information](<#1.0 issue information>)
-- [2.0 Source](<#2.0 source>)
-- [3.0 Affected Scope](<#3.0 affected scope>)
-- [4.0 Reproduction](<#4.0 reproduction>)
-- [5.0 Behavior](<#5.0 behavior>)
-- [6.0 Environment](<#6.0 environment>)
-- [7.0 Analysis](<#7.0 analysis>)
-- [8.0 Resolution](<#8.0 resolution>)
-- [Version History](<#version history>)
+- [1.0 Issue Information](#10-issue-information)
+- [2.0 Source](#20-source)
+- [3.0 Affected Scope](#30-affected-scope)
+- [4.0 Reproduction](#40-reproduction)
+- [5.0 Behavior](#50-behavior)
+- [6.0 Environment](#60-environment)
+- [7.0 Analysis](#70-analysis)
+- [8.0 Resolution](#80-resolution)
+- [Version History](#version-history)
 
 ---
 
@@ -35,7 +35,7 @@ issue_info:
     change_iteration: 1
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -53,7 +53,7 @@ source:
     No deliverable file was written in any AEL run across multiple retry attempts.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -71,7 +71,7 @@ affected_scope:
   version: "AEL orchestrator as of 2026-04-29"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -116,7 +116,7 @@ reproduction:
     asyncio.exceptions.CancelledError: Cancelled by cancel scope ...
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -138,7 +138,7 @@ behavior:
   workaround: "None identified. Retry does not resolve."
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -160,7 +160,7 @@ environment:
   domain: "framework (project_dir: framework/)"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -207,7 +207,7 @@ analysis:
       relationship: "same MCP client code path; different failure mode"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -270,7 +270,7 @@ metadata:
   schema_type: "t03_issue"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

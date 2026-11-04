@@ -8,15 +8,15 @@ Created: 2026 July 15
 
 ## Table of Contents
 
-[1.0 Scope](<#1.0 scope>)
-[2.0 Background](<#2.0 background>)
-[3.0 Findings](<#3.0 findings>)
-[4.0 Prompt-Cache Experiment](<#4.0 prompt-cache experiment>)
-[5.0 Recommended Optimisations](<#5.0 recommended optimisations>)
-[6.0 Actions Taken](<#6.0 actions taken>)
-[7.0 Open and Deferred Items](<#7.0 open and deferred items>)
-[References](<#references>)
-[Version History](<#version history>)
+[1.0 Scope](#10-scope)
+[2.0 Background](#20-background)
+[3.0 Findings](#30-findings)
+[4.0 Prompt-Cache Experiment](#40-prompt-cache-experiment)
+[5.0 Recommended Optimisations](#50-recommended-optimisations)
+[6.0 Actions Taken](#60-actions-taken)
+[7.0 Open and Deferred Items](#70-open-and-deferred-items)
+[References](#references)
+[Version History](#version-history)
 
 ---
 
@@ -24,7 +24,7 @@ Created: 2026 July 15
 
 Investigation into language-model efficiency (latency and token usage) for the AI-G&O AEL stack, prompted by review of the Headroom project. Covers `ai/ael/src/orchestrator.py`, the T04 prompt path, oMLX-hosted model behaviour, and an empirical prompt-cache test executed against the running oMLX server. Records findings, recommended optimisations, and artifacts produced.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -37,7 +37,7 @@ Two applicability questions were examined:
 - **oMLX.** A transparent proxy is transport-compatible with oMLX's OpenAI-style API, but adopting the package inserts an unaudited dependency and contradicts the framework's minimalism and dependency-discipline values. Its *principles* (cache alignment; never mutate the hot zone; compress repetitive tool output) transfer; the package itself is not recommended.
 - **Claude Code quota.** Usage is token-metered and tool outputs count toward it, so compression could in principle reduce consumption; however, compatibility of a compression proxy with subscription OAuth authentication is unverified, and native mitigations (`/clear`, lean context files, trimmed pastes) carry no dependency or policy risk.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -57,7 +57,7 @@ Validated findings are marked [V]; analytical (source-derived, not yet measured)
 - **3.10 [V]** oMLX acceleration features are largely unavailable for the in-use models: `specprefill`, `turboquant_kv`, and MTP are disabled, and DFlash is incompatible with the `mistral3` and `cohere2_moe` model types.
 - **3.11 [V]** `is_default` divergence: the loaded default at test time was `Devstral-...-8Bit`, not the config.yaml Tactical default (`North-Mini-Code-...-6bit`). Consistent with the known `is_default`-vs-config caveat.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -75,7 +75,7 @@ Condensed chat-endpoint result (identical 554-token payload; only status *positi
 
 Conclusion: cross-request caching exists (H0 rejected); the F25 pattern forfeits it; relocating the identical text to the tail recovers it. Full method, data, and interpretation: `dev/reports/procedure-omlx-prompt-cache-behaviour.md` §9.0.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -95,7 +95,7 @@ Ordered by leverage and certainty. Source-code changes route through the T03 →
 
 Not recommended: adopting Headroom as a dependency (§2.0). Its principles are already actioned by item 1 and item 2.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -106,7 +106,7 @@ Not recommended: adopting Headroom as a dependency (§2.0). Its principles are a
 - Scoped the F25 fix as triple `c3a7f0d2` (issue/change/prompt, Option A).
 - Changed `prompt-c3a7f0d2` `target_profile` from `ael` to `claude_code` to match the intended executor.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -117,7 +117,7 @@ Not recommended: adopting Headroom as a dependency (§2.0). Its principles are a
 - Reconcile the `is_default` divergence (3.11) if unintended.
 - Previously parked items are unaffected: tier-ordering redesign for the context-window resolver; live oMLX context-window query enhancement.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -125,7 +125,7 @@ Not recommended: adopting Headroom as a dependency (§2.0). Its principles are a
 
 headroomlabs-ai, 2026. *Headroom* [online]. GitHub. Available at: https://github.com/headroomlabs-ai/headroom [Accessed 15 July 2026].
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

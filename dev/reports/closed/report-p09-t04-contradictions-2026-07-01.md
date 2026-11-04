@@ -8,24 +8,24 @@ Created: 2026 July 01
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Scope and Method](<#2.0 scope and method>)
-[3.0 Root-Cause Structure](<#3.0 root-cause structure>)
-[4.0 Findings](<#4.0 findings>)
-[4.1 F1 — tactical_brief mandatory but AEL-exclusive](<#4.1 f1 — tactical_brief mandatory but ael-exclusive>)
-[4.2 F2 — change_ref mandatory vs initial-implementation exemption](<#4.2 f2 — change_ref mandatory vs initial-implementation exemption>)
-[4.3 F3 — P09 creation clause presumes a change document](<#4.3 f3 — p09 creation clause presumes a change document>)
-[4.4 F4 — source_ref vs coupled_docs internal contradiction](<#4.4 f4 — source_ref vs coupled_docs internal contradiction>)
-[4.5 F5 — "plain-text" vs "yaml fenced block"](<#4.5 f5 — plain-text vs yaml fenced block>)
-[4.6 F6 — context-budget check scope](<#4.6 f6 — context-budget check scope>)
-[4.7 F7 — schema / template drift](<#4.7 f7 — schema template drift>)
-[4.8 F8 — stale embedded version labels](<#4.8 f8 — stale embedded version labels>)
-[4.9 F9 — inconsistent tactical_brief size figures](<#4.9 f9 — inconsistent tactical_brief size figures>)
-[5.0 Severity Summary](<#5.0 severity summary>)
-[6.0 Resolution Options](<#6.0 resolution options>)
-[7.0 Recommendation](<#7.0 recommendation>)
-[Glossary](<#glossary>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Scope and Method](#20-scope-and-method)
+[3.0 Root-Cause Structure](#30-root-cause-structure)
+[4.0 Findings](#40-findings)
+[4.1 F1 — tactical_brief mandatory but AEL-exclusive](#41-f1--tactical_brief-mandatory-but-ael-exclusive)
+[4.2 F2 — change_ref mandatory vs initial-implementation exemption](#42-f2--change_ref-mandatory-vs-initial-implementation-exemption)
+[4.3 F3 — P09 creation clause presumes a change document](#43-f3--p09-creation-clause-presumes-a-change-document)
+[4.4 F4 — source_ref vs coupled_docs internal contradiction](#44-f4--source_ref-vs-coupled_docs-internal-contradiction)
+[4.5 F5 — "plain-text" vs "yaml fenced block"](#45-f5--plain-text-vs-yaml-fenced-block)
+[4.6 F6 — context-budget check scope](#46-f6--context-budget-check-scope)
+[4.7 F7 — schema / template drift](#47-f7--schema--template-drift)
+[4.8 F8 — stale embedded version labels](#48-f8--stale-embedded-version-labels)
+[4.9 F9 — inconsistent tactical_brief size figures](#49-f9--inconsistent-tactical_brief-size-figures)
+[5.0 Severity Summary](#50-severity-summary)
+[6.0 Resolution Options](#60-resolution-options)
+[7.0 Recommendation](#70-recommendation)
+[Glossary](#glossary)
+[Version History](#version-history)
 
 ---
 
@@ -40,7 +40,7 @@ Authoritative reference: `ai/governance.md` (v9.9). Analysis performed against
 the `solax-modbus` working copy; P09 and T04 are shared identically with this
 repository.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -56,7 +56,7 @@ hold for the same prompt, with the governing text cited. One consumer claim
 
 Out of scope: correctness of other protocols; template files other than T04.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -82,7 +82,7 @@ The two roots explain the prior session's difficulty: the TelemetryServer
 prompt was both an initial implementation (Root B) and targeted at Claude Code
 (Root A), so it collided with both assumptions simultaneously.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -108,7 +108,7 @@ consumer for only one of three tactical profiles. For a Claude Code or
 claude-omlx prompt the author must either populate a field no process reads, or
 omit a schema-required field. Both violate a stated directive.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.2 F2 — change_ref mandatory vs initial-implementation exemption
 
@@ -128,7 +128,7 @@ Contradiction: an initial-implementation prompt has no change document, so
 an empty string. A prompt that governance permits cannot satisfy the schema
 governance also mandates.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.3 F3 — P09 creation clause presumes a change document
 
@@ -140,7 +140,7 @@ T04 template." The conjunction presumes both documents exist for every prompt.
 This contradicts the §1.4.1 forward path, in which the prompt is created from a
 design document alone. Same root as F2; distinct textual location.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.4 F4 — source_ref vs coupled_docs internal contradiction
 
@@ -154,7 +154,7 @@ change pattern, which forbids a design-only origin.
 Contradiction: the template both permits and forbids a design-sourced prompt.
 The template is internally inconsistent, independent of any other document.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.5 F5 — "plain-text" vs "yaml fenced block"
 
@@ -171,7 +171,7 @@ misreading (author the brief as a `text` block) that the orchestrator's Pass-2
 fallback and governance v8.4 were written to correct. Wording defect, not a
 logical contradiction.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.6 F6 — context-budget check scope
 
@@ -186,7 +186,7 @@ precondition has no target, yet the primer says "every" / "any." The prior
 session voided the budget blocker for Claude Code — correct in substance, but
 in direct conflict with the primer's literal wording. Consequence of Root A.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.7 F7 — schema / template drift
 
@@ -198,7 +198,7 @@ body. Template revision v1.6 removed several fields from the body;
 `output_format` persists in the schema only. The schema documents fields the
 template does not provide and no directive populates — dead schema.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.8 F8 — stale embedded version labels
 
@@ -208,7 +208,7 @@ The T04 template body header reads "T04 Prompt Template v1.0" and the schema
 header "T04 Prompt Schema v1.0". The file Version History records the current
 version as 1.9. The embedded labels have not tracked the file since v1.0.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ### 4.9 F9 — inconsistent tactical_brief size figures
 
@@ -219,7 +219,7 @@ Three sizing figures for the same field: P09 §1.10.2 and the T04 comment give
 ≤1,000 tokens"; `budget.py` emits a dynamically computed maximum. An author
 following one source contradicts another.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -240,7 +240,7 @@ following one source contradicts another.
 Load-bearing set: **F1** (Root A) and **F2** (Root B). Between them they account
 for the prior session's difficulty.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -288,7 +288,7 @@ framework change and requires the standard issue → change → prompt workflow 
 this repository, distinct from the documentation-only edits used in
 `solax-modbus`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -300,7 +300,7 @@ The remaining findings are non-blocking and may be batched. This ordering
 follows severity and leaves design decisions (A1 vs A2, B1 vs B2) open for
 collaborative resolution.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -315,7 +315,7 @@ collaborative resolution.
 | coupled_docs | T04 field set linking a prompt to its source change document |
 | Root A / Root B | The two whole-level assumptions in §3.0 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

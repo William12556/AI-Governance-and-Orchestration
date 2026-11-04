@@ -12,16 +12,16 @@ Created: 2026 October 01
 
 ## Table of Contents
 
-[1.0 Hypothesis](<#1.0 hypothesis>)
-[2.0 Method](<#2.0 method>)
-[3.0 Steps and Results](<#3.0 steps and results>)
-[4.0 DI-01 Answer](<#4.0 di-01 answer>)
-[5.0 DI-04 Verdict](<#5.0 di-04 verdict>)
-[6.0 Rate-Limit Findings](<#6.0 rate-limit findings>)
-[7.0 Recommended Design Changes](<#7.0 recommended design changes>)
-[8.0 Open Items](<#8.0 open items>)
-[References](<#references>)
-[Version History](<#version history>)
+[1.0 Hypothesis](#10-hypothesis)
+[2.0 Method](#20-method)
+[3.0 Steps and Results](#30-steps-and-results)
+[4.0 DI-01 Answer](#40-di-01-answer)
+[5.0 DI-04 Verdict](#50-di-04-verdict)
+[6.0 Rate-Limit Findings](#60-rate-limit-findings)
+[7.0 Recommended Design Changes](#70-recommended-design-changes)
+[8.0 Open Items](#80-open-items)
+[References](#references)
+[Version History](#version-history)
 
 ---
 
@@ -34,7 +34,7 @@ Secondary questions in the same run:
 - DI-01: whether tool results sent to the Mistral API need a `name` field.
 - FR-04-09: whether a generated tool call ID of 9 alphanumeric characters is accepted.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -48,7 +48,7 @@ Secondary questions in the same run:
 
 Evidence (observed) and inference (concluded) are marked separately in each section.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -106,7 +106,7 @@ Further evidence: prompt tokens were identical (135) with and without `name`. To
 | Admin › API › Limits | "Organization limits", region Global. Per-model limits, no tier name shown. `mistral-medium-latest`: 1,000,000 tokens/min, 33.33 requests/s. |
 | Response headers (`mistral-medium-2604`) | `x-ratelimit-limit-tokens-minute: 1000000`, `x-ratelimit-limit-req-minute: 2000` |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -118,7 +118,7 @@ Further evidence: prompt tokens were identical (135) with and without `name`. To
 - Inference: the OpenAI-compatible provider sends tool results unchanged. No `name` handling is required.
 - Limit of the evidence: one model (`mistral-medium-2604`) on one date.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -140,7 +140,7 @@ Corrections to the design's assumptions:
 
 The verdict becomes **Confirmed** when the "Included API usage" meter shows a non-zero amount after a larger run such as V-04.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -152,7 +152,7 @@ The verdict becomes **Confirmed** when the "Included API usage" meter shows a no
 - Inference: `mistral-medium-2604` shares the `mistral-medium-latest` bucket (1,000,000 tokens/min, 2,000 requests/min = 33.33/s), because the response headers match the Limits page.
 - Assessment: these limits exceed the needs of a single-user engine for Mistral Medium. Some models are much lower: `mistral-large-2512` and `glm-5-2` allow 0.5 requests/s.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -167,7 +167,7 @@ The verdict becomes **Confirmed** when the "Included API usage" meter shows a no
 
 No change is recommended to §4.2. Its readiness rule (`models.list()` contains the model) already rejects a deprecated model such as `devstral-latest`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -180,7 +180,7 @@ No change is recommended to §4.2. Its readiness rule (`models.list()` contains 
 | O-03 | The test key expires about 2026-10-31. Rotate it, or create the engine key, before V-04 if V-04 runs later. |
 | O-04 | The shell-profile check for a global `MISTRAL_API_KEY` (`grep` of `~/.zshrc` and related files) was not reported. The shell itself showed the variable unset. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -204,7 +204,7 @@ No change is recommended to §4.2. Its readiness rule (`models.list()` contains 
 
 [9] MISTRAL AI, 2026. *mistral-vibe issue 1055: MISTRAL_API_KEY silently overrides subscription-linked Vibe key* [online]. Available from: https://github.com/mistralai/mistral-vibe/issues/1055 [Accessed 1 October 2026].
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

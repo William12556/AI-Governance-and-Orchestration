@@ -11,14 +11,14 @@ Created: 2026 September 22
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Method](<#2.0 method>)
-[3.0 Primer Divergence](<#3.0 primer divergence>)
-[4.0 Broken-Link Inventory](<#4.0 broken-link inventory>)
-[5.0 Post-Migration Comparison Procedure](<#5.0 post-migration comparison procedure>)
-[6.0 Findings Requiring a Decision](<#6.0 findings requiring a decision>)
-[7.0 Compliance Tooling Baseline](<#7.0 compliance tooling baseline>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Method](#20-method)
+[3.0 Primer Divergence](#30-primer-divergence)
+[4.0 Broken-Link Inventory](#40-broken-link-inventory)
+[5.0 Post-Migration Comparison Procedure](#50-post-migration-comparison-procedure)
+[6.0 Findings Requiring a Decision](#60-findings-requiring-a-decision)
+[7.0 Compliance Tooling Baseline](#70-compliance-tooling-baseline)
+[Version History](#version-history)
 
 ---
 
@@ -36,7 +36,7 @@ Two baselines are captured:
 2. Every broken relative file link in the migration set, so that verification
    check V4 has a reference point.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -51,7 +51,7 @@ Two baselines are captured:
   Each file link was resolved relative to its containing document and tested
   for existence.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -115,7 +115,7 @@ the repository does so: the only references to `docs/claude/` are a directory
 entry in `docs/claude/project_information.md`, a `README.md` version-history
 line, and a broken link in `ai/profiles/README.md` (§4.0, category C).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -184,7 +184,7 @@ wrong — so CON-08 is not breached, but the `dev/todo.md` item covering those
 eight links is discharged by it. Categories B, C and D, nine links, persist and
 remain on the todo list. Confirmed on the rehearsal.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -201,7 +201,7 @@ remain on the todo list. Confirmed on the rehearsal.
 5. Record the `docs/` copy's discarded version history as retained in §3.1 of
    this report.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -233,7 +233,7 @@ but not within it.
 `docs/claude/.DS_Store`, dated 2026-06-17. `.gitignore` covers `.DS_Store` and
 `**/.DS_Store`, so it is correctly excluded. Noted only for completeness.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -306,7 +306,7 @@ migration writes nothing to it, any difference is migration damage. This is
 robust to documents added to `dev/` between baseline capture and execution,
 which an absolute count is not.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

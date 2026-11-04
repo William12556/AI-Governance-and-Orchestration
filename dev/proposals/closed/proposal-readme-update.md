@@ -8,11 +8,11 @@ Created: 2026 February 18
 
 ## Table of Contents
 
-- [Purpose](<#purpose>)
-- [Current State](<#current state>)
-- [Proposed Changes](<#proposed changes>)
-- [Proposed Content](<#proposed content>)
-- [Version History](<#version history>)
+- [Purpose](#purpose)
+- [Current State](#current-state)
+- [Proposed Changes](#proposed-changes)
+- [Proposed Content](#proposed-content)
+- [Version History](#version-history)
 
 ---
 
@@ -20,7 +20,7 @@ Created: 2026 February 18
 
 Update `README.md` to reflect the current state of the framework following significant evolution since the file was last modified (2026-01-23).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -36,7 +36,7 @@ The README contains the following inaccuracies and omissions relative to governa
 - **Informal tone**: Language inconsistent with the neutral, factual tone adopted by the framework.
 - **External reference**: Website reference loosely stated and of marginal relevance.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -51,7 +51,7 @@ The README contains the following inaccuracies and omissions relative to governa
 | Important Notice | Retain, trim | Remove informal language; retain fitness-for-purpose disclaimer |
 | External reference | Remove | No longer relevant |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -129,7 +129,7 @@ AI-assisted development workflows, and protocol-driven project management.
 Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
 ~~~
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

@@ -113,7 +113,7 @@ python ai/engine/src/orchestrator.py --mode loop \
       - Planner: Generates 8-character UUID (first 8 hex digits of UUID v4)
       - Examples: change-a3f5b2c1-fix-parser.md, issue-d7e9f1a4-network-timeout.md
     - Planner: Design documents follow tier naming convention: master_, domain_, component_ prefixes
-    - Planner: Insures related documents are Obsidian cross linked
+    - Planner: Ensures related documents are cross-linked (link syntax: P12.9)
     - Document classes that require a master document are: design, audit, trace and test
     - Design class includes a dedicated name registry master: design-\<project\>-name_registry-master.md
     - All document classes (issue, change, prompt, test, result) contain internal iteration field starting at 1
@@ -833,7 +833,9 @@ exclude_lines = [
     - Planner: Master lists all Tier 2 domain document references
     - Planner: Each domain lists: master parent reference, all Tier 3 component children references
     - Planner: Each component lists: domain parent reference, generated code file paths
-    - Planner: Uses Obsidian internal link syntax for all cross-references
+    - Planner: Uses Markdown links with GitHub heading anchors for all cross-references: `[Text](file.md#heading-anchor)`, or `[Text](#heading-anchor)` within a document
+      - Anchor: heading text in lowercase; punctuation removed; each space replaced by a hyphen; a repeated heading takes the suffix -1, -2, ...
+      - Angle brackets are used only around a path that contains spaces
   - P12.10 Context Window Constraints
     - Planner: Ensures design documents at each tier do not exceed worker/reviewer context window
     - Planner: T03 prompts embed only Tier 3 component designs relevant to code generation task
@@ -1271,6 +1273,7 @@ See [workflow.md](workflow.md).
 | 12.4 | 2026-10-23 | P00.20: task register holds all open work (open triples, items not yet raised, deferred and parked items) in a four-column table with a leading Status keyword (sourced from GTach). P11.7 (framework-development requirements) and the P10.6 framework-repository notes removed; they apply only to the framework repository and are kept there. P11.7 reserved. Non-breaking. |
 | 12.5 | 2026-10-23 | P10.6: framework source organised by component; ai/src/ replaced by ai/webui/ (Overwatch) and ai/core/ (reserved) (change-14cf601f). Non-breaking. |
 | 12.6 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list. Non-breaking. |
+| 12.7 | 2026-11-04 | P00.10 cross-linking and P12.9: GitHub heading anchors replace Obsidian internal link syntax for all documents; anchor rule stated. Non-breaking. |
 
 ---
 [Return to Table of Contents](#table-of-contents)

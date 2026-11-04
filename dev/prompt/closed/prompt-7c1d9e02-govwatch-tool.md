@@ -6,17 +6,17 @@ Created: 2026 June 10
 
 ## Table of Contents
 
-- [1.0 Prompt Information](<#1.0 prompt information>)
-- [2.0 Context](<#2.0 context>)
-- [3.0 Specification](<#3.0 specification>)
-- [4.0 Design](<#4.0 design>)
-- [5.0 Error Handling](<#5.0 error handling>)
-- [6.0 Testing](<#6.0 testing>)
-- [7.0 Deliverable](<#7.0 deliverable>)
-- [8.0 Tactical Brief](<#8.0 tactical brief>)
-- [9.0 Success Criteria](<#9.0 success criteria>)
-- [10.0 Element Registry](<#10.0 element registry>)
-- [Version History](<#version history>)
+- [1.0 Prompt Information](#10-prompt-information)
+- [2.0 Context](#20-context)
+- [3.0 Specification](#30-specification)
+- [4.0 Design](#40-design)
+- [5.0 Error Handling](#50-error-handling)
+- [6.0 Testing](#60-testing)
+- [7.0 Deliverable](#70-deliverable)
+- [8.0 Tactical Brief](#80-tactical-brief)
+- [9.0 Success Criteria](#90-success-criteria)
+- [10.0 Element Registry](#100-element-registry)
+- [Version History](#version-history)
 
 ---
 
@@ -38,7 +38,7 @@ Tactical Domain: Claude Code. The authoritative specification is
 `dev/design/design-govwatch.md` v0.1; read it in full before coding. This
 prompt operationalises that design and is not a substitute for it.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -62,7 +62,7 @@ context:
     - "Reference design-govwatch.md for all component, parsing, and check detail"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -95,7 +95,7 @@ specification:
       metric: "startup time (NFR-02)"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -138,7 +138,7 @@ non-empty `tactical_brief` root key not beginning with `#`. Class `issue` maps
 to folder `issues/`; masters (`<class>-<name>-master.md`) are exempt from UUID
 and coupling checks.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -157,7 +157,7 @@ error_handling:
     format: "in-TUI alert entries"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -177,7 +177,7 @@ testing:
     - "Phase inference matches design §6.0 precedence"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -194,7 +194,7 @@ deliverable:
       content: ""   # textual, rich
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -227,7 +227,7 @@ tactical_brief: |
   Also create framework/ai/src/requirements-govwatch.txt listing textual and rich.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -243,7 +243,7 @@ success_criteria:
   - "Absent .ael/ralph/ and malformed documents are handled without exception"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -301,7 +301,7 @@ element_registry:
         type: "int"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

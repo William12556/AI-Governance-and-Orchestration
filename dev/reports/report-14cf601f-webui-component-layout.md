@@ -12,14 +12,14 @@ Created: 2026 October 23
 
 ## Table of Contents
 
-[1.0 Summary](<#1.0 summary>)
-[2.0 Files Changed](<#2.0 files changed>)
-[3.0 Test Results](<#3.0 test results>)
-[4.0 Governance Checks and Residue Search](<#4.0 governance checks and residue search>)
-[5.0 Deviations](<#5.0 deviations>)
-[6.0 Open Points for the Planner](<#6.0 open points for the planner>)
-[7.0 Session Branch, Starting Commit and Commit Hashes](<#7.0 session branch, starting commit and commit hashes>)
-[Version History](<#version history>)
+[1.0 Summary](#10-summary)
+[2.0 Files Changed](#20-files-changed)
+[3.0 Test Results](#30-test-results)
+[4.0 Governance Checks and Residue Search](#40-governance-checks-and-residue-search)
+[5.0 Deviations](#50-deviations)
+[6.0 Open Points for the Planner](#60-open-points-for-the-planner)
+[7.0 Session Branch, Starting Commit and Commit Hashes](#70-session-branch-starting-commit-and-commit-hashes)
+[Version History](#version-history)
 
 ---
 
@@ -31,7 +31,7 @@ Created: 2026 October 23
 - The only edit inside `overwatch.py` is the docstring usage line. Behaviour, CLI options and dependencies are unchanged.
 - `ai/core/README.md` is unchanged.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -53,7 +53,7 @@ Created: 2026 October 23
 | — | `dev/prompt/closed/prompt-14cf601f-webui-component-layout.md` | Prompt closed with `git mv` |
 | — | `dev/reports/report-14cf601f-webui-component-layout.md` | This report |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -73,7 +73,7 @@ Environment: Linux cloud session, Python 3.13.17. PyPI was unreachable, so `pip 
 - `python3 -m py_compile ai/webui/src/overwatch.py bin/migrate-terms.py`: passed.
 - Smoke test `overwatch.py --project dev/smoke --interval 1`: exits with "ai/workspace/ not found"; `dev/smoke` is not a project root. The pre-move module produces byte-identical output. A temporary project root containing `ai/workspace/` ran one cycle, wrote `overwatch.html` and `ai/dashboard-alerts.md`, and showed no traceback. No files were generated inside the repository.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -95,7 +95,7 @@ Residue search (`ai/src`, `tests/overwatch`, `requirements-overwatch`, with the 
 | `design-project-overwatch.md` Version History 0.5 | Same |
 | `design-project-overwatch.md` §14.0, "coexist in `ai/src/`" | Historical statement about govwatch coexistence; govwatch never lived in `ai/webui/`. Left unchanged per FR-I |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -105,7 +105,7 @@ Residue search (`ai/src`, `tests/overwatch`, `requirements-overwatch`, with the 
 - The session could not push: GitHub write access is not available to this cloud session. The commits are delivered as a git bundle for the operator to fetch and push. Commit hashes are preserved by the bundle.
 - `--project dev/smoke` is not a project root; a temporary root outside the repository was used for the one-cycle smoke run.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -116,7 +116,7 @@ Residue search (`ai/src`, `tests/overwatch`, `requirements-overwatch`, with the 
 - `CLAUDE.md` and `docs/guide-orchestration.md` were edited without new Version History rows, because the prompt permits only the rows it lists. Add rows if wanted.
 - Update the issue and change documents to closed status after review.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -129,7 +129,7 @@ Residue search (`ai/src`, `tests/overwatch`, `requirements-overwatch`, with the 
 - Final commit: docs(dev) report and prompt closure (this file; its hash is given in the hand-over message)
 - Note: final `linter.py` and `protocol_checker.py` results are taken after this report is committed and are given in the hand-over message.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

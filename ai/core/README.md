@@ -6,9 +6,9 @@ Created: 2026 October 23
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Rules](<#2.0 rules>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Rules](#20-rules)
+[Version History](#version-history)
 
 ---
 
@@ -16,7 +16,7 @@ Created: 2026 October 23
 
 `ai/core/` is reserved for code shared between framework components (`ai/engine/`, `ai/webui/`). It holds no source yet. Code moves here only when more than one component needs it.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -25,7 +25,7 @@ Created: 2026 October 23
 1. Layout follows the other components: `src/`, optional `doc/`, `requirements.txt`, tests in `tests/core/`.
 2. `core` imports no other framework component. `engine` and `webui` may import `core`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

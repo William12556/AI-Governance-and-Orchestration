@@ -12,36 +12,36 @@ Created: 2026 September 22
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Scope](<#2.0 scope>)
-[3.0 Mapping Tables](<#3.0 mapping tables>)
-[3.1 Protocol Mapping](<#3.1 protocol mapping>)
-[3.2 Ordinal Mapping](<#3.2 ordinal mapping>)
-[3.3 Template Mapping](<#3.3 template mapping>)
-[3.4 Machine-Readable Form](<#3.4 machine-readable form>)
-[4.0 Collision Analysis](<#4.0 collision analysis>)
-[4.1 Protocol Namespace Overlap](<#4.1 protocol namespace overlap>)
-[4.2 Template Namespace Cycles](<#4.2 template namespace cycles>)
-[4.3 Consequences](<#4.3 consequences>)
-[4.4 The Combined Citation Form](<#4.4 the combined citation form>)
-[5.0 Substitution Algorithm](<#5.0 substitution algorithm>)
-[5.1 Token Classes](<#5.1 token classes>)
-[5.2 Protected Regions](<#5.2 protected regions>)
-[5.3 Two-Pass Sentinel Substitution](<#5.3 two-pass sentinel substitution>)
-[5.4 Range Expressions](<#5.4 range expressions>)
-[5.5 Case Sensitivity](<#5.5 case sensitivity>)
-[5.6 Idempotence](<#5.6 idempotence>)
-[6.0 Target Structure of governance.md](<#6.0 target structure of governance.md>)
-[7.0 Alias Appendix](<#7.0 alias appendix>)
-[8.0 Backup Design](<#8.0 backup design>)
-[9.0 Write-Set Enforcement](<#9.0 write-set enforcement>)
-[10.0 Components](<#10.0 components>)
-[11.0 Verification Design](<#11.0 verification design>)
-[12.0 Boundary Conditions](<#12.0 boundary conditions>)
-[13.0 Element Registry](<#13.0 element registry>)
-[14.0 Requirements Traceability](<#14.0 requirements traceability>)
-[Glossary](<#glossary>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Scope](#20-scope)
+[3.0 Mapping Tables](#30-mapping-tables)
+[3.1 Protocol Mapping](#31-protocol-mapping)
+[3.2 Ordinal Mapping](#32-ordinal-mapping)
+[3.3 Template Mapping](#33-template-mapping)
+[3.4 Machine-Readable Form](#34-machine-readable-form)
+[4.0 Collision Analysis](#40-collision-analysis)
+[4.1 Protocol Namespace Overlap](#41-protocol-namespace-overlap)
+[4.2 Template Namespace Cycles](#42-template-namespace-cycles)
+[4.3 Consequences](#43-consequences)
+[4.4 The Combined Citation Form](#44-the-combined-citation-form)
+[5.0 Substitution Algorithm](#50-substitution-algorithm)
+[5.1 Token Classes](#51-token-classes)
+[5.2 Protected Regions](#52-protected-regions)
+[5.3 Two-Pass Sentinel Substitution](#53-two-pass-sentinel-substitution)
+[5.4 Range Expressions](#54-range-expressions)
+[5.5 Case Sensitivity](#55-case-sensitivity)
+[5.6 Idempotence](#56-idempotence)
+[6.0 Target Structure of governance.md](#60-target-structure-of-governancemd)
+[7.0 Alias Appendix](#70-alias-appendix)
+[8.0 Backup Design](#80-backup-design)
+[9.0 Write-Set Enforcement](#90-write-set-enforcement)
+[10.0 Components](#100-components)
+[11.0 Verification Design](#110-verification-design)
+[12.0 Boundary Conditions](#120-boundary-conditions)
+[13.0 Element Registry](#130-element-registry)
+[14.0 Requirements Traceability](#140-requirements-traceability)
+[Glossary](#glossary)
+[Version History](#version-history)
 
 ---
 
@@ -51,7 +51,7 @@ Specify the mapping tables, substitution algorithm, target document structure,
 backup mechanism and tooling that implement
 `requirements-eb782f83-protocol-template-reordering.md`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -69,7 +69,7 @@ Two new source files are introduced, both under `dev/tools/`:
 | `dev/tools/migrate_identifiers.py` | Backup, substitution, rename, rollback |
 | `dev/tools/verify_migration.py` | Machine-checkable verification (TR-09) |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -193,7 +193,7 @@ templates:
 a retired source identifier and a reserved target identifier. Validation treats
 the two namespaces separately.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -263,7 +263,7 @@ disagree — the corpus is internally consistent on this point, and any
 disagreement encountered during the run is a defect in the source, reported and
 fatal, never silently rewritten.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -469,7 +469,7 @@ the corpus rather than a property of it. The alternative — a distinct,
 non-overlapping target alphabet — was rejected because it would have forced
 mnemonic identifiers, which the proposal rejected on other grounds.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -507,7 +507,7 @@ Clause digits are preserved unchanged. `§1.1.14.4` becomes `P00.14.4`, not
 `P00.14.4` renumbered to close historical gaps. Renumbering clauses would exceed
 semantics preservation and would invalidate the bijection.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -528,7 +528,7 @@ and permanent (FR-05-02).
 The appendix is the only location in the live corpus, besides version-history
 tables, where retired identifiers may appear (FR-05-04).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -614,7 +614,7 @@ procedure above is the rollback mechanism. Pruning is not implemented and
 `--rollback` will not be exercised further: the migration is complete and the
 tool is single-use.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -635,7 +635,7 @@ Enumeration of the write set is deterministic: a sorted walk of the permitted
 roots, excluding `closed/` directories, binary files by extension, and anything
 `.gitignore` excludes.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -673,7 +673,7 @@ migrate_identifiers.py [--dry-run] [--rollback DIR] [--force-remigrate] [--root 
 verify_migration.py    [--root PATH] [--baseline PATH]
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -704,7 +704,7 @@ Compensating controls, in combination sufficient:
    omitted from processing is visible.
 4. V-16, manual semantic diff review, reads every hunk.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -729,7 +729,7 @@ Compensating controls, in combination sufficient:
 | A namespace whose tokens are embedded inside identifiers | Not matched, and not matchable by the token patterns: `\b` does not fire between `2` and `_`, so `t02_change` is invisible to C3. The `schema_type` namespace was missed entirely on this account (audit F-04) and is recorded as a permanent exception in Appendix A. Any future survey must enumerate namespaces deliberately rather than by pattern discovery. |
 | `git status --porcelain` first line | The status code occupies columns 1-2, so a clean index leaves a leading space. The raw output must not be stripped as a whole, or the first line shifts by one column and that file escapes the gate 3 dirty check. Found in testing. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -763,7 +763,7 @@ Compensating controls, in combination sufficient:
 | Protected heading pattern | constant | `PROTECTED_HEADING_RE` |
 | Token class patterns | constant | `TOKEN_PATTERNS` |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -797,7 +797,7 @@ Compensating controls, in combination sufficient:
 
 Test traceability is added when the test document exists.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -812,7 +812,7 @@ Test traceability is added when the test document exists.
 | Transposition | A two-element cycle; here `P03` and `P04` exchange identifiers |
 | Write set | The enumerated list of files the migration will modify, a subset of the migration set |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

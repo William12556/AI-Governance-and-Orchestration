@@ -6,17 +6,17 @@ Created: 2026 March 20
 
 ## Table of Contents
 
-- [Issue](<#issue>)
-- [Source](<#source>)
-- [Affected Scope](<#affected scope>)
-- [Reproduction](<#reproduction>)
-- [Behavior](<#behavior>)
-- [Environment](<#environment>)
-- [Analysis](<#analysis>)
-- [Resolution](<#resolution>)
-- [Prevention](<#prevention>)
-- [Traceability](<#traceability>)
-- [Version History](<#version history>)
+- [Issue](#issue)
+- [Source](#source)
+- [Affected Scope](#affected-scope)
+- [Reproduction](#reproduction)
+- [Behavior](#behavior)
+- [Environment](#environment)
+- [Analysis](#analysis)
+- [Resolution](#resolution)
+- [Prevention](#prevention)
+- [Traceability](#traceability)
+- [Version History](#version-history)
 
 ---
 
@@ -37,7 +37,7 @@ issue_info:
     change_iteration: null
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -58,7 +58,7 @@ source:
     produced code that was never deployed.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -78,7 +78,7 @@ affected_scope:
   version: "8.1"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -106,7 +106,7 @@ reproduction:
     runtime on target hardware after build and deployment.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -132,7 +132,7 @@ behavior:
     observing unexpected runtime behaviour.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -148,7 +148,7 @@ environment:
   domain: "domain_1"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -174,7 +174,7 @@ analysis:
   related_issues: []
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -195,7 +195,7 @@ resolution:
   fix_description: "Added entry point verification directive to P04 §1.5.1 and P09 §1.10.2 in framework/ai/governance.md and skel/ai/governance.md (v8.2). Strategic Domain must read project entry point configuration before specifying any target file_path."
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -217,7 +217,7 @@ prevention:
     the T04 prompt.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -234,7 +234,7 @@ notes: >
   point was epaper_ip_display.main:main (src/epaper_ip_display/main.py).
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

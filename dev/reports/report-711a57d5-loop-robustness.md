@@ -12,14 +12,14 @@ Created: 2026 October 29
 
 ## Table of Contents
 
-[1.0 Summary](<#1.0 summary>)
-[2.0 Files Changed](<#2.0 files changed>)
-[3.0 Test Results](<#3.0 test results>)
-[4.0 Governance Checks](<#4.0 governance checks>)
-[5.0 Deviations](<#5.0 deviations>)
-[6.0 Open Points for the Planner](<#6.0 open points for the planner>)
-[7.0 Session Branch, Starting Commit and Commit Hashes](<#7.0 session branch, starting commit and commit hashes>)
-[Version History](<#version history>)
+[1.0 Summary](#10-summary)
+[2.0 Files Changed](#20-files-changed)
+[3.0 Test Results](#30-test-results)
+[4.0 Governance Checks](#40-governance-checks)
+[5.0 Deviations](#50-deviations)
+[6.0 Open Points for the Planner](#60-open-points-for-the-planner)
+[7.0 Session Branch, Starting Commit and Commit Hashes](#70-session-branch-starting-commit-and-commit-hashes)
+[Version History](#version-history)
 
 ---
 
@@ -32,7 +32,7 @@ Created: 2026 October 29
 - Governance checks: no new findings.
 - No stop condition was reached. The installed `mcp` package accepts `read_timeout_seconds`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -52,7 +52,7 @@ Created: 2026 October 29
 | Tests | `tests/engine/test_loop_robustness.py` | New: T1 to T16 |
 | Tests | `tests/engine/test_providers.py` | Two assertions updated (§5.0) |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -95,7 +95,7 @@ Mutation checks (temporary copy under the session scratchpad; not committed):
 | M2 | FR-E status check replaced by `if False:` | T10 | 1 failed |
 | M3 | `rc = 1`, `_run_started` and `try:` moved back to after the context report, body dedented (pre-change placement) | T15 | 1 failed (last log line is 'engine start', not 'engine end rc=1') |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -108,7 +108,7 @@ Mutation checks (temporary copy under the session scratchpad; not committed):
 
 The final values were taken before the report commit and the prompt move; the report follows the existing report layout.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -118,7 +118,7 @@ The final values were taken before the report commit and the prompt move; the re
 - **Existing test assertions changed (permitted by the prompt's constraints).** In `tests/engine/test_providers.py`, `test_make_provider_passes_base_url_to_anthropic` and `test_keychain_t13_make_provider_passes_key` compared the SDK constructor kwargs by exact equality. Both now also expect `timeout=DEFAULT_REQUEST_TIMEOUT_SECONDS` and `max_retries=0` (FR-C).
 - **Additional test.** `test_t3_estimate_ignores_malformed_tool_call_entries` covers FR-B's "ignore malformed entries" clause. It was not listed in the prompt.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -130,7 +130,7 @@ The final values were taken before the report commit and the prompt move; the re
 - `BLOCKED.md` for FR-E includes `Last error: <e>` and the traceback, as the existing persistent-failure path does. The SDK exception text is assumed to carry no API key (NFR-05), the same assumption the existing path makes. This could be verified against the openai and anthropic SDK error formatting.
 - Planner follow-ups per the change: design-14e05e35 §3.0 and §11.0, `config.template.yaml` commented keys (`providers.<name>.request_timeout_seconds`, `omlx.request_timeout_seconds`, `loop.mcp_timeout_seconds`), operations guide timeout note, and the independent follow-up audit (P02.8.2).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -144,7 +144,7 @@ The final values were taken before the report commit and the prompt move; the re
 | `test(engine)`: T1 to T16, test_providers.py assertions | `2909557` |
 | `docs(dev)`: this report and prompt move to `dev/prompt/closed/` | The commit that adds this report; its hash is in `git log` on the session branch |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

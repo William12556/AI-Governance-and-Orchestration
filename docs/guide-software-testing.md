@@ -6,18 +6,18 @@ Created: 2026 March 05
 
 ## Table of Contents
 
-[Introduction](<#introduction>)
-[Testing Workflow](<#testing workflow>)
-[Test Types](<#test types>)
-[Test Organization](<#test organization>)
-[Progressive Validation Strategy](<#progressive validation strategy>)
-[Test Isolation](<#test isolation>)
-[Platform Considerations](<#platform considerations>)
-[Document Coupling](<#document coupling>)
-[Traceability](<#traceability>)
-[Best Practices](<#best practices>)
-[Glossary](<#glossary>)
-[Version History](<#version history>)
+[Introduction](#introduction)
+[Testing Workflow](#testing-workflow)
+[Test Types](#test-types)
+[Test Organization](#test-organization)
+[Progressive Validation Strategy](#progressive-validation-strategy)
+[Test Isolation](#test-isolation)
+[Platform Considerations](#platform-considerations)
+[Document Coupling](#document-coupling)
+[Traceability](#traceability)
+[Best Practices](#best-practices)
+[Glossary](#glossary)
+[Version History](#version-history)
 
 ---
 
@@ -43,7 +43,7 @@ This guidance covers:
 - Document coupling and traceability
 - Platform considerations
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -176,7 +176,7 @@ pytest -v tests/
 4. Increment iteration numbers
 5. Return to test execution
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -428,7 +428,7 @@ class Test<ClassName>Performance:
         assert memory_mb < 512
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -480,7 +480,7 @@ Subdirectories are optional; a flat `tests/` is equally valid (P15.3).
 - Descriptive of test purpose
 - Example: `test_connect_timeout_handling`
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -598,7 +598,7 @@ Document Closure
 - A diagnostic needed only once (for example a measurement on the target platform) runs outside the repository and is not committed.
 - Nothing under `tests/` is removed at document closure.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -722,7 +722,7 @@ pytest -n 4 tests/
 # Requires: pip install pytest-xdist
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -789,7 +789,7 @@ Specific platform details (OS, hardware, tooling) are defined in project design 
 - Execute integration tests automatically
 - Perform continuous performance monitoring
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -857,7 +857,7 @@ Planner verifies:
 - Bidirectional linkage exists
 - No orphaned documents
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -920,7 +920,7 @@ Planner identifies:
 - Tests without requirement linkage
 - Orphaned test documents
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -982,7 +982,7 @@ Planner identifies:
 4. **Parallel Execution:** Run tests concurrently
 5. **Platform Testing:** Validate on target platforms
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -1007,7 +1007,7 @@ Planner identifies:
 | **Traceability** | Bidirectional linking between requirements, design, code, tests |
 | **Unit Test** | Test verifying single component in isolation |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

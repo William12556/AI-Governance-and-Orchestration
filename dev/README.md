@@ -6,13 +6,13 @@ Created: 2026 October 23
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Governance](<#2.0 governance>)
-[3.0 Folder Map](<#3.0 folder map>)
-[4.0 Task Register](<#4.0 task register>)
-[5.0 Requirements](<#5.0 requirements>)
-[6.0 Repository Layout](<#6.0 repository layout>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Governance](#20-governance)
+[3.0 Folder Map](#30-folder-map)
+[4.0 Task Register](#40-task-register)
+[5.0 Requirements](#50-requirements)
+[6.0 Repository Layout](#60-repository-layout)
+[Version History](#version-history)
 
 ---
 
@@ -22,7 +22,7 @@ Created: 2026 October 23
 this repository. `bin/propagate.sh` copies `ai/` only, so nothing in `dev/`
 and nothing in this document reaches downstream projects.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -31,7 +31,7 @@ and nothing in this document reaches downstream projects.
 1. Framework development follows `ai/governance/software-engineering/governance.md`, with `dev/` in place of `ai/workspace/`.
 2. Where this document and `governance.md` differ, this document applies to `dev/`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -47,7 +47,7 @@ and nothing in this document reaches downstream projects.
 | `eval/` | Evaluation probes |
 | `tools/` | Migration scripts and mapping files |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -59,7 +59,7 @@ and nothing in this document reaches downstream projects.
 4. A row is removed once its outcome is recorded (a closed triple, or an explicit drop). Git history preserves prior state.
 5. It is exempt from document conventions: no table of contents, section numbering or version history.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -71,7 +71,7 @@ and nothing in this document reaches downstream projects.
 
 Moved from governance P11.7 (governance 12.4).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -83,7 +83,7 @@ Moved from governance P11.7 (governance 12.4).
 
 Moved from governance P10.6 and corrected (governance 12.4).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

@@ -6,24 +6,24 @@ Created: 2026 January 11
 
 ## Table of Contents
 
-- [Executive Summary](<#executive summary>)
-- [Context](<#context>)
-- [Analysis](<#analysis>)
-  - [Claude Code 2.1.0 Key Capabilities](<#claude code 2.1.0 key capabilities>)
-  - [Current Governance Framework State](<#current governance framework state>)
-- [Enhancement Opportunities](<#enhancement opportunities>)
-  - [1. Skills System Integration](<#1. skills system integration>)
-  - [2. CLAUDE.md Context Files](<#2. claude.md context files>)
-  - [3. Checkpoint Integration](<#3. checkpoint integration>)
-  - [4. Agent Lifecycle Hooks](<#4. agent lifecycle hooks>)
-  - [5. Wildcard Permissions](<#5. wildcard permissions>)
-  - [6. Headless Mode for Automation](<#6. headless mode for automation>)
-  - [7. Workflow Pattern Alignment](<#7. workflow pattern alignment>)
-- [Implementation Priority](<#implementation priority>)
-- [Logical Constraints](<#logical constraints>)
-- [Recommendations](<#recommendations>)
-- [References](<#references>)
-- [Version History](<#version history>)
+- [Executive Summary](#executive-summary)
+- [Context](#context)
+- [Analysis](#analysis)
+  - [Claude Code 2.1.0 Key Capabilities](#claude-code-210-key-capabilities)
+  - [Current Governance Framework State](#current-governance-framework-state)
+- [Enhancement Opportunities](#enhancement-opportunities)
+  - [1. Skills System Integration](#1-skills-system-integration)
+  - [2. CLAUDE.md Context Files](#2-claudemd-context-files)
+  - [3. Checkpoint Integration](#3-checkpoint-integration)
+  - [4. Agent Lifecycle Hooks](#4-agent-lifecycle-hooks)
+  - [5. Wildcard Permissions](#5-wildcard-permissions)
+  - [6. Headless Mode for Automation](#6-headless-mode-for-automation)
+  - [7. Workflow Pattern Alignment](#7-workflow-pattern-alignment)
+- [Implementation Priority](#implementation-priority)
+- [Logical Constraints](#logical-constraints)
+- [Recommendations](#recommendations)
+- [References](#references)
+- [Version History](#version-history)
 
 ---
 
@@ -33,7 +33,7 @@ This proposal analyzes Claude Code 2.1.0 capabilities and Anthropic's published 
 
 Primary recommendations focus on integrating Claude Code's skills system and CLAUDE.md context optimization to reduce token consumption and improve workflow efficiency while preserving existing governance structures.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -43,7 +43,7 @@ Claude Code version 2.1.0 was released January 7, 2026, representing a significa
 
 The AI Governance and Orchestration framework currently at version 5.6 defines a dual-domain architecture (Claude Desktop for planning, Claude Code for execution) with filesystem-based communication and strict protocol-driven workflows. This proposal examines how Claude Code 2.1.0's new capabilities align with and could enhance the existing governance model.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -83,7 +83,7 @@ The AI Governance and Orchestration framework currently at version 5.6 defines a
 - Visual iteration: Provide mock → implement → screenshot → refine
 - Codebase Q&A: Onboarding and exploration through natural language queries
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -112,7 +112,7 @@ Framework gaps relative to Claude Code 2.1.0:
 - Permission patterns require per-session configuration
 - Limited automation infrastructure for CI/CD integration
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -164,7 +164,7 @@ Framework gaps relative to Claude Code 2.1.0:
 - Enables team knowledge sharing through checked-in skills
 - Maintains human control through skill review and approval
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -256,7 +256,7 @@ CLAUDE.local.md
 - Enables team standardization through git-tracked configuration
 - Maintains separation between project context and instance-specific prompts
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -296,7 +296,7 @@ CLAUDE.local.md
 - Maintains audit trail through git commits at iteration boundaries
 - Preserves human control over permanent state changes
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -364,7 +364,7 @@ context: fork
 - Forked context isolation prevents hook interference with main workflow
 - Audit trail automatically generated through hook logging
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -399,7 +399,7 @@ context: fork
 - Maintains safety through scoped wildcard patterns
 - Improves workflow efficiency without architectural changes
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -435,7 +435,7 @@ context: fork
 - Early detection of protocol violations before human review
 - Reduced manual audit workload for routine checks
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -470,7 +470,7 @@ Create `/doc/workflow-pattern-mapping.md`:
 - Improves onboarding through familiar workflow terminology
 - Validates protocol design against established patterns
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -523,7 +523,7 @@ Create `/doc/workflow-pattern-mapping.md`:
    - Dependencies: None (parallel track)
    - Deliverables: Mapping document, protocol cross-references
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -559,7 +559,7 @@ Create `/doc/workflow-pattern-mapping.md`:
 - Wildcard permissions scoped to specific command namespaces
 - Hook execution in forked contexts prevents unintended side effects
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -607,7 +607,7 @@ Create `/doc/workflow-pattern-mapping.md`:
    - Measure skill reusability across development cycles
    - Document lessons learned for framework refinement
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -633,7 +633,7 @@ VentureBeat. (2026). *Claude Code 2.1.0 arrives with smoother workflows and smar
 
 ---
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

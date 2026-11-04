@@ -6,14 +6,14 @@ Created: 2026 September 23
 
 ## Table of Contents
 
-[1.0 Summary](<#1.0 summary>)
-[2.0 Independence and Method](<#2.0 independence and method>)
-[3.0 Status of N-01 to N-08](<#3.0 status of n-01 to n-08>)
-[4.0 Attack on the Claims](<#4.0 attack on the claims>)
-[5.0 T08 Record](<#5.0 t08 record>)
-[6.0 Experiments](<#6.0 experiments>)
-[7.0 Closure Recommendation](<#7.0 closure recommendation>)
-[Version History](<#version history>)
+[1.0 Summary](#10-summary)
+[2.0 Independence and Method](#20-independence-and-method)
+[3.0 Status of N-01 to N-08](#30-status-of-n-01-to-n-08)
+[4.0 Attack on the Claims](#40-attack-on-the-claims)
+[5.0 T08 Record](#50-t08-record)
+[6.0 Experiments](#60-experiments)
+[7.0 Closure Recommendation](#70-closure-recommendation)
+[Version History](#version-history)
 
 ---
 
@@ -26,7 +26,7 @@ Created: 2026 September 23
 - **New findings:** 0 critical, 0 high, 2 medium, 5 low.
 - **Recommendation:** Do not close change-b170cf6a yet. Fix A1 and A2 (medium) in iteration 2, with a follow-up re-check. The low findings may be fixed in the same iteration or accepted in writing. The macOS procedure is still outstanding.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -39,7 +39,7 @@ Created: 2026 September 23
 - **Not exercised:** macOS (APFS case-insensitivity, BSD userland, `/usr/bin/rsync` as openrsync) and bash 3.2. In the cloud container, loop mounts worked, but the kernel has no ext4 casefold support and no FUSE library was available. The egress policy blocked the bash 3.2 source (ftp.gnu.org and GitHub). N-02 and the macOS items below therefore rest on static reading.
 - **Repository side effects:** Read-only commands only (`git log`, `git show`, `git status`). No `.git/index.lock` remained (checked). This report is the only file added.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -56,7 +56,7 @@ Created: 2026 September 23
 | N-07 | Resolved | N07a: a symlinked `ai/ael` holding `config.yaml` gave exit 3 before any change; the link was intact and `ai-local/` was not created. N07b: a relative symlink was relocated and its log row carries the note. A directory at a declared file name remains unchanged, as scoped out by the change (no content lost). |
 | N-08 | Partially resolved | N08a: a FIFO at `workflow.md` was relocated intact. ESC was masked in the preview under `C.UTF-8` and `C` (N08b). Re-plan: files created at new paths gave exit 3 (R2b). The log row is written before its action (lines 421–431). Residual: the C1 CSI byte is not masked. The raw byte `0x9B` is passed through in both locales, and `U+009B` is passed through under `LC_ALL=C` (N08b). Whether a terminal interprets it depends on the terminal; the risk is low. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -85,7 +85,7 @@ Created: 2026 September 23
 - **Unverified on macOS (information):** BSD `awk -F'\t'` (label table; failure would produce spurious `local modification` backups, which is the safe direction), BSD `tr -cd '\0'`, BSD `cp` on symlinks, and bash 3.2 execution. The change document itself records that bash 3.2 was not re-run.
 - **Documentation:** guide-install §3.3 says declared files "are never touched". Seeding (A1, A6) and A7 contradict this.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -206,7 +206,7 @@ metadata:
   schema_type: "t08_audit"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -242,7 +242,7 @@ metadata:
 | ED | Empty directory at `workflow.md` | Replaced by the framework file |
 | P1–P3 | 9.16 migration; 1,500 project files; 3,000 `state/` files | 7 relocated, 0 backups; 7.1 s; 1.6 s |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -256,7 +256,7 @@ metadata:
   - Run the macOS procedure (N-02, A7, BSD tools, bash 3.2) before the next downstream propagation.
 - **Human approval:** pending operator decision.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

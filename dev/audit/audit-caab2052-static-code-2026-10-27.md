@@ -6,21 +6,21 @@ Created: 2026 October 27
 
 ## Table of Contents
 
-[1.0 Summary](<#1.0 summary>)
-[2.0 Method](<#2.0 method>)
-[3.0 Scope and File Inventory](<#3.0 scope and file inventory>)
-[4.0 Requirements and Design Compliance](<#4.0 requirements and design compliance>)
-[5.0 Findings by Dimension](<#5.0 findings by dimension>)
-[6.0 Findings Register](<#6.0 findings register>)
-[7.0 Prior-Finding Re-verification](<#7.0 prior-finding re-verification>)
-[8.0 Test Coverage Gaps](<#8.0 test coverage gaps>)
-[9.0 Positive Findings](<#9.0 positive findings>)
-[10.0 Recommended Remediation Order](<#10.0 recommended remediation order>)
-[11.0 Open Questions for the Operator](<#11.0 open questions for the operator>)
-[12.0 T08 Record](<#12.0 t08 record>)
-[13.0 Closure Recommendation](<#13.0 closure recommendation>)
-[14.0 Operator Decisions](<#14.0 operator decisions>)
-[Version History](<#version history>)
+[1.0 Summary](#10-summary)
+[2.0 Method](#20-method)
+[3.0 Scope and File Inventory](#30-scope-and-file-inventory)
+[4.0 Requirements and Design Compliance](#40-requirements-and-design-compliance)
+[5.0 Findings by Dimension](#50-findings-by-dimension)
+[6.0 Findings Register](#60-findings-register)
+[7.0 Prior-Finding Re-verification](#70-prior-finding-re-verification)
+[8.0 Test Coverage Gaps](#80-test-coverage-gaps)
+[9.0 Positive Findings](#90-positive-findings)
+[10.0 Recommended Remediation Order](#100-recommended-remediation-order)
+[11.0 Open Questions for the Operator](#110-open-questions-for-the-operator)
+[12.0 T08 Record](#120-t08-record)
+[13.0 Closure Recommendation](#130-closure-recommendation)
+[14.0 Operator Decisions](#140-operator-decisions)
+[Version History](#version-history)
 
 ---
 
@@ -38,7 +38,7 @@ Created: 2026 October 27
 - **Tests:** 331 passed, 1 skipped (`tests/webui/test_overwatch.py:296`, skipped when run as root). `linter.py dev`: 0 errors, 96 warnings. `protocol_checker.py dev`: 0 errors, 0 warnings.
 - **Prior findings:** of 41 re-verification rows for findings that concern these files, 31 are resolved, 7 are still present (6 deferred in `dev/task.md`, one of which is realised as M-03; 1 accepted), 1 is partly resolved and 2 are not applicable to this scope (§7.0).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -63,7 +63,7 @@ Created: 2026 October 27
 - **Claim classification:** each finding is marked *observed* (tool output, probe or file:line) or *inferred* (with confidence and a verification method).
 - **Side effects:** the virtual environment, the mypy cache, the npm tarball and the probe scripts were written to the scratchpad. pytest and the probes created gitignored `__pycache__/` folders under `ai/` and `tests/`; these were removed before the commit. `git status` showed only this report before the commit.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -87,7 +87,7 @@ Created: 2026 October 27
 
 Context only: `ai/engine/mcp/server.py` (344), `ai/engine/recipes/` (2 files), `tests/engine/` (9 files, 2,864 LOC), `tests/webui/` (1 file, 339 LOC).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -178,7 +178,7 @@ Context only: `ai/engine/mcp/server.py` (344), `ai/engine/recipes/` (2 files), `
 | NFR-05 absent state directory is idle | Pass | `overwatch.py:452-453` |
 | NFR-07 dependency footprint `pyyaml` only | Pass | `ai/webui/requirements.txt`; `test_render_no_textual_or_rich_import` |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -255,7 +255,7 @@ See §4.0. Departures not covered by a finding: FR-03-02/FR-03-04 against design
 
 See §8.0.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -291,7 +291,7 @@ Critical: none. High: none. Medium: M-01 to M-06. Low: L-01 to L-19.
 | L-18 | Low | `orchestrator.py:55, 533, 1078-1554, 1878-2306, 2612` | Very large functions; project root implied by the working directory | Observed | Split `run_phase`/`run_loop`; pass the project root explicitly |
 | L-19 | Low | `providers.py:170, 201, 338, 376` | Provider method names and returns differ from design §4.1 | Observed | Amend the design |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -345,7 +345,7 @@ Status is against the code at `24b2dfc`. "Deferred" means the item is open in `d
 
 Totals: 41 rows, where one row groups six findings outside this scope. 31 resolved, 7 still present (6 deferred, 1 accepted), 1 partly resolved, 2 rows not applicable.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -369,7 +369,7 @@ Observed from `pytest --collect-only` (332 items) and a search of `tests/` for e
 | `approve.py` | Commit failure path (L-05) |
 | `overwatch.py` | `Scanner`, `PhaseInference`, every `ComplianceEngine` rule (FR-02-01 to FR-02-12), `_read_engine_state`, `_read_budget`, `AlertWriter.payload`. The 19 tests cover rendering, escaping and writing only |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -389,7 +389,7 @@ Observed from `pytest --collect-only` (332 items) and a search of `tests/` for e
 - The test suite is hermetic and fast: 331 tests in about 12 s with no network. The edge-case tests encode prior audit scenarios (E-1b to E-3e) as regressions.
 - Prior remediation was thorough: every critical, high and medium finding of audit-14e05e35 and its follow-ups is resolved in the code.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -403,7 +403,7 @@ Observed from `pytest --collect-only` (332 items) and a search of `tests/` for e
 6. **Hygiene and structure:** L-10, L-13, L-14, L-16, L-17, L-18, L-19. L-17 and L-18 fit naturally with opening `ai/core/`.
 7. **Tests:** the §8.0 gaps, starting with the Overwatch compliance rules and the audit-run gates.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -416,7 +416,7 @@ Observed from `pytest --collect-only` (332 items) and a search of `tests/` for e
 | OQ-03 | requirements-1c1f4ef6 still states FR-AEL-013 (corrective user message), NFR-AEL-001 (no subprocess beyond MCP) and NFR-AEL-005 (no optional dependency), and design-ael §10.0 lists four packages. The code departs from each, with documented reasons. Should the baseline be amended or marked superseded by requirements-14e05e35? | Baseline currency |
 | OQ-04 | Design §7.0 lists "the run type's own paths" as allowed write targets. No such category exists in `scope.py`; the audit report lives in the state directory, which is already writable. Remove the phrase, or implement it? | FR-05-01 wording |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -544,7 +544,7 @@ metadata:
   schema_type: "t08_audit"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -555,7 +555,7 @@ metadata:
 - Findings remediated by a source change require a follow-up audit before closure (P02.8.2).
 - OQ-01 to OQ-04 should be decided before closure. Their answers decide whether the Conflict and Deviates rows in §4.0 are resolved in code or in documents.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -569,7 +569,7 @@ Recorded by the planner on 2026-10-29 on the operator's decision.
 | M-03, M-04, M-05; L-01, L-02, L-04 to L-08, L-10 to L-19 | Not yet decided | Registered in `dev/task.md` by §10.0 group |
 | OQ-01 to OQ-04 | Open | Registered in `dev/task.md` |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

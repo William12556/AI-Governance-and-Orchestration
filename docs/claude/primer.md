@@ -6,18 +6,18 @@ Created: 2026 April 27
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Architecture](<#2.0 architecture>)
-[2.1 Worker/Reviewer Profiles](<#2.1 worker/reviewer profiles>)
-[2.2 Monitoring Tools](<#2.2 monitoring tools>)
-[3.0 Responsibilities](<#3.0 responsibilities>)
-[4.0 Workflow](<#4.0 workflow>)
-[4.1 Audit Modes](<#4.1 audit modes>)
-[5.0 Protocol Reference](<#5.0 protocol reference>)
-[6.0 Document Conventions](<#6.0 document conventions>)
-[7.0 Constraints](<#7.0 constraints>)
-[8.0 Templates](<#8.0 templates>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Architecture](#20-architecture)
+[2.1 Worker/Reviewer Profiles](#21-workerreviewer-profiles)
+[2.2 Monitoring Tools](#22-monitoring-tools)
+[3.0 Responsibilities](#30-responsibilities)
+[4.0 Workflow](#40-workflow)
+[4.1 Audit Modes](#41-audit-modes)
+[5.0 Protocol Reference](#50-protocol-reference)
+[6.0 Document Conventions](#60-document-conventions)
+[7.0 Constraints](#70-constraints)
+[8.0 Templates](#80-templates)
+[Version History](#version-history)
 
 ---
 
@@ -29,7 +29,7 @@ this document provides orientation and quick reference only.
 
 **Prime Directive: Follow the workflow.**
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -71,7 +71,7 @@ selects one of three options:
 Implementation profiles are defined in `ai/profiles/`. The active profile
 determines the worker/reviewer context file name, skills directory, and engine configuration.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -85,7 +85,7 @@ determines the worker/reviewer context file name, skills directory, and engine c
 | Context file | `ai/context.md`                     | `CLAUDE.md` (project root)    | `CLAUDE.md` (project root)          |
 | Profile      | `mlx_devstral_small_2_2512_6bit.md` | `claude-code.md`              | `claude-omlx.md`                    |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -104,7 +104,7 @@ registry grouped by UUID. Writes `overwatch.html` (project root) and
 `ai/dashboard-alerts.md` each scan cycle. govwatch (TUI) is retired
 (change-5bcd46ad).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -143,7 +143,7 @@ The planner owns the following functions:
 - Open-work register maintenance: `ai/task.md`, all open work in one four-column table (P00.20)
 - Git commit after every iteration increment
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -170,7 +170,7 @@ P15  Tests pass              →  human acceptance
 P00  Close documents         →  move to closed/ → git commit → engine reset
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -189,7 +189,7 @@ unattended runtime (`--duration`). The orchestrator selects the audit recipe
 pair automatically when `audit-index.md` is present in the state directory. If
 the requested mode is unclear, ask before proceeding.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -209,7 +209,7 @@ the requested mode is unclear, ask before proceeding.
 | P13 | Prompt | T03 authoring, `tactical_brief`, engine command delivery |
 | P11 | Requirements | T01 elicitation before design; baseline before Tier 1 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -242,7 +242,7 @@ required after each increment.
 | Active | `ai/workspace/<class>/` | Mutable |
 | Closed | `ai/workspace/<class>/closed/` | Immutable |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -287,7 +287,7 @@ required after each increment.
 - Forward path: approved design → T03 prompt → execution → review.
 - The T06 → T07 corrective loop is triggered only by engine `BLOCKED` or test failure.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -307,7 +307,7 @@ any document.
 | T01 | Requirements | `ai/governance/software-engineering/templates/T01-requirements.md` |
 | T08 | Audit | `ai/governance/software-engineering/templates/T08-audit.md` |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

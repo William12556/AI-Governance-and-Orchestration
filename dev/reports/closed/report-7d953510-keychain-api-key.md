@@ -9,18 +9,18 @@ Created: 2026 October 14
 
 ## Table of Contents
 
-[1.0 Summary](<#1.0 summary>)
-[2.0 Files Changed](<#2.0 files changed>)
-[3.0 Test Results](<#3.0 test results>)
-[4.0 Governance Checks](<#4.0 governance checks>)
-[5.0 Deviations from the Prompt](<#5.0 deviations from the prompt>)
-[6.0 Open Points for the Planner](<#6.0 open points for the planner>)
-[7.0 Commits](<#7.0 commits>)
-[8.0 Iteration 2](<#8.0 iteration 2>)
-[9.0 Iteration 3](<#9.0 iteration 3>)
-[10.0 Iteration 4](<#10.0 iteration 4>)
-[11.0 Iteration 5](<#11.0 iteration 5>)
-[Version History](<#version history>)
+[1.0 Summary](#10-summary)
+[2.0 Files Changed](#20-files-changed)
+[3.0 Test Results](#30-test-results)
+[4.0 Governance Checks](#40-governance-checks)
+[5.0 Deviations from the Prompt](#50-deviations-from-the-prompt)
+[6.0 Open Points for the Planner](#60-open-points-for-the-planner)
+[7.0 Commits](#70-commits)
+[8.0 Iteration 2](#80-iteration-2)
+[9.0 Iteration 3](#90-iteration-3)
+[10.0 Iteration 4](#100-iteration-4)
+[11.0 Iteration 5](#110-iteration-5)
+[Version History](#version-history)
 
 ---
 
@@ -44,7 +44,7 @@ A malformed `api_key_keychain` is rejected before step 1 (FR-B). Steps 1 and
 error now names both keys (FR-D). A Keychain source takes precedence over a
 literal key (FR-E).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -62,7 +62,7 @@ literal key (FR-E).
 `make_provider()`, `build_role_bindings()` and `orchestrator.py` are
 unchanged. No dependency was added.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -105,7 +105,7 @@ so records are captured exactly once whether or not an earlier test called
 
 No existing test asserted the old FR-D message, so none was edited.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -123,7 +123,7 @@ The 95 linter warnings are pre-existing (for example missing
 `dev/prompt/closed/`. They are listed by the linter and
 were not fixed.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -133,7 +133,7 @@ None. One addition within scope: T10 also covers `api_key_keychain: None`
 (an empty YAML value), which FR-B rejects because the key is present but not a
 non-empty string.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -162,7 +162,7 @@ non-empty string.
    show a macOS access dialog for `/usr/bin/security`; an unanswered dialog
    ends in the 10 s timeout ConfigError.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -176,7 +176,7 @@ Work was committed directly to `main`.
 | `feat(engine)`: providers.py and tests | `9b4cb2389a64b6e02b2294680e74c2dd8b7984aa` |
 | `docs(dev)`: this report and the prompt move | The commit that adds this file; a commit cannot record its own hash. Read it with `git log -1 -- dev/reports/report-7d953510-keychain-api-key.md`. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -237,7 +237,7 @@ moved with the file to `dev/prompt/closed/`, as in iteration 1.
 | `feat(engine)`: providers.py and T15 | `d4c1cdb250a12fab3b719012219350ee8b1d3638` |
 | `docs(dev)`: this section and the prompt move | The commit that adds this section; a commit cannot record its own hash. Read it with `git log -1 -- dev/reports/report-7d953510-keychain-api-key.md`. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -315,7 +315,7 @@ docstring or comment changed.
 | `feat(engine)`: providers.py and T16 to T18 | `45a8ac0e96e5b25976f84107a35b72e00d08e913` |
 | `docs(dev)`: this section and the prompt move | The commit that adds this section; a commit cannot record its own hash. Read it with `git log -1 -- dev/reports/report-7d953510-keychain-api-key.md`. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -404,7 +404,7 @@ moved with the file to `dev/prompt/closed/`.
 | `feat(engine)`: orchestrator.py and T19 to T21 | `050e5ec323f428b307f7a7050494e5b79b9b8502` |
 | `docs(dev)`: this section and the prompt move | The commit that adds this section; a commit cannot record its own hash. Read it with `git log -1 -- dev/reports/report-7d953510-keychain-api-key.md`. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -499,7 +499,7 @@ and pushed; not merged into `main`, no pull request opened.
 | `test(engine)`: T22 and the T19, T20 NOTSET change | `e1667def0be2ce30491b493cb20f8e7cf643bc15` |
 | `docs(dev)`: this section and the prompt move | The commit that adds this section; a commit cannot record its own hash. Read it with `git log -1 -- dev/reports/report-7d953510-keychain-api-key.md`. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

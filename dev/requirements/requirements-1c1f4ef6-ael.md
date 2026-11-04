@@ -6,18 +6,18 @@ Created: 2026 March 26
 
 ## Table of Contents
 
-- [Purpose](<#purpose>)
-- [Scope](<#scope>)
-- [Terminology](<#terminology>)
-- [As-Built Requirements](<#as-built requirements>)
-  - [Functional](<#functional>)
-  - [Non-Functional](<#non-functional>)
-- [Proposed Requirements](<#proposed requirements>)
-  - [Strategic Domain Task Authoring](<#strategic domain task authoring>)
-  - [Pipeline Mode](<#pipeline mode>)
-- [Constraints](<#constraints>)
-- [Open Issues](<#open issues>)
-- [Version History](<#version history>)
+- [Purpose](#purpose)
+- [Scope](#scope)
+- [Terminology](#terminology)
+- [As-Built Requirements](#as-built-requirements)
+  - [Functional](#functional)
+  - [Non-Functional](#non-functional)
+- [Proposed Requirements](#proposed-requirements)
+  - [Strategic Domain Task Authoring](#strategic-domain-task-authoring)
+  - [Pipeline Mode](#pipeline-mode)
+- [Constraints](#constraints)
+- [Open Issues](#open-issues)
+- [Version History](#version-history)
 
 ---
 
@@ -25,7 +25,7 @@ Created: 2026 March 26
 
 This document records functional and non-functional requirements for the engine orchestrator. It covers the existing as-built system and proposed design extensions under active consideration.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -39,7 +39,7 @@ This document records functional and non-functional requirements for the engine 
 
 Out of scope: inference endpoint implementation (oMLX), MCP server implementations, recipe content.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -59,7 +59,7 @@ Out of scope: inference endpoint implementation (oMLX), MCP server implementatio
 | Pipeline | Sequential execution of multiple task files under a single orchestrator invocation |
 | Task queue | Directory containing ordered task files for pipeline execution |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -112,7 +112,7 @@ The orchestrator shall truncate tool call lists that exceed a configurable per-i
 **FR-AEL-015 — Duplicate read detection**
 The orchestrator shall log a warning when the model reads the same file path more than once within a phase.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -133,7 +133,7 @@ The `--task <file or string>` interface shall remain functional. Changes to task
 **NFR-AEL-005 — Minimal dependencies**
 Python dependencies shall be limited to those declared in `requirements.txt`. No optional or platform-specific dependencies.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -155,7 +155,7 @@ The `extract_tactical_brief()` function and all associated fallback logic shall 
 **FR-AEL-P04 — Backward-compatible --task flag**
 The `--task <file>` flag shall remain. When a file path is provided, the orchestrator shall read the file verbatim as the task string. No extraction or parsing shall be applied.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -185,7 +185,7 @@ The orchestrator shall write a pipeline-level log entry for each task: task file
 **FR-AEL-P12 — config.yaml tasks_dir**
 The tasks directory path shall be configurable via `config.yaml` under `pipeline.tasks_dir`. The `--tasks` CLI flag shall override this value.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -197,7 +197,7 @@ The tasks directory path shall be configurable via `config.yaml` under `pipeline
 - MCP transport: stdio only
 - State directory is ephemeral and excluded from git
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -210,7 +210,7 @@ The tasks directory path shall be configurable via `config.yaml` under `pipeline
 | OI-003 | Dependency ordering between pipeline tasks is not formally specified; filename sequence implies dependency but is not enforced |
 | OI-004 | Pipeline mode: behaviour when tasks directory is empty or contains no `.md` files is not defined |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

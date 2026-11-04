@@ -8,13 +8,13 @@ Created: 2026 September 25
 
 ## Table of Contents
 
-[1.0 Scope](<#1.0 scope>)
-[2.0 Name Mapping](<#2.0 name mapping>)
-[3.0 Exclusions](<#3.0 exclusions>)
-[4.0 Change Log](<#4.0 change log>)
-[5.0 Verification](<#5.0 verification>)
-[6.0 External Follow-up](<#6.0 external follow-up>)
-[Version History](<#version history>)
+[1.0 Scope](#10-scope)
+[2.0 Name Mapping](#20-name-mapping)
+[3.0 Exclusions](#30-exclusions)
+[4.0 Change Log](#40-change-log)
+[5.0 Verification](#50-verification)
+[6.0 External Follow-up](#60-external-follow-up)
+[Version History](#version-history)
 
 ---
 
@@ -24,7 +24,7 @@ Rename of the project from "LLM Governance and Orchestration (LLM-G&O)" to "AI G
 
 `bin/` script edits (comments, messages, URLs, `REPO` value) are handled under the Trivial Change Exemption (P04.12), approved by the operator. The git commit is their audit record; this report lists them for completeness.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -37,7 +37,7 @@ Rename of the project from "LLM Governance and Orchestration (LLM-G&O)" to "AI G
 | `LLM Orchestration Framework` | `AI Governance and Orchestration Framework` |
 | `LLM-G&O` | `AI-G&O` |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -51,7 +51,7 @@ Left unchanged by operator decision:
 - Generic use of "LLM" as a technology term (e.g., "any capable LLM"); deferred to the strategic reorientation.
 - `docs/claude/project_information.md` (git-ignored; already updated by the operator).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -97,7 +97,7 @@ Line numbers refer to the file state before Version History rows were appended.
 
 In addition, a Version History entry dated 2026-09-25 was appended to each changed document (not to `bin/` scripts). `ai/governance.md` advanced to version 10.6.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -106,7 +106,7 @@ In addition, a Version History entry dated 2026-09-25 was appended to each chang
 - Repository-wide search (case-insensitive, hidden files included, `closed/` and `.LOG` excluded) finds no old-name occurrences other than the new Version History rows and `ai/governance.md` row 5.4.
 - `bash -n` passes for `bin/bootstrap.sh`, `bin/propagate.sh` and `bin/release.sh`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -118,7 +118,7 @@ Items outside the repository, for the operator:
 2. Downstream projects: run `bin/propagate.sh` to deliver `ai/governance.md` v10.6.
 3. Claude project memory and project description.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

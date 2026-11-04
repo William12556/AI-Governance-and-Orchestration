@@ -6,14 +6,14 @@ Created: 2026 March 27
 
 ## Table of Contents
 
-- [1.0 Issue Information](<#1.0 issue information>)
-- [2.0 Source](<#2.0 source>)
-- [3.0 Affected Scope](<#3.0 affected scope>)
-- [4.0 Reproduction](<#4.0 reproduction>)
-- [5.0 Behavior](<#5.0 behavior>)
-- [6.0 Analysis](<#6.0 analysis>)
-- [7.0 Resolution](<#7.0 resolution>)
-- [Version History](<#version history>)
+- [1.0 Issue Information](#10-issue-information)
+- [2.0 Source](#20-source)
+- [3.0 Affected Scope](#30-affected-scope)
+- [4.0 Reproduction](#40-reproduction)
+- [5.0 Behavior](#50-behavior)
+- [6.0 Analysis](#60-analysis)
+- [7.0 Resolution](#70-resolution)
+- [Version History](#version-history)
 
 ---
 
@@ -34,7 +34,7 @@ issue_info:
     change_iteration: null
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -50,7 +50,7 @@ source:
     without reviewer running.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -65,7 +65,7 @@ affected_scope:
   version: "governance v8.7"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -90,7 +90,7 @@ reproduction:
     INFO AEL end rc=1
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -128,7 +128,7 @@ behavior:
   workaround: "Raise phase_max_iterations to 50 in config.yaml as a palliative measure."
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -174,7 +174,7 @@ analysis:
       relationship: ""
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -215,7 +215,7 @@ resolution:
     Applied to framework, skel, GTach, e-Paper-IP-Display, solax-modbus.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

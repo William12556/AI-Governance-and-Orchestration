@@ -12,16 +12,16 @@ Created: 2026 October 01
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Method](<#2.0 method>)
-[3.0 Pre-run Check](<#3.0 pre-run check>)
-[4.0 V-02 SE Regression on oMLX](<#4.0 v-02 se regression on omlx>)
-[5.0 V-04 Mistral API](<#5.0 v-04 mistral api>)
-[6.0 V-04 Anthropic Provider](<#6.0 v-04 anthropic provider>)
-[7.0 Observations](<#7.0 observations>)
-[8.0 Verdicts](<#8.0 verdicts>)
-[9.0 Open Items](<#9.0 open items>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Method](#20-method)
+[3.0 Pre-run Check](#30-pre-run-check)
+[4.0 V-02 SE Regression on oMLX](#40-v-02-se-regression-on-omlx)
+[5.0 V-04 Mistral API](#50-v-04-mistral-api)
+[6.0 V-04 Anthropic Provider](#60-v-04-anthropic-provider)
+[7.0 Observations](#70-observations)
+[8.0 Verdicts](#80-verdicts)
+[9.0 Open Items](#90-open-items)
+[Version History](#version-history)
 
 ---
 
@@ -29,7 +29,7 @@ Created: 2026 October 01
 
 This report records the live checks of Phase 2: the SE regression replay (V-02) and one live run per provider (V-04). The offline checks (V-01, V-03, V-05 to V-13) are the pytest suite, 216 tests passing at the time of writing.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -42,7 +42,7 @@ This report records the live checks of Phase 2: the SE regression replay (V-02) 
 - Between runs: `git checkout -- src tests` and `--mode reset`.
 - Evidence: operator terminal output and the engine logs in `ai/state/`. Evidence and inference are marked separately in §7.0.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -53,7 +53,7 @@ This report records the live checks of Phase 2: the SE regression replay (V-02) 
 | Loop run before approvals | Exit 3; missing: change status (found: proposed), change approval, prompt approval; no state written | FR-08-05 |
 | Change set to `approved`; `approve.py c8e760ee change`, `approve.py c8e760ee prompt` | Approvals committed; next run started | FR-08-04 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -72,7 +72,7 @@ Worker Devstral Small 2 8-bit, reviewer Magistral Small 2509 8-bit, both through
 | Outcome | Reviewer REVISE ×5 on a docstring that already states the behaviour; BLOCKED by stall detection | — |
 | Return stage | `BLOCKED.md`: "Return to stage: prompt (work item c8e760ee)" | FR-02-03 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -89,7 +89,7 @@ Both roles `mistral-medium-2604` through `kind: openai_compatible`, key injected
 | Read-only reviewer | 9 tools for the reviewer, 17 for the worker | — |
 | Human approval gate | `awaiting-approval.md`: work item c8e760ee, stage accept; nothing passed by the engine | FR-03-05 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -107,7 +107,7 @@ No Anthropic API key is available (operator, 2026-10-01). The native Anthropic p
 
 Not verified live: the Anthropic API itself, its acceptance of strict tool schemas built from MCP tools, prompt caching and Models API readiness.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -120,7 +120,7 @@ Not verified live: the Anthropic API itself, its acceptance of strict tool schem
 | OB-03 | With a pinned global `context_window` (as solax-modbus had), per-role windows do not apply; projects need `model_context_windows` instead. | Evidence: configuration; inference for other projects |
 | OB-04 | The project venv must contain the engine requirements, now including `anthropic` when that provider kind is used. | Evidence: `pip install anthropic` needed before §6.0 |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -135,7 +135,7 @@ Not verified live: the Anthropic API itself, its acceptance of strict tool schem
 | FR-08-05 pre-run check (live) | Pass (§3.0) |
 | V-09 API key not in logs or state | Pass (§9.0 O-01) |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -148,7 +148,7 @@ Not verified live: the Anthropic API itself, its acceptance of strict tool schem
 | O-03 | `phase2-replay` branch deleted 2026-10-01. Remaining: propagate governance 12.x to solax-modbus `main` with `--allow-major`, then record the c8e760ee approvals there if the work item is replayed (dev/task.md). |
 | O-04 | **Closed 2026-10-01.** V-14: `dev/audit/audit-14e05e35-phase2-2026-10-01.md` and five follow-up audits; change-82dbf16a closed. |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

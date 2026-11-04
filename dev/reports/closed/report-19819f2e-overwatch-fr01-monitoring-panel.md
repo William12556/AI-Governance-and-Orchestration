@@ -10,21 +10,21 @@ Created: 2026 August 21
 
 ## Table of Contents
 
-[1.0 Purpose](<#1.0 purpose>)
-[2.0 Scope Executed](<#2.0 scope executed>)
-[3.0 Deliverables](<#3.0 deliverables>)
-[4.0 Implementation Notes](<#4.0 implementation notes>)
-[4.1 Data Layer Carry-Over](<#4.1 data layer carry-over>)
-[4.2 HtmlRenderer](<#4.2 htmlrenderer>)
-[4.3 Scan Loop and CLI](<#4.3 scan loop and cli>)
-[5.0 Verification](<#5.0 verification>)
-[5.1 Success Criteria](<#5.1 success criteria>)
-[5.2 Test Results](<#5.2 test results>)
-[5.3 Runtime Smoke Test](<#5.3 runtime smoke test>)
-[6.0 Deviations and Judgement Calls](<#6.0 deviations and judgement calls>)
-[7.0 Out of Scope / Not Done](<#7.0 out of scope not done>)
-[8.0 Recommended Next Steps](<#8.0 recommended next steps>)
-[Version History](<#version history>)
+[1.0 Purpose](#10-purpose)
+[2.0 Scope Executed](#20-scope-executed)
+[3.0 Deliverables](#30-deliverables)
+[4.0 Implementation Notes](#40-implementation-notes)
+[4.1 Data Layer Carry-Over](#41-data-layer-carry-over)
+[4.2 HtmlRenderer](#42-htmlrenderer)
+[4.3 Scan Loop and CLI](#43-scan-loop-and-cli)
+[5.0 Verification](#50-verification)
+[5.1 Success Criteria](#51-success-criteria)
+[5.2 Test Results](#52-test-results)
+[5.3 Runtime Smoke Test](#53-runtime-smoke-test)
+[6.0 Deviations and Judgement Calls](#60-deviations-and-judgement-calls)
+[7.0 Out of Scope / Not Done](#70-out-of-scope--not-done)
+[8.0 Recommended Next Steps](#80-recommended-next-steps)
+[Version History](#version-history)
 
 ---
 
@@ -38,7 +38,7 @@ browser-rendered HTML file.
 Authoritative sources: `dev/design/design-project-overwatch.md` v0.1 (§3.1,
 §7.1, §12.0, §14.0) and `ai/src/govwatch.py` as the reused data layer.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -52,7 +52,7 @@ Authoritative sources: `dev/design/design-project-overwatch.md` v0.1 (§3.1,
 | Unit tests | Authored, 19 tests, all passing |
 | FR-02 … FR-10 (later phases) | Not started — out of scope by prompt constraint |
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -68,7 +68,7 @@ Authoritative sources: `dev/design/design-project-overwatch.md` v0.1 (§3.1,
 
 No file outside these paths was created or modified.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -142,7 +142,7 @@ so a single cycle is directly testable without a timer. It scans, writes
 that write failed, then writes `overwatch.html`. `KeyboardInterrupt` exits
 cleanly. No `subprocess` call exists anywhere in the module.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -206,7 +206,7 @@ confirmation of the three panels rendering as intended remains for the
 human, and is in any case a precondition of the OQ-09 side-by-side
 validation (§8.0).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -247,7 +247,7 @@ validation (§8.0).
    and a busy loop; `govwatch` was insulated from this by Textual's timer.
    Not specified either way in the prompt.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -269,7 +269,7 @@ Deliberately not implemented, per the prompt's constraints:
   in `ai/src/` and propagate together via `bin/propagate.sh`, which needs
   no change (design §14.0).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -287,7 +287,7 @@ Deliberately not implemented, per the prompt's constraints:
    existing `govwatch` entry. Neither was touched here — both fall outside
    this prompt's permitted file list.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

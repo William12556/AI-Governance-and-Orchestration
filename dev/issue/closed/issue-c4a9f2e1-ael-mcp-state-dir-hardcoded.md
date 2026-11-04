@@ -6,13 +6,13 @@ Created: 2026 June 15
 
 ## Table of Contents
 
-- [1.0 Issue Information](<#1.0 issue information>)
-- [2.0 Source](<#2.0 source>)
-- [3.0 Affected Scope](<#3.0 affected scope>)
-- [4.0 Behavior](<#4.0 behavior>)
-- [5.0 Analysis](<#5.0 analysis>)
-- [6.0 Resolution](<#6.0 resolution>)
-- [Version History](<#version history>)
+- [1.0 Issue Information](#10-issue-information)
+- [2.0 Source](#20-source)
+- [3.0 Affected Scope](#30-affected-scope)
+- [4.0 Behavior](#40-behavior)
+- [5.0 Analysis](#50-analysis)
+- [6.0 Resolution](#60-resolution)
+- [Version History](#version-history)
 
 ---
 
@@ -33,7 +33,7 @@ issue_info:
     change_iteration: 1
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -51,7 +51,7 @@ source:
     at the pre-consolidation location.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -73,7 +73,7 @@ affected_scope:
   version: "ael-mcp as of 2026-06-15 (repository: William12556/ael-mcp)"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -99,7 +99,7 @@ behavior:
   workaround: "Launch AEL from the terminal rather than via ael-mcp tools."
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -125,7 +125,7 @@ analysis:
       relationship: "same consolidation effort; framework-side source updates"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -167,7 +167,7 @@ metadata:
   schema_type: "t03_issue"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

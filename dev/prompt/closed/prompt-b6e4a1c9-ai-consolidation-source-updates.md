@@ -6,14 +6,14 @@ Created: 2026 June 15
 
 ## Table of Contents
 
-- [1.0 Prompt Information](<#1.0 prompt information>)
-- [2.0 Context](<#2.0 context>)
-- [3.0 Specification](<#3.0 specification>)
-- [4.0 Deliverable](<#4.0 deliverable>)
-- [5.0 Testing](<#5.0 testing>)
-- [6.0 Tactical Brief](<#6.0 tactical brief>)
-- [7.0 Success Criteria](<#7.0 success criteria>)
-- [Version History](<#version history>)
+- [1.0 Prompt Information](#10-prompt-information)
+- [2.0 Context](#20-context)
+- [3.0 Specification](#30-specification)
+- [4.0 Deliverable](#40-deliverable)
+- [5.0 Testing](#50-testing)
+- [6.0 Tactical Brief](#60-tactical-brief)
+- [7.0 Success Criteria](#70-success-criteria)
+- [Version History](#version-history)
 
 ---
 
@@ -34,7 +34,7 @@ prompt_info:
 Tactical Domain: Claude Code. This prompt operationalises change-b6e4a1c9.
 Read each target file before editing and apply only the path edits specified.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -58,7 +58,7 @@ context:
     - "Preserve existing code style and formatting"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -98,7 +98,7 @@ specification:
       - "Preserve formatting and comments"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -115,7 +115,7 @@ deliverable:
     - path: "framework/ai/ael/tests/test_regression.py"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -133,7 +133,7 @@ testing:
     - "Both scripts contain the new exclude entries"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -162,7 +162,7 @@ tactical_brief: |
   and confirm it passes.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -178,7 +178,7 @@ success_criteria:
   - "No file under skel/ or any downstream project was modified"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

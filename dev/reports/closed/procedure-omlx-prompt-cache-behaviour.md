@@ -8,16 +8,16 @@ Created: 2026 July 15
 
 ## Table of Contents
 
-[1.0 Objective](<#1.0 objective>)
-[2.0 Hypotheses](<#2.0 hypotheses>)
-[3.0 Variables and Controls](<#3.0 variables and controls>)
-[4.0 Test Conditions](<#4.0 test conditions>)
-[5.0 Procedure](<#5.0 procedure>)
-[6.0 Measurement](<#6.0 measurement>)
-[7.0 Interpretation and Decision Matrix](<#7.0 interpretation and decision matrix>)
-[8.0 Confounds and Precautions](<#8.0 confounds and precautions>)
-[9.0 Results](<#9.0 results>)
-[Version History](<#version history>)
+[1.0 Objective](#10-objective)
+[2.0 Hypotheses](#20-hypotheses)
+[3.0 Variables and Controls](#30-variables-and-controls)
+[4.0 Test Conditions](#40-test-conditions)
+[5.0 Procedure](#50-procedure)
+[6.0 Measurement](#60-measurement)
+[7.0 Interpretation and Decision Matrix](#70-interpretation-and-decision-matrix)
+[8.0 Confounds and Precautions](#80-confounds-and-precautions)
+[9.0 Results](#90-results)
+[Version History](#version-history)
 
 ---
 
@@ -27,7 +27,7 @@ Determine whether the oMLX inference server reuses prefix (KV) cache computation
 
 The result gates a proposed `orchestrator.py` change. The F25 iteration-countdown injection mutates `messages[0]` every iteration (`messages[0]["content"] = system_prompt + status`), which changes the prompt prefix on each call. If oMLX performs cross-request prefix caching, this mutation forfeits reuse and inflates prefill cost per iteration. If oMLX does not cache across requests, the mutation is cost-neutral and the change carries no benefit.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -36,7 +36,7 @@ The result gates a proposed `orchestrator.py` change. The F25 iteration-countdow
 - **H1:** oMLX reuses prefix KV-cache across sequential requests. A request sharing a long identical prefix with an immediately prior request exhibits materially lower prompt-eval time / time-to-first-token (TTFT) than a request whose prefix diverges early.
 - **H0 (null):** No cross-request prefix reuse. Prompt-eval time is independent of prefix stability; identical-prefix and mutated-prefix requests produce equivalent prefill timing.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -51,7 +51,7 @@ The result gates a proposed `orchestrator.py` change. The F25 iteration-countdow
   - No model reload between requests within a set.
   - Single-threaded issuance; machine otherwise quiescent.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -63,7 +63,7 @@ Let `P` be a fixed, large prefix (target ~2,000–4,000 tokens) authored as a si
 - **Condition M (mutated prefix — models current F25):** system content = `P + "<status:N>"` where `N` varies per request; trailing user message varies (`A`, `B`). Divergence occurs inside the system message, shortening the shared prefix.
 - **Condition C (cold — uncached baseline):** each request uses a unique large prefix (`P1`, `P2`) sharing no common head. Establishes full uncached prefill cost.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -79,7 +79,7 @@ Let `P` be a fixed, large prefix (target ~2,000–4,000 tokens) authored as a si
 
 The `omlx` MCP tools (`omlx_chat`, `omlx_completion`) are sufficient to execute this procedure, because oMLX returns `usage.prompt_tokens_details.cached_tokens` — a direct, structural cache-hit signal that does not depend on timing precision (see §6.0). For a defensible *latency* figure the server-reported `total_time` is coarse, so a streaming client (direct `AsyncOpenAI` against `base_url`, `stream=True`, `time.monotonic()` around first-chunk arrival) is preferred; `curl` with `--no-buffer` against `/v1/chat/completions` is an acceptable alternative for TTFT.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -93,7 +93,7 @@ Priority order for the dependent variable:
 
 Record per request: condition, repetition index, `prompt_tokens`, `cached_tokens`, `total_time`.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -111,7 +111,7 @@ Decisions:
 - **S ≈ M ≈ C** → no orchestrator prefix change. Redirect effort to speculative decoding and reviewer-model downsizing, which do not depend on prefix reuse.
 - **S << C but M also << C** → mutation does not sit early enough to matter; re-examine where divergence actually falls in the tokenised prefix before drawing a conclusion.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -124,7 +124,7 @@ Decisions:
 - **Generation contamination.** Hold `max_tokens = 1` so generation time does not mask prefill differences.
 - **Warm-up.** The first request after model load includes weight-warm and allocation costs unrelated to prefix caching; always discard it.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -176,7 +176,7 @@ Per §7.0 the outcome is **S << C and M ≈ C**: implement the F25 prefix fix �
 - `cached_tokens` replaced TTFT as the primary signal (§6.0 revised). It is a stronger, timing-independent measure and made execution feasible through the non-streaming MCP tools.
 - N = 3 per chat condition rather than K ≥ 10. Variance was negligible (F25 pinned at 2.84 s; Fix 1.05–1.07 s), so medians are reported as indicative. A K ≥ 10 streaming run remains the route to a formal latency figure.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

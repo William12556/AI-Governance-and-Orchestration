@@ -6,14 +6,14 @@ Created: 2026 June 10
 
 ## Table of Contents
 
-- [1.0 Issue Information](<#1.0 issue information>)
-- [2.0 Source](<#2.0 source>)
-- [3.0 Affected Scope](<#3.0 affected scope>)
-- [4.0 Behavior](<#4.0 behavior>)
-- [5.0 Analysis](<#5.0 analysis>)
-- [6.0 Resolution](<#6.0 resolution>)
-- [7.0 Traceability](<#7.0 traceability>)
-- [Version History](<#version history>)
+- [1.0 Issue Information](#10-issue-information)
+- [2.0 Source](#20-source)
+- [3.0 Affected Scope](#30-affected-scope)
+- [4.0 Behavior](#40-behavior)
+- [5.0 Analysis](#50-analysis)
+- [6.0 Resolution](#60-resolution)
+- [7.0 Traceability](#70-traceability)
+- [Version History](#version-history)
 
 ---
 
@@ -34,7 +34,7 @@ issue_info:
     change_iteration: 1
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -52,7 +52,7 @@ source:
     documents reside in dev/; the deliverable is framework/ai/src/govwatch.py.
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -68,7 +68,7 @@ affected_scope:
   version: "framework/ai v9.0"
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -91,7 +91,7 @@ behavior:
   workaround: "Manual inspection of workspace/ and .ael/ralph/."
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -110,7 +110,7 @@ analysis:
   related_issues: []
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -130,7 +130,7 @@ resolution:
   fix_description: ""
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -145,7 +145,7 @@ traceability:
   test_refs: []
 ```
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 

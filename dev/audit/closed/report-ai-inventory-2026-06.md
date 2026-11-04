@@ -8,11 +8,11 @@ Created: 2026 June 16
 
 ## Table of Contents
 
-[1.0 Scope](<#1.0 scope>)
-[2.0 Document Inventory](<#2.0 document inventory>)
-[3.0 Findings](<#3.0 findings>)
-[4.0 Summary](<#4.0 summary>)
-[Version History](<#version history>)
+[1.0 Scope](#10-scope)
+[2.0 Document Inventory](#20-document-inventory)
+[3.0 Findings](#30-findings)
+[4.0 Summary](#40-summary)
+[Version History](#version-history)
 
 ---
 
@@ -25,7 +25,7 @@ individually cross-checked.
 
 Authoritative reference: `ai/governance.md` (v9.3).
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -109,7 +109,7 @@ Authoritative reference: `ai/governance.md` (v9.3).
 Empty directory structure. Active directories: `audit/`, `change/`, `design/`,
 `issues/`, `prompt/`, `requirements/`, `test/`, `trace/`. No open documents.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -323,7 +323,7 @@ approximately April 2026.
 **Resolution:** Add `Created:` timestamps based on file metadata. Low priority;
 no functional impact.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
@@ -344,7 +344,7 @@ no functional impact.
 
 4 errors. 6 warnings.
 
-[Return to Table of Contents](<#table of contents>)
+[Return to Table of Contents](#table-of-contents)
 
 ---
 
