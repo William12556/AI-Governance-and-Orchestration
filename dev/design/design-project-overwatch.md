@@ -258,7 +258,7 @@ TBD at implementation) read-only text blocks, one per file.
 ### 7.5 Requirements/Design Panel (FR-05) — Resolution of OQ-04
 
 **Decision: full content, not a summary.** Framework documents are already
-concise (numbered-section convention, per `obsidian_markdown_guidelines.md`
+concise (numbered-section convention`
 practice); an extraction/summarisation heuristic would add complexity and
 risk of misrepresentation for no clear benefit at single-project scale.
 Rendered as read-only text.
