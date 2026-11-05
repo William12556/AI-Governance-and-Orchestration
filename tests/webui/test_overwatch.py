@@ -3,7 +3,8 @@
 Fixtures are constructed directly as Snapshot/DocumentRecord/Alert
 instances rather than by scanning a real project tree — the data layer
 under those objects is carried over unmodified from govwatch.py and is
-not what this phase changes.
+not what this phase changes. The change-b8a6c445 tests (O1 to O6) at the
+end scan fixture projects built in tmp_path.
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ import json
 import os
 import re
 import stat
+import subprocess
 import sys
 from pathlib import Path
 
@@ -337,3 +339,140 @@ def test_validate_project_rejects_non_project(tmp_path: Path, capsys) -> None:
     """A directory without ai/workspace/ fails validation with a diagnostic."""
     assert overwatch.validate_project(overwatch.resolve_paths(tmp_path)) is False
     assert "ai/workspace/ not found" in capsys.readouterr().err
+
+
+# ---------------------------------------------------------------------------
+# change-b8a6c445 (prompt-b8a6c445 O1 to O6): run record and scan fixes
+# ---------------------------------------------------------------------------
+
+
+def _finished_pid() -> int:
+    """Pid of a child process that has exited and been reaped."""
+    child = subprocess.Popen([sys.executable, "-c", "pass"])
+    child.wait()
+    return child.pid
+
+
+def _run_json(pid: int, ended=None, rc=None, task_file=None) -> str:
+    return json.dumps({"mode": "loop", "task_file": task_file, "pid": pid,
+                       "started": "2026-11-05T10:00:00+00:00", "ended": ended, "rc": rc})
+
+
+_ENDED = "2026-11-05T10:05:00+00:00"
+
+
+@pytest.mark.parametrize(
+    "case, files, status, rc",
+    [
+        ("a", {}, "idle", None),
+        ("b", {"run.json": "live"}, "running", None),
+        ("c", {"run.json": "dead"}, "ended", None),
+        ("d", {"run.json": "ended"}, "ended", 2),
+        ("e", {"run.json": "ended", "BLOCKED.md": "# BLOCKED\n"}, "blocked", 2),
+        ("f", {"run.json": "ended", ".complete": ""}, "ship", 2),
+        ("g", {"run.json": "live", "BLOCKED.md": "# BLOCKED\n"}, "running", None),
+        ("h", {"task.md": "task\n"}, "unknown", None),
+        ("i", {"run.json": "not json"}, "unknown", None),
+    ],
+)
+def test_o1_engine_status_precedence(tmp_path: Path, case, files, status, rc) -> None:
+    """Status follows the run record first, then BLOCKED.md and .complete (FR-C)."""
+    records = {
+        "live": _run_json(os.getpid()),
+        "dead": _run_json(_finished_pid()),
+        "ended": _run_json(os.getpid(), ended=_ENDED, rc=2),
+        "not json": "not json",
+    }
+    paths = overwatch.resolve_paths(tmp_path)
+    paths.engine_state.mkdir(parents=True)
+    for name, content in files.items():
+        (paths.engine_state / name).write_text(records.get(content, content))
+
+    eng = overwatch.Scanner(paths)._read_engine_state()
+
+    assert eng.status == status
+    assert eng.rc == rc
+
+
+def _workspace_with_prompt(root: Path) -> Path:
+    prompt_dir = root / "ai" / "workspace" / "prompt"
+    prompt_dir.mkdir(parents=True)
+    prompt = prompt_dir / "prompt-1a2b3c4d-x.md"
+    prompt.write_text("```yaml\nprompt_info:\n  id: prompt-1a2b3c4d\n```\n")
+    return prompt
+
+
+@pytest.mark.parametrize("which, alerted", [("prompt", False), ("unnormalised", False),
+                                            ("other", True), ("copy", True), ("text", True)])
+def test_o2_fr_02_06_compares_task_file(tmp_path: Path, which, alerted) -> None:
+    """FR-02-06 matches the run record's task_file to an open prompt by path (FR-D)."""
+    prompt = _workspace_with_prompt(tmp_path)
+    task_file = {
+        "prompt": str(prompt),
+        "unnormalised": str(prompt.parent / ".." / "prompt" / prompt.name),
+        "other": str(tmp_path / "elsewhere.md"),
+        "copy": str(tmp_path / prompt.name),  # same name, outside the workspace
+        "text": None,
+    }[which]
+    paths = overwatch.resolve_paths(tmp_path)
+    paths.engine_state.mkdir(parents=True)
+    (paths.engine_state / "run.json").write_text(
+        _run_json(os.getpid(), ended=_ENDED, rc=0, task_file=task_file))
+
+    alerts = [a for a in overwatch.Scanner(paths).scan().alerts if a.code == "FR-02-06"]
+
+    if alerted:
+        assert [a.message for a in alerts] == ["engine run task is not an open prompt document"]
+    else:
+        assert alerts == []
+
+
+def test_o3_result_document_scanned_once(tmp_path: Path) -> None:
+    """A document under test/result/ is listed once, for class result (FR-E, L-07)."""
+    result_dir = tmp_path / "ai" / "workspace" / "test" / "result"
+    result_dir.mkdir(parents=True)
+    (result_dir / "result-1a2b3c4d-x.md").write_text("# result\n")
+
+    docs = overwatch.Scanner(overwatch.resolve_paths(tmp_path)).scan().documents
+
+    assert [(d.cls, os.path.basename(d.path)) for d in docs] == [
+        ("result", "result-1a2b3c4d-x.md")
+    ]
+
+
+def test_o4_closed_tested_inside_workspace_only(tmp_path: Path) -> None:
+    """A 'closed' ancestor of the project does not hide its documents (FR-E, L-08)."""
+    root = tmp_path / "closed" / "proj"
+    prompt = _workspace_with_prompt(root)
+    (prompt.parent / "closed").mkdir()
+    (prompt.parent / "closed" / "prompt-5e6f7a8b-y.md").write_text("# closed\n")
+
+    docs = overwatch.Scanner(overwatch.resolve_paths(root)).scan().documents
+
+    assert [os.path.basename(d.path) for d in docs] == [prompt.name]
+
+
+def test_o5_alert_payload_heading_and_ended_rc(paths) -> None:
+    """The alert heading names Overwatch; an ended run shows its exit code (FR-C, FR-F)."""
+    snap = overwatch.Snapshot(
+        engine_state=overwatch.EngineState(status="ended", rc=2, has_run_record=True),
+        scan_time=datetime.datetime(2026, 11, 5, 10, 0, 0),
+    )
+
+    lines = overwatch.AlertWriter(paths).payload(snap).splitlines()
+
+    assert lines[0] == f"# Overwatch alerts — {paths.root.name}"
+    assert "engine: ENDED rc=2" in lines
+
+
+def test_o6_ended_run_with_open_prompt_awaits_execution() -> None:
+    """An ended run with an open prompt infers 'Awaiting prompt execution' (FR-C)."""
+    snap = overwatch.Snapshot(
+        documents=[overwatch.DocumentRecord(
+            cls="prompt", uuid="1a2b3c4d", name="x",
+            path="/proj/ai/workspace/prompt/prompt-1a2b3c4d-x.md",
+        )],
+        engine_state=overwatch.EngineState(status="ended"),
+    )
+
+    assert overwatch.PhaseInference().infer(snap) == "Awaiting prompt execution"
