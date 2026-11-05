@@ -45,6 +45,7 @@ State files reside in `ai/state/` (configured via `loop.state_dir` in `config.ya
 | `.complete` | Orchestrator | Completion marker (see §5.0 for content variants) |
 | `BLOCKED.md` | Worker | Unrecoverable failure details; seeds T06 issue |
 | `context-budget.md` | Orchestrator | Context window sizing report for planner |
+| `run.json` | Orchestrator | Run record: mode, task file, pid, start and end time, exit code. Written at start and again at the end of every run after logging starts; Overwatch derives the engine status from it (change-b8a6c445) |
 | `engine_<timestamp>.LOG` | Orchestrator | Full debug log; preserved across reset |
 
 The worker may write `work-summary.txt`, `work-complete.txt` and `BLOCKED.md` only; writes to the other engine files are refused (change-82dbf16a).
@@ -358,6 +359,7 @@ Related refusals (change-82dbf16a): `write refused: … is or contains an engine
 | 1.20 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
 | 1.21 | 2026-11-04 | §3.0: retry wording corrected to 3 attempts (audit-711a57d5 F-06) |
 | 1.22 | 2026-11-04 | §3.0: finite timeouts; API key redaction in error text (change-5e8aea4f) |
+| 1.23 | 2026-11-05 | §2.1: `run.json` run record (change-b8a6c445) |
 
 ---
 

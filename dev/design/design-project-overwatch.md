@@ -175,6 +175,14 @@ Extends `govwatch`'s dataclasses (`ProjectPaths`, `DocumentRecord`,
 `Snapshot` gains three fields: `tasks: list[TaskRow]`, `configs:
 list[ConfigFile]`, `stages: list[StageToken]`.
 
+Since change-b8a6c445 the engine state (`EngineState`) is derived from the
+engine's run record `run.json` and gains `task_file`, `rc` and
+`has_run_record`. Status precedence, first match wins: a run record with no
+end and a live pid → `running`; `BLOCKED.md` → `blocked`; `.complete` →
+`ship`; any other valid run record → `ended` (with its exit code); an
+unreadable record, or `task.md` without a record → `unknown`; otherwise
+`idle`.
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -183,8 +191,8 @@ list[ConfigFile]`, `stages: list[StageToken]`.
 
 | Component | Disposition |
 |---|---|
-| `Scanner`, `ComplianceEngine`, `AlertWriter` | Reused unmodified from `govwatch.py` |
-| `PhaseInference` | Reused unmodified for the project-wide phase shown in §7.1; not replaced |
+| `Scanner`, `ComplianceEngine`, `AlertWriter` | Reused from `govwatch.py`; modified by change-b8a6c445: engine status from `run.json` (§4.0), FR-02-06 compares the run's task file with the open prompts by resolved path, each document scanned once for its most specific class directory, `closed/` tested inside the workspace only, alert heading `# Overwatch alerts` |
+| `PhaseInference` | Reused for the project-wide phase shown in §7.1; not replaced. Since change-b8a6c445 an ended run with an open prompt also gives "Awaiting prompt execution" |
 | `StageInference` | New. Wraps `PhaseInference`'s document-grouping logic per UUID rather than project-wide (§6.0) |
 | `TaskParser` | New. Parses `ai/task.md`'s four-column table into `TaskRow` records (§9.0) |
 | `ConfigReader` | New. Loads `ai/config.yaml` and `ai/engine/recipes/*.yaml` via `yaml.safe_load`, read-only |
@@ -357,6 +365,8 @@ type="application/json" id="snapshot">` block carrying the full serialised
 
 Unchanged from `govwatch` (design-govwatch.md §8.3), with an added
 "## Next Steps" section carrying `AdvisorEngine` output, `none` when empty.
+Since change-b8a6c445 the heading reads `# Overwatch alerts — <project>`
+and an ended run is shown as `ENDED rc=<N>`.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -500,6 +510,7 @@ bounded interval, not an open-ended dual-maintenance commitment.
 | 0.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 0.5 | 2026-10-23 | Component layout: ai/src/overwatch.py → ai/webui/src/overwatch.py, ai/src/requirements-overwatch.txt → ai/webui/requirements.txt (change-14cf601f); §14.0 govwatch coexistence statement unchanged |
 | 0.6 | 2026-11-04 | §7.5: reference to the retired Obsidian guideline removed; internal links changed from Obsidian anchor syntax to GitHub heading anchors |
+| 0.7 | 2026-11-05 | §4.0 engine status from the run record; §5.0 Scanner, ComplianceEngine, AlertWriter and PhaseInference changes; §8.4 heading and ended status (change-b8a6c445) |
 
 ---
 

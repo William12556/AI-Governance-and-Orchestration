@@ -140,6 +140,7 @@ python ai/engine/src/orchestrator.py --mode loop \
       - `review-feedback.txt`: Feedback for the next iteration, from the reviewer's final response or a gate
       - `.complete`: Success marker
       - `BLOCKED.md`: Failure details
+      - `run.json`: Run record (mode, task file, pid, start, end, exit code), written by the engine at start and end
     - Boundary Conditions:
       - MAX_ITERATIONS: Configurable per task (default 10-50)
       - TOKEN_BUDGET: Aggregate token limit
@@ -1274,6 +1275,7 @@ See [workflow.md](workflow.md).
 | 12.5 | 2026-10-23 | P10.6: framework source organised by component; ai/src/ replaced by ai/webui/ (Overwatch) and ai/core/ (reserved) (change-14cf601f). Non-breaking. |
 | 12.6 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list. Non-breaking. |
 | 12.7 | 2026-11-04 | P00.10 cross-linking and P12.9: GitHub heading anchors replace Obsidian internal link syntax for all documents; anchor rule stated. Non-breaking. |
+| 12.8 | 2026-11-05 | P00.11 state files: `run.json` run record (change-b8a6c445). Non-breaking. |
 
 ---
 [Return to Table of Contents](#table-of-contents)

@@ -246,7 +246,7 @@ On BLOCKED the engine appends `Return to stage: <on_blocked>` to `BLOCKED.md` wh
 
 A rejected call returns a tool error to the worker: `write outside the declared scope: <path>; allowed: <list>`. It is logged with tool, path and reason (FR-05-04). Paths are resolved (symlinks included) before matching; `writable_paths` match as prefixes, deliverables match exactly. A write call with no recognised path argument is rejected (change-82dbf16a).
 
-The worker never writes the engine signal files in the state directory (`review-result.txt`, `review-feedback.txt`, `.complete`, `.timeout`, `awaiting-approval.md`, `mcp-run.json`, `iteration.txt`, `task.md`, `context-budget.md`), whatever the task, nor a directory that holds one (tools such as `replace_text` rewrite under a directory); names are compared case-insensitively. `work-summary.txt`, `work-complete.txt` and `BLOCKED.md` stay writable. Only tools offered to a phase are dispatched, and a review phase dispatches no write tool (change-82dbf16a).
+The worker never writes the engine signal files in the state directory (`review-result.txt`, `review-feedback.txt`, `.complete`, `.timeout`, `awaiting-approval.md`, `mcp-run.json`, `iteration.txt`, `task.md`, `context-budget.md`, `run.json`), whatever the task, nor a directory that holds one (tools such as `replace_text` rewrite under a directory); names are compared case-insensitively. `work-summary.txt`, `work-complete.txt` and `BLOCKED.md` stay writable. Only tools offered to a phase are dispatched, and a review phase dispatches no write tool (change-82dbf16a).
 
 Before the review phase the engine injects a `[DELIVERABLES]` block listing each deliverable as an absolute path, so the reviewer does not resolve relative paths against the state directory (FR-05-03). The block merges the worker's reported deliverables with the prompt's declared `deliverable.files` that exist (change-82dbf16a).
 
@@ -345,6 +345,7 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 | MCP request exceeds `loop.mcp_timeout_seconds` | Tool error to the worker, or the server is skipped at connection; run continues (change-711a57d5). |
 | Read call whose `path` is not a string or whose `paths` is not a list | Dispatched as usual; read tracking ignores the value; run continues (change-5e8aea4f). |
 | Closing the MCP client raises (for example a late answer after a timeout) | Warning printed; the run's exit status is unchanged (change-5e8aea4f). |
+| Run record (`run.json`) cannot be written at start or end | Warning `run record not written` logged; the run continues and its exit code is unchanged (change-b8a6c445). |
 | Provider error text on the completion or readiness path | A key from `api_key_env` or `api_key_keychain` is replaced by `API-KEY-REDACTED` before the text is logged, printed, written to `BLOCKED.md` or raised. Literal keys (kind `omlx` or a local `base_url`) are not secrets and are not replaced (NFR-05; change-5e8aea4f). |
 
 [Return to Table of Contents](#table-of-contents)
@@ -445,6 +446,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.20 | 2026-11-05 | §7.0: `run.json` added to the engine signal files; §11.0: run-record write failure (change-b8a6c445). |
 | 1.19 | 2026-11-05 | §7.0: "the run type's own paths" removed; no requirement or implementation exists (audit-caab2052 OQ-04, operator decision). |
 | 1.18 | 2026-11-04 | §3.0 Timeouts: finite values; §11.0 non-string read paths, MCP close errors, API key redaction in error text (change-5e8aea4f). |
 | 1.17 | 2026-10-29 | §3.0 Timeouts row; §11.0 malformed tool arguments, model request timeouts, non-retryable client errors, MCP request timeouts (change-711a57d5). |
