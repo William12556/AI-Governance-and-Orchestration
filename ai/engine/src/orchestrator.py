@@ -1529,14 +1529,10 @@ async def run_phase(
                 )
                 if _ep_path and _ep_path.endswith(".py"):
                     # change-711a57d5 (audit-caab2052 L-03): bounded; on timeout
-                    # the syntax addition is skipped.
+                    # the syntax addition is skipped. change-a5bd4fe1
+                    # (audit-caab2052 L-12): temporary bytecode cache.
                     try:
-                        _ep_proc = subprocess.run(
-                            [sys.executable, "-m", "py_compile", _ep_path],
-                            capture_output=True,
-                            text=True,
-                            timeout=_SUBPROCESS_TIMEOUT_SECONDS,
-                        )
+                        _ep_proc = G.compile_file(_ep_path, timeout=_SUBPROCESS_TIMEOUT_SECONDS)
                     except subprocess.TimeoutExpired:
                         _ep_proc = None
                     if _ep_proc is not None and _ep_proc.returncode != 0:
@@ -1604,14 +1600,10 @@ async def run_phase(
                 for _py_path in _py_paths:
                     if _py_path.endswith(".py") and os.path.isfile(_py_path):
                         # change-711a57d5 (audit-caab2052 L-03): bounded; on
-                        # timeout the file counts as not checked.
+                        # timeout the file counts as not checked. change-a5bd4fe1
+                        # (audit-caab2052 L-12): temporary bytecode cache.
                         try:
-                            proc = subprocess.run(
-                                [sys.executable, "-m", "py_compile", _py_path],
-                                capture_output=True,
-                                text=True,
-                                timeout=_SUBPROCESS_TIMEOUT_SECONDS,
-                            )
+                            proc = G.compile_file(_py_path, timeout=_SUBPROCESS_TIMEOUT_SECONDS)
                         except subprocess.TimeoutExpired:
                             continue
                         if proc.returncode != 0:
@@ -1734,13 +1726,17 @@ def run_preflight_check(task: str, log: logging.Logger) -> str:
         )
         if syntax_match:
             path = syntax_match.group(1)
+            # change-a5bd4fe1 (audit-caab2052 L-12): project paths only.
+            _cwd = os.path.realpath(os.getcwd())
+            _real_path = os.path.realpath(os.path.abspath(path))
+            if _real_path != _cwd and not _real_path.startswith(_cwd.rstrip(os.sep) + os.sep):
+                lines.append(f"  [{i}] UNCHECKED  {criterion} (outside the project)")
+                unchecked += 1
+                continue
             try:
                 # change-711a57d5 (L-03): bounded; a timeout is UNCHECKED below.
-                proc = subprocess.run(
-                    [sys.executable, "-m", "py_compile", path],
-                    capture_output=True, text=True,
-                    timeout=_SUBPROCESS_TIMEOUT_SECONDS,
-                )
+                # change-a5bd4fe1 (audit-caab2052 L-12): temporary bytecode cache.
+                proc = G.compile_file(path, timeout=_SUBPROCESS_TIMEOUT_SECONDS)
                 if proc.returncode == 0:
                     lines.append(f"  [{i}] SATISFIED  {criterion}")
                     satisfied += 1
@@ -1794,12 +1790,14 @@ def run_preflight_check(task: str, log: logging.Logger) -> str:
     return summary
 
 
-def _run_syntax_gate(state_dir: str, log: logging.Logger) -> str:
+def _run_syntax_gate(state_dir: str, log: logging.Logger, project_root: str = "") -> str:
     """
     F6: Built-in syntax gate (gates.syntax_check). Returns a [SYNTAX GATE]
     block for the reviewer task, or '' when no .py deliverable exists.
+    change-a5bd4fe1 (audit-caab2052 L-12): paths outside project_root (the
+    working directory when empty) are not checked.
     """
-    block, count = G.syntax_check(state_dir, log)
+    block, count = G.syntax_check(state_dir, log, project_root or None)
     if block:
         status = G.gate_status(block)
         style = "dim" if status == "PASS" else "yellow"
@@ -1817,7 +1815,9 @@ def _run_pytest_gate(state_dir: str, log: logging.Logger, project_root: str,
     interpreter. Returns a [TEST GATE] block, or '' when no target resolves.
     PASS: exit 0; FAIL: tests failed; UNCHECKED: pytest could not run. In
     run_loop FAIL overrides SHIP and UNCHECKED ends the run BLOCKED
-    (change-82dbf16a).
+    (change-82dbf16a). change-a5bd4fe1 (operator decision 2026-11-05): with a
+    tests/ directory the gate adds a collection-only pass over it
+    (gates.add_collection_pass); the status is the worse of the two steps.
     """
     deliverables = _extract_deliverables(state_dir, log)
     if not deliverables:
@@ -1829,6 +1829,8 @@ def _run_pytest_gate(state_dir: str, log: logging.Logger, project_root: str,
         return ""
     log.info("pytest gate: running pytest on %d target(s): %s", len(targets), targets)
     block = G.run_command_gate(G.PYTEST_GATE, spec or {}, targets, project_root, log)
+    # change-a5bd4fe1 (operator decision 2026-11-05): collection-only pass.
+    block = G.add_collection_pass(block, spec or {}, project_root, log)
     status = G.gate_status(block)
     if status == "PASS":
         log.info("pytest gate: %d target(s), status=%s", len(targets), status)
@@ -2181,7 +2183,8 @@ async def run_loop(
 
         # F6: syntax gate; F6b and change-e58fd295: declared command gates.
         # Results are injected into the reviewer task.
-        _syntax_result = _run_syntax_gate(state_dir, log) if "syntax" in gate_list else ""
+        _syntax_result = (_run_syntax_gate(state_dir, log, project_root)  # change-a5bd4fe1 (L-12)
+                          if "syntax" in gate_list else "")
         if "syntax" in gate_list:
             _log_gate(log, "syntax", "built_in", G.gate_status(_syntax_result))
         _command_results: list[tuple[str, str]] = []
@@ -2356,6 +2359,19 @@ async def run_loop(
                                 )
                         else:
                             log.debug("read-evidence SHIP gate: no deliverables — gate is no-op")
+
+                        # change-a5bd4fe1 (audit-caab2052 OQ-01; FR-03-04 v1.8):
+                        # a syntax gate FAIL overrides SHIP.
+                        if (_read_gate_pass and "syntax" in gate_list
+                                and G.gate_status(_syntax_result) == "FAIL"):
+                            _read_gate_pass = False
+                            log.warning("syntax SHIP gate: FAIL — overriding SHIP")
+                            console.print(
+                                "[yellow][engine] syntax SHIP gate: FAIL "
+                                "— overriding SHIP to REVISE[/yellow]"
+                            )
+                            write_state(state_dir, "review-feedback.txt",
+                                        f"Syntax gate failed.\n\n{_syntax_result}")
 
                         # Command SHIP gates: non-audit (loop) path only.
                         # Override SHIP to REVISE if any command gate reported FAIL

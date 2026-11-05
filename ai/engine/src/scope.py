@@ -3,8 +3,10 @@ Write-tool classification and worker write scope (design-14e05e35 §7.0; change-
 
 One source for which MCP tools write (audit-5bcd46ad L-09): the scope check,
 the loop's deliverable tracking and mcp_client's read-only filter all use
-is_write_tool / is_readonly_tool. Classification is fail-closed: a tool is a
-write tool when its name is a known write tool or contains a write verb.
+is_write_tool / is_readonly_tool. Classification is fail-closed
+(change-a5bd4fe1, audit-caab2052 L-01): a tool is read-only only when its name
+matches a read-only pattern and contains no write verb; every other tool,
+including one whose name is not recognised, is a write tool.
 
 For a T03 prompt task the worker may write only (FR-05-01):
     - the prompt's deliverable.files paths (exact files),
@@ -16,6 +18,8 @@ and task files that are not T03 prompts keep project-root containment.
 change-82dbf16a (audit-14e05e35): engine signal files in the state directory
 are never writable by the worker (H-01); a write call with no recognised path
 argument is refused (M-01); paths are compared after symlink resolution (L-02).
+change-a5bd4fe1 (audit-caab2052 L-02): a write path that cannot be resolved is
+refused.
 """
 
 from __future__ import annotations
@@ -37,8 +41,12 @@ WRITE_TOOLS = frozenset({
 })
 WRITE_NAME_PATTERNS = (r"replace", r"write", r"edit", r"create", r"delete",
                        r"remove", r"move", r"rename", r"patch", r"mkdir")
+# change-a5bd4fe1 (audit-caab2052 L-01): ^diff and ^count added (filesystem-mcp
+# diff, mcp-ripgrep count-matches), which the fail-closed rule would otherwise
+# classify as write tools.
 READONLY_TOOL_PATTERNS = (r"^read", r"^list", r"^grep", r"^search", r"^stat",
-                          r"^get_file_info", r"^find", r"^head", r"^tail", r"^cat")
+                          r"^get_file_info", r"^find", r"^head", r"^tail", r"^cat",
+                          r"^diff", r"^count")
 
 PATH_KEYS = ("path", "file_path", "destination", "new_path", "source",
              "from", "to", "src", "dst", "target", "newPath")
@@ -49,13 +57,20 @@ DIRECTORY_TOOLS = ("mkdir", "create_directory", "makedirs")
 
 
 def is_write_tool(name: str) -> bool:
-    """Fail-closed: a known write tool, or any name containing a write verb."""
-    return name in WRITE_TOOLS or any(re.search(p, name) for p in WRITE_NAME_PATTERNS)
+    """
+    Fail-closed: every tool not recognised as read-only is a write tool
+    (change-a5bd4fe1, audit-caab2052 L-01).
+    """
+    return not is_readonly_tool(name)
 
 
 def is_readonly_tool(name: str) -> bool:
-    """A read-only tool: no write verb, and a read-only name pattern."""
-    if is_write_tool(name):
+    """
+    Fail-closed: read-only only when the name matches a read-only pattern and
+    is neither a known write tool nor contains a write verb (change-a5bd4fe1,
+    audit-caab2052 L-01).
+    """
+    if name in WRITE_TOOLS or any(re.search(p, name) for p in WRITE_NAME_PATTERNS):
         return False
     return any(re.match(p, name) for p in READONLY_TOOL_PATTERNS)
 
@@ -210,7 +225,9 @@ def check(tool_name: str, arguments: dict, project_root: str,
         try:
             resolved = _real(target)
         except Exception:
-            continue  # malformed path: left to the MCP server
+            # change-a5bd4fe1 (audit-caab2052 L-02): an unresolvable path is refused.
+            return Violation(target, "unresolvable path",
+                             f"write refused: path '{target}' cannot be resolved")
         if not _within(resolved, root):
             return Violation(target, "outside the project root",
                              f"Scope violation: path '{target}' is outside the project root "
