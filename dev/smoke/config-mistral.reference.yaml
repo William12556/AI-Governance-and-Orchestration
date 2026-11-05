@@ -1,0 +1,68 @@
+# Reference engine configuration for the dev/smoke harness, reviewer on the
+# Mistral API.
+#
+# Copy to ai/config-mistral.yaml and pass it with --config. Identical to
+# config.reference.yaml except for the providers: and roles: blocks and the
+# context window entry for the API reviewer. With roles: present, the omlx:
+# block supplies only the endpoint of provider omlx.
+#
+# The API key is read from the macOS Keychain item ai-go-mistral
+# (change-7d953510). Reviewer model as decided for report-14e05e35 OB-01
+# (operator decision 2026-11-05).
+
+omlx:
+  base_url: "http://127.0.0.1:8000/v1"
+  api_key: "local"
+  default_model: "mistralai_Devstral-Small-2-24B-Instruct-2512-MLX-8Bit"
+  reviewer_model: "Magistral-Small-2509-MLX-8bit"
+
+providers:
+  mistral:
+    kind: openai_compatible
+    base_url: "https://api.mistral.ai/v1"
+    api_key_keychain: ai-go-mistral
+
+roles:
+  worker:   { provider: omlx, model: "mistralai_Devstral-Small-2-24B-Instruct-2512-MLX-8Bit" }
+  reviewer: { provider: mistral, model: "mistral-medium-2604" }
+
+# Filesystem MCP is confined to PROJECT_ROOT. The placeholder is substituted
+# by _substitute_project_root() before MCPClient connects.
+mcp_servers:
+  filesystem:
+    command: "/usr/local/bin/npx"
+    args:
+      - "-y"
+      - "@j0hanz/filesystem-mcp@2.5.0"  # pinned: tool names/arguments are version-specific (change-c37198be)
+      - "{PROJECT_ROOT}"
+    env:
+      PATH: "/opt/homebrew/opt/node@24/bin:/usr/local/bin:/usr/bin:/bin"
+
+readiness:
+  timeout_seconds: 60
+  poll_interval_seconds: 2
+
+loop:
+  max_iterations: 2
+  phase_max_iterations: 20
+  mcp_error_threshold: 3
+  max_tool_calls_per_iteration: 10
+  preflight_check: false
+  phase_duration_minutes: 10
+  # Must remain ai/state: engine-mcp hardcodes this path for status
+  # reporting and log placement.
+  state_dir: "ai/state"
+
+execution:
+  max_completion_tokens: null
+  max_tool_result_chars: null
+  strict_tactical_brief: false
+
+context:
+  context_window: null
+  budget_warn_pct: 0.80
+  budget_abort_pct: 0.95
+  model_context_windows:
+    "mistralai_Devstral-Small-2-24B-Instruct-2512-MLX-8Bit": 262144
+    "Magistral-Small-2509-MLX-8bit": 40960   # vendor-recommended effective window
+    mistral-medium-2604: 262144   # no live context query exists for API models
