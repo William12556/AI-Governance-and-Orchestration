@@ -5,7 +5,7 @@ change_info:
   id: "change-b8a6c445"
   title: "Status accuracy: engine run record and Overwatch status (audit-caab2052 group 2)"
   date: "2026-11-05"
-  status: "approved"  # operator, 2026-11-05
+  status: "verified"  # audit-b8a6c445 and live check; operator approval 2026-11-05
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -152,7 +152,7 @@ implementation:
     - { step: "Live check", owner: "operator" }
     - { step: "Follow-up audit (P02.8.2)", owner: "independent session" }
   rollback_procedure: "Revert the implementation commits; run.json files left in state directories are ignored by earlier versions."
-  deployment_notes: "Propagate with bin/propagate.sh after verification; no configuration change."
+  deployment_notes: "Propagate with bin/propagate.sh after verification; no configuration change. Governance 12.8 (P00.11 run.json) propagates with it."
 
 traceability:
   related_changes:
@@ -170,6 +170,26 @@ version_history:
   - version: "1.1"
     date: "2026-11-05"
     changes: ["Approved by the operator as drafted, including the statuses 'ended' and 'unknown', the pid liveness check with os.kill(pid, 0), and the out-of-scope items (engine-mcp unchanged, stale BLOCKED.md not cleared, other atomic writes in group 6)"]
+  - version: "1.2"
+    date: "2026-11-05"
+    changes:
+      - "Implemented in Claude Code cloud on branch claude/zealous-allen-zy42g9 from b8807af: engine 31104df, webui 98f701e, tests 8c4f500, report and prompt move dbaf969 (report-b8a6c445 v0.1). Merged fast-forward to main by the operator"
+      - "Tests: implementing session 408 passed, 1 skipped (Linux; baseline 383); operator on macOS 409 passed. Mutations M1 to M5 each fail at least one test; M6 removes one parametrised case (session report)"
+      - "Planner review passed: scope limited to the deliverable files; FR-A to FR-F as specified; report deviations D-1 (pid <= 0 and OverflowError not alive), D-2 (extra O2 cases) and D-3 (temporary file removed on BaseException) accepted"
+      - "Planner documents updated (505869e): design-14e05e35 v1.20, design-project-overwatch v0.7, requirements-0c6aedee v0.7, guide-engine-operations v1.23, governance 12.8 (P00.11 run.json; non-breaking)"
+  - version: "1.3"
+    date: "2026-11-05"
+    changes:
+      - "Follow-up audit dev/audit/audit-b8a6c445-followup-2026-11-05.md (independent session, audited at 505869e): FR-A to FR-F compliant; file scope as permitted; no regression; 0 critical, 0 high, 0 medium, 6 low, 2 info; none blocking this change"
+      - "Operator decisions 2026-11-05: F-02, a marker outranks an ended run record only when it is not older than the run's start; F-03, FR-02-06 only while the engine runs. F-01 to F-05 and F-08 raised as issue-86c958dd, with two live-check observations (HTTP 404 retried; manifest.yaml version 12.2). F-06 corrected by the planner: requirements-0c6aedee v0.8, design-project-overwatch v0.8, design-ael-orchestrator v0.9. F-07 optional, not raised"
+      - "Live check in dev/smoke (refreshed with bin/propagate.sh) with Overwatch, 2026-11-05: SHIP run, rc 0, .complete, Overwatch 'engine: SHIP'; BLOCKED run (--reviewer-model no-such-model; HTTP 404 at the first review call), rc 1, BLOCKED.md, 'engine: BLOCKED'; early return (loop without a task), rc 1, task_file null, 'engine: ENDED rc=1'. No violations or warnings"
+      - "All validation criteria met"
+  - version: "1.4"
+    date: "2026-11-05"
+    changes: ["Status verified on operator approval (2026-11-05)"]
+  - version: "1.5"
+    date: "2026-11-05"
+    changes: ["Closed on operator acceptance (P00.14.4); moved to dev/change/closed/ with the issue and report-b8a6c445. audit-b8a6c445 stays active until issue-86c958dd is closed"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

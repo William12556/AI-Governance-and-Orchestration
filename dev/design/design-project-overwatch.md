@@ -44,8 +44,9 @@ This document specifies the component design for Project Overwatch, derived
 from [requirements-0c6aedee-project-overwatch.md](../requirements/requirements-0c6aedee-project-overwatch.md)
 v0.2. Project Overwatch is a read-only, browser-rendered project management
 interface for a single project governed by the AI-Governance-and-Orchestration
-framework. It reuses `govwatch`'s data layer unmodified for its monitoring
-function and adds nine further panels.
+framework. It reuses `govwatch`'s data layer for its monitoring function
+(unmodified at the FR-01 port; changed since by change-b8a6c445, §5.0) and
+adds nine further panels.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -112,15 +113,15 @@ a silent inconsistency between the requirements and design documents.
 ```mermaid
 graph TD
     FS["Project filesystem<br/>ai/workspace/ ai/state/<br/>ai/config.yaml ai/task.md"]
-    SC["Scanner (govwatch, unmodified)"]
+    SC["Scanner (govwatch)"]
     NEW["TaskParser / ConfigReader (new)"]
     SNAP["Snapshot"]
     PI["StageInference<br/>(generalises PhaseInference)"]
-    CE["ComplianceEngine (unmodified)"]
+    CE["ComplianceEngine (govwatch)"]
     DE["DiffEngine (new, on-demand only)"]
     RN["HtmlRenderer (new)"]
     OUT["overwatch.html"]
-    AW["AlertWriter (unmodified)"]
+    AW["AlertWriter (govwatch)"]
     ALERTS["dashboard-alerts.md"]
 
     FS -->|read-only| SC
@@ -238,9 +239,15 @@ has real usage.
 
 Ports the three existing `govwatch` panels (Workflow State, Compliance
 Alerts, Document Registry) to HTML sections reading directly from
-`Snapshot.phase`, `Snapshot.alerts`, `Snapshot.documents` — no new logic.
-Colour-coding (VIOLATION red / WARNING yellow / OK green) carried forward
-as CSS classes rather than `rich` markup.
+`Snapshot.phase`, `Snapshot.alerts`, `Snapshot.documents` — no new logic at
+the FR-01 port. Colour-coding (VIOLATION red / WARNING yellow / OK green)
+carried forward as CSS classes rather than `rich` markup.
+
+Since change-b8a6c445 the engine status is one of `idle`, `running`,
+`ship`, `blocked`, `ended` and `unknown` (§4.0), styled as `blocked` red,
+`running` and `ship` green, `ended` yellow (as warnings), and `idle` and
+`unknown` grey. The page shows `ENDED` without the exit code; the alert
+file shows `ENDED rc=<N>` (§8.4).
 
 ### 7.2 Explain-This Overlay (FR-02)
 
@@ -511,6 +518,7 @@ bounded interval, not an open-ended dual-maintenance commitment.
 | 0.5 | 2026-10-23 | Component layout: ai/src/overwatch.py → ai/webui/src/overwatch.py, ai/src/requirements-overwatch.txt → ai/webui/requirements.txt (change-14cf601f); §14.0 govwatch coexistence statement unchanged |
 | 0.6 | 2026-11-04 | §7.5: reference to the retired Obsidian guideline removed; internal links changed from Obsidian anchor syntax to GitHub heading anchors |
 | 0.7 | 2026-11-05 | §4.0 engine status from the run record; §5.0 Scanner, ComplianceEngine, AlertWriter and PhaseInference changes; §8.4 heading and ended status (change-b8a6c445) |
+| 0.8 | 2026-11-05 | §1.0 and §3.2: "unmodified" removed or limited to the FR-01 port; §7.1 engine status values and styles (change-b8a6c445; audit-b8a6c445 F-06) |
 
 ---
 

@@ -168,6 +168,7 @@ All paths relative to `state_dir` (`ai/state/` by default, per `config.yaml`
 | `.timeout` | `run_loop` | Strategic Domain / govwatch | Duration-limit exit sentinel |
 | `BLOCKED.md` | `run_phase`, `run_loop`, `_completion_with_retry` | Strategic Domain (T03 issue seed) | Failure detail; loop exits non-zero |
 | `context-budget.md` | `write_context_report` (startup) | Strategic Domain (T04 authoring precondition) | Context window, thresholds, headroom, guidance |
+| `run.json` | `main_async` (start of the run, and in the final `finally`) | Overwatch (engine status, FR-02-06) | Run record: mode, task file, pid, start, end, exit code; written atomically; protected from worker writes (change-b8a6c445) |
 | `audit-index.md` | Strategic Domain (pre-loop, audit runs only) | `run_phase`, `run_loop` (item injection, scope lock) | Checklist of audit items; presence selects audit recipe pair |
 | `audit-report.md` | Tactical Domain, via MCP append; initialised zero-byte by `main_async` | `_archive_audit_artifacts` | Accumulated audit findings; append-only guarded (§5.7) |
 | `ael_YYYYMMDD-HHMMSS.LOG` | `setup_logging` | Strategic Domain (post-mortem) | Structured DEBUG/INFO/WARNING/ERROR log; final line always `engine end rc=N` |
@@ -696,6 +697,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | 0.6 | 2026-09-29 | change-c37198be design update (audit-5bcd46ad M-03): §5.2 missing-task-file refusal; §5.4 recipe-set selection; §5.5 write-verb classification; §5.7 nested-path scope targets and filesystem-mcp 2.x write tools; §10.0 NFR-AEL-004 note; §11.0 registry rows; §13.0 OI-005 |
 | 0.7 | 2026-10-01 | §13.0 OI-005 resolved by change-bdc6820f |
 | 0.8 | 2026-11-05 | §3.2 package list and §10.0 NFR-AEL-001 and NFR-AEL-005 rows describe the engine as built (audit-caab2052 OQ-03, operator decision) |
+| 0.9 | 2026-11-05 | §4.1: `run.json` run record (change-b8a6c445; audit-b8a6c445 F-06) |
 
 ---
 

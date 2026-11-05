@@ -16,6 +16,7 @@ Created: 2026 November 5
 - [8.0 Findings](#80-findings)
 - [9.0 T08 Record](#90-t08-record)
 - [10.0 Closure Recommendation](#100-closure-recommendation)
+- [11.0 Dispositions](#110-dispositions)
 - [Version History](#version-history)
 
 ---
@@ -257,11 +258,31 @@ metadata:
 
 ---
 
+## 11.0 Dispositions
+
+Recorded by the planner, 2026-11-05.
+
+| Finding | Disposition |
+|---|---|
+| F-01 | Raised in issue-86c958dd |
+| F-02 | Operator decision: a marker outranks an ended run record only when it is not older than the record's start time. Raised in issue-86c958dd |
+| F-03 | Operator decision: FR-02-06 is evaluated only while the engine status is `running`. Raised in issue-86c958dd |
+| F-04, F-05, F-08 | Raised in issue-86c958dd |
+| F-06 | Corrected by the planner: requirements-0c6aedee v0.8 FR-01-03, design-project-overwatch v0.8 §1.0, §3.2 and §7.1, design-ael-orchestrator v0.9 §4.1 |
+| F-07 | Optional; not raised |
+
+The tests (macOS, 409 passed) and the operator's live check (SHIP, BLOCKED, early return in `dev/smoke`, 2026-11-05) were completed; change-b8a6c445 is verified and closed. This audit stays active until issue-86c958dd is closed.
+
+[Return to Table of Contents](#table-of-contents)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-05 | Initial follow-up audit of change-b8a6c445 |
+| 1.1 | 2026-11-05 | §11.0 Dispositions added by the planner (operator decisions for F-02 and F-03) |
 
 ---
 

@@ -5,7 +5,7 @@ issue_info:
   id: "issue-b8a6c445"
   title: "Status accuracy: engine runs shown as running after they end; prompt match always fails; duplicated results; closed-path filter; stale alert heading"
   date: "2026-11-05"
-  status: "open"
+  status: "closed"
   severity: "medium"
   type: "defect"
   iteration: 1
@@ -102,6 +102,15 @@ version_history:
   - version: "1.0"
     date: "2026-11-05"
     changes: ["Initial issue from audit-caab2052 remediation group 2"]
+  - version: "1.1"
+    date: "2026-11-05"
+    changes: ["Status resolved: change-b8a6c445 implemented (dbaf969) (P03.7)"]
+  - version: "1.2"
+    date: "2026-11-05"
+    changes: ["Verified: macOS suite 409 passed, follow-up audit-b8a6c445 and the live check in dev/smoke (SHIP, BLOCKED, early return); change-b8a6c445 verified on operator approval"]
+  - version: "1.3"
+    date: "2026-11-05"
+    changes: ["Closed on operator acceptance (P00.14.4); moved to dev/issue/closed/. Residual findings of audit-b8a6c445 continue in issue-86c958dd"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

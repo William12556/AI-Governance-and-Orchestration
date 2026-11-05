@@ -92,7 +92,7 @@ inference, diff generation) are additive.
 |---|---|
 | FR-01-01 | Render workflow phase, engine state, and budget state, reusing `PhaseInference` and existing state-reading logic unmodified at the FR-01 port; the engine status has since been derived from the engine's run record (change-b8a6c445). |
 | FR-01-02 | Render compliance alerts (tier1/tier2), colour-coded by severity, reusing `ComplianceEngine` unmodified at the FR-01 port; FR-02-06 has since compared the run record's task file with the open prompts (change-b8a6c445). |
-| FR-01-03 | Render the document registry, grouped by UUID, open documents only, reusing `Scanner` unmodified. |
+| FR-01-03 | Render the document registry, grouped by UUID, open documents only, reusing `Scanner` unmodified at the FR-01 port; each document has since been listed once, for its most specific class directory, and only `closed/` folders inside the workspace exclude documents (change-b8a6c445). |
 | FR-01-04 | This panel constitutes shipped parity with the current TUI. Retirement of `govwatch.py` and its removal from `ai/src/` propagation is gated on this phase shipping and being validated — not on approval of this document. |
 
 [Return to Table of Contents](#table-of-contents)
@@ -307,6 +307,7 @@ a single-effort ("Big Bang") delivery.
 | 0.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 0.6 | 2026-11-05 | NFR-01 states the two permitted outputs, as design §3.1 and §11.0 specify; CON-01 `.ael/` → `ai/state/` (audit-caab2052 OQ-02, operator decision) |
 | 0.7 | 2026-11-05 | FR-01-01, FR-01-02: "unmodified" limited to the FR-01 port; later changes by change-b8a6c445 noted |
+| 0.8 | 2026-11-05 | FR-01-03: "unmodified" limited to the FR-01 port; later change by change-b8a6c445 noted (audit-b8a6c445 F-06) |
 
 ---
 
