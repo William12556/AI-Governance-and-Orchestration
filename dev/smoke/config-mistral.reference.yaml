@@ -1,7 +1,9 @@
 # Reference engine configuration for the dev/smoke harness, reviewer on the
 # Mistral API.
 #
-# Copy to ai/config-mistral.yaml and pass it with --config. Identical to
+# Pass this file directly with --config (run from dev/smoke). Do not copy it
+# into ai/: bin/propagate.sh relocates undeclared files there to ai-local/.
+# Identical to
 # config.reference.yaml except for the providers: and roles: blocks and the
 # context window entry for the API reviewer. With roles: present, the omlx:
 # block supplies only the endpoint of provider omlx.

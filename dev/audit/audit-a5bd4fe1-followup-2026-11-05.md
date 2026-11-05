@@ -16,6 +16,7 @@ Created: 2026 November 5
 - [8.0 Findings](#80-findings)
 - [9.0 T08 Record](#90-t08-record)
 - [10.0 Closure Recommendation](#100-closure-recommendation)
+- [11.0 Dispositions](#110-dispositions)
 - [Version History](#version-history)
 
 ---
@@ -258,11 +259,32 @@ version_history:
 
 ---
 
+## 11.0 Dispositions
+
+Recorded by the planner on operator approval, 2026-11-05.
+
+| Finding | Disposition |
+|---|---|
+| F-01 | Fix: raised in issue-b8c75bac (edit-failure check only for dispatched calls; compile errors caught at both run_phase sites) |
+| F-02 | Fix: raised in issue-b8c75bac (write verbs matched case-insensitively; list extended) |
+| F-03 | Documented: guide-engine-operations v1.25 §7.0, design-14e05e35 v1.22 §6.0. No code change |
+| F-04 | Raised in issue-b8c75bac: U1, U4, U5 and U10 |
+| F-05 | Corrected: guide-engine-operations v1.25 §7.0, design-14e05e35 v1.22 §6.0 |
+| F-06, F-07, F-08 | No action |
+| F-09 | Resolved: dev/smoke propagated before the live check |
+
+The macOS suite (446 passed) and the live check in `dev/smoke` (SHIP in round 2, collection step shown, no bytecode in `src/`, two out-of-scope writes refused) were completed; change-a5bd4fe1 is verified and closed. This audit stays active until issue-b8c75bac is closed.
+
+[Return to Table of Contents](#table-of-contents)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-05 | Initial follow-up audit of change-a5bd4fe1 |
+| 1.1 | 2026-11-05 | §11.0 Dispositions added by the planner (operator approval) |
 
 ---
 

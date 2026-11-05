@@ -5,7 +5,7 @@ change_info:
   id: "change-a5bd4fe1"
   title: "Scope and gate hardening (audit-caab2052 group 5)"
   date: "2026-11-05"
-  status: "approved"  # operator, 2026-11-05
+  status: "verified"  # audit-a5bd4fe1 and live check; operator approval 2026-11-05
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -182,6 +182,27 @@ version_history:
   - version: "1.1"
     date: "2026-11-05"
     changes: ["Approved by the operator as drafted; implementation per prompt-a5bd4fe1"]
+  - version: "1.2"
+    date: "2026-11-05"
+    changes:
+      - "Implemented in Claude Code cloud on branch claude/upbeat-mccarthy-4qrd2e from aac3f18: engine ef20d95, tests 19db6dd, report and prompt move 0fabfa6 (report-a5bd4fe1 v1.0). Merged fast-forward to main by the operator"
+      - "Tests: implementing session 445 passed, 1 skipped (Linux; baseline 408); operator on macOS 446 passed. Mutations M1 to M7 each fail their named test (session report)"
+      - "Planner review passed: FR-A to FR-E as specified; report deviations accepted (three existing test doubles adapted to the new argument and the extra subprocess call; two extra tests; E4 partly through add_collection_pass; private helpers in gates.py)"
+      - "Planner documents updated (aace3f6): design-14e05e35 v1.21, requirements-14e05e35 v1.9, guide-engine-operations v1.24"
+  - version: "1.3"
+    date: "2026-11-05"
+    changes:
+      - "Follow-up audit dev/audit/audit-a5bd4fe1-followup-2026-11-05.md (independent session, audited at aace3f6): FR-A to FR-E compliant; timeouts unchanged; no regression; 0 critical, 0 high, 0 medium, 5 low, 4 info; none blocking this change"
+      - "Operator decisions 2026-11-05: F-01, F-02 and F-04 (U1, U4, U5, U10) raised as issue-b8c75bac; F-03 and F-05 documented (design-14e05e35 v1.22, guide-engine-operations v1.25); F-06 to F-08 no action; F-09 resolved by propagation"
+      - "Live check in dev/smoke (propagated) with task-scoped.md and the Mistral reviewer, PYTHONDONTWRITEBYTECODE=1, 2026-11-05 (engine_20261105-153856.LOG): REVISE in round 1 (pytest FAIL), SHIP in round 2, rc 0; collection-only pass PASS and shown in the TEST GATE block in both rounds; src/ holds no __pycache__; two out-of-scope worker writes refused, run continued"
+      - "Validation criterion wording: the live check ran with PYTHONDONTWRITEBYTECODE=1 so that bytecode written by pytest imports does not mask the syntax gate's behaviour"
+      - "All validation criteria met"
+  - version: "1.4"
+    date: "2026-11-05"
+    changes: ["Status verified on operator approval (2026-11-05)"]
+  - version: "1.5"
+    date: "2026-11-05"
+    changes: ["Closed on operator acceptance (P00.14.4); moved to dev/change/closed/ with the issue and report-a5bd4fe1. audit-a5bd4fe1 stays active until issue-b8c75bac is closed"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

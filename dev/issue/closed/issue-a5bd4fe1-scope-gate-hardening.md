@@ -5,7 +5,7 @@ issue_info:
   id: "issue-a5bd4fe1"
   title: "Scope and gate hardening: unclassified tools unchecked, unresolvable paths allowed, py_compile writes beside sources, syntax FAIL does not block SHIP, import-breaking helper files pass the pytest gate"
   date: "2026-11-05"
-  status: "open"
+  status: "closed"
   severity: "low"
   type: "defect"
   iteration: 1
@@ -109,6 +109,15 @@ version_history:
   - version: "1.0"
     date: "2026-11-05"
     changes: ["Initial issue from audit-caab2052 remediation group 5"]
+  - version: "1.1"
+    date: "2026-11-05"
+    changes: ["Status resolved: change-a5bd4fe1 implemented (0fabfa6) (P03.7)"]
+  - version: "1.2"
+    date: "2026-11-05"
+    changes: ["Verified: macOS suite 446 passed, follow-up audit-a5bd4fe1 and the live check in dev/smoke; change-a5bd4fe1 verified on operator approval"]
+  - version: "1.3"
+    date: "2026-11-05"
+    changes: ["Closed on operator acceptance (P00.14.4); moved to dev/issue/closed/. Residual findings of audit-a5bd4fe1 continue in issue-b8c75bac"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
