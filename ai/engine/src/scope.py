@@ -129,7 +129,8 @@ def extract_deliverable_paths(raw: str) -> list[str] | None:
 # recipes instruct the worker to write them, and none can produce SHIP.
 SIGNAL_FILES = ("review-result.txt", "review-feedback.txt", ".complete", ".timeout",
                 "awaiting-approval.md", "mcp-run.json", "iteration.txt", "task.md",
-                "context-budget.md")
+                "context-budget.md",
+                "run.json")  # change-b8a6c445 (audit-caab2052 M-04, M-05)
 
 
 def signal_files(state_dir: str) -> frozenset[str]:

@@ -47,6 +47,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import traceback
 
@@ -397,6 +398,9 @@ def _strip_verdict(text: str) -> str:
     return tokens[1].strip() if len(tokens) > 1 else ""
 
 
+# change-b8a6c445 (audit-caab2052 M-04, M-05): engine-written run record
+_RUN_RECORD = "run.json"
+
 # State files cleared by reset (logs and context report excluded)
 _RESET_FILES = [
     "task.md",
@@ -410,6 +414,7 @@ _RESET_FILES = [
     "BLOCKED.md",
     "audit-index.md",
     "audit-report.md",
+    _RUN_RECORD,  # change-b8a6c445 (audit-caab2052 M-04, M-05)
 ]
 
 
@@ -647,6 +652,32 @@ def write_state(state_dir: str, filename: str, content: str) -> None:
     os.makedirs(state_dir, exist_ok=True)
     with open(os.path.join(state_dir, filename), "w") as f:
         f.write(content)
+
+
+def _write_run_record(state_dir: str, record: dict) -> None:
+    """
+    change-b8a6c445 (audit-caab2052 M-04, M-05): write the run record atomically.
+
+    The record is written to a temporary file in state_dir and moved over
+    run.json with os.replace, so a reader sees the previous record or the new
+    one, never a partial file. On any failure the temporary file is removed
+    and the exception re-raised; main_async catches it.
+    """
+    tmp_path: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=state_dir,
+                                         prefix=".run.json.", suffix=".tmp",
+                                         delete=False) as fh:
+            tmp_path = fh.name
+            fh.write(json.dumps(record, indent=2) + "\n")
+        os.replace(tmp_path, os.path.join(state_dir, _RUN_RECORD))
+    except BaseException:
+        if tmp_path is not None:
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass
+        raise
 
 
 def reset_state(state_dir: str) -> int:
@@ -2614,7 +2645,27 @@ async def main_async(args: argparse.Namespace) -> int:
     # every exit after setup_logging logs 'engine end' and closes the client.
     rc = 1  # default: failure — ensures rc is defined even on unexpected exception
     mcp = None
+    # change-b8a6c445 (audit-caab2052 M-04, M-05): run record, written at the
+    # start of the try and again in the finally; a write failure is logged
+    # and never changes rc or the control flow.
+    _run_record: dict | None = None
+    _run_record_written = False
     try:
+        # change-b8a6c445 (audit-caab2052 M-04, M-05): start record
+        _run_record = {
+            "mode": args.mode,
+            "task_file": os.path.abspath(args.task) if _task_bytes is not None else None,
+            "pid": os.getpid(),
+            "started": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
+            "ended": None,
+            "rc": None,
+        }
+        try:
+            _write_run_record(state_dir, _run_record)
+            _run_record_written = True
+        except Exception as e:
+            log.warning("run record not written: %s", e)
+
         # change-e58fd295: recipes come from the manifest's run types (FR-01-03)
         recipe_set  = _select_recipe_set(state_dir)
         try:
@@ -2826,6 +2877,14 @@ async def main_async(args: argparse.Namespace) -> int:
         _finish_run(args.mode, rc, state_dir, manifest, loop_stage, work_item,
                     _gate_outcomes if args.mode == "loop" else {}, _run_started, log)
     finally:
+        # change-b8a6c445 (audit-caab2052 M-04, M-05): end record
+        if _run_record_written:
+            try:
+                _run_record["ended"] = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
+                _run_record["rc"] = rc
+                _write_run_record(state_dir, _run_record)
+            except Exception as e:
+                log.warning("run record not written: %s", e)
         log.info("engine end rc=%d", rc)
         if mcp is not None:
             await mcp.close()
