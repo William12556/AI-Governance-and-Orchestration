@@ -222,8 +222,8 @@ The trivial exemption (P04.12) creates no documents and is not tracked; the git 
 
 | Gate | Type | Behaviour |
 |---|---|---|
-| `syntax` | Built-in | Current `_run_syntax_gate`, moved to `gates.py`; results unchanged. |
-| `pytest` (any declared command gate) | Command exit code | Command from the manifest, overridden by `gates.<name>` in config. Placeholders: `{python}`, `{targets}` (current deliverable-to-test mapping), `{project_root}`. Exit 0 = PASS, non-zero = FAIL, not runnable = UNCHECKED. FAIL overrides SHIP, as today (FR-03-04). UNCHECKED ends the run BLOCKED, naming the gate, before the review phase. A gate with nothing to check (no targets, no command) is SKIPPED: not applicable, listed in `awaiting-approval.md` (FR-03-02 v1.3; change-82dbf16a). Provider key variables (`api_key_env`) are removed from the gate environment. A key in the Keychain (`api_key_keychain`) has no such protection: gate code can read it through `/usr/bin/security` with the operator's permissions, an instance of DI-06 (audit-7d953510 M-01, accepted). |
+| `syntax` | Built-in | `py_compile` of the `.py` files named in `work-summary.txt` that lie inside the project; a path outside it is skipped with a warning. Bytecode goes to a temporary directory removed after each compile, never beside the file. A FAIL overrides SHIP (FR-03-04 v1.8; change-a5bd4fe1). |
+| `pytest` (any declared command gate) | Command exit code | Command from the manifest, overridden by `gates.<name>` in config. Placeholders: `{python}`, `{targets}` (current deliverable-to-test mapping), `{project_root}`. Exit 0 = PASS, non-zero = FAIL, not runnable = UNCHECKED. FAIL overrides SHIP, as today (FR-03-04). UNCHECKED ends the run BLOCKED, naming the gate, before the review phase. A gate with nothing to check (no targets, no command) is SKIPPED: not applicable, listed in `awaiting-approval.md` (FR-03-02 v1.3; change-82dbf16a). Provider key variables (`api_key_env`) are removed from the gate environment. A key in the Keychain (`api_key_keychain`) has no such protection: gate code can read it through `/usr/bin/security` with the operator's permissions, an instance of DI-06 (audit-7d953510 M-01, accepted). When it has a target and `tests/` exists, the pytest gate also runs a collection-only pass, `pytest --collect-only -q tests`, with the gate's interpreter, timeout and environment (a custom command does not apply); exit 0 or 5 (no tests) passes. The gate status is the worse of the two steps, and the block shows both (change-a5bd4fe1). |
 | `reviewer` | Reviewer verdict | SHIP or REVISE from the reviewer's final response only. `review-result.txt` is not read (change-82dbf16a iteration 2, follow-up F-01). After the gates and before the review phase the engine clears `review-result.txt`, `review-feedback.txt`, `.complete` and `awaiting-approval.md`, so files written by gate processes do not survive into the verdict or the status (iteration 3, F2-03, F2-04). The clear runs before the UNCHECKED check, so this also holds when a gate cannot run (iteration 4, F3-01). Symlinks and directories are removed as well; an entry that cannot be removed ends the run BLOCKED naming it; `engine_status` reports `shipped` only for a regular `.complete` (iteration 5, F4-01). |
 | Human approval | Approval | Never passed by the engine (FR-03-05). Checked before a run (§8.0); after SHIP the engine writes `awaiting-approval.md` to the state directory naming the work item and stage. |
 
@@ -237,14 +237,14 @@ On BLOCKED the engine appends `Return to stage: <on_blocked>` to `BLOCKED.md` wh
 
 ## 7.0 Write Scope
 
-`scope.py` owns `WRITE_TOOLS`, the path-key tables and path extraction, moved from `orchestrator.py`. The loop and the scope check import them from there (FR-05-02).
+`scope.py` owns `WRITE_TOOLS`, the path-key tables and path extraction, moved from `orchestrator.py`. The loop and the scope check import them from there (FR-05-02). Classification is fail-closed: a tool is read-only only when its name starts with a read-only prefix (`read`, `list`, `grep`, `search`, `stat`, `get_file_info`, `find`, `head`, `tail`, `cat`, `diff`, `count`) and contains no write verb; every other tool, including an unrecognised one, is a write tool. The class decides the scope check, deliverable tracking and the tools offered to the reviewer (change-a5bd4fe1).
 
 | Task | Allowed write targets |
 |---|---|
 | T03 prompt file | `deliverable.files[].path`, the manifest's `writable_paths` and the state directory (FR-05-01) |
 | Free-text task (CLI only) | The project root, as today (NFR-02) |
 
-A rejected call returns a tool error to the worker: `write outside the declared scope: <path>; allowed: <list>`. It is logged with tool, path and reason (FR-05-04). Paths are resolved (symlinks included) before matching; `writable_paths` match as prefixes, deliverables match exactly. A write call with no recognised path argument is rejected (change-82dbf16a).
+A rejected call returns a tool error to the worker: `write outside the declared scope: <path>; allowed: <list>`. It is logged with tool, path and reason (FR-05-04). Paths are resolved (symlinks included) before matching; `writable_paths` match as prefixes, deliverables match exactly. A write call with no recognised path argument is rejected (change-82dbf16a), and so is a write path that cannot be resolved (change-a5bd4fe1).
 
 The worker never writes the engine signal files in the state directory (`review-result.txt`, `review-feedback.txt`, `.complete`, `.timeout`, `awaiting-approval.md`, `mcp-run.json`, `iteration.txt`, `task.md`, `context-budget.md`, `run.json`), whatever the task, nor a directory that holds one (tools such as `replace_text` rewrite under a directory); names are compared case-insensitively. `work-summary.txt`, `work-complete.txt` and `BLOCKED.md` stay writable. Only tools offered to a phase are dispatched, and a review phase dispatches no write tool (change-82dbf16a).
 
@@ -339,6 +339,10 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 | Anthropic rejects a tool schema under strict mode | Stop at the first call with the API message; the operator sets `strict_tools: false`. |
 | Pre-run check fails | No run; exit code 3; message lists missing evidence and approvals. |
 | Rejected write | Tool error to the worker; run continues. |
+| Call to a tool not recognised as read-only | Checked as a write: outside the scope, or without a recognised path argument, it is a tool error; not offered to the reviewer (change-a5bd4fe1). |
+| Write path that cannot be resolved (for example one containing NUL) | Tool error `write refused: path '<path>' cannot be resolved`; run continues (change-a5bd4fe1). |
+| Syntax gate FAIL with a reviewer SHIP | SHIP overridden; feedback `Syntax gate failed.` followed by the gate block (change-a5bd4fe1). |
+| Collection-only pass cannot run | pytest gate UNCHECKED; the run ends BLOCKED naming the gate (change-a5bd4fe1). |
 | Tool call whose arguments are not a JSON object | Tool error to the worker; run continues. Such calls count as MCP errors, so with the default `loop.mcp_error_threshold` of 3 the run ends BLOCKED at the third consecutive one, before the repeated-identical-call limit of 4 (change-711a57d5). |
 | Model request times out or fails with a retryable error | Up to 3 attempts with backoff, then `BLOCKED.md` (change-711a57d5). |
 | Model request fails with HTTP 400, 401 or 403 | Not retried; `BLOCKED.md` names the status (change-711a57d5; audit-14e05e35 L-09). |
@@ -446,6 +450,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.21 | 2026-11-05 | §6.0: syntax gate project paths, temporary bytecode cache, FAIL overrides SHIP; pytest collection-only pass. §7.0: fail-closed tool classification, unresolvable paths rejected. §11.0: four rows (change-a5bd4fe1). |
 | 1.20 | 2026-11-05 | §7.0: `run.json` added to the engine signal files; §11.0: run-record write failure (change-b8a6c445). |
 | 1.19 | 2026-11-05 | §7.0: "the run type's own paths" removed; no requirement or implementation exists (audit-caab2052 OQ-04, operator decision). |
 | 1.18 | 2026-11-04 | §3.0 Timeouts: finite values; §11.0 non-string read paths, MCP close errors, API key redaction in error text (change-5e8aea4f). |
