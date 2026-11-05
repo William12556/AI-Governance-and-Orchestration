@@ -241,7 +241,7 @@ On BLOCKED the engine appends `Return to stage: <on_blocked>` to `BLOCKED.md` wh
 
 | Task | Allowed write targets |
 |---|---|
-| T03 prompt file | `deliverable.files[].path`, the manifest's `writable_paths`, the run type's own paths, and the state directory (FR-05-01) |
+| T03 prompt file | `deliverable.files[].path`, the manifest's `writable_paths` and the state directory (FR-05-01) |
 | Free-text task (CLI only) | The project root, as today (NFR-02) |
 
 A rejected call returns a tool error to the worker: `write outside the declared scope: <path>; allowed: <list>`. It is logged with tool, path and reason (FR-05-04). Paths are resolved (symlinks included) before matching; `writable_paths` match as prefixes, deliverables match exactly. A write call with no recognised path argument is rejected (change-82dbf16a).
@@ -445,6 +445,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.19 | 2026-11-05 | §7.0: "the run type's own paths" removed; no requirement or implementation exists (audit-caab2052 OQ-04, operator decision). |
 | 1.18 | 2026-11-04 | §3.0 Timeouts: finite values; §11.0 non-string read paths, MCP close errors, API key redaction in error text (change-5e8aea4f). |
 | 1.17 | 2026-10-29 | §3.0 Timeouts row; §11.0 malformed tool arguments, model request timeouts, non-retryable client errors, MCP request timeouts (change-711a57d5). |
 | 1.16 | 2026-10-15 | §3.0 Keys: binding-time log records reach the run log (change-7d953510 iteration 4). |

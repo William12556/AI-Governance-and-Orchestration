@@ -72,7 +72,7 @@ inference, diff generation) are additive.
 
 | ID | Constraint |
 |---|---|
-| CON-01 | Read-only. The tool must not create, edit, or delete any file in `workspace/`, `src/`, `tests/`, `.ael/`, or `task.md`. |
+| CON-01 | Read-only. The tool must not create, edit, or delete any file in `workspace/`, `src/`, `tests/`, `ai/state/`, or `task.md`. |
 | CON-02 | Single-project scope. No cross-project reads, comparisons, or aggregation. |
 | CON-03 | Scoped to `ai/` only. `dev/` and any directory outside `ai/` and its designated inputs (e.g. `task.md`) are out of scope. |
 | CON-04 | Python 3.11+, consistent with framework requirements. |
@@ -212,7 +212,7 @@ inference, diff generation) are additive.
 
 | ID | Requirement |
 |---|---|
-| NFR-01 | Read-only end to end. No document creation, editing, or write capability exists anywhere in the tool (supersedes `govwatch`'s single-write-target model — see OQ-02 regarding `dashboard-alerts.md`'s disposition). |
+| NFR-01 | Read-only for project content. The tool has no document creation or editing capability. Its only writes are its two outputs, `overwatch.html` (project root) and `ai/dashboard-alerts.md` (design-project-overwatch §3.1, §11.0; OQ-02). |
 | NFR-02 | Single-project scope only (CON-02). |
 | NFR-03 | Scoped to `ai/` folder contents plus `ai/task.md`; `dev/` is out of scope (CON-03). |
 | NFR-04 | The tool must handle missing or malformed documents gracefully, producing a WARNING rather than an unhandled failure — carried forward from `govwatch` NFR-04. |
@@ -305,6 +305,7 @@ a single-effort ("Big Bang") delivery.
 | 0.3 | 2026-09-23 | Renamed from requirements-project-overwatch.md to the P00.10 UUID convention; OQ-10 resolved (requirements-govwatch.md archived) |
 | 0.4 | 2026-09-25 | Project rename: LLM-G&O → AI-G&O (report-rename-ai-go-2026-09-25) |
 | 0.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 0.6 | 2026-11-05 | NFR-01 states the two permitted outputs, as design §3.1 and §11.0 specify; CON-01 `.ael/` → `ai/state/` (audit-caab2052 OQ-02, operator decision) |
 
 ---
 

@@ -129,7 +129,7 @@ persist between `worker`/`reviewer`/`loop` invocations).
 ```
 ai/engine/
 ├── config.yaml                  # runtime configuration (§4.2)
-├── requirements.txt              # openai, mcp, pyyaml, rich
+├── requirements.txt              # openai, anthropic (lazy), mcp, pyyaml, rich
 ├── recipes/
 │   ├── loop-work.yaml
 │   ├── loop-review.yaml
@@ -509,11 +509,11 @@ against the owning stdio server session.
 
 | NFR | Design provision |
 |---|---|
-| NFR-AEL-001 Single process | No subprocess spawning beyond MCP server stdio processes (`py_compile` invocations are the sole additional `subprocess.run` use, not daemonized) |
+| NFR-AEL-001 Single process | One engine process, no daemons. Child processes: MCP server stdio processes, and helper processes the engine waits for: command gates (pytest), `py_compile`, `grep` (preflight), `git` (stage tracking) and `/usr/bin/security` (Keychain keys) |
 | NFR-AEL-002 Async execution | `asyncio` throughout for completion calls and MCP dispatch; `run_phase`/`run_loop`/`main_async` are all coroutines |
 | NFR-AEL-003 Config-driven | All runtime parameters read from `config.yaml` (§4.2); `--model`, `--max-iterations`, `--config` are the only CLI overrides |
 | NFR-AEL-004 Backward compatibility | `--task <file or string>` interface retained; since change-c37198be a path-like value naming a missing file is refused (exit 1) instead of being run as free text. `extract_tactical_brief` fallback to raw document preserves behaviour for documents lacking a `tactical_brief` block |
-| NFR-AEL-005 Minimal dependencies | `requirements.txt`: `openai`, `mcp`, `pyyaml`, `rich` only — no platform-specific or optional dependencies |
+| NFR-AEL-005 Minimal dependencies | `requirements.txt`: `openai`, `anthropic`, `mcp`, `pyyaml`, `rich`; no platform-specific dependencies. `anthropic` is imported only for provider kind `anthropic` |
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -695,6 +695,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | 0.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 0.6 | 2026-09-29 | change-c37198be design update (audit-5bcd46ad M-03): §5.2 missing-task-file refusal; §5.4 recipe-set selection; §5.5 write-verb classification; §5.7 nested-path scope targets and filesystem-mcp 2.x write tools; §10.0 NFR-AEL-004 note; §11.0 registry rows; §13.0 OI-005 |
 | 0.7 | 2026-10-01 | §13.0 OI-005 resolved by change-bdc6820f |
+| 0.8 | 2026-11-05 | §3.2 package list and §10.0 NFR-AEL-001 and NFR-AEL-005 rows describe the engine as built (audit-caab2052 OQ-03, operator decision) |
 
 ---
 

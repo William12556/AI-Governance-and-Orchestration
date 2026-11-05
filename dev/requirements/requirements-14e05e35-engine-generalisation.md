@@ -111,7 +111,7 @@ The baseline requirements FR-AEL-001 to FR-AEL-015 and NFR-AEL-001 to NFR-AEL-00
 | FR-03-01 | Three gate types exist: human approval, reviewer verdict and command exit code. |
 | FR-03-02 | Each stage's gates are declared in the manifest. A stage completes only when every applicable gate passes. A gate that cannot run ends the run BLOCKED and is named. A gate with nothing to check is not applicable and is listed for the operator at approval. |
 | FR-03-03 | A command gate's command, working directory and interpreter are configurable per project in `ai/config.yaml`. The default reproduces the current pytest gate (backlog §2.0-10). |
-| FR-03-04 | The SE syntax and pytest gates become declared command gates with unchanged results. |
+| FR-03-04 | The SE pytest gate becomes a declared command gate with unchanged results. The syntax gate stays built in (design §6.0); a syntax FAIL overrides SHIP as a command gate FAIL does (FR-03-02; audit-caab2052 OQ-01). |
 | FR-03-05 | The engine never marks a human approval gate as passed. It ends the run and records that approval is awaited. |
 | FR-03-06 | Every gate result is logged per iteration with gate name, type and outcome. |
 
@@ -330,6 +330,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.8 | 2026-11-05 | FR-03-04 amended: the syntax gate stays built in and its FAIL blocks SHIP (audit-caab2052 OQ-01, operator decision). |
 | 1.7 | 2026-10-23 | Out-of-scope table: dev/todo.md → dev/task.md (register consolidation). No change in meaning. |
 | 1.6 | 2026-10-14 | FR-04-07 wording: Keychain search list instead of login Keychain (audit-7d953510 L-02); no change in meaning for a default setup. |
 | 1.5 | 2026-10-14 | FR-04-07 amended: login Keychain as a second key source on macOS (issue-7d953510, change-7d953510; approved by the operator). |

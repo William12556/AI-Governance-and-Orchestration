@@ -566,8 +566,13 @@ Recorded by the planner on 2026-10-29 on the operator's decision.
 | Finding | Decision | Disposition |
 |---|---|---|
 | M-01, M-02, M-06, L-03, L-09 | Remediate | First triple, together with audit-14e05e35 L-09 (HTTP 400/401/403 not retried). M-01: a non-object argument value gets a tool error reply, from one check in `run_phase`. M-06: configurable timeouts, default 300 s per model call and 120 s per MCP call; SDK retries 0, engine retry loop retained. Follow-up audit required (P02.8.2). **Closed 2026-11-04:** change-711a57d5 verified and closed; follow-up `audit-711a57d5` found no critical or high findings; its residual findings F-01 to F-05 continue in triple 5e8aea4f |
-| M-03, M-04, M-05; L-01, L-02, L-04 to L-08, L-10 to L-19 | Not yet decided | Registered in `dev/task.md` by §10.0 group |
-| OQ-01 to OQ-04 | Open | Registered in `dev/task.md` |
+| M-03 | Remediate (2026-11-05) | Group 3: retire the numeric `schema_type` prefix. Templates emit the class word; the checkers accept the class word and all 14 numbered values as aliases; an unknown value is a warning. Also closes audit-eb782f83 F-04 and governance Appendix A.5 |
+| M-04, M-05 | Remediate (2026-11-05) | Group 2: the engine writes one run record, `run.json` (task path, pid, start, end, rc), at start and in the final `finally` of `main_async`; Overwatch reads it for the engine status and the FR-02-06 prompt match; `run.json` joins the protected signal files |
+| L-01, L-02, L-04 to L-08, L-10 to L-19 | Not yet decided | Registered in `dev/task.md` by §10.0 group; decided when each group's triple is raised |
+| OQ-01 | Decided (2026-11-05): a syntax FAIL blocks SHIP | The syntax gate stays built in; a syntax FAIL overrides SHIP as a command gate FAIL does. FR-03-04 amended (requirements-14e05e35 v1.8). Source change with group 5. Converting syntax to a declared command gate is left to the Phase 3 governance split |
+| OQ-02 | Decided (2026-11-05): the design is authoritative | NFR-01 and CON-01 amended (requirements-0c6aedee v0.6). The CON-07 citation at `overwatch.py:828` is corrected in the group 2 triple |
+| OQ-03 | Decided (2026-11-05): amend the baseline in place | FR-AEL-013, NFR-AEL-001, NFR-AEL-005 (requirements-1c1f4ef6 v1.4) and design-ael §3.2, §10.0 (v0.8) describe the engine as built |
+| OQ-04 | Decided (2026-11-05): remove the phrase | "the run type's own paths" removed from design-14e05e35 §7.0 (v1.19) |
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -580,6 +585,7 @@ Recorded by the planner on 2026-10-29 on the operator's decision.
 | 1.0 | 2026-10-27 | Initial static code audit of ai/engine/src and ai/webui/src |
 | 1.1 | 2026-10-29 | Planner review corrections: M-03 document count 23 → 21 (two matches were narrative text); eb782f83 F-04 row relabelled deferred; register and T08 locations aligned (M-01, M-05, L-03, L-17); related_audits set to related and audit-5bcd46ad added; severity line in §6.0; all `gates.py` citations corrected (each was 104 lines too high: 126-134, 151-152, 53-68, 67, 147); §13.0 Closure Recommendation and §14.0 Operator Decisions added |
 | 1.2 | 2026-11-04 | §14.0: remediation group 1 recorded as closed (change-711a57d5, audit-711a57d5) |
+| 1.3 | 2026-11-05 | §14.0: operator decisions for M-03, M-04, M-05 and OQ-01 to OQ-04 |
 
 ---
 

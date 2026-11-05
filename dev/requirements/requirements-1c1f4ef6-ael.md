@@ -104,7 +104,7 @@ The orchestrator shall write a timestamped log file (`ael_YYYYMMDD-HHMMSS.LOG`) 
 At startup, the orchestrator shall write `context-budget.md` to the state directory with context window size (as resolved per FR-AEL-005's tiered chain), thresholds, headroom estimate, and guidance for the Strategic Domain. This file is retained for human/govwatch visibility; the Strategic Domain's T04-authoring precondition instead calls `omlx_model_status` directly rather than checking for this file's presence (P09 §1.10.2).
 
 **FR-AEL-013 — MCP error handling**
-The orchestrator shall detect MCP tool errors, inject a corrective user message, and write `BLOCKED.md` after a configurable consecutive error threshold is reached.
+The orchestrator shall detect MCP tool errors, append corrective guidance to the tool result returned to the model, and write `BLOCKED.md` after a configurable consecutive error threshold is reached.
 
 **FR-AEL-014 — Tool call cap**
 The orchestrator shall truncate tool call lists that exceed a configurable per-iteration maximum.
@@ -119,7 +119,7 @@ The orchestrator shall log a warning when the model reads the same file path mor
 ### Non-Functional
 
 **NFR-AEL-001 — Single process**
-The orchestrator shall run as a single Python process. No background daemons or subprocess spawning beyond MCP server stdio processes.
+The orchestrator shall run as a single Python process with no background daemons. Child processes are limited to MCP server stdio processes and short-lived helper processes that the orchestrator waits for: command gates, `py_compile`, `grep`, `git` and, on macOS, `/usr/bin/security`.
 
 **NFR-AEL-002 — Async execution**
 The orchestrator shall use Python `asyncio` for all I/O-bound operations (inference calls, MCP dispatch).
@@ -131,7 +131,7 @@ All runtime parameters (endpoint URL, model, iteration limits, thresholds, state
 The `--task <file or string>` interface shall remain functional. Changes to task input handling shall not require modification to existing T04 prompt documents.
 
 **NFR-AEL-005 — Minimal dependencies**
-Python dependencies shall be limited to those declared in `requirements.txt`. No optional or platform-specific dependencies.
+Python dependencies shall be limited to those declared in `requirements.txt`. No platform-specific dependencies. A provider SDK used by only one provider kind (`anthropic`) is imported only when that kind is configured.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -222,6 +222,7 @@ The tasks directory path shall be configurable via `config.yaml` under `pipeline
 | 1.1 | 2026-07-08 | FR-AEL-005 and FR-AEL-012 reworded to reflect the tiered context-window resolver replacing the retired standalone budget.py; FR-AEL-012 notes the Strategic Domain's T04 precondition now calls omlx_model_status directly rather than checking file presence (change-d42e64a9) |
 | 1.2 | 2026-09-23 | Renamed from ael-requirements.md to the P00.10 UUID convention |
 | 1.3 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
+| 1.4 | 2026-11-05 | FR-AEL-013, NFR-AEL-001 and NFR-AEL-005 amended to the behaviour as built (audit-caab2052 OQ-03, operator decision) |
 
 ---
 
