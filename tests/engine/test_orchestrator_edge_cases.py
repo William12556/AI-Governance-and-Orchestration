@@ -102,7 +102,7 @@ def _stub_phases(monkeypatch, orch, worker, reviewer, pytest_result=""):
         return (worker if label == "WORKER" else reviewer)(state_dir, calls[label])
 
     monkeypatch.setattr(orch, "run_phase", fake_run_phase)
-    monkeypatch.setattr(orch, "_run_syntax_gate", lambda state_dir, log: "")
+    monkeypatch.setattr(orch, "_run_syntax_gate", lambda state_dir, log, root="": "")
     monkeypatch.setattr(orch, "_run_pytest_gate", lambda state_dir, log, root: pytest_result)
     # Non-terminal stdin: at max_iterations run_loop declines to continue.
     monkeypatch.setattr(orch.sys, "stdin", io.StringIO())

@@ -367,7 +367,7 @@ def test_run_loop_gives_reviewer_its_own_provider_and_window(orch, log, project,
         return 0, "SHIP", set()
 
     monkeypatch.setattr(orch, "run_phase", fake_run_phase)
-    monkeypatch.setattr(orch, "_run_syntax_gate", lambda state_dir, log: "")
+    monkeypatch.setattr(orch, "_run_syntax_gate", lambda state_dir, log, root="": "")
     monkeypatch.setattr(orch, "_run_pytest_gate", lambda state_dir, log, root: "")
     asyncio.run(orch.run_loop("W", None, "wm", "rm", {}, {}, "task", 1, 2,
                               str(project / "ai" / "state"), log, context_window=100,

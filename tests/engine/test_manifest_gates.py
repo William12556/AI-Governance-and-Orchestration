@@ -180,7 +180,7 @@ def test_pytest_gate_default_command_unchanged(orch, log, project, monkeypatch):
     seen = {}
 
     def fake_run(argv, **kw):
-        seen["argv"] = argv
+        seen.setdefault("argv", argv)  # the target run; the collection pass follows (change-a5bd4fe1)
         return subprocess.CompletedProcess(argv, 0, "1 passed", "")
 
     monkeypatch.setattr(G.subprocess, "run", fake_run)
