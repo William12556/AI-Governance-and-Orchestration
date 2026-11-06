@@ -5,7 +5,7 @@ issue_info:
   id: "issue-86c958dd"
   title: "Run record and status follow-up: recorded exit code, stale markers, FR-02-06 scope, path case, test gaps, 404 retry, manifest version; context-window resolution order"
   date: "2026-11-05"
-  status: "open"
+  status: "resolved"  # change-86c958dd implemented (P03.7)
   severity: "low"
   type: "defect"
   iteration: 2
@@ -132,7 +132,7 @@ analysis:
     not fix an order.
 
 resolution:
-  approach: "To be defined in change-86c958dd."
+  approach: "Implemented by change-86c958dd (848b0d7, b97c950, 6b310b4, bf18451); follow-up audit pending."
   change_ref: "change-86c958dd"
 
 traceability:
@@ -148,6 +148,9 @@ version_history:
   - version: "1.1"
     date: "2026-11-06"
     changes: ["Iteration 2: context-window resolution order added as CW (Stage C work item 2); line numbers re-verified at 90fb563"]
+  - version: "1.2"
+    date: "2026-11-06"
+    changes: ["Status resolved: change-86c958dd implemented (P03.7)"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

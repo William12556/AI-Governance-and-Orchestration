@@ -136,7 +136,7 @@ mcp_servers:
     command: "/path/to/mcp-ripgrep/venv/bin/mcp-ripgrep"
 
 context:
-  model_context_windows:                    # per-model overrides; used when the live oMLX query returns null
+  model_context_windows:                    # per-model entries; used before the live oMLX query
     "<worker-model-id>": 262144
     "<reviewer-model-id>": 131072
 ```
@@ -218,6 +218,7 @@ The planner coordinates each step. Human approval gates are required before requ
 | 1.12 | 2026-09-29 | Profile file name corrected: claude.md → claude-code.md |
 | 1.13 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 1.14 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
+| 1.15 | 2026-11-06 | §5.1: model_context_windows used before the live oMLX query (change-86c958dd) |
 
 ---
 

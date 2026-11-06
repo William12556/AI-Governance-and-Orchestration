@@ -182,7 +182,11 @@ engine's run record `run.json` and gains `task_file`, `rc` and
 end and a live pid → `running`; `BLOCKED.md` → `blocked`; `.complete` →
 `ship`; any other valid run record → `ended` (with its exit code); an
 unreadable record, or `task.md` without a record → `unknown`; otherwise
-`idle`.
+`idle`. With a valid record that is not live, `BLOCKED.md` and `.complete`
+count only when their modification time is not earlier than the record's
+`started` time (whole seconds); an older marker belongs to an earlier run
+and the status is `ended`. When `started` is absent or cannot be parsed,
+the precedence above applies unchanged (change-86c958dd).
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -192,7 +196,7 @@ unreadable record, or `task.md` without a record → `unknown`; otherwise
 
 | Component | Disposition |
 |---|---|
-| `Scanner`, `ComplianceEngine`, `AlertWriter` | Reused from `govwatch.py`; modified by change-b8a6c445: engine status from `run.json` (§4.0), FR-02-06 compares the run's task file with the open prompts by resolved path, each document scanned once for its most specific class directory, `closed/` tested inside the workspace only, alert heading `# Overwatch alerts` |
+| `Scanner`, `ComplianceEngine`, `AlertWriter` | Reused from `govwatch.py`; modified by change-b8a6c445: engine status from `run.json` (§4.0), FR-02-06 compares the run's task file with the open prompts by file identity (`os.path.samefile`) and is evaluated only while the engine status is `running` (change-86c958dd), each document scanned once for its most specific class directory, `closed/` tested inside the workspace only, alert heading `# Overwatch alerts` |
 | `PhaseInference` | Reused for the project-wide phase shown in §7.1; not replaced. Since change-b8a6c445 an ended run with an open prompt also gives "Awaiting prompt execution" |
 | `StageInference` | New. Wraps `PhaseInference`'s document-grouping logic per UUID rather than project-wide (§6.0) |
 | `TaskParser` | New. Parses `ai/task.md`'s four-column table into `TaskRow` records (§9.0) |
@@ -519,6 +523,7 @@ bounded interval, not an open-ended dual-maintenance commitment.
 | 0.6 | 2026-11-04 | §7.5: reference to the retired Obsidian guideline removed; internal links changed from Obsidian anchor syntax to GitHub heading anchors |
 | 0.7 | 2026-11-05 | §4.0 engine status from the run record; §5.0 Scanner, ComplianceEngine, AlertWriter and PhaseInference changes; §8.4 heading and ended status (change-b8a6c445) |
 | 0.8 | 2026-11-05 | §1.0 and §3.2: "unmodified" removed or limited to the FR-01 port; §7.1 engine status values and styles (change-b8a6c445; audit-b8a6c445 F-06) |
+| 0.9 | 2026-11-06 | §4.0: marker age against the run record's start; §5.0: FR-02-06 only while running, by file identity (change-86c958dd) |
 
 ---
 

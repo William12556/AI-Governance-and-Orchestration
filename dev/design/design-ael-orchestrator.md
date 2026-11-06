@@ -424,8 +424,8 @@ check `work-complete.txt`. No tool calls in the response ends the phase.
 | Tier | Source | Condition |
 |---|---|---|
 | 1 | `config.context.context_window` | Non-null explicit global override |
-| 2 | Live oMLX admin API query (`settings.max_context_window`) | `omlx.base_url` configured; query succeeds and returns non-null |
-| 3 | `config.context.model_context_windows.<model_name>` | Entry present for the active model |
+| 2 | `config.context.model_context_windows.<model_name>` | Entry present for the active model |
+| 3 | Live oMLX admin API query (`settings.max_context_window`) | Provider of kind `omlx` with a base URL; query succeeds and returns non-null |
 | 4 | Unresolved | Returns `None`; budget tracking disabled, `context-budget.md` states the window could not be determined |
 
 This supersedes the retired standalone `budget.py` file-existence gate
@@ -698,6 +698,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | 0.7 | 2026-10-01 | §13.0 OI-005 resolved by change-bdc6820f |
 | 0.8 | 2026-11-05 | §3.2 package list and §10.0 NFR-AEL-001 and NFR-AEL-005 rows describe the engine as built (audit-caab2052 OQ-03, operator decision) |
 | 0.9 | 2026-11-05 | §4.1: `run.json` run record (change-b8a6c445; audit-b8a6c445 F-06) |
+| 0.10 | 2026-11-06 | §7.0: per-model entry is tier 2, before the live query (tier 3) (change-86c958dd) |
 
 ---
 

@@ -89,7 +89,7 @@ The orchestrator shall read and write loop state files (`task.md`, `iteration.tx
 The orchestrator shall extract the `tactical_brief` field from a T04 prompt document passed via `--task`. Pass 1: scan YAML fenced blocks for `tactical_brief` root key. Pass 2 (fallback): extract first fenced block beneath a `## N.N Tactical Brief` section header. If neither pass succeeds, fall back to the raw document.
 
 **FR-AEL-008 — Context window resolution**
-The orchestrator shall resolve the model context window by reading `max_position_embeddings` from the model's `config.json` on disk, with optional override via `config.yaml`.
+The orchestrator shall resolve the model context window in this order: the global `context.context_window` setting; the per-model `context.model_context_windows` entry; the provider's live query (oMLX admin API); otherwise unresolved. Reading `config.json` on disk was retired (change-d42e64a9); the order was set by change-86c958dd.
 
 **FR-AEL-009 — Model readiness polling**
 The orchestrator shall poll the inference endpoint until the model is listed or the endpoint is reachable, before submitting any completion request. Timeout and interval are configurable.
@@ -223,6 +223,7 @@ The tasks directory path shall be configurable via `config.yaml` under `pipeline
 | 1.2 | 2026-09-23 | Renamed from ael-requirements.md to the P00.10 UUID convention |
 | 1.3 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.4 | 2026-11-05 | FR-AEL-013, NFR-AEL-001 and NFR-AEL-005 amended to the behaviour as built (audit-caab2052 OQ-03, operator decision) |
+| 1.5 | 2026-11-06 | FR-AEL-008 amended to the context-window order as built (change-86c958dd, operator approval) |
 
 ---
 

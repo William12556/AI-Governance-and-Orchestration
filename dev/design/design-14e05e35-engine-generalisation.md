@@ -154,7 +154,7 @@ The engine's message history stays in the current OpenAI chat format. Each provi
 - Moves the plain-text tool-call fallback (`parser.parse_tool_calls`) out of `run_phase` into the provider.
 - Generates missing tool call IDs with one helper: 9 characters from `[A-Za-z0-9]` (FR-04-09).
 - A response without `choices` raises `ProviderError` inside the existing bounded retry, so it is retried and ends BLOCKED instead of crashing (closes backlog §3.0-5; amended in change-53c6f252).
-- `kind: omlx` keeps the live context-window query and readiness polling (FR-AEL-008, FR-AEL-009). For `openai_compatible`, readiness is a successful `models.list()` containing the model; the context window comes from configuration tiers 1 and 3.
+- `kind: omlx` keeps the live context-window query and readiness polling (FR-AEL-008, FR-AEL-009). For `openai_compatible`, readiness is a successful `models.list()` containing the model; the context window comes from configuration tiers 1 and 2 (global override, then per-model entry); the live query is tier 3 and applies to kind `omlx` only (change-86c958dd).
 
 ### 4.3 AnthropicProvider (kind `anthropic`)
 
@@ -345,13 +345,14 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 | Collection-only pass cannot run | pytest gate UNCHECKED; the run ends BLOCKED naming the gate (change-a5bd4fe1). |
 | Tool call whose arguments are not a JSON object | Tool error to the worker; run continues. Such calls count as MCP errors, so with the default `loop.mcp_error_threshold` of 3 the run ends BLOCKED at the third consecutive one, before the repeated-identical-call limit of 4 (change-711a57d5). |
 | Model request times out or fails with a retryable error | Up to 3 attempts with backoff, then `BLOCKED.md` (change-711a57d5). |
-| Model request fails with HTTP 400, 401 or 403 | Not retried; `BLOCKED.md` names the status (change-711a57d5; audit-14e05e35 L-09). |
+| Model request fails with HTTP 400, 401, 403 or 404 | Not retried; `BLOCKED.md` names the status (change-711a57d5; audit-14e05e35 L-09; 404 added by change-86c958dd). |
 | MCP request exceeds `loop.mcp_timeout_seconds` | Tool error to the worker, or the server is skipped at connection; run continues (change-711a57d5). |
 | Read call whose `path` is not a string or whose `paths` is not a list | Dispatched as usual; read tracking ignores the value; run continues (change-5e8aea4f). |
 | Write call in an audit run whose path or content is not a string | The `audit-report.md` check ignores non-string paths and treats non-string content as empty; it never raises (change-b8c75bac). |
 | Compile at the edit-failure or post-write check raises (other than a timeout) | Warning logged; the file is not checked; run continues. The edit-failure check runs only for a dispatched call (change-b8c75bac). |
 | Closing the MCP client raises (for example a late answer after a timeout) | Warning printed; the run's exit status is unchanged (change-5e8aea4f). |
-| Run record (`run.json`) cannot be written at start or end | Warning `run record not written` logged; the run continues and its exit code is unchanged (change-b8a6c445). |
+| Run record (`run.json`) cannot be built or written at start or end | Warning `run record not written` logged; the run continues and its exit code is unchanged (change-b8a6c445; change-86c958dd). |
+| Run ends with an exception after the run record was started | The end record has `rc` null and `error` naming the exception type; the exception propagates (change-86c958dd). |
 | Provider error text on the completion or readiness path | A key from `api_key_env` or `api_key_keychain` is replaced by `API-KEY-REDACTED` before the text is logged, printed, written to `BLOCKED.md` or raised. Literal keys (kind `omlx` or a local `base_url`) are not secrets and are not replaced (NFR-05; change-5e8aea4f). |
 
 [Return to Table of Contents](#table-of-contents)
@@ -452,6 +453,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.26 | 2026-11-06 | §4.2: context-window tiers (per-model entry before the live query); §11.0: HTTP 404 not retried, run record build failure and exception record (change-86c958dd). |
 | 1.25 | 2026-11-06 | §7.0: write verbs match as substrings; effect on read tool names accepted (audit-b8c75bac F-01). |
 | 1.24 | 2026-11-06 | §7.0: write verbs case-insensitive, list extended; §11.0: configuration errors in `ai/config.yaml`, audit-report check arguments, compile exceptions (change-b8c75bac). |
 | 1.23 | 2026-11-06 | §3.0 Timeouts: maximum of 86400 s for `request_timeout_seconds` and `loop.mcp_timeout_seconds` (audit-5e8aea4f F-02; change-b8c75bac). |

@@ -45,7 +45,7 @@ State files reside in `ai/state/` (configured via `loop.state_dir` in `config.ya
 | `.complete` | Orchestrator | Completion marker (see §5.0 for content variants) |
 | `BLOCKED.md` | Worker | Unrecoverable failure details; seeds T06 issue |
 | `context-budget.md` | Orchestrator | Context window sizing report for planner |
-| `run.json` | Orchestrator | Run record: mode, task file, pid, start and end time, exit code. Written at start and again at the end of every run after logging starts; Overwatch derives the engine status from it (change-b8a6c445) |
+| `run.json` | Orchestrator | Run record: mode, task file, pid, start and end time, exit code. Written at start and again at the end of every run after logging starts; Overwatch derives the engine status from it (change-b8a6c445). When the run ends with an exception, `rc` is null and `error` names the exception type (change-86c958dd) |
 | `engine_<timestamp>.LOG` | Orchestrator | Full debug log; preserved across reset |
 
 The worker may write `work-summary.txt`, `work-complete.txt` and `BLOCKED.md` only; writes to the other engine files are refused (change-82dbf16a).
@@ -115,10 +115,10 @@ execution:
 
 # Context budget
 context:
-  context_window: null    # null = try live oMLX query, then per-model override below
+  context_window: null    # null = per-model entry below, else try the live oMLX query
   budget_warn_pct: 0.80   # warn at this fraction of context window
   budget_abort_pct: 0.95  # abort phase at this fraction
-  model_context_windows:  # tier-3 per-model overrides (used when the live query returns null)
+  model_context_windows:  # tier-2 per-model entries (used before the live oMLX query)
     "<worker-model-id>": 262144
     "<reviewer-model-id>": 131072
 ```
@@ -129,7 +129,7 @@ context:
 
 For audit runs, set `max_iterations` to at least the number of items in `audit-index.md`.
 
-**Timeouts (change-711a57d5):** `request_timeout_seconds` (in the `omlx:` block or in a `providers.<name>` block) bounds one model request; the engine makes up to 3 attempts per request, and the SDK does not retry on its own. HTTP 400, 401 and 403 are not retried. `loop.mcp_timeout_seconds` bounds one MCP request; a timeout reaches the worker as a tool error. If long local prefills on oMLX end in timeouts, raise `request_timeout_seconds` for that provider. Both timeouts must be positive numbers of at most 86400 seconds (one day); `.nan`, `.inf` and larger values are refused, and the run stops before any state is written (change-5e8aea4f; change-b8c75bac).
+**Timeouts (change-711a57d5):** `request_timeout_seconds` (in the `omlx:` block or in a `providers.<name>` block) bounds one model request; the engine makes up to 3 attempts per request, and the SDK does not retry on its own. HTTP 400, 401, 403 and 404 are not retried (404 since change-86c958dd). `loop.mcp_timeout_seconds` bounds one MCP request; a timeout reaches the worker as a tool error. If long local prefills on oMLX end in timeouts, raise `request_timeout_seconds` for that provider. Both timeouts must be positive numbers of at most 86400 seconds (one day); `.nan`, `.inf` and larger values are refused, and the run stops before any state is written (change-5e8aea4f; change-b8c75bac).
 
 **Configuration errors (change-b8c75bac):** the engine checks `ai/config.yaml` before it writes any state. The run ends with exit 1 and `configuration error (<file>): <field>: <reason>` when the file cannot be read, is not valid YAML or its top level is not a mapping; when the `loop:` block or `loop.state_dir` is missing; when `loop.max_iterations` is not a positive integer and `--max-iterations` is not given; when a timeout is invalid; when an `anthropic` provider's `max_tokens` is not a positive integer; or when a `gates.<name>.timeout_seconds` override is not a positive number. An empty `timeout_seconds:` in a gate override is refused; omit the key to use the manifest value.
 
@@ -240,7 +240,7 @@ Remediation: reduce brief size, run `--mode reset`, retry.
 
 ### 6.5 Devstral context window
 
-Devstral Small 2 (2512) reports `max_context_window: 393216` via oMLX, but that figure is an unvalidated RoPE-scaling ceiling; the vendor-validated value is 262144. The orchestrator resolves the window through the four-tier chain (live oMLX query, then the per-model `context.model_context_windows` override) — `models_dir` and on-disk `config.json` reading were retired (change-d42e64a9). This project forces 262144 for the Devstral worker and 131072 for the Magistral reviewer via `model_context_windows`. Magistral does not expose a live `max_context_window`, so its override is required. For audit runs with per-iteration bounded context, this window is rarely a practical constraint.
+Devstral Small 2 (2512) reports `max_context_window: 393216` via oMLX, but that figure is an unvalidated RoPE-scaling ceiling; the vendor-validated value is 262144. The orchestrator resolves the window through the four-tier chain (global `context.context_window`, then the per-model `context.model_context_windows` entry, then the live oMLX query; change-86c958dd) — `models_dir` and on-disk `config.json` reading were retired (change-d42e64a9). This project forces 262144 for the Devstral worker and 131072 for the Magistral reviewer via `model_context_windows`. Magistral does not expose a live `max_context_window`, so its override is required. For audit runs with per-iteration bounded context, this window is rarely a practical constraint.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -367,6 +367,7 @@ Related refusals (change-82dbf16a): `write refused: … is or contains an engine
 | 1.26 | 2026-11-06 | §3.0: maximum timeout of 86400 seconds (change-b8c75bac) |
 | 1.27 | 2026-11-06 | §3.0: configuration errors; §8.7: write verbs in any letter case (change-b8c75bac) |
 | 1.28 | 2026-11-06 | §8.7: write verbs match as substrings (audit-b8c75bac F-01) |
+| 1.29 | 2026-11-06 | §2.1: `run.json` error field; §3.0: HTTP 404 not retried, per-model entry before the live query; §6.5: tier order (change-86c958dd) |
 
 ---
 

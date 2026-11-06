@@ -5,7 +5,7 @@ change_info:
   id: "change-86c958dd"
   title: "Run record, status and context-window order (Stage C work item 2)"
   date: "2026-11-06"
-  status: "approved"  # operator approval 2026-11-06
+  status: "implemented"  # planner review and live check passed; follow-up audit pending
   priority: "low"
   iteration: 2
   coupled_docs:
@@ -206,6 +206,16 @@ version_history:
   - version: "1.1"
     date: "2026-11-06"
     changes: ["Approved by the operator as drafted, including the planner's proposals: the 'error' field (A1), os.path.samefile (B3), 404 only (A3) and the FR-AEL-008 document correction; implementation per prompt-86c958dd"]
+  - version: "1.2"
+    date: "2026-11-06"
+    changes:
+      - "Implemented in Claude Code cloud on branch claude/sweet-gauss-i0ribu from c1afa16: engine 848b0d7, governance b97c950, webui 6b310b4, tests bf18451, report and prompt move 83f4342 (report-86c958dd v1.0). Merged fast-forward to main by the operator"
+      - "Tests: implementing session 551 passed, 1 skipped at baseline; 595 passed, 2 skipped after (Linux; 44 new collected items). Mutations M1a to M1d, M2 to M6, M8, M9 killed; M7 survives on the case-sensitive container file system (session report)"
+      - "Planner review passed: FR-A1 to FR-D as specified; diff limited to the permitted files; two existing assertions changed as caused by FR-D and FR-B2 (recorded). Independent run on Linux with SDK stand-ins, without test_engine_mcp.py: 529 passed, 1 skipped at c1afa16; 573 passed, 2 skipped at 83f4342. M5 (BLOCKED.md age check) re-applied: two B1 tests fail. Report deviations D-1 to D-4 accepted"
+      - "macOS suite including tests/engine/test_engine_mcp.py: 597 passed (operator, 83f4342); test_b3_fr_02_06_compares_file_identity[case-False] ran and passed on APFS, so M7 is covered on macOS"
+      - "Live check in dev/smoke (propagated, governance 12.8) with task-scoped.md and --config config-mistral.reference.yaml, 2026-11-06: engine_20261106-140049.LOG: context window 262144 (tier 2: config per-model override) for the Devstral worker (393216 from the live query before this change) and for mistral-medium-2604; SHIPPED iteration=1; engine end rc=0. engine_20261106-140423.LOG with --worker-model no-such-model: unresolved context window listing tier 2 and tier 3; 'Completion call failed with HTTP 404 (not retried)' at the first attempt; rc 1; run.json rc 1 without error field"
+      - "Report §6.0: stale 400/401/403 comment in _completion_with_retry and TypeError on a null model_context_windows mapping registered in dev/task.md work item 5 (h) (operator decision 2026-11-06); log line keeps the last rc when an exception is in flight (as specified)"
+      - "Planner documents updated: design-14e05e35 v1.26 (§4.2, §11.0), design-ael-orchestrator v0.10 (§7.0), design-project-overwatch v0.9 (§4.0, §5.0), guide-engine-operations v1.29 (§2.1, §3.0, §6.5), ai/engine/README.md v2.14 (§6.0), docs/guide-getting-started.md v1.15 (§5.1), requirements-1c1f4ef6 v1.5 (FR-AEL-008)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
