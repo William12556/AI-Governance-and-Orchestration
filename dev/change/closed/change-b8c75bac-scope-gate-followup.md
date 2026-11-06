@@ -5,7 +5,7 @@ change_info:
   id: "change-b8c75bac"
   title: "Engine argument and config robustness (Stage C work item 1)"
   date: "2026-11-06"
-  status: "closed"  # verified: audit-b8c75bac, macOS suite and live check; operator approval 2026-11-06
+  status: "verified"  # audit-b8c75bac, macOS suite and live check; operator approval 2026-11-06
   priority: "low"
   iteration: 2
   coupled_docs:
@@ -226,7 +226,7 @@ version_history:
       - "All validation criteria met; status verified on operator approval"
   - version: "1.4"
     date: "2026-11-06"
-    changes: ["Closed on operator acceptance (P00.14.4); moved to dev/change/closed/ with the issue and report-b8c75bac. audit-a5bd4fe1 and audit-5e8aea4f closed and moved to dev/audit/closed/; audit-b8c75bac stays active until work item 6 resolves its F-03"]
+    changes: ["Closed on operator acceptance (P00.14.4); status stays verified, the terminal value for a change; moved to dev/change/closed/ with the issue and report-b8c75bac. audit-a5bd4fe1 and audit-5e8aea4f closed and moved to dev/audit/closed/; audit-b8c75bac stays active until work item 6 resolves its F-03"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
