@@ -230,7 +230,7 @@ class OpenAICompatProvider:
             raise ProviderError(f"model '{model}' is not available at {self.base_url}")
 
     def live_context_window(self, model: str) -> int | None:
-        """Tier 2 of context resolution: live query for kind 'omlx' only."""
+        """Tier 3 of context resolution: live query for kind 'omlx' only."""
         if self.kind == "omlx" and self.base_url:
             return query_omlx_context_window(model, self.base_url)
         return None

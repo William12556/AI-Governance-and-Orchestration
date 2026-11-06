@@ -105,7 +105,8 @@ _COMPLETION_MAX_RETRIES = 3
 _COMPLETION_INITIAL_BACKOFF = 2.0  # seconds
 _COMPLETION_BACKOFF_MULTIPLIER = 2.0
 # change-711a57d5 (audit-14e05e35 L-09): client errors a retry cannot fix
-_NON_RETRYABLE_STATUS = frozenset({400, 401, 403})
+# change-86c958dd (live check P-01): 404 (unknown model) added
+_NON_RETRYABLE_STATUS = frozenset({400, 401, 403, 404})
 
 # change-711a57d5 (audit-caab2052 L-03): bound on grep and py_compile subprocesses
 _SUBPROCESS_TIMEOUT_SECONDS = 30
@@ -760,15 +761,18 @@ def resolve_context_window(model_name: str, config: dict,
     Resolve the model context window in tokens using a four-tier chain.
 
     Tier 1: config['context']['context_window'] if not null (explicit global override)
-    Tier 2: Live query (oMLX admin endpoint for settings.max_context_window)
-    Tier 3: config['context']['model_context_windows'][model_name] if present
+    Tier 2: config['context']['model_context_windows'][model_name] if present
+    Tier 3: Live query (oMLX admin endpoint for settings.max_context_window)
     Tier 4: Return None (context window unknown)
+
+    change-86c958dd (operator decision 2026-11-05): the per-model entry is
+    used before the live query.
 
     Args:
         model_name: The model id bound to the role being resolved (FR-04-05)
         config: The parsed config.yaml contents
         live_query: The role provider's live_context_window, or None to skip
-            tier 2. Omitted: query the legacy omlx.base_url, as before.
+            tier 3. Omitted: query the legacy omlx.base_url, as before.
 
     Returns:
         Context window size in tokens, or None if unresolved at every tier.
@@ -784,26 +788,27 @@ def resolve_context_window(model_name: str, config: dict,
         return int(override)
     tiers_tried.append("tier 1 (global override): null")
 
-    # Tier 2: Live query (oMLX only)
+    # change-86c958dd (operator decision 2026-11-05): per-model entry before the live query
+    # Tier 2: Per-model override from config
+    model_overrides = ctx_cfg.get("model_context_windows", {})
+    if model_name in model_overrides:
+        ctx = model_overrides[model_name]
+        log.info("context window: %d (tier 2: config per-model override for '%s')", ctx, model_name)
+        return int(ctx)
+    tiers_tried.append(f"tier 2 (per-model override): no entry for '{model_name}'")
+
+    # Tier 3: Live query (oMLX only)
     if live_query is _LEGACY_LIVE_QUERY:
         base_url = (config.get("omlx") or {}).get("base_url", "")
         live_query = (lambda m: _query_omlx_context_window(m, base_url)) if base_url else None
     if live_query is not None:
         live_ctx = live_query(model_name)
         if live_ctx is not None:
-            log.info("context window: %d (tier 2: live oMLX admin query)", live_ctx)
+            log.info("context window: %d (tier 3: live oMLX admin query)", live_ctx)
             return live_ctx
-        tiers_tried.append("tier 2 (live oMLX query): null or failed")
+        tiers_tried.append("tier 3 (live oMLX query): null or failed")
     else:
-        tiers_tried.append("tier 2 (live query): not available for this provider")
-
-    # Tier 3: Per-model override from config
-    model_overrides = ctx_cfg.get("model_context_windows", {})
-    if model_name in model_overrides:
-        ctx = model_overrides[model_name]
-        log.info("context window: %d (tier 3: config per-model override for '%s')", ctx, model_name)
-        return int(ctx)
-    tiers_tried.append(f"tier 3 (per-model override): no entry for '{model_name}'")
+        tiers_tried.append("tier 3 (live query): not available for this provider")
 
     # Tier 4: Unresolved
     log.warning(
@@ -2748,17 +2753,20 @@ async def main_async(args: argparse.Namespace) -> int:
     # and never changes rc or the control flow.
     _run_record: dict | None = None
     _run_record_written = False
+    # change-86c958dd (audit-b8a6c445 F-01): exception in flight when the finally runs
+    _run_exc: BaseException | None = None
     try:
         # change-b8a6c445 (audit-caab2052 M-04, M-05): start record
-        _run_record = {
-            "mode": args.mode,
-            "task_file": os.path.abspath(args.task) if _task_bytes is not None else None,
-            "pid": os.getpid(),
-            "started": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
-            "ended": None,
-            "rc": None,
-        }
+        # change-86c958dd (audit-b8a6c445 F-08): built inside the guarded write
         try:
+            _run_record = {
+                "mode": args.mode,
+                "task_file": os.path.abspath(args.task) if _task_bytes is not None else None,
+                "pid": os.getpid(),
+                "started": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
+                "ended": None,
+                "rc": None,
+            }
             _write_run_record(state_dir, _run_record)
             _run_record_written = True
         except Exception as e:
@@ -2770,7 +2778,8 @@ async def main_async(args: argparse.Namespace) -> int:
             _work_path, _rev_path = manifest.recipe_paths(recipe_set)
         except ManifestError as e:
             console.print(f"[red][engine] manifest error: {escape(str(e))}[/red]")
-            return 1
+            rc = 1  # change-86c958dd (audit-b8a6c445 F-01): rc assigned before return
+            return rc
         work_recipe = load_yaml(_work_path)
         rev_recipe  = load_yaml(_rev_path)
         console.print(f"[blue][engine] governance model: {escape(manifest.name)} {escape(manifest.version)}; "
@@ -2808,10 +2817,12 @@ async def main_async(args: argparse.Namespace) -> int:
                             f"# BLOCKED\n\n{b.role} provider '{b.provider_name}' not ready: {e}\n")
                 console.print(f"[red][engine] BLOCKED: {b.role} provider '{escape(b.provider_name)}' not ready: {escape(str(e))}[/red]")
                 log.error("provider not ready role=%s provider=%s: %s", b.role, b.provider_name, e)
-                return 1
+                rc = 1  # change-86c958dd (audit-b8a6c445 F-01): rc assigned before return
+                return rc
             _ready.add((b.provider_name, b.model))
 
         # Resolve context window per role using the four-tier chain
+        # (change-86c958dd, operator decision 2026-11-05: global, per-model, live, unresolved)
         context_windows: dict[str, int | None] = {}
         for b in (worker_b, reviewer_b):
             ctx = resolve_context_window(b.model, config, live_query=b.provider.live_context_window)
@@ -2849,7 +2860,8 @@ async def main_async(args: argparse.Namespace) -> int:
                         "strict_tactical_brief: target_profile='engine' but no valid tactical_brief in %s",
                         args.task,
                     )
-                    return 1
+                    rc = 1  # change-86c958dd (audit-b8a6c445 F-01): rc assigned before return
+                    return rc
 
             task = brief if brief and not brief.startswith("#") else raw
         else:
@@ -2857,7 +2869,8 @@ async def main_async(args: argparse.Namespace) -> int:
 
         if not task:
             console.print(f"[red][engine] error: no task provided (--task or {state_dir}/task.md)[/red]")
-            return 1
+            rc = 1  # change-86c958dd (audit-b8a6c445 F-01): rc assigned before return
+            return rc
 
         # change-bdc6820f: write scope from the T03 prompt's deliverables (FR-05-01)
         project_root = os.getcwd()
@@ -2974,12 +2987,22 @@ async def main_async(args: argparse.Namespace) -> int:
                 _archive_audit_artifacts(state_dir, args.task, log)
         _finish_run(args.mode, rc, state_dir, manifest, loop_stage, work_item,
                     _gate_outcomes if args.mode == "loop" else {}, _run_started, log)
+    except BaseException as exc:
+        # change-86c958dd (audit-b8a6c445 F-01): recorded in the end record, then re-raised
+        _run_exc = exc
+        raise
     finally:
         # change-b8a6c445 (audit-caab2052 M-04, M-05): end record
         if _run_record_written:
             try:
                 _run_record["ended"] = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
-                _run_record["rc"] = rc
+                # change-86c958dd (audit-b8a6c445 F-01): rc null and the exception type
+                # when the run ends with an exception in flight
+                if _run_exc is not None:
+                    _run_record["rc"] = None
+                    _run_record["error"] = type(_run_exc).__name__
+                else:
+                    _run_record["rc"] = rc
                 _write_run_record(state_dir, _run_record)
             except Exception as e:
                 log.warning("run record not written: %s", e)
