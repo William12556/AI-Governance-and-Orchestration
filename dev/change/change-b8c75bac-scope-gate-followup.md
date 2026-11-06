@@ -5,7 +5,7 @@ change_info:
   id: "change-b8c75bac"
   title: "Engine argument and config robustness (Stage C work item 1)"
   date: "2026-11-06"
-  status: "proposed"
+  status: "approved"  # operator approval 2026-11-06
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -204,6 +204,9 @@ version_history:
   - version: "1.0"
     date: "2026-11-06"
     changes: ["Initial change record"]
+  - version: "1.1"
+    date: "2026-11-06"
+    changes: ["Approved by the operator as drafted, including the planner's additions to C (invalid YAML, non-mapping top level, loop.max_iterations); implementation per prompt-b8c75bac"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
