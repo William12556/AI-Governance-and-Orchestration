@@ -404,6 +404,19 @@ def _pid_alive(pid: int) -> bool:
     return True
 
 
+def _same_file(a: str, b: str) -> bool:
+    """Return True if *a* and *b* name the same existing file (change-86c958dd, audit-b8a6c445 F-04).
+
+    os.path.samefile compares file identity, so letter case on a
+    case-insensitive volume and symlinks do not matter. A missing file or an
+    invalid path compares as not the same file.
+    """
+    try:
+        return os.path.samefile(a, b)
+    except (OSError, ValueError):
+        return False
+
+
 class Scanner:
     """Produce a Snapshot from the project filesystem.
 
@@ -492,6 +505,13 @@ class Scanner:
         BLOCKED.md → blocked; .complete → ship; valid record otherwise →
         ended; invalid record, or task.md without run.json → unknown;
         otherwise → idle (NFR-05).
+
+        change-86c958dd (audit-b8a6c445 F-02): with a valid record that is
+        not live, BLOCKED.md and .complete count only when the marker's
+        mtime is not earlier than the record's started time (whole
+        seconds); an older marker gives ended. When started is absent or
+        cannot be parsed, or no valid record exists, the precedence above
+        is unchanged.
         """
         state_dir = self.paths.engine_state
         if not state_dir.is_dir():
@@ -525,11 +545,28 @@ class Scanner:
                 record = data
         live = record is not None and record.get("ended") is None and _pid_alive(record["pid"])
 
+        # change-86c958dd (audit-b8a6c445 F-02): a marker older than the
+        # record's start belongs to an earlier run. started_ts None: no check.
+        started_ts: Optional[int] = None
+        if record is not None and not live:
+            try:
+                started_ts = int(datetime.datetime.fromisoformat(record["started"]).timestamp())
+            except (KeyError, TypeError, ValueError, OverflowError, OSError):
+                started_ts = None
+
+        def _current(name: str) -> bool:
+            if started_ts is None:
+                return True
+            try:
+                return int((state_dir / name).stat().st_mtime) >= started_ts
+            except OSError:
+                return True
+
         if live:
             status = "running"
-        elif blocked_content is not None:
+        elif blocked_content is not None and _current("BLOCKED.md"):
             status = "blocked"
-        elif complete_content is not None:
+        elif complete_content is not None and _current(".complete"):
             status = "ship"
         elif record is not None:
             status = "ended"
@@ -773,12 +810,15 @@ class ComplianceEngine:
 
         # FR-02-06: engine run task not an open prompt → WARNING
         # change-b8a6c445 (audit-caab2052 M-05): compares the run record's
-        # task_file with the open prompts by resolved path.
-        if eng.has_run_record:
+        # task_file with the open prompts.
+        # change-86c958dd (audit-b8a6c445 F-03): evaluated only while the
+        # engine is running, not for ended or stale run records.
+        if eng.status == "running":
             open_prompts = [d for d in docs if d.cls == "prompt" and not d.is_master]
             if open_prompts:
+                # change-86c958dd (audit-b8a6c445 F-04): file identity, not path text
                 matched = eng.task_file is not None and any(
-                    os.path.realpath(eng.task_file) == os.path.realpath(doc.path)
+                    _same_file(eng.task_file, doc.path)
                     for doc in open_prompts
                 )
                 if not matched:
