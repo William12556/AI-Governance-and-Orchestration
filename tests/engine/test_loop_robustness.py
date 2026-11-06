@@ -1,5 +1,6 @@
 """Tests for engine loop robustness (change-711a57d5, prompt-711a57d5 T1 to T16;
-change-5e8aea4f, prompt-5e8aea4f T17 to T28)."""
+change-5e8aea4f, prompt-5e8aea4f T17 to T28; change-b8c75bac, prompt-b8c75bac
+B1 to B4)."""
 
 import argparse
 import asyncio
@@ -411,8 +412,14 @@ async def _not_ready(self, model, **kw):
     raise TimeoutError("stubbed readiness")
 
 
+def _squash(text):
+    """Text without whitespace: Rich wraps long console lines (change-b8c75bac)."""
+    return "".join(text.split())
+
+
 @pytest.mark.parametrize("value", [0, -1, "x", True])
-def test_t16_invalid_mcp_timeout_stops_before_state(orch, project, monkeypatch, capsys, value):
+def test_t16_invalid_mcp_timeout_stops_before_state(orch, project, monkeypatch, capsys, value,
+                                                    isolated_engine_logger):
     import openai
 
     monkeypatch.setattr(openai, "AsyncOpenAI", lambda **kw: object())
@@ -421,7 +428,9 @@ def test_t16_invalid_mcp_timeout_stops_before_state(orch, project, monkeypatch, 
     config = _legacy_config(project, "ai/state/t16", mcp_timeout_seconds=value)
     assert asyncio.run(orch.main_async(_main_args(config))) == 1
     assert not (project / "ai" / "state" / "t16").exists()
-    assert "loop.mcp_timeout_seconds: must be a positive number" in capsys.readouterr().out
+    # change-b8c75bac (audit-5e8aea4f F-02): 'configuration error (<config path>)' form
+    assert _squash(f"configuration error ({config}): loop.mcp_timeout_seconds: "
+                   "must be a positive number") in _squash(capsys.readouterr().out)
 
 
 # =================================================================================================
@@ -499,6 +508,25 @@ def test_t18_close_error_becomes_warning(capsys):
     assert client._sessions == {}
 
 
+def test_t18b_close_propagates_cancellation(capsys):
+    """change-b8c75bac (audit-5e8aea4f F-03, N2b): BaseException is not swallowed."""
+    client = MC.MCPClient({})
+
+    async def cancelled_aclose():
+        raise asyncio.CancelledError()
+
+    client._stack.aclose = cancelled_aclose
+    client._sessions["fs"] = object()
+
+    async def run():
+        with pytest.raises(asyncio.CancelledError):
+            await client.close()
+
+    asyncio.run(run())
+    assert "Warning: error while closing MCP connections" not in capsys.readouterr().out
+    assert client._sessions == {}
+
+
 # --- FR-C (audit-711a57d5 F-03): non-finite timeouts -------------------------------------------
 
 @pytest.mark.parametrize("value", [float("nan"), float("inf")])
@@ -513,7 +541,8 @@ def test_t19_non_finite_request_timeout_is_a_config_error(fake_sdks, pcfg, value
 
 
 @pytest.mark.parametrize("value", [float("nan"), float("inf")])
-def test_t20_non_finite_mcp_timeout_stops_before_state(orch, project, monkeypatch, capsys, value):
+def test_t20_non_finite_mcp_timeout_stops_before_state(orch, project, monkeypatch, capsys, value,
+                                                       isolated_engine_logger):
     import openai
 
     monkeypatch.setattr(openai, "AsyncOpenAI", lambda **kw: object())
@@ -521,7 +550,9 @@ def test_t20_non_finite_mcp_timeout_stops_before_state(orch, project, monkeypatc
     config = _legacy_config(project, "ai/state/t20", mcp_timeout_seconds=value)
     assert asyncio.run(orch.main_async(_main_args(config))) == 1
     assert not (project / "ai" / "state" / "t20").exists()
-    assert "loop.mcp_timeout_seconds: must be a positive number" in capsys.readouterr().out
+    # change-b8c75bac (audit-5e8aea4f F-02): 'configuration error (<config path>)' form
+    assert _squash(f"configuration error ({config}): loop.mcp_timeout_seconds: "
+                   "must be a positive number") in _squash(capsys.readouterr().out)
 
 
 # --- FR-E (audit-711a57d5 F-04): untested behaviours M4, M5, M6, M15 ---------------------------
@@ -638,6 +669,12 @@ def test_t25_provider_redacts_only_a_secret_key(fake_sdks, monkeypatch):
     local = P.make_provider("omlx", {"kind": "omlx", "base_url": "http://127.0.0.1:8000/v1",
                                      "api_key": "local-test-key"})
     assert local.redact("bad key local-test-key") == "bad key local-test-key"
+    # change-b8c75bac (audit-5e8aea4f F-03, N12): kind anthropic with api_key_env
+    anth = P.make_provider("anth", {"kind": "anthropic", "api_key_env": "T5E8_KEY"})
+    assert isinstance(anth, P.AnthropicProvider)
+    assert fake_sdks["anthropic"]["api_key"] == FAKE_SECRET
+    assert anth.redact(f"bad key {FAKE_SECRET}!") == f"bad key {P.REDACTED}!"
+    assert FAKE_SECRET not in repr(anth)
 
 
 class _SecretFailing(_Failing):
@@ -683,11 +720,24 @@ class _ListFails:
         raise RuntimeError(f"401 unauthorised: key {FAKE_SECRET}")
 
 
+class _RetrieveFails:
+    """Fake Anthropic client whose models.retrieve raises an error containing FAKE_SECRET
+    (change-b8c75bac, audit-5e8aea4f F-03, N5)."""
+
+    def __init__(self):
+        self.models = self
+
+    async def retrieve(self, model):
+        raise RuntimeError(f"401 unauthorised: key {FAKE_SECRET}")
+
+
 @pytest.mark.parametrize("make", [
     lambda: P.OpenAICompatProvider(kind="openai_compatible", base_url="https://x.invalid/v1",
                                    client=_ListFails(), secret=FAKE_SECRET),
     lambda: P.AnthropicProvider(base_url="https://x.invalid", client=_ListFails(),
                                 secret=FAKE_SECRET),
+    # change-b8c75bac: the Anthropic API branch (no base_url)
+    lambda: P.AnthropicProvider(client=_RetrieveFails(), secret=FAKE_SECRET),
 ])
 @pytest.mark.parametrize("timeout", [0, 0.05])
 def test_t27_await_ready_text_is_redacted(make, timeout):
@@ -724,3 +774,144 @@ def test_t28_resolve_api_key_reports_secret_sources(monkeypatch):
     default_cfg = {"kind": "omlx", "base_url": "http://127.0.0.1:8000/v1"}
     assert P._resolve_api_key("o", default_cfg, "omlx") == ("local", False)
     assert P._api_key("o", default_cfg, "omlx") == "local"
+
+
+# =================================================================================================
+# change-b8c75bac (prompt-b8c75bac B1, B2): audit-5e8aea4f F-01, F-02
+# =================================================================================================
+
+# --- B1 (audit-5e8aea4f F-01): F21 audit-report check with any argument shape ------------------
+
+_REPORT = "## Item 1\nfinding\n"
+
+
+@pytest.fixture
+def report_state(project):
+    state = project / "ai" / "state"
+    (state / "audit-report.md").write_text(_REPORT)
+    return state
+
+
+@pytest.mark.parametrize("tool,arguments,refused", [
+    ("write_file", {"path": ["src/x.py"]}, False),
+    ("write_file", {"path": 5, "file_path": "src/x.py"}, False),
+    ("create", {"files": [{"path": 3}, "x", {"path": "audit-report.md", "content": 7}]}, True),
+    ("create", {"files": "x"}, False),
+    ("write_file", {"path": "ai/state/audit-report.md", "content": None}, True),
+])
+def test_b1_audit_report_check_accepts_any_argument_shape(orch, report_state, tool, arguments,
+                                                          refused):
+    result = orch._validate_audit_report_write(tool, arguments, str(report_state))
+    if refused:
+        assert result == (
+            f"Error: This write would discard {len(_REPORT.strip())} characters of existing "
+            "audit-report.md findings. audit-report.md is append-only — use the edit "
+            "tool to append, or include the full existing content before your new entry.")
+    else:
+        assert result is None
+
+
+def test_b1_report_write_keeping_the_content_is_allowed(orch, report_state):
+    arguments = {"path": "ai/state/audit-report.md", "content": _REPORT + "## Item 2\n"}
+    assert orch._validate_audit_report_write("write_file", arguments, str(report_state)) is None
+
+
+def test_b1_list_path_through_run_phase(orch, project, report_state, rec_log):
+    """As audit-5e8aea4f probe A2: no traceback; the phase continues."""
+    log, _ = rec_log
+    script = _Script([_call("ffffffff1", "write_file", {"path": ["src/x.py"]}),
+                      _call("ffffffff2", "write_file", {"path": "src/y.txt", "content": "y"}),
+                      P.Completion(text="done")])
+    mcp = _ResultMCP(["write_file"])
+    rc, _, _ = asyncio.run(orch.run_phase(
+        script, mcp, "m", {"instructions": ""}, "task", 5, str(report_state), log,
+        phase_label="WORKER", project_root=str(project)))
+    assert rc == 0
+    assert mcp.calls == [("write_file", {"path": "src/y.txt", "content": "y"})]
+    (first,) = [m for m in script.seen[1] if m["role"] == "tool"]
+    assert first["content"].startswith("Error: write refused: tool 'write_file' was called "
+                                       "without a recognised path argument")
+
+
+# --- B2 (audit-5e8aea4f F-02): timeout maximum 86400 s ------------------------------------------
+
+_POSITIVE = "must be a positive number"
+_MAXIMUM = "must not exceed 86400 seconds"
+_TIMEOUT_CASES = [
+    (86400, None),
+    (86400.5, _MAXIMUM),
+    (1e14, _MAXIMUM),
+    (10 ** 400, _POSITIVE),
+    (True, _POSITIVE),
+    ("60", _POSITIVE),
+    (0, _POSITIVE),
+    (-1, _POSITIVE),
+    (float("nan"), _POSITIVE),
+    (float("inf"), _POSITIVE),
+]
+_CASE_IDS = ["86400", "86400.5", "1e14", "10**400", "True", "str60", "0", "-1", "nan", "inf"]
+
+
+@pytest.mark.parametrize("value,error", _TIMEOUT_CASES, ids=_CASE_IDS)
+def test_b2_validate_timeout(value, error):
+    if error is None:
+        assert P.validate_timeout(value, "x.y") == 86400.0
+    else:
+        with pytest.raises(P.ConfigError) as ei:
+            P.validate_timeout(value, "x.y")
+        assert str(ei.value) == f"x.y: {error}"
+
+
+@pytest.mark.parametrize("value,error", _TIMEOUT_CASES, ids=_CASE_IDS)
+@pytest.mark.parametrize("sdk,pcfg", [("openai", _OPENAI_CFG), ("anthropic", _ANTHROPIC_CFG)])
+def test_t19b_request_timeout_bounds(fake_sdks, sdk, pcfg, value, error):
+    if error is None:
+        P.make_provider("remote", dict(pcfg, request_timeout_seconds=value))
+        assert fake_sdks[sdk]["timeout"] == 86400
+    else:
+        with pytest.raises(P.ConfigError) as ei:
+            P.make_provider("remote", dict(pcfg, request_timeout_seconds=value))
+        assert str(ei.value) == f"providers.remote.request_timeout_seconds: {error}"
+
+
+class _Stop(Exception):
+    """Raised by a stubbed archive_prior_logs: validation passed, no state written."""
+
+
+def _stop_at_archive(state_dir, archive_dir):
+    raise _Stop(state_dir)
+
+
+def _timeout_config(project, state_rel, field, value):
+    cfg = {"omlx": {"base_url": "http://127.0.0.1:8000/v1", "api_key": "local",
+                    "default_model": "devstral"},
+           "loop": {"state_dir": state_rel, "max_iterations": 1}}
+    if field == "request_timeout_seconds":
+        cfg["omlx"]["request_timeout_seconds"] = value
+        name = "providers.omlx.request_timeout_seconds"
+    else:
+        cfg["loop"]["mcp_timeout_seconds"] = value
+        name = "loop.mcp_timeout_seconds"
+    path = project / "config.yaml"
+    path.write_text(yaml.safe_dump(cfg))
+    return path, name
+
+
+@pytest.mark.parametrize("value,error", _TIMEOUT_CASES, ids=_CASE_IDS)
+@pytest.mark.parametrize("field", ["request_timeout_seconds", "mcp_timeout_seconds"])
+def test_t20b_timeout_bounds_through_main_async(orch, project, monkeypatch, capsys,
+                                                isolated_engine_logger, field, value, error):
+    import openai
+
+    monkeypatch.setattr(openai, "AsyncOpenAI", lambda **kw: object())
+    monkeypatch.setattr(P.OpenAICompatProvider, "await_ready", _not_ready)
+    monkeypatch.setattr(orch, "archive_prior_logs", _stop_at_archive)
+    config, name = _timeout_config(project, "ai/state/t20b", field, value)
+    if error is None:
+        with pytest.raises(_Stop):
+            asyncio.run(orch.main_async(_main_args(config)))
+    else:
+        assert asyncio.run(orch.main_async(_main_args(config))) == 1
+        assert (_squash(f"configuration error ({config}): {name}: {error}")
+                in _squash(capsys.readouterr().out))
+    assert not (project / "ai" / "state" / "t20b").exists()

@@ -1,5 +1,7 @@
 """Tests for scope and gate hardening (change-a5bd4fe1, prompt-a5bd4fe1 S1 to S4,
-C1 to C4, D1 to D2, E1 to E4; audit-caab2052 L-01, L-02, L-12, OQ-01)."""
+C1 to C4, D1 to D2, E1 to E4; audit-caab2052 L-01, L-02, L-12, OQ-01) and the
+follow-up of change-b8c75bac (prompt-b8c75bac A1 to A3; audit-a5bd4fe1 F-01,
+F-02, F-04)."""
 
 import asyncio
 import io
@@ -331,3 +333,150 @@ def test_e4_no_tests_directory_or_no_target_runs_no_collection(orch, proj, tmp_p
     # No target: the gate does not run at all.
     assert orch._run_pytest_gate(str(proj / "ai" / "state"), log, str(proj)) == ""
     assert not any("--collect-only" in a for a in argvs)
+
+
+# =================================================================================================
+# change-b8c75bac (prompt-b8c75bac A1 to A3): audit-a5bd4fe1 F-01, F-02, F-04
+# =================================================================================================
+
+class _CompileSpy:
+    """Stand-in for G.compile_file recording paths; optionally raising."""
+
+    def __init__(self, exc=None):
+        self.paths = []
+        self.exc = exc
+
+    def __call__(self, path, timeout=G.SYNTAX_TIMEOUT_SECONDS):
+        self.paths.append(path)
+        if self.exc is not None:
+            raise self.exc
+        return subprocess.CompletedProcess([PY, "-m", "py_compile", path], 0, "", "")
+
+
+class _CountingMCP(_WritingMCP):
+    """_WritingMCP that records dispatched calls."""
+
+    def __init__(self, results=None):
+        super().__init__(results)
+        self.calls = []
+
+    async def call_tool(self, name, arguments):
+        self.calls.append((name, arguments))
+        return await super().call_tool(name, arguments)
+
+
+# --- A1 (audit-a5bd4fe1 F-01): edit-failure check on refused calls ----------------------------
+
+def test_a1a_refused_edit_with_marker_is_not_compiled(orch, proj, rec_log, monkeypatch):
+    """U10: a refusal echoing E_INVALID_INPUT in the path does not start the edit-failure check."""
+    log, _ = rec_log
+    spy = _CompileSpy()
+    monkeypatch.setattr(G, "compile_file", spy)
+    script = _Script([_call("eeeeeeee1", "edit_file", {"path": "../E_INVALID_INPUT.py"}),
+                      P.Completion(text="done")])
+    mcp = _CountingMCP()
+    rc, _, _ = _worker_phase(orch, proj, log, script, mcp)
+    assert rc == 0
+    assert mcp.calls == []
+    assert spy.paths == []
+    (tool_msg,) = [m for m in script.seen[-1] if m["role"] == "tool"]
+    assert tool_msg["content"].startswith(
+        "Error: Scope violation: path '../E_INVALID_INPUT.py' is outside the project root")
+    assert "The edit failed because the old_text pattern" not in tool_msg["content"]
+
+
+def test_a1b_unresolvable_edit_with_marker_does_not_raise(orch, proj, rec_log, monkeypatch):
+    log, rec = rec_log
+    spy = _CompileSpy()
+    monkeypatch.setattr(G, "compile_file", spy)
+    path = "src/x\x00E_INVALID_INPUT.py"
+    script = _Script([_call("eeeeeeee2", "edit_file", {"path": path}),
+                      _call("eeeeeeee3", "write_file", {"path": "src/ok.txt", "content": "x"}),
+                      P.Completion(text="done")])
+    mcp = _CountingMCP()
+    rc, _, _ = _worker_phase(orch, proj, log, script, mcp)
+    assert rc == 0
+    assert spy.paths == []
+    # The phase continued: the next call was dispatched.
+    assert mcp.calls == [("write_file", {"path": "src/ok.txt", "content": "x"})]
+    (first_tool,) = [m for m in script.seen[1] if m["role"] == "tool"]
+    assert first_tool["content"].startswith(f"Error: write refused: path '{path}' cannot be resolved")
+    assert "The edit failed because the old_text pattern" not in first_tool["content"]
+    assert f"write rejected tool=edit_file path={path} reason=unresolvable path" in rec.lines
+
+
+def test_a1c_compile_exception_is_logged_and_skipped(orch, proj, rec_log, monkeypatch):
+    log, rec = rec_log
+    (proj / "src" / "e.py").write_text("x = 1\n")
+    spy = _CompileSpy(ValueError("embedded null byte"))
+    monkeypatch.setattr(G, "compile_file", spy)
+    script = _Script([_call("eeeeeeee4", "edit_file", {"path": "src/e.py"}),
+                      _call("eeeeeeee5", "write_file", {"path": "src/w.py", "content": "x = 1\n"}),
+                      P.Completion(text="done")])
+    mcp = _CountingMCP({"edit_file": "Error: edits failed to match"})
+    rc, _, _ = _worker_phase(orch, proj, log, script, mcp)
+    assert rc == 0
+    assert spy.paths == ["src/e.py", "src/w.py"]
+    assert "edit-failure check: compile of src/e.py failed (ValueError); not checked" in rec.lines
+    assert "post-write check: compile of src/w.py failed (ValueError); not checked" in rec.lines
+    tool_msgs = [m for m in script.seen[-1] if m["role"] == "tool"]
+    assert "The edit failed because the old_text pattern" in tool_msgs[0]["content"]
+    assert "syntax error" not in tool_msgs[0]["content"]
+    assert tool_msgs[1]["content"] == "ok"
+
+
+# --- A2 (audit-a5bd4fe1 F-02): write verbs in any letter case ----------------------------------
+
+@pytest.mark.parametrize("name", [
+    "searchAndReplace", "listAndDelete", "read_and_append", "search_and_copy",
+    "find_and_truncate", "cat_save", "list_update", "head_upload", "grep_set",
+    "read_and_put", "find_insert", "ReadAndWrite",
+])
+def test_a2a_read_prefixed_names_with_a_write_verb_are_write_tools(name):
+    assert S.is_write_tool(name) is True
+    assert S.is_readonly_tool(name) is False
+
+
+# A2b: test_s1_configured_server_tools_keep_their_class above, unchanged.
+
+
+# --- A3 (audit-a5bd4fe1 F-04): U1, U4, U5 ---------------------------------------------------------
+
+@pytest.mark.parametrize("target,collection_rc,expected", [
+    ("FAIL", 0, "FAIL"),
+    ("UNCHECKED", 1, "UNCHECKED"),
+])
+def test_u1_combined_status_keeps_the_worse_target(proj, rec_log, monkeypatch,
+                                                   target, collection_rc, expected):
+    log, _ = rec_log
+
+    def fake_run(argv, **kw):
+        assert "--collect-only" in argv
+        return subprocess.CompletedProcess(argv, collection_rc, "collected", "")
+
+    monkeypatch.setattr(G.subprocess, "run", fake_run)
+    block = f"[TEST GATE: {target}]\ntarget output\n[END TEST GATE]\n"
+    combined = G.add_collection_pass(block, {}, str(proj), log)
+    assert G.gate_status(combined) == expected
+    assert combined.startswith(f"[TEST GATE: {expected}]")
+    assert combined.rstrip().endswith("[END TEST GATE]")
+
+
+def test_u4_preflight_compile_leaves_no_bytecode(orch, proj, rec_log):
+    log, _ = rec_log
+    (proj / "src" / "ok.py").write_text("x = 1\n")
+    task = "```yaml\nsuccess_criteria:\n  - \"src/ok.py has no syntax errors\"\n```\n"
+    summary = orch.run_preflight_check(task, log)
+    assert "[1] SATISFIED  src/ok.py has no syntax errors" in summary
+    assert _pycache_dirs(proj) == []
+
+
+def test_u5_syntax_fail_does_not_override_audit_ship(orch, proj, rec_log, monkeypatch):
+    """FR-D of change-a5bd4fe1 applies on the loop path only; the audit SHIP gate decides here."""
+    log, rec = rec_log
+    (proj / "ai" / "state" / "audit-index.md").write_text("- [x] item one\n- [x] item two\n")
+    block = "[SYNTAX GATE: FAIL]\n  ✗ src/bad.py: SYNTAX ERROR\n[END SYNTAX GATE]\n"
+    rc, state = _ship_loop(orch, proj, log, monkeypatch, block)
+    assert rc == 0
+    assert (state / ".complete").exists()
+    assert "syntax SHIP gate: FAIL — overriding SHIP" not in rec.lines
