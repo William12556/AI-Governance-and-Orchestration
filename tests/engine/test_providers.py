@@ -292,8 +292,72 @@ def test_context_window_per_role(orch):
     config = {"context": {"model_context_windows": {"devstral": 262144, "magistral": 40960}}}
     assert orch.resolve_context_window("devstral", config, live_query=None) == 262144
     assert orch.resolve_context_window("magistral", config, live_query=None) == 40960
-    assert orch.resolve_context_window("magistral", config, live_query=lambda m: 1000) == 1000
+    # change-86c958dd (operator decision 2026-11-05): the per-model entry is used before the live query
+    assert orch.resolve_context_window("magistral", config, live_query=lambda m: 1000) == 40960
     assert orch.resolve_context_window("x", {}, live_query=None) is None
+
+
+# --- change-86c958dd (prompt-86c958dd D1 to D4): context-window tier order ----------------------
+# engine_log: the fixture defined below (captures the 'engine' logger)
+
+def _lines(caplog):
+    return [(r.levelname, r.getMessage()) for r in caplog.records]
+
+
+_CW_CONFIG = {"context": {"model_context_windows": {"magistral": 40960}}}
+
+
+def test_d1_per_model_entry_before_live_query(orch, engine_log):
+    assert orch.resolve_context_window("magistral", _CW_CONFIG, live_query=lambda m: 1000) == 40960
+    assert ("INFO", "context window: 40960 (tier 2: config per-model override for 'magistral')") \
+        in _lines(engine_log)
+
+
+def test_d2_live_query_without_entry(orch, engine_log):
+    assert orch.resolve_context_window("devstral", _CW_CONFIG, live_query=lambda m: 1000) == 1000
+    assert ("INFO", "context window: 1000 (tier 3: live oMLX admin query)") in _lines(engine_log)
+
+
+def test_d3_global_override_wins(orch, engine_log):
+    config = {"context": {"context_window": 8192, "model_context_windows": {"magistral": 40960}}}
+    assert orch.resolve_context_window("magistral", config, live_query=lambda m: 1000) == 8192
+
+
+def test_d4_unresolved_lists_tiers_2_and_3(orch, engine_log):
+    assert orch.resolve_context_window("devstral", _CW_CONFIG, live_query=lambda m: None) is None
+    (warning,) = [msg for lvl, msg in _lines(engine_log) if lvl == "WARNING"]
+    assert "tier 2 (per-model override): no entry for 'devstral'" in warning
+    assert "tier 3 (live oMLX query): null or failed" in warning
+    assert warning.index("tier 2") < warning.index("tier 3")
+
+
+def test_d4_unresolved_without_live_query(orch, engine_log):
+    assert orch.resolve_context_window("devstral", _CW_CONFIG, live_query=None) is None
+    (warning,) = [msg for lvl, msg in _lines(engine_log) if lvl == "WARNING"]
+    assert "tier 3 (live query): not available for this provider" in warning
+
+
+# --- change-86c958dd (prompt-86c958dd A3; live check P-01): HTTP 404 is not retried -------------
+
+def test_a3_http_404_is_not_retried(orch, log, project):
+    class NotFound(Exception):
+        status_code = 404
+
+    calls = {"n": 0}
+
+    class Missing:
+        async def complete(self, model, messages, tools, max_tokens=None):
+            calls["n"] += 1
+            # the text the OpenAI SDK gives (live check P-01)
+            raise NotFound("Error code: 404 - Model 'no-such-model' not found")
+
+    state = project / "ai" / "state"
+    with pytest.raises(RuntimeError, match="404"):
+        asyncio.run(orch._completion_with_retry(Missing(), "m", [], None, log, str(state),
+                                                initial_backoff=0))
+    assert calls["n"] == 1
+    blocked = (state / "BLOCKED.md").read_text()
+    assert "Completion call failed with HTTP 404 (not retried)." in blocked
 
 
 def test_completion_retry_recovers_from_provider_error(orch, log, project):

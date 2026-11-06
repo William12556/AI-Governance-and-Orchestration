@@ -53,6 +53,9 @@ class _FakeMCPClient:
     async def connect(self):
         pass
 
+    def get_openai_tools(self):
+        return []
+
     async def close(self):
         pass
 
@@ -192,3 +195,191 @@ def test_r6_write_is_atomic_and_cleans_up(orch, tmp_path, monkeypatch):
         orch._write_run_record(str(state), dict(record, rc=0))
     assert set(os.listdir(state)) == before
     assert _record(state) == record
+
+
+# --- change-86c958dd (prompt-86c958dd A1, A2, A4): exit code and start record -------------------
+
+def _stub_loop(orch, monkeypatch, outcome):
+    """run_loop returns *outcome*, or raises it when it is an exception."""
+
+    async def run_loop(*args, **kwargs):
+        if isinstance(outcome, BaseException):
+            raise outcome
+        return outcome
+
+    monkeypatch.setattr(orch, "run_loop", run_loop)
+
+
+def _log_lines(state, logger):
+    for handler in list(logger.handlers):
+        handler.flush()
+    (log_file,) = state.glob("engine_*.LOG")
+    return log_file.read_text().splitlines()
+
+
+@pytest.mark.parametrize("loop_rc", [0, 2])
+def test_a1a_record_holds_the_returned_code(orch, project, monkeypatch, isolated_engine_logger,
+                                            loop_rc):
+    _stub_providers(orch, monkeypatch)
+    _stub_loop(orch, monkeypatch, loop_rc)
+    config = _legacy_config(project, "ai/state/a1a")
+    assert _run(orch, _main_args(config, task="do the work"), isolated_engine_logger) == loop_rc
+    record = _record(project / "ai" / "state" / "a1a")
+    assert record["rc"] == loop_rc
+    assert "error" not in record
+    assert _is_iso(record["ended"])
+
+
+def _manifest_error(orch, monkeypatch, project):
+    def broken(self, run_type):
+        raise M.ManifestError("recipe missing")
+
+    monkeypatch.setattr(M.Manifest, "recipe_paths", broken)
+    return "do the work"
+
+
+def _not_ready_provider(orch, monkeypatch, project):
+    monkeypatch.setattr(P.OpenAICompatProvider, "await_ready", _not_ready)
+    return "do the work"
+
+
+def _strict_brief(orch, monkeypatch, project):
+    (project / "strict.md").write_text("```yaml\nprompt_info:\n  target_profile: engine\n```\n")
+    return "strict.md"
+
+
+def _no_task(orch, monkeypatch, project):
+    return None
+
+
+@pytest.mark.parametrize("early_return", [_manifest_error, _not_ready_provider, _strict_brief,
+                                          _no_task])
+def test_a1b_early_returns_record_rc_1(orch, project, monkeypatch, isolated_engine_logger,
+                                       early_return):
+    _stub_providers(orch, monkeypatch)
+    _stub_loop(orch, monkeypatch, AssertionError("run_loop reached"))
+    task = early_return(orch, monkeypatch, project)
+    config = _legacy_config(project, "ai/state/a1b")
+    cfg = yaml.safe_load(config.read_text())
+    cfg["execution"] = {"strict_tactical_brief": True}
+    config.write_text(yaml.safe_dump(cfg))
+    assert _run(orch, _main_args(config, task=task), isolated_engine_logger) == 1
+    record = _record(project / "ai" / "state" / "a1b")
+    assert record["rc"] == 1
+    assert "error" not in record
+
+
+def _raise_after_rc_0(orch, monkeypatch):
+    _stub_loop(orch, monkeypatch, 0)
+
+    def finish(*args, **kwargs):
+        raise RuntimeError("finish failed")
+
+    monkeypatch.setattr(orch, "_finish_run", finish)
+    return RuntimeError
+
+
+def _interrupt_loop(orch, monkeypatch):
+    _stub_loop(orch, monkeypatch, KeyboardInterrupt())
+    return KeyboardInterrupt
+
+
+@pytest.mark.parametrize("setup", [_raise_after_rc_0, _interrupt_loop])
+def test_a1c_exception_records_rc_null_and_type(orch, project, monkeypatch,
+                                                isolated_engine_logger, setup):
+    _stub_providers(orch, monkeypatch)
+    exc_type = setup(orch, monkeypatch)
+    config = _legacy_config(project, "ai/state/a1c")
+    with pytest.raises(exc_type):
+        asyncio.run(orch.main_async(_main_args(config, task="do the work")))
+    state = project / "ai" / "state" / "a1c"
+    record = _record(state)
+    assert record["rc"] is None
+    assert record["error"] == exc_type.__name__
+    assert _is_iso(record["ended"])
+    last = _log_lines(state, isolated_engine_logger)[-1]
+    assert last.split(" INFO ", 1)[1].startswith("engine end rc=")  # "<timestamp> INFO <message>"
+
+
+def test_a2a_start_record_build_failure_is_a_warning(orch, project, monkeypatch,
+                                                     isolated_engine_logger):
+    """datetime.datetime.now raises once, at the start record (the first call after setup_logging)."""
+    _stub_providers(orch, monkeypatch)
+    _stub_loop(orch, monkeypatch, 0)
+    armed = {"on": False}
+    real_datetime = orch.datetime.datetime
+
+    class _FailingNow(real_datetime):
+        @classmethod
+        def now(cls, tz=None):
+            if armed["on"]:
+                armed["on"] = False
+                raise OSError("clock unavailable")
+            return real_datetime.now(tz)
+
+    fake_module = type(orch.datetime)("datetime")
+    fake_module.__dict__.update(vars(orch.datetime))
+    fake_module.datetime = _FailingNow
+    monkeypatch.setattr(orch, "datetime", fake_module)
+    real_setup = orch.setup_logging
+
+    def setup_then_arm(state_dir):
+        logger = real_setup(state_dir)
+        armed["on"] = True
+        return logger
+
+    monkeypatch.setattr(orch, "setup_logging", setup_then_arm)
+    config = _legacy_config(project, "ai/state/a2a")
+    assert _run(orch, _main_args(config, task="do the work"), isolated_engine_logger) == 0
+    state = project / "ai" / "state" / "a2a"
+    lines = _log_lines(state, isolated_engine_logger)
+    assert any("WARNING" in ln and "run record not written: clock unavailable" in ln for ln in lines)
+    assert "engine end rc=0" in lines[-1]
+    assert not (state / "run.json").exists()
+
+
+def test_a2b_end_write_failure_keeps_start_record(orch, project, monkeypatch,
+                                                  isolated_engine_logger):
+    """F-05: only the second _write_run_record call fails."""
+    _stub_providers(orch, monkeypatch)
+    _stub_loop(orch, monkeypatch, 2)
+    real_write = orch._write_run_record
+    calls = {"n": 0}
+
+    def second_fails(state_dir, record):
+        calls["n"] += 1
+        if calls["n"] == 2:
+            raise OSError("disk full")
+        real_write(state_dir, record)
+
+    monkeypatch.setattr(orch, "_write_run_record", second_fails)
+    config = _legacy_config(project, "ai/state/a2b")
+    assert _run(orch, _main_args(config, task="do the work"), isolated_engine_logger) == 2
+    assert calls["n"] == 2
+    state = project / "ai" / "state" / "a2b"
+    lines = _log_lines(state, isolated_engine_logger)
+    assert any("WARNING" in ln and "run record not written: disk full" in ln for ln in lines)
+    assert "engine end rc=2" in lines[-1]
+    record = _record(state)
+    assert record["ended"] is None and record["rc"] is None
+
+
+def test_a4_manifest_version_tracks_governance():
+    """manifest.yaml states the version of the last governance.md version-history row (P-02)."""
+    import re
+    root = os.path.join(os.path.dirname(__file__), "..", "..", "ai", "governance",
+                        "software-engineering")
+    with open(os.path.join(root, "manifest.yaml")) as fh:
+        manifest_version = yaml.safe_load(fh)["model"]["version"]
+    with open(os.path.join(root, "governance.md")) as fh:
+        text = fh.read()
+    history = text[text.index("\n## Version History"):]
+    history = history[:history.index("\n## ", 1)]
+    rows = re.findall(r"^\| *([0-9]+\.[0-9]+) *\|", history, re.MULTILINE)
+    assert manifest_version == rows[-1]
+
+
+def test_c_run_json_is_a_signal_file():
+    """audit-b8a6c445 F-05 (A8): run.json is protected from worker writes."""
+    import scope as S
+    assert "run.json" in S.SIGNAL_FILES

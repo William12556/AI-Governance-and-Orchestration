@@ -353,9 +353,12 @@ def _finished_pid() -> int:
     return child.pid
 
 
-def _run_json(pid: int, ended=None, rc=None, task_file=None) -> str:
+_STARTED = "2026-11-05T10:00:00+00:00"
+
+
+def _run_json(pid, ended=None, rc=None, task_file=None, started=_STARTED) -> str:
     return json.dumps({"mode": "loop", "task_file": task_file, "pid": pid,
-                       "started": "2026-11-05T10:00:00+00:00", "ended": ended, "rc": rc})
+                       "started": started, "ended": ended, "rc": rc})
 
 
 _ENDED = "2026-11-05T10:05:00+00:00"
@@ -405,7 +408,11 @@ def _workspace_with_prompt(root: Path) -> Path:
 @pytest.mark.parametrize("which, alerted", [("prompt", False), ("unnormalised", False),
                                             ("other", True), ("copy", True), ("text", True)])
 def test_o2_fr_02_06_compares_task_file(tmp_path: Path, which, alerted) -> None:
-    """FR-02-06 matches the run record's task_file to an open prompt by path (FR-D)."""
+    """FR-02-06 matches the run record's task_file to an open prompt by path (FR-D).
+
+    change-86c958dd (audit-b8a6c445 F-03): the record is live, since FR-02-06
+    is evaluated only while the engine runs.
+    """
     prompt = _workspace_with_prompt(tmp_path)
     task_file = {
         "prompt": str(prompt),
@@ -416,8 +423,7 @@ def test_o2_fr_02_06_compares_task_file(tmp_path: Path, which, alerted) -> None:
     }[which]
     paths = overwatch.resolve_paths(tmp_path)
     paths.engine_state.mkdir(parents=True)
-    (paths.engine_state / "run.json").write_text(
-        _run_json(os.getpid(), ended=_ENDED, rc=0, task_file=task_file))
+    (paths.engine_state / "run.json").write_text(_run_json(os.getpid(), task_file=task_file))
 
     alerts = [a for a in overwatch.Scanner(paths).scan().alerts if a.code == "FR-02-06"]
 
@@ -476,3 +482,196 @@ def test_o6_ended_run_with_open_prompt_awaits_execution() -> None:
     )
 
     assert overwatch.PhaseInference().infer(snap) == "Awaiting prompt execution"
+
+
+# ---------------------------------------------------------------------------
+# change-86c958dd (prompt-86c958dd B1 to B3, C): marker age, FR-02-06 scope,
+# file identity, audit-b8a6c445 F-05 gaps
+# ---------------------------------------------------------------------------
+
+
+def _started_ts(started: str) -> int:
+    return int(datetime.datetime.fromisoformat(started).timestamp())
+
+
+@pytest.mark.parametrize(
+    "marker, offset, started, status",
+    [
+        ("BLOCKED.md", -10, _STARTED, "ended"),
+        ("BLOCKED.md", 10, _STARTED, "blocked"),
+        (".complete", -10, _STARTED, "ended"),
+        (".complete", 10, _STARTED, "ship"),
+        ("BLOCKED.md", -10, "not-a-date", "blocked"),
+        (".complete", -10, "not-a-date", "ship"),
+    ],
+)
+def test_b1_marker_older_than_run_start_gives_ended(tmp_path: Path, marker, offset, started,
+                                                     status) -> None:
+    """A marker counts for an ended record only when not older than its start (F-02)."""
+    paths = overwatch.resolve_paths(tmp_path)
+    paths.engine_state.mkdir(parents=True)
+    (paths.engine_state / "run.json").write_text(
+        _run_json(os.getpid(), ended=_ENDED, rc=1, started=started))
+    marker_path = paths.engine_state / marker
+    marker_path.write_text("# BLOCKED\n" if marker == "BLOCKED.md" else "")
+    t = _started_ts(_STARTED)  # 'not-a-date' cases: mtime relative to the fixture time
+    os.utime(marker_path, (t + offset, t + offset))
+
+    assert overwatch.Scanner(paths)._read_engine_state().status == status
+
+
+def test_b1_stale_blocked_does_not_hide_current_complete(tmp_path: Path) -> None:
+    """With an older BLOCKED.md and a current .complete, the order gives ship (F-02)."""
+    paths = overwatch.resolve_paths(tmp_path)
+    paths.engine_state.mkdir(parents=True)
+    (paths.engine_state / "run.json").write_text(_run_json(os.getpid(), ended=_ENDED, rc=0))
+    t = _started_ts(_STARTED)
+    for name, offset in (("BLOCKED.md", -10), (".complete", 10)):
+        (paths.engine_state / name).write_text("x")
+        os.utime(paths.engine_state / name, (t + offset, t + offset))
+
+    assert overwatch.Scanner(paths)._read_engine_state().status == "ship"
+
+
+def _fr_02_06(root: Path, record: str) -> list:
+    paths = overwatch.resolve_paths(root)
+    paths.engine_state.mkdir(parents=True)
+    (paths.engine_state / "run.json").write_text(record)
+    return [a for a in overwatch.Scanner(paths).scan().alerts if a.code == "FR-02-06"]
+
+
+@pytest.mark.parametrize("live, alerted", [(False, False), (True, True)])
+def test_b2_fr_02_06_only_while_running(tmp_path: Path, live, alerted) -> None:
+    """FR-02-06 is evaluated only while the engine status is running (F-03)."""
+    _workspace_with_prompt(tmp_path)
+    other = str(tmp_path / "elsewhere.md")
+    record = (_run_json(os.getpid(), task_file=other) if live
+              else _run_json(os.getpid(), ended=_ENDED, rc=0, task_file=other))
+
+    assert bool(_fr_02_06(tmp_path, record)) is alerted
+
+
+def _case_insensitive(directory: Path) -> bool:
+    probe = directory / "CaseProbe.tmp"
+    probe.write_text("")
+    try:
+        return (directory / "caseprobe.tmp").exists()
+    finally:
+        probe.unlink()
+
+
+@pytest.mark.parametrize("which, alerted", [("symlink", False), ("case", False),
+                                            ("missing", True)])
+def test_b3_fr_02_06_compares_file_identity(tmp_path: Path, which, alerted) -> None:
+    """FR-02-06 compares the task file and the open prompt by file identity (F-04)."""
+    prompt = _workspace_with_prompt(tmp_path)
+    if which == "symlink":
+        link = tmp_path / "link.md"
+        link.symlink_to(prompt)
+        task_file = str(link)
+    elif which == "case":
+        if not _case_insensitive(tmp_path):
+            pytest.skip("tmp file system is case-sensitive")
+        task_file = str(prompt.parent / prompt.name.upper())
+    else:
+        task_file = str(prompt.parent / "prompt-9f8e7d6c-missing.md")
+
+    assert bool(_fr_02_06(tmp_path, _run_json(os.getpid(), task_file=task_file))) is alerted
+
+
+def test_same_file_helper_returns_false_on_errors(tmp_path: Path) -> None:
+    """The helper compares as not the same file on OSError and ValueError (F-04)."""
+    f = tmp_path / "a.md"
+    f.write_text("x")
+    assert overwatch._same_file(str(f), str(f)) is True
+    assert overwatch._same_file(str(f), str(tmp_path / "missing.md")) is False
+    assert overwatch._same_file(str(f), "bad\0path") is False
+
+
+@pytest.mark.parametrize(
+    "case, record, extra, status, rc",
+    [
+        ("pid bool", {"pid": True}, {}, "unknown", None),
+        ("pid str", {"pid": "123"}, {}, "unknown", None),
+        ("ended number", {"ended": 5}, {}, "unknown", None),
+        ("rc bool", {"ended": _ENDED, "rc": True}, {}, "ended", None),
+        ("invalid + BLOCKED.md", {"pid": "123"}, {"BLOCKED.md": "# BLOCKED\n"}, "blocked", None),
+        ("live + .complete", {}, {".complete": ""}, "running", None),
+    ],
+)
+def test_c_o1_record_validation(tmp_path: Path, case, record, extra, status, rc) -> None:
+    """audit-b8a6c445 F-05: O1 cases for field types and marker precedence."""
+    data = json.loads(_run_json(os.getpid()))
+    data.update(record)
+    paths = overwatch.resolve_paths(tmp_path)
+    paths.engine_state.mkdir(parents=True)
+    (paths.engine_state / "run.json").write_text(json.dumps(data))
+    for name, content in extra.items():
+        (paths.engine_state / name).write_text(content)
+
+    eng = overwatch.Scanner(paths)._read_engine_state()
+
+    assert eng.status == status
+    assert eng.rc == rc
+
+
+@pytest.mark.parametrize("pid", [0, -1])
+def test_c_pid_alive_rejects_non_process_pids(pid, monkeypatch) -> None:
+    """audit-b8a6c445 F-05: a pid of 0 or below is not alive; os.kill is not called."""
+    def kill(p, sig):
+        raise AssertionError("os.kill called")
+
+    monkeypatch.setattr(overwatch.os, "kill", kill)
+    assert overwatch._pid_alive(pid) is False
+
+
+def test_c_pid_alive_permission_error_is_alive(monkeypatch) -> None:
+    """audit-b8a6c445 F-05: PermissionError means the process exists under another user."""
+    def kill(p, sig):
+        raise PermissionError
+
+    monkeypatch.setattr(overwatch.os, "kill", kill)
+    assert overwatch._pid_alive(12345) is True
+
+
+@pytest.mark.parametrize("task_file, task_ref", [("/proj/ai/workspace/prompt/prompt-1a2b3c4d-x.md",
+                                                  "prompt-1a2b3c4d-x.md"),
+                                                 (None, "text task")])
+def test_c_task_ref(tmp_path: Path, task_file, task_ref) -> None:
+    """audit-b8a6c445 F-05: task_ref is the task file's name, or 'text task'."""
+    paths = overwatch.resolve_paths(tmp_path)
+    paths.engine_state.mkdir(parents=True)
+    (paths.engine_state / "run.json").write_text(
+        _run_json(os.getpid(), ended=_ENDED, rc=0, task_file=task_file))
+
+    eng = overwatch.Scanner(paths)._read_engine_state()
+
+    assert eng.task_ref == task_ref
+    assert eng.task_file == task_file
+
+
+def test_c_task_ref_absent_without_record(tmp_path: Path) -> None:
+    paths = overwatch.resolve_paths(tmp_path)
+    paths.engine_state.mkdir(parents=True)
+    assert overwatch.Scanner(paths)._read_engine_state().task_ref is None
+
+
+def test_c_fr_02_06_silent_with_invalid_record(tmp_path: Path) -> None:
+    """audit-b8a6c445 F-05: an invalid run record raises no FR-02-06."""
+    _workspace_with_prompt(tmp_path)
+    assert _fr_02_06(tmp_path, json.dumps({"pid": "123", "task_file": "/elsewhere.md"})) == []
+
+
+def test_c_o3_document_directly_in_test_dir(tmp_path: Path) -> None:
+    """audit-b8a6c445 F-05: a document directly in test/ is scanned beside test/result/."""
+    test_dir = tmp_path / "ai" / "workspace" / "test"
+    (test_dir / "result").mkdir(parents=True)
+    (test_dir / "test-5e6f7a8b-y.md").write_text("# test\n")
+    (test_dir / "result" / "result-1a2b3c4d-x.md").write_text("# result\n")
+
+    docs = overwatch.Scanner(overwatch.resolve_paths(tmp_path)).scan().documents
+
+    assert sorted((d.cls, os.path.basename(d.path)) for d in docs) == [
+        ("result", "result-1a2b3c4d-x.md"),
+        ("test", "test-5e6f7a8b-y.md"),
+    ]
