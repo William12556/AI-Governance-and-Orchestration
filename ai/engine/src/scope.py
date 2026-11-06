@@ -6,7 +6,8 @@ the loop's deliverable tracking and mcp_client's read-only filter all use
 is_write_tool / is_readonly_tool. Classification is fail-closed
 (change-a5bd4fe1, audit-caab2052 L-01): a tool is read-only only when its name
 matches a read-only pattern and contains no write verb; every other tool,
-including one whose name is not recognised, is a write tool.
+including one whose name is not recognised, is a write tool. Write verbs are
+matched in any letter case (change-b8c75bac, audit-a5bd4fe1 F-02).
 
 For a T03 prompt task the worker may write only (FR-05-01):
     - the prompt's deliverable.files paths (exact files),
@@ -39,8 +40,12 @@ WRITE_TOOLS = frozenset({
     "mkdir", "create_directory", "makedirs",
     "create", "patch", "replace_text", "search_and_replace",
 })
+# change-b8c75bac (audit-a5bd4fe1 F-02): append to insert added; matched with
+# re.IGNORECASE, so searchAndReplace or ReadAndWrite is a write tool.
 WRITE_NAME_PATTERNS = (r"replace", r"write", r"edit", r"create", r"delete",
-                       r"remove", r"move", r"rename", r"patch", r"mkdir")
+                       r"remove", r"move", r"rename", r"patch", r"mkdir",
+                       r"append", r"copy", r"truncate", r"save", r"update",
+                       r"upload", r"set", r"put", r"insert")
 # change-a5bd4fe1 (audit-caab2052 L-01): ^diff and ^count added (filesystem-mcp
 # diff, mcp-ripgrep count-matches), which the fail-closed rule would otherwise
 # classify as write tools.
@@ -68,9 +73,10 @@ def is_readonly_tool(name: str) -> bool:
     """
     Fail-closed: read-only only when the name matches a read-only pattern and
     is neither a known write tool nor contains a write verb (change-a5bd4fe1,
-    audit-caab2052 L-01).
+    audit-caab2052 L-01). Write verbs match in any letter case
+    (change-b8c75bac, audit-a5bd4fe1 F-02).
     """
-    if name in WRITE_TOOLS or any(re.search(p, name) for p in WRITE_NAME_PATTERNS):
+    if name in WRITE_TOOLS or any(re.search(p, name, re.IGNORECASE) for p in WRITE_NAME_PATTERNS):
         return False
     return any(re.match(p, name) for p in READONLY_TOOL_PATTERNS)
 

@@ -60,7 +60,8 @@ from typing import Any, Callable
 sys.path.insert(0, os.path.dirname(__file__))
 from mcp_client import MCPClient
 from providers import (ConfigError, ProviderError, as_provider, build_role_bindings,
-                       query_omlx_context_window as _query_omlx_context_window)
+                       query_omlx_context_window as _query_omlx_context_window,
+                       validate_timeout)
 import gates as G
 import scope as S
 import stages as ST
@@ -274,21 +275,33 @@ def _validate_audit_report_write(tool_name: str, arguments: dict, state_dir: str
 
     Returns None if safe (not a write tool, not this file, file absent/empty,
     or existing content is preserved in the new content). Returns an error
-    message string otherwise.
+    message string otherwise. Never raises for any argument shape: non-string
+    paths are ignored and a non-string content counts as empty
+    (change-b8c75bac, audit-5e8aea4f F-01).
     """
     if tool_name not in ("write", "write_file", "create_file", "create"):
         return None
+
+    def _content(obj: dict) -> str:
+        value = obj.get("content")
+        return value if isinstance(value, str) else ""
+
     # change-c37198be (D3): filesystem-mcp 2.x `create` batches files[{path, content}].
-    writes = [(arguments.get("path") or arguments.get("file_path") or "", arguments.get("content"))]
-    writes += [(f.get("path") or f.get("file_path") or "", f.get("content"))
-               for f in arguments.get("files") or [] if isinstance(f, dict)]
+    # change-b8c75bac (audit-5e8aea4f F-01): string paths only (scope.path_values);
+    # files is read only when it is a list.
+    writes = [(p, _content(arguments)) for p in S.path_values(arguments, ("path", "file_path"))]
+    files = arguments.get("files")
+    if isinstance(files, list):
+        for f in files:
+            if isinstance(f, dict):
+                writes += [(p, _content(f)) for p in S.path_values(f, ("path", "file_path"))]
     report_path = os.path.join(state_dir, "audit-report.md")
     if not os.path.exists(report_path):
         return None
     existing = open(report_path).read().strip()
     if not existing:
         return None
-    if all(os.path.basename(t) != "audit-report.md" or existing in (c or "").strip()
+    if all(os.path.basename(t) != "audit-report.md" or existing in c.strip()
            for t, c in writes):
         return None
     return (
@@ -596,6 +609,30 @@ def _archive_audit_artifacts(state_dir: str, task_path: str | None, log: logging
 def load_yaml(path: str) -> dict:
     with open(path) as f:
         return yaml.safe_load(f)
+
+
+def _load_config(path: str) -> dict:
+    """
+    Load ai/config.yaml (change-b8c75bac, audit-14e05e35 L-08; NFR-04).
+
+    Raises ConfigError for a file that cannot be read, invalid YAML (with the
+    line when the parser reports one) or a top level that is not a mapping.
+    Recipe files keep load_yaml.
+    """
+    try:
+        with open(path, "rb") as f:
+            config = yaml.safe_load(f)
+    except OSError as e:
+        raise ConfigError(f"cannot read file: {e.strerror or e}") from None
+    except yaml.MarkedYAMLError as e:
+        if e.problem_mark is None:
+            raise ConfigError("invalid YAML") from None
+        raise ConfigError(f"invalid YAML: {e.problem} at line {e.problem_mark.line + 1}") from None
+    except yaml.YAMLError:
+        raise ConfigError("invalid YAML") from None
+    if not isinstance(config, dict):
+        raise ConfigError("top level must be a mapping")
+    return config
 
 
 def _substitute_project_root(config: dict) -> dict:
@@ -1248,7 +1285,9 @@ async def run_phase(
             # change-a2f9c4d1: persist a deliverable manifest before returning
             if is_worker_phase:
                 _synthesize_work_summary(state_dir, _written_paths, "wall-clock cap reached", log)
-            return 0, "", set(_read_counts.keys()) if not is_worker_phase else set()
+            # change-b8c75bac (d7f4a1c8 P08 review): normalised as at the other exits
+            _read_paths = {os.path.abspath(p) for p in _read_counts.keys()} if not is_worker_phase else set()
+            return 0, "", _read_paths
 
         # Context budget check before API call
         if context_window is not None:
@@ -1506,9 +1545,12 @@ async def run_phase(
 
             # P1c: edit pattern-not-found — targeted file-read instruction
             # change-711a57d5 (M-01): not for a call with malformed arguments.
+            # change-b8c75bac (audit-a5bd4fe1 F-01): only for a dispatched call;
+            # a refusal echoes the worker's path, which can carry the marker.
             _edit_pattern_failed = (
                 tc["name"] in ("edit", "edit_file")
                 and isinstance(tc["arguments"], dict)
+                and not _scope_err and not _report_err
                 and any(s in result for s in _EDIT_PATTERN_ERRORS)
             )
             if _edit_pattern_failed:
@@ -1534,6 +1576,11 @@ async def run_phase(
                     try:
                         _ep_proc = G.compile_file(_ep_path, timeout=_SUBPROCESS_TIMEOUT_SECONDS)
                     except subprocess.TimeoutExpired:
+                        _ep_proc = None
+                    except Exception as exc:
+                        # change-b8c75bac (audit-a5bd4fe1 F-01): as a timeout
+                        log.warning("%s check: compile of %s failed (%s); not checked",
+                                    "edit-failure", _ep_path, type(exc).__name__)
                         _ep_proc = None
                     if _ep_proc is not None and _ep_proc.returncode != 0:
                         _ep_msg += (
@@ -1605,6 +1652,11 @@ async def run_phase(
                         try:
                             proc = G.compile_file(_py_path, timeout=_SUBPROCESS_TIMEOUT_SECONDS)
                         except subprocess.TimeoutExpired:
+                            continue
+                        except Exception as exc:
+                            # change-b8c75bac (audit-a5bd4fe1 F-01): as a timeout
+                            log.warning("%s check: compile of %s failed (%s); not checked",
+                                        "post-write", _py_path, type(exc).__name__)
                             continue
                         if proc.returncode != 0:
                             err = proc.stderr.strip()
@@ -2465,6 +2517,13 @@ def _resolve_gate_specs(manifest, config: dict) -> dict[str, dict]:
         override = gcfg.get(name) or {}
         if not isinstance(override, dict):
             raise ConfigError(f"gates.{name}: must be a mapping")
+        # change-b8c75bac (audit-14e05e35 L-08; NFR-04): the ai/config.yaml
+        # override is checked here; manifest values are checked in manifest.py.
+        if "timeout_seconds" in override:
+            _gt = override["timeout_seconds"]
+            if (isinstance(_gt, bool) or not isinstance(_gt, (int, float))
+                    or (isinstance(_gt, float) and not math.isfinite(_gt)) or _gt <= 0):
+                raise ConfigError(f"gates.{name}.timeout_seconds: must be a positive number")
         specs[name] = {
             "command": override.get("command") or g["command"],
             "timeout_seconds": override.get("timeout_seconds") or g.get("timeout_seconds", G.DEFAULT_TIMEOUT_SECONDS),
@@ -2542,8 +2601,19 @@ def _annotate_blocked_return(state_dir: str, loop_stage, work_item: str | None,
 
 
 async def main_async(args: argparse.Namespace) -> int:
-    config    = load_yaml(args.config)
-    state_dir = os.path.abspath(config["loop"]["state_dir"])
+    # change-b8c75bac (audit-14e05e35 L-08; NFR-04): file, top level, loop and
+    # loop.state_dir are checked before the reset branch and any state change.
+    try:
+        config = _load_config(args.config)
+        if not isinstance(config.get("loop"), dict):
+            raise ConfigError("loop: required and must be a mapping")
+        _state_rel = config["loop"].get("state_dir")
+        if not isinstance(_state_rel, str) or not _state_rel:
+            raise ConfigError("loop.state_dir: required and must be a non-empty string")
+    except ConfigError as e:
+        console.print(f"[red][engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
+        return 1
+    state_dir = os.path.abspath(_state_rel)
 
     # Reset mode — no model or MCP connection required
     if args.mode == "reset":
@@ -2610,6 +2680,15 @@ async def main_async(args: argparse.Namespace) -> int:
     elif work_item and not _tracked:
         console.print(f"[yellow][engine] work item {escape(work_item)}: prompt is outside "
                       f"ai/workspace/ — not tracked[/yellow]")
+    # change-b8c75bac (audit-14e05e35 L-08; NFR-04): checked before any state change.
+    if not args.max_iterations:
+        _cfg_max_iter = config["loop"].get("max_iterations")
+        if (isinstance(_cfg_max_iter, bool) or not isinstance(_cfg_max_iter, int)
+                or _cfg_max_iter <= 0):
+            console.print(f"[red][engine] configuration error ({escape(args.config)}): "
+                          "loop.max_iterations: required as a positive integer "
+                          "unless --max-iterations is given[/red]")
+            return 1
     max_iter          = args.max_iterations or config["loop"]["max_iterations"]
     deadline          = time.monotonic() + args.duration * 3600 if args.duration else None
     phase_max_iter    = config["loop"].get("phase_max_iterations", max_iter)
@@ -2621,14 +2700,17 @@ async def main_async(args: argparse.Namespace) -> int:
     phase_duration_seconds = _phase_duration_min * 60 if _phase_duration_min else None
     # change-711a57d5 (audit-caab2052 M-06): MCP request read timeout. Checked
     # before setup_logging, so a refused run writes no state.
+    # change-b8c75bac (audit-5e8aea4f F-02; operator decision 2026-11-06): the
+    # shared validation with a maximum of 86400 s; the message names the file.
     mcp_timeout           = config["loop"].get("mcp_timeout_seconds")
     if mcp_timeout is None:
         mcp_timeout = 120.0
-    elif (isinstance(mcp_timeout, bool) or not isinstance(mcp_timeout, (int, float))
-          or not math.isfinite(mcp_timeout) or mcp_timeout <= 0):
-        # change-5e8aea4f (audit-711a57d5 F-03): nan and inf rejected
-        console.print("[red][engine] config error: loop.mcp_timeout_seconds: must be a positive number[/red]")
-        return 1
+    else:
+        try:
+            mcp_timeout = validate_timeout(mcp_timeout, "loop.mcp_timeout_seconds")
+        except ConfigError as e:
+            console.print(f"[red][engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
+            return 1
     model          = worker_b.model  # worker binding; used for banners and the context report
 
     # Execution controls (opt-in, default disabled)
