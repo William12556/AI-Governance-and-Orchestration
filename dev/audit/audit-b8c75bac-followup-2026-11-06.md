@@ -16,6 +16,7 @@ Created: 2026 November 6
 - [8.0 Findings](#80-findings)
 - [9.0 T08 Record](#90-t08-record)
 - [10.0 Closure Recommendation](#100-closure-recommendation)
+- [11.0 Dispositions](#110-dispositions)
 - [Version History](#version-history)
 
 ---
@@ -300,11 +301,32 @@ metadata:
 
 ---
 
+## 11.0 Dispositions
+
+Recorded by the planner on operator approval, 2026-11-06.
+
+| Finding | Disposition |
+|---|---|
+| F-01 | Documented and accepted: the substring rule and an example in design-14e05e35 v1.25 §7.0 and guide-engine-operations v1.28 §8.7. No code change |
+| F-02 | Corrected: issue-b8c75bac v1.2 set to resolved, with the version entry |
+| F-03 | Registered in `dev/task.md` work item 6 (test coverage gaps): X05, X16, X17; X03, X06, X09 optional |
+| F-04 | No action |
+| F-05 | Registered in `dev/task.md` work item 5 as part (g): map `RecursionError` in `_load_config` to `invalid YAML` |
+| F-06 | Recorded: the correct reference for "no state on a configuration error" is design-14e05e35 §11.0, not FR-08-05. The closed documents are not edited; no requirement changes |
+| F-07 | No action |
+
+The full suite on macOS, including `tests/engine/test_engine_mcp.py`, gave 552 passed (operator, 2026-11-06, at `a80bc0d`); `protocol_checker.py dev` 0 errors. change-b8c75bac is verified and closed. This audit stays active until work item 6 resolves F-03.
+
+[Return to Table of Contents](#table-of-contents)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-06 | Initial follow-up audit of change-b8c75bac |
+| 1.1 | 2026-11-06 | §11.0 Dispositions added by the planner (operator approval) |
 
 ---
 

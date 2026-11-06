@@ -5,7 +5,7 @@ change_info:
   id: "change-b8c75bac"
   title: "Engine argument and config robustness (Stage C work item 1)"
   date: "2026-11-06"
-  status: "implemented"  # planner review and live check passed; follow-up audit pending
+  status: "closed"  # verified: audit-b8c75bac, macOS suite and live check; operator approval 2026-11-06
   priority: "low"
   iteration: 2
   coupled_docs:
@@ -217,6 +217,16 @@ version_history:
       - "Live check in dev/smoke (propagated) with task-scoped.md and --config config-mistral.reference.yaml, PYTHONDONTWRITEBYTECODE=1, 2026-11-06 (engine_20261106-123150.LOG): SHIP after 2 loop iterations, rc 0. A run with --config naming a missing file printed 'configuration error (ai/no-such-config.yaml): cannot read file: No such file or directory' and exited 1"
       - "Observed in the live check (report §6.0 item 5): Rich consumes the '[engine]' prefix of console lines; pre-existing, outside this change"
       - "Planner documents updated: design-14e05e35 v1.24 (§7.0 write verbs, §11.0 three rows), guide-engine-operations v1.27 (§3.0 configuration errors, §8.7 write verbs); §3.0 timeouts were updated before implementation (design v1.23, guide v1.26)"
+  - version: "1.3"
+    date: "2026-11-06"
+    changes:
+      - "Follow-up audit dev/audit/audit-b8c75bac-followup-2026-11-06.md (independent session, audited at a6e0c3e): FR-A1 to FR-D compliant; no regression; 16 named mutations and U1, U4, U5 killed; 0 critical, 0 high, 0 medium, 3 low, 4 info; none blocking"
+      - "Operator decisions 2026-11-06: F-01 documented and accepted (design-14e05e35 v1.25 §7.0, guide-engine-operations v1.28 §8.7); F-02 corrected (issue v1.2 resolved); F-03 to work item 6; F-05 to work item 5 (g); F-04, F-06, F-07 no action (audit §11.0)"
+      - "Full suite on macOS including tests/engine/test_engine_mcp.py: 552 passed (operator, a80bc0d); protocol_checker.py dev 0 errors"
+      - "All validation criteria met; status verified on operator approval"
+  - version: "1.4"
+    date: "2026-11-06"
+    changes: ["Closed on operator acceptance (P00.14.4); moved to dev/change/closed/ with the issue and report-b8c75bac. audit-a5bd4fe1 and audit-5e8aea4f closed and moved to dev/audit/closed/; audit-b8c75bac stays active until work item 6 resolves its F-03"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

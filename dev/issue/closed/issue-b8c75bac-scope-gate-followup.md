@@ -5,7 +5,7 @@ issue_info:
   id: "issue-b8c75bac"
   title: "Engine argument and config robustness: refused-call edit check, write verbs, audit-report write check, timeout extremes, config validation, read-path normalisation, test gaps"
   date: "2026-11-05"
-  status: "open"
+  status: "closed"  # change-b8c75bac verified and closed 2026-11-06
   severity: "low"
   type: "defect"
   iteration: 2
@@ -140,7 +140,7 @@ analysis:
     §8.4 is not part of this issue.
 
 resolution:
-  approach: "To be defined in change-b8c75bac."
+  approach: "Implemented by change-b8c75bac (b39fdca, 1073b35); follow-up audit audit-b8c75bac-followup-2026-11-06."
   change_ref: "change-b8c75bac"
 
 traceability:
@@ -156,6 +156,14 @@ version_history:
   - version: "1.1"
     date: "2026-11-06"
     changes: ["Iteration 2: added audit-5e8aea4f F-01 to F-04, audit-14e05e35 L-08 and the F28 read-path normalisation (Stage C work item 1); line numbers verified at 7440752"]
+  - version: "1.2"
+    date: "2026-11-06"
+    changes:
+      - "coupled_docs.change_iteration set to 2 with change-b8c75bac iteration 2 (P04; change v1.2)"
+      - "Status resolved: change-b8c75bac implemented (P03.7; audit-b8c75bac F-02)"
+  - version: "1.3"
+    date: "2026-11-06"
+    changes: ["Closed with change-b8c75bac on operator acceptance; moved to dev/issue/closed/"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

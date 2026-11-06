@@ -237,7 +237,7 @@ On BLOCKED the engine appends `Return to stage: <on_blocked>` to `BLOCKED.md` wh
 
 ## 7.0 Write Scope
 
-`scope.py` owns `WRITE_TOOLS`, the path-key tables and path extraction, moved from `orchestrator.py`. The loop and the scope check import them from there (FR-05-02). Classification is fail-closed: a tool is read-only only when its name starts with a read-only prefix (`read`, `list`, `grep`, `search`, `stat`, `get_file_info`, `find`, `head`, `tail`, `cat`, `diff`, `count`) and contains no write verb; every other tool, including an unrecognised one, is a write tool. Write verbs are matched in any letter case: `replace`, `write`, `edit`, `create`, `delete`, `remove`, `move`, `rename`, `patch`, `mkdir`, `append`, `copy`, `truncate`, `save`, `update`, `upload`, `set`, `put`, `insert` (change-b8c75bac). The class decides the scope check, deliverable tracking and the tools offered to the reviewer (change-a5bd4fe1).
+`scope.py` owns `WRITE_TOOLS`, the path-key tables and path extraction, moved from `orchestrator.py`. The loop and the scope check import them from there (FR-05-02). Classification is fail-closed: a tool is read-only only when its name starts with a read-only prefix (`read`, `list`, `grep`, `search`, `stat`, `get_file_info`, `find`, `head`, `tail`, `cat`, `diff`, `count`) and contains no write verb; every other tool, including an unrecognised one, is a write tool. Write verbs are matched in any letter case: `replace`, `write`, `edit`, `create`, `delete`, `remove`, `move`, `rename`, `patch`, `mkdir`, `append`, `copy`, `truncate`, `save`, `update`, `upload`, `set`, `put`, `insert` (change-b8c75bac). Verbs match anywhere in the name, not as whole words, so a read tool such as `list_datasets` or `read_output` is classified as a write tool; this fail-closed effect is accepted (audit-b8c75bac F-01). The class decides the scope check, deliverable tracking and the tools offered to the reviewer (change-a5bd4fe1).
 
 | Task | Allowed write targets |
 |---|---|
@@ -452,6 +452,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.25 | 2026-11-06 | §7.0: write verbs match as substrings; effect on read tool names accepted (audit-b8c75bac F-01). |
 | 1.24 | 2026-11-06 | §7.0: write verbs case-insensitive, list extended; §11.0: configuration errors in `ai/config.yaml`, audit-report check arguments, compile exceptions (change-b8c75bac). |
 | 1.23 | 2026-11-06 | §3.0 Timeouts: maximum of 86400 s for `request_timeout_seconds` and `loop.mcp_timeout_seconds` (audit-5e8aea4f F-02; change-b8c75bac). |
 | 1.22 | 2026-11-05 | §6.0: compile behaviour of the edit-failure, post-write and preflight checks; collection-pass interpreter requirement (audit-a5bd4fe1 F-03, F-05). |

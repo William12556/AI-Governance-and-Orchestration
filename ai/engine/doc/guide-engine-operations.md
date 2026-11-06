@@ -328,7 +328,7 @@ curl -s http://localhost:8000/v1/models -H "Authorization: Bearer local"
 
 **Remediation:** If the file is a genuine deliverable, add it to `deliverable.files` in the prompt and rerun. Directory creation on the way to a declared file is allowed. The reviewer receives the deliverables as absolute paths in a `[DELIVERABLES]` block.
 
-Related refusals (change-82dbf16a): `write refused: … is or contains an engine signal file` (the worker targeted an engine-owned state file, or a directory holding one; compared case-insensitively); `write refused: tool '…' was called without a recognised path argument`; `tool refused tool=… reason=…` in the log (a tool not offered to the phase, or any write tool in the review phase). Paths are compared after symlink resolution. `write refused: path '…' cannot be resolved` (for example a path containing a NUL character). A tool whose name the engine does not recognise as read-only is treated as a write tool: it is checked against the scope and not offered to the reviewer. Read-only names start with `read`, `list`, `grep`, `search`, `stat`, `get_file_info`, `find`, `head`, `tail`, `cat`, `diff` or `count` and contain no write verb (change-a5bd4fe1). Write verbs are matched in any letter case and include `append`, `copy`, `truncate`, `save`, `update`, `upload`, `set`, `put` and `insert`, so `searchAndReplace` or `read_and_append` is a write tool (change-b8c75bac).
+Related refusals (change-82dbf16a): `write refused: … is or contains an engine signal file` (the worker targeted an engine-owned state file, or a directory holding one; compared case-insensitively); `write refused: tool '…' was called without a recognised path argument`; `tool refused tool=… reason=…` in the log (a tool not offered to the phase, or any write tool in the review phase). Paths are compared after symlink resolution. `write refused: path '…' cannot be resolved` (for example a path containing a NUL character). A tool whose name the engine does not recognise as read-only is treated as a write tool: it is checked against the scope and not offered to the reviewer. Read-only names start with `read`, `list`, `grep`, `search`, `stat`, `get_file_info`, `find`, `head`, `tail`, `cat`, `diff` or `count` and contain no write verb (change-a5bd4fe1). Write verbs are matched in any letter case and include `append`, `copy`, `truncate`, `save`, `update`, `upload`, `set`, `put` and `insert`, so `searchAndReplace` or `read_and_append` is a write tool (change-b8c75bac). Verbs match anywhere in the name, so a read tool of another MCP server such as `list_datasets` or `read_output` is also treated as a write tool: it is not offered to the reviewer, and without a path argument the worker's call is refused (audit-b8c75bac F-01).
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -366,6 +366,7 @@ Related refusals (change-82dbf16a): `write refused: … is or contains an engine
 | 1.25 | 2026-11-05 | §7.0: collection pass conditions and interpreter; bytecode and project paths at the other compile checks (audit-a5bd4fe1 F-03, F-05) |
 | 1.26 | 2026-11-06 | §3.0: maximum timeout of 86400 seconds (change-b8c75bac) |
 | 1.27 | 2026-11-06 | §3.0: configuration errors; §8.7: write verbs in any letter case (change-b8c75bac) |
+| 1.28 | 2026-11-06 | §8.7: write verbs match as substrings (audit-b8c75bac F-01) |
 
 ---
 

@@ -275,6 +275,8 @@ Recorded by the planner on operator approval, 2026-11-05.
 
 The macOS suite (446 passed) and the live check in `dev/smoke` (SHIP in round 2, collection step shown, no bytecode in `src/`, two out-of-scope writes refused) were completed; change-a5bd4fe1 is verified and closed. This audit stays active until issue-b8c75bac is closed.
 
+Closed 2026-11-06: issue-b8c75bac and change-b8c75bac are closed (F-01, F-02 and F-04 remediated; follow-up audit audit-b8c75bac-followup-2026-11-06). No finding remains open; moved to `dev/audit/closed/`.
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -285,6 +287,7 @@ The macOS suite (446 passed) and the live check in `dev/smoke` (SHIP in round 2,
 |---|---|---|
 | 1.0 | 2026-11-05 | Initial follow-up audit of change-a5bd4fe1 |
 | 1.1 | 2026-11-05 | §11.0 Dispositions added by the planner (operator approval) |
+| 1.2 | 2026-11-06 | Closed: issue-b8c75bac closed; moved to `dev/audit/closed/` |
 
 ---
 

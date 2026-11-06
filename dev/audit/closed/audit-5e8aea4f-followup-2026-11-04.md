@@ -17,6 +17,7 @@ Created: 2026 November 4
 - [9.0 Positive Findings](#90-positive-findings)
 - [10.0 T08 Record](#100-t08-record)
 - [11.0 Closure Recommendation](#110-closure-recommendation)
+- [12.0 Dispositions](#120-dispositions)
 - [Version History](#version-history)
 
 ---
@@ -332,11 +333,27 @@ metadata:
 
 ---
 
+## 12.0 Dispositions
+
+Recorded by the planner, 2026-11-06.
+
+| Finding | Disposition |
+|---|---|
+| F-01 to F-04 | Remediated by change-b8c75bac (issue-b8c75bac iteration 2, part B), verified by audit-b8c75bac-followup-2026-11-06 and closed 2026-11-06. F-02 uses a maximum of 86400 s (operator decision 2026-11-06) |
+| Rich markup observation (§8.4) | Not counted; the related loss of the `[engine]` prefix is registered in `dev/task.md` work item 5 (f) |
+
+No finding remains open; moved to `dev/audit/closed/`.
+
+[Return to Table of Contents](#table-of-contents)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-04 | Initial strategic follow-up audit of change-5e8aea4f |
+| 1.1 | 2026-11-06 | §12.0 Dispositions added by the planner; closed and moved to `dev/audit/closed/` |
 
 ---
 
