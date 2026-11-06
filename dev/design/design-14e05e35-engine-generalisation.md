@@ -115,7 +115,7 @@ gates:
 | CLI | `--worker-model`, `--reviewer-model` and `--model` override the model within the role's provider. |
 | Model IDs | Roles use pinned model IDs, not `-latest` aliases, so runs are reproducible. Devstral is not available on the Mistral API (deprecated); a tested Mistral API model is `mistral-medium-2604` (`dev/reports/report-14e05e35-mistral-api-hypothesis.md`). Model choice per role is an operator decision. |
 | Gates | `gates.<name>` overrides the command gate of that name declared in the manifest (FR-03-03). |
-| Timeouts | `request_timeout_seconds` per provider (default 300 s, also accepted in the legacy `omlx:` block) bounds each model request. The SDK's own retries are off, so the engine's bounded retry (3 attempts) is the only retry. `loop.mcp_timeout_seconds` (default 120 s) bounds each MCP request (initialize, list_tools, call_tool). Both must be positive finite numbers; an invalid value, including NaN or infinity, stops the run before any state is written (change-711a57d5; change-5e8aea4f). |
+| Timeouts | `request_timeout_seconds` per provider (default 300 s, also accepted in the legacy `omlx:` block) bounds each model request. The SDK's own retries are off, so the engine's bounded retry (3 attempts) is the only retry. `loop.mcp_timeout_seconds` (default 120 s) bounds each MCP request (initialize, list_tools, call_tool). Both must be positive numbers of at most 86400 s (one day); an invalid value, including NaN, infinity, a larger value or one that cannot be converted to a float, stops the run before any state is written (change-711a57d5; change-5e8aea4f; change-b8c75bac). |
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -450,6 +450,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.23 | 2026-11-06 | §3.0 Timeouts: maximum of 86400 s for `request_timeout_seconds` and `loop.mcp_timeout_seconds` (audit-5e8aea4f F-02; change-b8c75bac). |
 | 1.22 | 2026-11-05 | §6.0: compile behaviour of the edit-failure, post-write and preflight checks; collection-pass interpreter requirement (audit-a5bd4fe1 F-03, F-05). |
 | 1.21 | 2026-11-05 | §6.0: syntax gate project paths, temporary bytecode cache, FAIL overrides SHIP; pytest collection-only pass. §7.0: fail-closed tool classification, unresolvable paths rejected. §11.0: four rows (change-a5bd4fe1). |
 | 1.20 | 2026-11-05 | §7.0: `run.json` added to the engine signal files; §11.0: run-record write failure (change-b8a6c445). |

@@ -77,7 +77,7 @@ omlx:
   api_key: "local"                        # oMLX bearer token
   default_model: "<worker-model-id>"     # worker/base model ID as reported by /v1/models
   reviewer_model: "<reviewer-model-id>"  # optional; reviewer-phase model (falls back to default_model)
-  request_timeout_seconds: 300           # optional; bound on one model request (default 300)
+  request_timeout_seconds: 300           # optional; bound on one model request (default 300, maximum 86400)
 
 # MCP server definitions
 mcp_servers:
@@ -102,7 +102,7 @@ loop:
   max_iterations: 5         # outer loop cycles (work+review pairs)
   phase_max_iterations: 20  # inner tool-call iterations per phase
   mcp_error_threshold: 3    # consecutive MCP errors before BLOCKED
-  mcp_timeout_seconds: 120  # optional; bound on one MCP request (default 120)
+  mcp_timeout_seconds: 120  # optional; bound on one MCP request (default 120, maximum 86400)
   max_tool_calls_per_iteration: 10  # tool call cap per inner iteration
   preflight_check: false    # evaluate success criteria before first worker pass
   state_dir: "ai/state"   # state directory path (relative to project root)
@@ -129,7 +129,7 @@ context:
 
 For audit runs, set `max_iterations` to at least the number of items in `audit-index.md`.
 
-**Timeouts (change-711a57d5):** `request_timeout_seconds` (in the `omlx:` block or in a `providers.<name>` block) bounds one model request; the engine makes up to 3 attempts per request, and the SDK does not retry on its own. HTTP 400, 401 and 403 are not retried. `loop.mcp_timeout_seconds` bounds one MCP request; a timeout reaches the worker as a tool error. If long local prefills on oMLX end in timeouts, raise `request_timeout_seconds` for that provider. Both timeouts must be positive finite numbers; `.nan` and `.inf` are refused (change-5e8aea4f).
+**Timeouts (change-711a57d5):** `request_timeout_seconds` (in the `omlx:` block or in a `providers.<name>` block) bounds one model request; the engine makes up to 3 attempts per request, and the SDK does not retry on its own. HTTP 400, 401 and 403 are not retried. `loop.mcp_timeout_seconds` bounds one MCP request; a timeout reaches the worker as a tool error. If long local prefills on oMLX end in timeouts, raise `request_timeout_seconds` for that provider. Both timeouts must be positive numbers of at most 86400 seconds (one day); `.nan`, `.inf` and larger values are refused, and the run stops before any state is written (change-5e8aea4f; change-b8c75bac).
 
 **Keys in error text (change-5e8aea4f):** in error text from a model request or the readiness check, a key from `api_key_env` or `api_key_keychain` appears as `API-KEY-REDACTED` in the run log, the console and `BLOCKED.md`, even when an endpoint echoes it back. Literal keys for `omlx` or a local `base_url` are not secrets and are shown unchanged.
 
@@ -362,6 +362,7 @@ Related refusals (change-82dbf16a): `write refused: … is or contains an engine
 | 1.23 | 2026-11-05 | §2.1: `run.json` run record (change-b8a6c445) |
 | 1.24 | 2026-11-05 | §7.0: syntax FAIL overrides SHIP, syntax gate bytecode and project paths, pytest collection-only pass; §8.7: unresolvable paths, fail-closed tool classification (change-a5bd4fe1) |
 | 1.25 | 2026-11-05 | §7.0: collection pass conditions and interpreter; bytecode and project paths at the other compile checks (audit-a5bd4fe1 F-03, F-05) |
+| 1.26 | 2026-11-06 | §3.0: maximum timeout of 86400 seconds (change-b8c75bac) |
 
 ---
 
