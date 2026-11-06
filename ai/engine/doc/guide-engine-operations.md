@@ -45,7 +45,7 @@ State files reside in `ai/state/` (configured via `loop.state_dir` in `config.ya
 | `.complete` | Orchestrator | Completion marker (see §5.0 for content variants) |
 | `BLOCKED.md` | Worker | Unrecoverable failure details; seeds T06 issue |
 | `context-budget.md` | Orchestrator | Context window sizing report for planner |
-| `run.json` | Orchestrator | Run record: mode, task file, pid, start and end time, exit code. Written at start and again at the end of every run after logging starts; Overwatch derives the engine status from it (change-b8a6c445). When the run ends with an exception, `rc` is null and `error` names the exception type (change-86c958dd) |
+| `run.json` | Orchestrator | Run record: mode, task file, pid, start and end time, exit code. Written at start and again at the end of every run after logging starts; Overwatch derives the engine status from it (change-b8a6c445). When the run ends with an exception, `rc` is null and `error` names the exception type (change-86c958dd); an interrupt (Ctrl-C) is recorded as `CancelledError` |
 | `engine_<timestamp>.LOG` | Orchestrator | Full debug log; preserved across reset |
 
 The worker may write `work-summary.txt`, `work-complete.txt` and `BLOCKED.md` only; writes to the other engine files are refused (change-82dbf16a).
@@ -368,6 +368,7 @@ Related refusals (change-82dbf16a): `write refused: … is or contains an engine
 | 1.27 | 2026-11-06 | §3.0: configuration errors; §8.7: write verbs in any letter case (change-b8c75bac) |
 | 1.28 | 2026-11-06 | §8.7: write verbs match as substrings (audit-b8c75bac F-01) |
 | 1.29 | 2026-11-06 | §2.1: `run.json` error field; §3.0: HTTP 404 not retried, per-model entry before the live query; §6.5: tier order (change-86c958dd) |
+| 1.30 | 2026-11-06 | §2.1: an interrupt is recorded as `CancelledError` (audit-86c958dd F-04) |
 
 ---
 

@@ -5,7 +5,7 @@ change_info:
   id: "change-86c958dd"
   title: "Run record, status and context-window order (Stage C work item 2)"
   date: "2026-11-06"
-  status: "implemented"  # planner review and live check passed; follow-up audit pending
+  status: "verified"  # audit-86c958dd, macOS suite and live check; operator approval 2026-11-06
   priority: "low"
   iteration: 2
   coupled_docs:
@@ -216,6 +216,16 @@ version_history:
       - "Live check in dev/smoke (propagated, governance 12.8) with task-scoped.md and --config config-mistral.reference.yaml, 2026-11-06: engine_20261106-140049.LOG: context window 262144 (tier 2: config per-model override) for the Devstral worker (393216 from the live query before this change) and for mistral-medium-2604; SHIPPED iteration=1; engine end rc=0. engine_20261106-140423.LOG with --worker-model no-such-model: unresolved context window listing tier 2 and tier 3; 'Completion call failed with HTTP 404 (not retried)' at the first attempt; rc 1; run.json rc 1 without error field"
       - "Report §6.0: stale 400/401/403 comment in _completion_with_retry and TypeError on a null model_context_windows mapping registered in dev/task.md work item 5 (h) (operator decision 2026-11-06); log line keeps the last rc when an exception is in flight (as specified)"
       - "Planner documents updated: design-14e05e35 v1.26 (§4.2, §11.0), design-ael-orchestrator v0.10 (§7.0), design-project-overwatch v0.9 (§4.0, §5.0), guide-engine-operations v1.29 (§2.1, §3.0, §6.5), ai/engine/README.md v2.14 (§6.0), docs/guide-getting-started.md v1.15 (§5.1), requirements-1c1f4ef6 v1.5 (FR-AEL-008)"
+  - version: "1.3"
+    date: "2026-11-06"
+    changes:
+      - "Follow-up audit dev/audit/audit-86c958dd-followup-2026-11-06.md (independent session, audited at 4efebe4): FR-A1 to FR-D compliant; no regression; full suite including test_engine_mcp.py on Linux 595 passed, 2 skipped; prompt mutations killed except M7 on Linux; 0 critical, 0 high, 0 medium, 3 low, 3 info; none blocking"
+      - "Operator decisions 2026-11-06 (audit §11.0): F-01 to work item 5 (i); F-02 to work item 5 (h), extended; F-03 to work item 6 (b); F-04 documented (guide-engine-operations v1.30 §2.1); F-05 corrected (design-ael-orchestrator v0.11 §4.1); F-06 corrected here"
+      - "Correction (audit F-06): 45 new collected items, not 44 as stated in v1.2 and report-86c958dd §3.0"
+      - "All validation criteria met; status verified on operator approval"
+  - version: "1.4"
+    date: "2026-11-06"
+    changes: ["Closed on operator acceptance (P00.14.4); status stays verified; moved to dev/change/closed/ with the issue and report-86c958dd. audit-b8a6c445 closed and moved to dev/audit/closed/; audit-86c958dd stays active until work items 5 and 6 resolve its F-01 to F-03"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

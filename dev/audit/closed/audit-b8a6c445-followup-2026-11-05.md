@@ -273,6 +273,8 @@ Recorded by the planner, 2026-11-05.
 
 The tests (macOS, 409 passed) and the operator's live check (SHIP, BLOCKED, early return in `dev/smoke`, 2026-11-05) were completed; change-b8a6c445 is verified and closed. This audit stays active until issue-86c958dd is closed.
 
+Closed 2026-11-06: issue-86c958dd and change-86c958dd are closed (F-01 to F-05 and F-08 remediated; follow-up audit audit-86c958dd-followup-2026-11-06). No finding remains open; moved to `dev/audit/closed/`.
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -283,6 +285,7 @@ The tests (macOS, 409 passed) and the operator's live check (SHIP, BLOCKED, earl
 |---|---|---|
 | 1.0 | 2026-11-05 | Initial follow-up audit of change-b8a6c445 |
 | 1.1 | 2026-11-05 | §11.0 Dispositions added by the planner (operator decisions for F-02 and F-03) |
+| 1.2 | 2026-11-06 | Closed: issue-86c958dd closed; moved to `dev/audit/closed/` |
 
 ---
 

@@ -16,6 +16,7 @@ Created: 2026 November 6
 - [8.0 Findings](#80-findings)
 - [9.0 T08 Record](#90-t08-record)
 - [10.0 Closure Recommendation](#100-closure-recommendation)
+- [11.0 Dispositions](#110-dispositions)
 - [Version History](#version-history)
 
 ---
@@ -295,11 +296,31 @@ metadata:
 
 ---
 
+## 11.0 Dispositions
+
+Recorded by the planner on operator approval, 2026-11-06.
+
+| Finding | Disposition |
+|---|---|
+| F-01 | Registered in `dev/task.md` work item 5 as part (i): set `blocked_detail` only when the status is `blocked`, with a test |
+| F-02 | Registered in `dev/task.md` work item 5 (h), extended: each `context.model_context_windows` entry must be a positive integer (not a bool), checked before any state is written, reported as `configuration error (<file>): context.model_context_windows.<model>: …` |
+| F-03 | Registered in `dev/task.md` work item 6 (b): X05, X09 (absent `started`) and a hard-link B3 case; X03 and X06 optional |
+| F-04 | Documented: guide-engine-operations v1.30 §2.1 states that an interrupt is recorded as `CancelledError` |
+| F-05 | Corrected: design-ael-orchestrator v0.11 §4.1 `run.json` row states the `error` field |
+| F-06 | Corrected in change-86c958dd v1.3 (45 new collected items); the closed report is not edited |
+
+change-86c958dd is verified and closed. This audit stays active until work items 5 and 6 resolve F-01 to F-03.
+
+[Return to Table of Contents](#table-of-contents)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-06 | Initial follow-up audit of change-86c958dd |
+| 1.1 | 2026-11-06 | §11.0 Dispositions added by the planner (operator approval) |
 
 ---
 
