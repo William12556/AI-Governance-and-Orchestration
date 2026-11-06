@@ -237,7 +237,7 @@ On BLOCKED the engine appends `Return to stage: <on_blocked>` to `BLOCKED.md` wh
 
 ## 7.0 Write Scope
 
-`scope.py` owns `WRITE_TOOLS`, the path-key tables and path extraction, moved from `orchestrator.py`. The loop and the scope check import them from there (FR-05-02). Classification is fail-closed: a tool is read-only only when its name starts with a read-only prefix (`read`, `list`, `grep`, `search`, `stat`, `get_file_info`, `find`, `head`, `tail`, `cat`, `diff`, `count`) and contains no write verb; every other tool, including an unrecognised one, is a write tool. The class decides the scope check, deliverable tracking and the tools offered to the reviewer (change-a5bd4fe1).
+`scope.py` owns `WRITE_TOOLS`, the path-key tables and path extraction, moved from `orchestrator.py`. The loop and the scope check import them from there (FR-05-02). Classification is fail-closed: a tool is read-only only when its name starts with a read-only prefix (`read`, `list`, `grep`, `search`, `stat`, `get_file_info`, `find`, `head`, `tail`, `cat`, `diff`, `count`) and contains no write verb; every other tool, including an unrecognised one, is a write tool. Write verbs are matched in any letter case: `replace`, `write`, `edit`, `create`, `delete`, `remove`, `move`, `rename`, `patch`, `mkdir`, `append`, `copy`, `truncate`, `save`, `update`, `upload`, `set`, `put`, `insert` (change-b8c75bac). The class decides the scope check, deliverable tracking and the tools offered to the reviewer (change-a5bd4fe1).
 
 | Task | Allowed write targets |
 |---|---|
@@ -332,7 +332,7 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 
 | Condition | Behaviour |
 |---|---|
-| Missing or invalid manifest or configuration | Stop before any model call; message names file and field (NFR-04). |
+| Missing or invalid manifest or configuration | Stop before any model call; message names file and field (NFR-04). For `ai/config.yaml`: a file that cannot be read, invalid YAML, a top level that is not a mapping, a missing `loop` or `loop.state_dir`, a `loop.max_iterations` that is not a positive integer without `--max-iterations`, an invalid timeout, a `max_tokens` that is not a positive integer, or a gate `timeout_seconds` override that is not a positive number gives `configuration error (<file>): <field>: <reason>` and exit 1 before any state is written, in reset mode too for the file and `loop` checks (change-b8c75bac). |
 | Missing API key environment variable | Stop at startup naming the variable; the value is never logged (NFR-05). |
 | Keychain lookup fails (not macOS, `security` missing, non-zero exit, timeout, output not valid text, empty item) | Stop at startup naming the provider and service; the message holds the exit code at most, never the command output (NFR-05; change-7d953510). |
 | Provider not ready within the readiness timeout | `BLOCKED.md`, as today. |
@@ -348,6 +348,8 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 | Model request fails with HTTP 400, 401 or 403 | Not retried; `BLOCKED.md` names the status (change-711a57d5; audit-14e05e35 L-09). |
 | MCP request exceeds `loop.mcp_timeout_seconds` | Tool error to the worker, or the server is skipped at connection; run continues (change-711a57d5). |
 | Read call whose `path` is not a string or whose `paths` is not a list | Dispatched as usual; read tracking ignores the value; run continues (change-5e8aea4f). |
+| Write call in an audit run whose path or content is not a string | The `audit-report.md` check ignores non-string paths and treats non-string content as empty; it never raises (change-b8c75bac). |
+| Compile at the edit-failure or post-write check raises (other than a timeout) | Warning logged; the file is not checked; run continues. The edit-failure check runs only for a dispatched call (change-b8c75bac). |
 | Closing the MCP client raises (for example a late answer after a timeout) | Warning printed; the run's exit status is unchanged (change-5e8aea4f). |
 | Run record (`run.json`) cannot be written at start or end | Warning `run record not written` logged; the run continues and its exit code is unchanged (change-b8a6c445). |
 | Provider error text on the completion or readiness path | A key from `api_key_env` or `api_key_keychain` is replaced by `API-KEY-REDACTED` before the text is logged, printed, written to `BLOCKED.md` or raised. Literal keys (kind `omlx` or a local `base_url`) are not secrets and are not replaced (NFR-05; change-5e8aea4f). |
@@ -450,6 +452,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.24 | 2026-11-06 | §7.0: write verbs case-insensitive, list extended; §11.0: configuration errors in `ai/config.yaml`, audit-report check arguments, compile exceptions (change-b8c75bac). |
 | 1.23 | 2026-11-06 | §3.0 Timeouts: maximum of 86400 s for `request_timeout_seconds` and `loop.mcp_timeout_seconds` (audit-5e8aea4f F-02; change-b8c75bac). |
 | 1.22 | 2026-11-05 | §6.0: compile behaviour of the edit-failure, post-write and preflight checks; collection-pass interpreter requirement (audit-a5bd4fe1 F-03, F-05). |
 | 1.21 | 2026-11-05 | §6.0: syntax gate project paths, temporary bytecode cache, FAIL overrides SHIP; pytest collection-only pass. §7.0: fail-closed tool classification, unresolvable paths rejected. §11.0: four rows (change-a5bd4fe1). |

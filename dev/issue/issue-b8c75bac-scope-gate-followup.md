@@ -11,7 +11,7 @@ issue_info:
   iteration: 2
   coupled_docs:
     change_ref: "change-b8c75bac"
-    change_iteration: 1
+    change_iteration: 2
 
 source:
   origin: "code_review"  # follow-up audits audit-a5bd4fe1 and audit-5e8aea4f; audit-14e05e35 L-08; d7f4a1c8 P08 review

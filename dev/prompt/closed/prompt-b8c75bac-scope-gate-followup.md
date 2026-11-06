@@ -7,10 +7,10 @@ prompt_info:
   source_ref: "change-b8c75bac"
   target_profile: "claude_code"  # Claude Code cloud session
   date: "2026-11-06"
-  iteration: 1
+  iteration: 2  # synchronised with change-b8c75bac iteration 2 (change v1.2)
   coupled_docs:
     change_ref: "change-b8c75bac"
-    change_iteration: 1
+    change_iteration: 2
 
 context:
   purpose: >

@@ -5,9 +5,9 @@ change_info:
   id: "change-b8c75bac"
   title: "Engine argument and config robustness (Stage C work item 1)"
   date: "2026-11-06"
-  status: "approved"  # operator approval 2026-11-06
+  status: "implemented"  # planner review and live check passed; follow-up audit pending
   priority: "low"
-  iteration: 1
+  iteration: 2
   coupled_docs:
     issue_ref: "issue-b8c75bac"
     issue_iteration: 2
@@ -188,7 +188,7 @@ implementation:
     - { step: "Live check in dev/smoke", owner: "operator" }
     - { step: "Follow-up audit (P02.8.2)", owner: "independent session" }
   rollback_procedure: "Revert the implementation commits."
-  deployment_notes: "Propagate with bin/propagate.sh in the single propagation after Stage C work item 6. Before propagating, check that no downstream ai/config.yaml sets a timeout above 86400."
+  deployment_notes: "Propagate with bin/propagate.sh in the single propagation after Stage C work item 6. Before propagating, check that no downstream ai/config.yaml sets a timeout above 86400 or an empty, zero or negative gates.<name>.timeout_seconds override (report-b8c75bac §6.0 item 4)."
 
 traceability:
   related_changes:
@@ -207,6 +207,16 @@ version_history:
   - version: "1.1"
     date: "2026-11-06"
     changes: ["Approved by the operator as drafted, including the planner's additions to C (invalid YAML, non-mapping top level, loop.max_iterations); implementation per prompt-b8c75bac"]
+  - version: "1.2"
+    date: "2026-11-06"
+    changes:
+      - "Iteration corrected to 2 to match issue-b8c75bac iteration 2 (governance P04: change iteration matches the issue iteration at creation); issue coupled_docs.change_iteration and prompt-b8c75bac iteration and change_iteration set to 2. Resolves the linter coupling error noted in report-b8c75bac §6.0 item 3"
+      - "Implemented in Claude Code cloud on branch claude/charming-bardeen-wbmqqh from 310058b: engine b39fdca, tests 1073b35, report and prompt move 5074b75 (report-b8c75bac v1.0). Merged fast-forward to main by the operator"
+      - "Tests: implementing session 445 passed, 1 skipped at baseline; 551 passed, 1 skipped after (Linux; 106 new cases). Mutations M1 to M12, N2b, N5, N12 and the B4 mutation each fail their named tests (session report)"
+      - "Planner review passed: FR-A1 to FR-D as specified; diff limited to the permitted files. Independent run on Linux with SDK stand-ins, without test_engine_mcp.py: 423 passed, 1 skipped at 310058b; 529 passed, 1 skipped at 5074b75. Mutations M1, M6 and M9 re-applied: each fails its named tests. Report deviations 1 to 5 accepted (test layout, binary config read, 'not args.max_iterations', both path and file_path checked, int gate timeouts not range-checked)"
+      - "Live check in dev/smoke (propagated) with task-scoped.md and --config config-mistral.reference.yaml, PYTHONDONTWRITEBYTECODE=1, 2026-11-06 (engine_20261106-123150.LOG): SHIP after 2 loop iterations, rc 0. A run with --config naming a missing file printed 'configuration error (ai/no-such-config.yaml): cannot read file: No such file or directory' and exited 1"
+      - "Observed in the live check (report §6.0 item 5): Rich consumes the '[engine]' prefix of console lines; pre-existing, outside this change"
+      - "Planner documents updated: design-14e05e35 v1.24 (§7.0 write verbs, §11.0 three rows), guide-engine-operations v1.27 (§3.0 configuration errors, §8.7 write verbs); §3.0 timeouts were updated before implementation (design v1.23, guide v1.26)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
