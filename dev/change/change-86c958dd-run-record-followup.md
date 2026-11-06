@@ -5,7 +5,7 @@ change_info:
   id: "change-86c958dd"
   title: "Run record, status and context-window order (Stage C work item 2)"
   date: "2026-11-06"
-  status: "proposed"
+  status: "approved"  # operator approval 2026-11-06
   priority: "low"
   iteration: 2
   coupled_docs:
@@ -203,6 +203,9 @@ version_history:
   - version: "1.0"
     date: "2026-11-06"
     changes: ["Initial change record (iteration 2, matching issue-86c958dd iteration 2)"]
+  - version: "1.1"
+    date: "2026-11-06"
+    changes: ["Approved by the operator as drafted, including the planner's proposals: the 'error' field (A1), os.path.samefile (B3), 404 only (A3) and the FR-AEL-008 document correction; implementation per prompt-86c958dd"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
