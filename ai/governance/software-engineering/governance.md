@@ -1277,6 +1277,7 @@ See [workflow.md](workflow.md).
 | 12.7 | 2026-11-04 | P00.10 cross-linking and P12.9: GitHub heading anchors replace Obsidian internal link syntax for all documents; anchor rule stated. Non-breaking. |
 | 12.8 | 2026-11-05 | P00.11 state files: `run.json` run record (change-b8a6c445). Non-breaking. |
 | 12.9 | 2026-11-07 | Appendix A.5: `schema_type` class words, numbered values accepted as aliases, class inferred from the root key for active documents; P00.14.3 and T04: test status `superseded` (change-e4428fd5). Non-breaking. |
+| 12.10 | 2026-11-07 | Appendix A.5: YAML that does not parse is reported (error, or warning for a closed record); `closed/` judged below the workspace directory (change-9377f9b9). Non-breaking. |
 
 ---
 [Return to Table of Contents](#table-of-contents)
@@ -1426,3 +1427,9 @@ In `protocol_checker.py`, a prompt in `closed/` with `schema_type` that fails
 the self-containment check gives a warning marked `(closed record)`, not an
 error. A closed prompt without `schema_type` is not checked. Every other check
 keeps its severity in `closed/`.
+
+In `linter.py`, a first YAML block that does not parse, or nests too deeply,
+gives `YAML block does not parse: <problem>`: an error, or a warning marked
+`(closed record)` for a document in `closed/`; `protocol_checker.py` skips the
+document. Both here and in item 3, `closed/` is judged on the path below the
+workspace directory (change-9377f9b9).

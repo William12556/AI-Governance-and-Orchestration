@@ -5,7 +5,7 @@ change_info:
   id: "change-9377f9b9"
   title: "Checker hygiene: report unparsable and deeply nested YAML, closed test below the workspace, reject boolean iteration, checker tests (Stage C work item 5A)"
   date: "2026-11-07"
-  status: "approved"  # operator approval 2026-11-07
+  status: "implemented"  # operator approval 2026-11-07; implemented 2026-11-07
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -159,6 +159,15 @@ version_history:
   - version: "1.1"
     date: "2026-11-07"
     changes: ["Approved by the operator as drafted; implementation per prompt-9377f9b9"]
+  - version: "1.2"
+    date: "2026-11-07"
+    changes:
+      - "Implemented in Claude Code cloud on branch claude/serene-tesla-h5vqt5 from f281ba4: engine 6c13f98, tests 096875e, report and prompt move 427767e (report-9377f9b9 v1.0). Status implemented"
+      - "Session: 744 passed, 2 skipped at baseline; 766 passed, 2 skipped after (Linux; 22 new cases). Mutations M1 to M8 fail their named tests"
+      - "Planner review: diff limited to the prompt scope; linter.py dev 0 errors, 112 warnings, including the two closed prompts as 'YAML block does not parse ... (closed record)'; protocol_checker.py dev 0 errors, 20 warnings. Suite with SDK stand-ins, without test_engine_mcp.py: 744 passed, 2 skipped (+22 = 766)"
+      - "Report §6.0: item 1 (M7 is caught by iteration true only, since false < 1 is already rejected) accepted; items 2 and 3 accepted as existing behaviour"
+      - "Planner updates: governance.md 12.10 Appendix A.5; manifest.yaml 12.10"
+      - "Open: operator macOS suite; follow-up audit (P02.8.2)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
