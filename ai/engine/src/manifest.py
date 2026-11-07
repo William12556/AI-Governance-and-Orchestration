@@ -185,6 +185,9 @@ def load_manifest(path: str) -> Manifest:
         if not isinstance(st_gates, list):
             raise _err(path, f"{where}.gates", "must be a list")
         for g in st_gates:
+            # change-e4428fd5 (audit-caab2052 L-11): type check before the membership test
+            if not isinstance(g, str):
+                raise _err(path, f"{where}.gates", "entries must be strings")
             if g not in BUILT_IN_GATES and g not in gates:
                 raise _err(path, f"{where}.gates", f"gate '{g}' is neither built in nor declared under gates")
         if st["owner"] == "loop" and "reviewer" not in st_gates:
