@@ -644,6 +644,7 @@ def _hook(root, body):
 @pytest.mark.parametrize("prior", ["committed", "absent"])
 def test_failed_approval_commit_restores_the_file(repo, se, prior):
     """T6 (FR-03): a failed commit leaves ai/approvals.yaml and its index entry as they were."""
+    _git(repo, "config", "commit.gpgsign", "false")
     _doc(repo, "prompt", "prompt")
     approvals = repo / "ai" / "approvals.yaml"
     if prior == "committed":
