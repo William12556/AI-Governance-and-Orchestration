@@ -23,6 +23,14 @@ context:
     Add test modules for both checkers. Remediates issue-e4428fd5
     (audit-caab2052 M-03, L-11 and group 3 tests; audit-eb782f83 F-04)
     with the operator decisions of 2026-11-05 and 2026-11-07.
+    AMENDMENT 1 (2026-11-07): FR-A1 to FR-E are implemented and merged
+    (44e3e04, be4cbbb, bc4563b, 7c1907a; report-e4428fd5 v1.0). The first
+    implementation stopped because root-key inference validated closed
+    documents without schema_type for the first time (6 linter and 16
+    protocol errors on dev/). This amendment implements FR-A4 only:
+    inference is limited to documents outside closed/ whose file name
+    class matches the root key (operator decision 2026-11-07, option V3;
+    change-e4428fd5 v1.2).
   integration: >
     ai/engine/src/linter.py validates document structure, YAML fields
     (check_yaml), coupling (check_coupling) and links, keyed on
@@ -54,6 +62,7 @@ context:
     - "Git (CLAUDE.md §4.0): work on your session branch. Record the starting commit before any edit. Commit to the session branch and push it; do not merge into main, open a pull request, force-push or rewrite history."
     - "Stop condition: if any FR conflicts with existing code or tests, or needs a file outside the scope, implement the unaffected FRs, record the conflict in report §5.0 and §6.0, and stop."
     - "Stop condition: if the baseline suite has failures, do not fix them; record them and judge the final run against the baseline."
+    - "Amendment 1 scope: code changes are limited to ai/engine/src/linter.py, ai/engine/src/protocol_checker.py, tests/engine/test_linter.py and tests/engine/test_protocol_checker.py. Governance changes are limited to updating dev/reports/report-e4428fd5-governance-checkers.md (new version, Amendment 1 results) and moving this prompt to dev/prompt/closed/. FR-A1 to FR-E are already implemented; do not change them except as FR-A4 states."
 
 specification:
   description: "Five changes, FR-A1 to FR-E, with the tests listed under testing.unit_tests."
@@ -66,6 +75,7 @@ specification:
       - "FR-C (audit-caab2052 L-11; type checks) No check in linter.py, protocol_checker.py or manifest.py raises for any YAML value shape. In detail: (1) a YAML block whose top level is not a mapping gives the linter ERROR 'YAML block top level must be a mapping' and is skipped by protocol_checker; (2) check_yaml: an id that is not a str gives ERROR \"'<id path>' must be a string\"; an enum field whose value is not a str gives ERROR \"'<field path>' value must be a string\" (in place of the membership test); (3) check_coupling: a reference that is not a str gives ERROR \"'<ref path>' must be a string\"; (4) protocol_checker: load_workspace skips a document whose id is not a str; _uuid_from_id returns None for a non-str; every coupling check and check_status_consistency skip a reference or status that is not a str (linter reports it); (5) manifest.py: a stage gates entry that is not a str raises ManifestError for '<stage>.gates' with 'entries must be strings', before the membership test. Comments: change-e4428fd5 (audit-caab2052 L-11)."
       - "FR-D (superseded) The test status enum gains 'superseded': linter _ENUMS['test']['test_info.status'], protocol_checker _TERMINAL_STATUS['test'] = frozenset({'passed', 'superseded'}), T04-test.md (the status comment on the template's status line and the schema enum for test_info.status). Comment: change-e4428fd5 (GTach observation 2026-10-08)."
       - "FR-E (tests) New tests/engine/test_linter.py and tests/engine/test_protocol_checker.py as listed under testing; one case in tests/engine/test_manifest_gates.py for FR-C (5)."
+      - "FR-A4 (Amendment 1; operator decision 2026-11-07, option V3) resolve_class gains an optional parameter path: str | None = None. When schema_type is absent and path is given, the root-key class is used only when (1) no component of the path is 'closed' and (2) the file name's prefix before the first '-' equals that class (prompt-<...>.md with prompt_info gives prompt; proposal-<...>.md with change_info gives no class). Otherwise the result is (None, MISSING_SCHEMA_TYPE), as before the change. With path None (direct calls, for example from tests) the root-key rule applies without the two conditions. check_yaml passes its path; protocol_checker.load_workspace passes its path. Documents with schema_type present are unaffected. The corpus test test_checkers_complete_on_dev_corpus asserts that each checker reports 0 errors on dev/. Comment: change-e4428fd5 amendment 1 (operator decision 2026-11-07)."
     technical:
       language: "Python"
       version: "3.11+"
@@ -108,6 +118,10 @@ testing:
     - { scenario: "D: a test document with status superseded in test/closed/; with status executed in test/closed/; with superseded in test/", expected: "closed superseded: no finding; closed executed: lifecycle finding as today; active superseded: the existing terminal-status-in-active-folder finding" }
     - { scenario: "E (one test per check, each with a minimal defective fixture and a valid one): linter naming, structure (table of contents, version history), yaml, coupling (missing, not found, iteration mismatch), links; protocol uuid_chain, bidirectional (mandatory and optional back-reference), one_to_one, status_consistency, lifecycle_placement, prompt_self_contained", expected: "each check fires on its defective fixture and is silent on the valid one" }
     - { scenario: "Corpus: run both checkers on dev/ (subprocess, as an operator would)", expected: "0 errors from each; record warning counts before and after in the report" }
+    - { scenario: "AM1 (Amendment 1): resolve_class with prompt_info and no schema_type for path prompt/prompt-x.md, prompt/closed/prompt-x.md, and None", expected: "prompt; (None, missing-schema_type message); prompt" }
+    - { scenario: "AM2: a proposal file proposals/proposal-x.md containing a change_info block without schema_type, through check_yaml and load_workspace", expected: "no change rules applied; the missing-schema_type warning from linter; skipped by protocol_checker" }
+    - { scenario: "AM3: a closed change without schema_type and with status 'closed' (as change-3b9e6d72)", expected: "no enum, lifecycle or status_consistency error; the missing-schema_type warning as before the change" }
+    - { scenario: "AM4: an active prompt without metadata and with an empty specification.description", expected: "prompt checks applied: self-containment ERROR" }
   edge_cases:
     - "Use tmp_path workspaces; no network."
     - "Name fixtures with the document naming patterns the checkers accept (MASTER_RE, NORMAL_RE)."
@@ -115,6 +129,7 @@ testing:
     - "Baseline before any edit: python3 -m pytest tests/engine tests/webui -q; python3 ai/engine/src/linter.py dev; python3 ai/engine/src/protocol_checker.py dev; record counts and findings per check."
     - "After the change: the same commands; no new test failures; all new tests pass; both checkers report 0 errors on dev/."
     - "Mutation check (not committed), each on a temporary copy: (M1) remove the numbered-alias rule: A2a fails; (M2) remove root-key inference: A2d fails; (M3) give the template_version warning for inferred classes: A2d fails; (M4) remove the closed downgrade in check_prompt_self_contained: B fails; (M5) apply the downgrade to every protocol check: B2 fails; (M6) remove the enum type check: C fails; (M7) remove the manifest gates type check: C fails; (M8) remove superseded from _TERMINAL_STATUS: D fails; (M9) key one linter table back to t02_change: A2a fails. Record results."
+    - "Amendment 1 mutations (not committed): (M10) drop the closed/ condition: AM1 and the corpus test fail; (M11) drop the file-name condition: AM2 fails; (M12) check_yaml stops passing its path: AM1 through check_yaml or AM3 fails. Record results in the updated report."
 
 deliverable:
   format_requirements:
@@ -122,6 +137,7 @@ deliverable:
     - "Execute pytest suite for affected test paths on completion; report pass/fail summary"
     - "Setup if needed: pip install -r ai/engine/requirements.txt -r ai/webui/requirements.txt pytest (pip may need --break-system-packages)"
     - "Close this prompt with git mv dev/prompt/prompt-e4428fd5-governance-checkers.md dev/prompt/closed/; leave the issue and change documents active"
+    - "Amendment 1: update the existing report to version 1.1 with a new section '8.0 Amendment 1' (files and functions changed, baseline and final test counts, new tests, mutations M10 to M12, both checkers on dev/ with counts per check before and after) and a Version History row; keep sections 1.0 to 7.0 unchanged except a one-line pointer to §8.0 in §1.0"
     - "Commits: Conventional Commits; checker and manifest source as fix(engine), templates as fix(governance), tests as test, report and prompt move as docs(dev)"
   files:
     - { path: "ai/engine/src/linter.py", content: "modified (FR-A1, FR-A2, FR-C, FR-D)" }

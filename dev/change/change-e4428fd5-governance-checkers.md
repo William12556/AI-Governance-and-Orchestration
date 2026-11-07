@@ -198,6 +198,15 @@ version_history:
   - version: "1.1"
     date: "2026-11-07"
     changes: ["Approved by the operator as drafted; implementation per prompt-e4428fd5"]
+  - version: "1.2"
+    date: "2026-11-07"
+    changes:
+      - "Implemented in Claude Code cloud on branch claude/zen-gauss-yz04oa from 75203cf: engine 44e3e04, governance templates be4cbbb, tests bc4563b, report and prompt move 7c1907a (report-e4428fd5 v1.0). Merged fast-forward to main by the operator"
+      - "Tests: 595 passed, 2 skipped at baseline; 724 passed, 2 skipped after (Linux; 129 new cases). Mutations M1 to M9 killed (session report). Planner run on Linux with SDK stand-ins, without test_engine_mcp.py: 702 passed, 2 skipped"
+      - "Stop condition reached: root-key inference (FR-A1) validated closed documents without schema_type for the first time, giving linter 6 errors and protocol_checker 16 errors on dev/, against the 0-errors criterion. The planner's estimate in the issue had omitted root-key inference. The errors are real defects in closed records (5 changes left at implemented or closed, 10 issues left at resolved, 3 invalid prompt task_type values) plus one false positive (proposal-d325514e with an example change_info block)"
+      - "Planner simulation on the branch: inference outside closed/ only, with the file name class matching the root key (V3): linter 0 errors, 104 warnings; protocol_checker 0 errors, 20 warnings"
+      - "Amendment 1 (operator decision 2026-11-07, option V3): root-key inference only for a document outside closed/ whose file name prefix matches the inferred class; with no path given the rule applies unconditionally; the corpus test asserts 0 errors. Closed documents without schema_type keep the validation they had (none). Implementation per prompt-e4428fd5 Amendment 1 (FR-A4)"
+      - "Report §5.0 item 4 interpretations accepted, including the report of a non-string back-reference as a mismatch error"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
