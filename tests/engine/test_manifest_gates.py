@@ -106,6 +106,15 @@ def test_invalid_manifest_names_the_field(tmp_path, mutation, fragment):
         assert path in str(e) and fragment in str(e)
 
 
+def test_non_string_gate_entry_names_the_field(tmp_path):
+    """change-e4428fd5 (audit-caab2052 L-11): a mapping in a stage gates list."""
+    data = _mutate("stages.3.gates", ["syntax", {"name": "pytest"}, "reviewer"])(_loop_only(_se_data()))
+    path = _write_manifest(tmp_path, data)
+    with pytest.raises(M.ManifestError) as exc:
+        M.load_manifest(path)
+    assert str(exc.value) == f"{path}: stages[3].gates: entries must be strings"
+
+
 def test_valid_fixture_loads(tmp_path):
     m = M.load_manifest(_write_manifest(tmp_path, _loop_only(_se_data())))
     assert m.loop_stage().id == "implement"
