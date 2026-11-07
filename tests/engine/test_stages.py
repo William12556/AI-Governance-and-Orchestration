@@ -508,3 +508,188 @@ def test_engine_refuses_a_tracked_task_absent_at_the_read(orch, repo, se, monkey
                               worker_model=None, reviewer_model=None, max_iterations=None, duration=None)
     assert asyncio.run(orch.main_async(args)) == 3
     assert calls["n"] == 1
+
+
+# --- change-4b0a5592: audit-caab2052 L-04, L-05, L-06; audit-14e05e35 F5-01 ---------
+
+_needs_fifo = pytest.mark.skipif(not hasattr(os, "mkfifo"), reason="os.mkfifo not available")
+
+
+def test_is_tracked_task_by_location_any_type(project):
+    """T1 (FR-01): any existing path at or below ai/workspace/ is tracked, whatever its type."""
+    ws = project / "ai" / "workspace"
+    regular = _doc(project, "prompt", "prompt")
+    directory = ws / "prompt" / f"prompt-{U}-dir.md"
+    directory.mkdir()
+    outside = project / "notes.md"
+    outside.write_text("x\n")
+    link = project / "link-into-workspace"
+    link.symlink_to(regular)
+    for path in (regular, directory, ws, link):
+        assert ST.is_tracked_task(str(project), str(path)), path
+    for path in (ws / "prompt" / "missing.md", outside):
+        assert not ST.is_tracked_task(str(project), str(path)), path
+    assert not ST.is_tracked_task(str(project), "implement x")
+    if hasattr(os, "mkfifo"):
+        fifo = ws / "fifo"
+        os.mkfifo(fifo)
+        assert ST.is_tracked_task(str(project), str(fifo))
+
+
+def _loop_args(project, task, mode="loop"):
+    return argparse.Namespace(config=_config(project), mode=mode, task=str(task), model=None,
+                              worker_model=None, reviewer_model=None, max_iterations=None, duration=None)
+
+
+def _run_captured(orch, monkeypatch, args):
+    """main_async with the engine console captured; returns (exit code, console text)."""
+    import io
+    from rich.console import Console
+    buf = io.StringIO()
+    monkeypatch.setattr(orch, "console", Console(file=buf, width=10000, highlight=False))
+    return asyncio.run(orch.main_async(args)), buf.getvalue()
+
+
+def _state_entries(project):
+    return sorted(p.relative_to(project).as_posix() for p in (project / "ai" / "state").rglob("*"))
+
+
+@pytest.mark.parametrize("mode", ["loop", "worker"])
+def test_engine_refuses_a_workspace_prompt_without_a_uuid_name(orch, repo, se, monkeypatch, mode):
+    """T2 (FR-02): a T03 prompt in ai/workspace/ without prompt-<uuid>- in its name is refused."""
+    task = repo / "ai" / "workspace" / "prompt" / "my-task.md"
+    task.parent.mkdir(parents=True)
+    task.write_text(f"Created: 2026 November 07\n\n```yaml\nprompt_info:\n  id: \"prompt-{U}\"\n```\n")
+    before = _state_entries(repo)
+    rel = os.path.join("ai", "workspace", "prompt", "my-task.md")
+    code, out = _run_captured(orch, monkeypatch, _loop_args(repo, rel, mode))
+    assert code == 3
+    # rich renders '[engine]' as markup, so the console text starts after it
+    assert f" task {rel} is not ready for 'implement'; missing:" in out
+    assert "is not an active prompt document" in out
+    assert _state_entries(repo) == before
+
+
+def test_engine_refuses_a_workspace_note(orch, repo, se, monkeypatch):
+    """T3 (FR-02): any other file in ai/workspace/ is refused in loop mode."""
+    task = repo / "ai" / "workspace" / "notes.md"
+    task.parent.mkdir(parents=True)
+    task.write_text("notes\n")
+    before = _state_entries(repo)
+    code, _ = _run_captured(orch, monkeypatch, _loop_args(repo, task))
+    assert code == 3
+    assert _state_entries(repo) == before
+
+
+@pytest.mark.parametrize("kind", ["directory", pytest.param("fifo", marks=_needs_fifo), "workspace"])
+def test_engine_refuses_non_file_workspace_tasks(orch, repo, se, monkeypatch, kind):
+    """T4 (FR-01, FR-02): a directory, a FIFO (never opened) and ai/workspace/ itself are refused."""
+    import threading
+    ws = repo / "ai" / "workspace"
+    task = ws / "prompt" / f"prompt-{U}-x.md"
+    task.parent.mkdir(parents=True)
+    if kind == "directory":
+        task.mkdir()
+    elif kind == "fifo":
+        os.mkfifo(task)
+    else:
+        task = ws
+    before = _state_entries(repo)
+    result = {}
+
+    def run():
+        result["value"] = _run_captured(orch, monkeypatch, _loop_args(repo, task))
+
+    worker = threading.Thread(target=run, daemon=True)
+    worker.start()
+    worker.join(timeout=30)
+    assert not worker.is_alive(), "main_async blocked (the FIFO was opened)"
+    assert result["value"][0] == 3
+    assert _state_entries(repo) == before
+
+
+def test_engine_warns_for_a_prompt_outside_the_workspace(orch, repo, se, monkeypatch):
+    """T5 (FR-02): prompt-<uuid>-x.md outside ai/workspace/ keeps the not-tracked warning."""
+    task = repo / f"prompt-{U}-x.md"
+    task.write_text("x\n")
+    calls = []
+    monkeypatch.setattr(orch.ST, "prerun_missing", lambda *a, **k: calls.append(a) or ["x"])
+
+    def stop(*a, **k):
+        raise _Stop
+
+    monkeypatch.setattr(orch, "archive_prior_logs", stop)
+    import io
+    from rich.console import Console
+    buf = io.StringIO()
+    monkeypatch.setattr(orch, "console", Console(file=buf, width=10000, highlight=False))
+    with pytest.raises(_Stop):
+        asyncio.run(orch.main_async(_loop_args(repo, task)))
+    assert f" work item {U}: prompt is outside ai/workspace/ — not tracked" in buf.getvalue()
+    assert calls == []
+
+
+def _hook(root, body):
+    """A pre-commit hook in a hooks directory configured for this repository only."""
+    hooks = root / ".test-hooks"
+    hooks.mkdir(exist_ok=True)
+    hook = hooks / "pre-commit"
+    hook.write_text(body)
+    hook.chmod(0o755)
+    _git(root, "config", "core.hooksPath", str(hooks))
+    _git(root, "config", "commit.gpgsign", "false")
+    return hook
+
+
+@pytest.mark.parametrize("prior", ["committed", "absent"])
+def test_failed_approval_commit_restores_the_file(repo, se, prior):
+    """T6 (FR-03): a failed commit leaves ai/approvals.yaml and its index entry as they were."""
+    _doc(repo, "prompt", "prompt")
+    approvals = repo / "ai" / "approvals.yaml"
+    if prior == "committed":
+        _doc(repo, "prompt", "prompt", uuid=V)
+        assert A.approve(str(repo), V, "prompt", manifest=se)[0] == 0
+    before = approvals.read_bytes() if approvals.exists() else None
+    hook = _hook(repo, "#!/bin/sh\necho 'hook says no' >&2\nexit 1\n")
+    code, msg = A.approve(str(repo), U, "prompt", manifest=se)
+    assert code == 1 and msg.startswith("git failed (commit -q): ") and "hook says no" in msg
+    assert "could not be restored" not in msg
+    if before is None:
+        assert not approvals.exists()
+    else:
+        assert approvals.read_bytes() == before
+    assert _git(repo, "status", "--porcelain", "--", "ai/approvals.yaml").stdout == ""
+    hook.unlink()
+    code, msg = A.approve(str(repo), U, "prompt", manifest=se)
+    assert code == 0, msg
+    assert approvals.read_text().count(f'uuid: "{U}", stage: "prompt"') == 1
+    assert (U, "prompt") in ST.committed_approvals(str(repo))
+
+
+def test_failed_approval_commit_without_output_reports_the_exit_code(repo, se):
+    """T7 (FR-03): a silent failure still gives a detail."""
+    _doc(repo, "prompt", "prompt")
+    _hook(repo, "#!/bin/sh\nexit 1\n")
+    code, msg = A.approve(str(repo), U, "prompt", manifest=se)
+    assert code == 1 and msg.endswith("exit code 1")
+
+
+def test_approvals_in_a_project_nested_in_a_repository(project, se, monkeypatch):
+    """T8 (FR-04): approve.py and the pre-run check work in a project below the repository root."""
+    for k, v in (("GIT_AUTHOR_NAME", "t"), ("GIT_AUTHOR_EMAIL", "t@example.com"),
+                 ("GIT_COMMITTER_NAME", "t"), ("GIT_COMMITTER_EMAIL", "t@example.com")):
+        monkeypatch.setenv(k, v)
+    _git(project, "init", "-q")
+    _git(project, "config", "commit.gpgsign", "false")
+    (project / "README.md").write_text("x\n")
+    _git(project, "add", "README.md")
+    _git(project, "commit", "-q", "-m", "init")
+    sub = project / "sub"
+    prompt = _doc(sub, "prompt", "prompt")
+    approve_py = os.path.join(REPO, "ai", "engine", "src", "approve.py")
+    out = subprocess.run([sys.executable, approve_py, U, "prompt"], cwd=str(sub),
+                         capture_output=True, text=True)
+    assert out.returncode == 0, out.stderr
+    assert _git(project, "show", "--name-only", "--format=", "HEAD").stdout.split() == ["sub/ai/approvals.yaml"]
+    assert (U, "prompt") in ST.committed_approvals(str(sub))
+    assert ST.prerun_missing(str(sub), se, U, str(prompt), prompt.read_bytes()) == []
