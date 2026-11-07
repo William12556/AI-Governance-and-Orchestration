@@ -1422,6 +1422,7 @@ The numbered values are retired but stay valid, so no document needs editing.
 | `change` | `T07-change.md` | `t02_change` | `t07_change` |
 | `audit` | `T08-audit.md` | `t08_audit` | `t08_audit` |
 
-In `protocol_checker.py`, a prompt in `closed/` that fails the self-containment
-check gives a warning marked `(closed record)`, not an error. Every other check
+In `protocol_checker.py`, a prompt in `closed/` with `schema_type` that fails
+the self-containment check gives a warning marked `(closed record)`, not an
+error. A closed prompt without `schema_type` is not checked. Every other check
 keeps its severity in `closed/`.

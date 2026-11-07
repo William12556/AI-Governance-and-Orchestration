@@ -5,7 +5,7 @@ change_info:
   id: "change-e4428fd5"
   title: "Governance checkers: class-word schema_type, aliases, type checks, superseded tests, checker tests (Stage C work item 3)"
   date: "2026-11-07"
-  status: "implemented"  # operator approval 2026-11-07; implemented with Amendment 1 2026-11-07
+  status: "verified"  # operator approval 2026-11-07; implemented with Amendment 1; verified 2026-11-07 (audit-e4428fd5)
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -23,9 +23,10 @@ scope:
     result, issue, change, audit. Both checkers resolve a document's class
     from its schema_type: a class word, or a numbered value of either
     scheme (t01_ to t08_ followed by a class word) as an alias. Without a
-    schema_type, the class is inferred from a unique root key
-    (prompt_info, test_info, result_info, issue_info, change_info,
-    audit_info). An unrecognised value gives a warning. Rule tables are
+    schema_type, the class is inferred from the first top-level key found
+    among the root keys (prompt_info, test_info, result_info, issue_info,
+    change_info, audit_info), only for a document outside closed/ whose
+    file name prefix is that class (Amendment 1, FR-A4). An unrecognised value gives a warning. Rule tables are
     keyed by class word. Templates T01, T02 and T04 to T08 emit the class
     word; T03 stays without metadata. (B) In protocol_checker, the prompt
     self-containment check reports WARN instead of ERROR for a prompt in a
@@ -90,8 +91,10 @@ technical_details:
     str matching ^t0[1-8]_(<class word>)$ gives the class word; any other
     str gives None and the message "unknown schema_type '<value>'"; a
     non-str value gives None and "metadata.schema_type must be a string".
-    An absent schema_type gives the class of the single top-level key of
-    the data found in ROOT_KEYS, or None with the existing message
+    An absent schema_type gives the class of the first top-level key of
+    the data found in ROOT_KEYS (Amendment 1: only when no path component
+    is closed and the file name prefix is that class; with no path given,
+    unconditionally), or None with the existing message
     "YAML block present but metadata.schema_type is missing" when none
     matches. (A2) _ENUMS, _ID_FIELDS, _ITER_FIELDS and _COUPLING in
     linter.py, and _TERMINAL_STATUS, _STATUS_FIELD, _ID_FIELD,
@@ -141,7 +144,7 @@ technical_details:
   interface_changes:
     - interface: "metadata.schema_type"
       change_type: "contract"
-      details: "Class words; numbered values of both schemes accepted as aliases; absent value inferred from a unique root key; unknown value warned"
+      details: "Class words; numbered values of both schemes accepted as aliases; absent value inferred from the first root key for a document outside closed/ whose file name matches (Amendment 1); unknown value warned"
       backward_compatible: "yes: every value in use is accepted"
     - interface: "Test status"
       change_type: "contract"
@@ -215,6 +218,15 @@ version_history:
       - "Planner updates: governance.md 12.9 (P00.14.3 Test: superseded; Appendix A.5 rewritten as the retired namespace) and manifest.yaml 12.9"
       - "Report §8.6 dispositions: item 1 (FR-B reaches only closed prompts with schema_type) stated in Appendix A.5; item 2 (the 'closed' test covers the whole path) moved to Stage C work item 5 as part (j); item 3 (closed-record defects not reported) accepted as the V3 design"
       - "Open: operator macOS suite; follow-up audit (P02.8.2)"
+  - version: "1.4"
+    date: "2026-11-07"
+    changes:
+      - "Operator macOS suite: 734 passed. Checkers on dev/: linter 0 errors, 104 warnings; protocol_checker 0 errors, 20 warnings"
+      - "Follow-up audit audit-e4428fd5-followup-2026-11-07: 0 critical, 0 high, 0 medium, 3 low, 5 info; no finding blocks verification. Dispositions in audit §11.0 (operator approval 2026-11-07)"
+      - "audit F-05: scope.summary, proposed_behavior and interface_changes state the first root key and the Amendment 1 conditions"
+      - "audit F-07: report §5.0 item 3 accepted; the structure scenario of E is met without a table-of-contents check, which belongs to the manual layout task (dev/task.md work item 7a)"
+      - "audit F-06: governance.md Appendix A.5 closed-prompt paragraph qualified with schema_type, corrected within 12.9 before propagation"
+      - "Status verified; closed with issue-e4428fd5 (P00.14.4)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

@@ -16,6 +16,7 @@ Created: 2026 November 7
 - [8.0 Findings](#80-findings)
 - [9.0 T08 Record](#90-t08-record)
 - [10.0 Closure Recommendation](#100-closure-recommendation)
+- [11.0 Dispositions](#110-dispositions)
 - [Version History](#version-history)
 
 ---
@@ -404,11 +405,32 @@ metadata:
 
 ---
 
+## 11.0 Dispositions
+
+Recorded by the planner, 2026-11-07, with operator approval.
+
+| Finding | Disposition |
+|---|---|
+| F-01 | Registered: `dev/task.md` work item 5 (g) extended to `_extract_yaml` and `load_manifest` |
+| F-02 | Registered: work item 5 (k) |
+| F-03, F-04 | Registered: work item 6 (d) |
+| F-05 | Corrected by the planner: change-e4428fd5 v1.4 `scope.summary`, `proposed_behavior` and `interface_changes` |
+| F-06 | Corrected by the planner: governance.md Appendix A.5, within 12.9 before propagation |
+| F-07 | Recorded in change-e4428fd5 v1.4: the E structure scenario is met without a table-of-contents check; layout belongs to work item 7a |
+| F-08 | Registered: work item 5 (l) |
+
+The operator's macOS suite (734 passed) completed the validation criteria. change-e4428fd5 is verified and closed with issue-e4428fd5 and report-e4428fd5. The pre-propagation checker run of §5.0 is added to work item 8e. This audit stays active until work items 5 and 6 are closed.
+
+[Return to Table of Contents](#table-of-contents)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-07 | Initial follow-up audit of change-e4428fd5 |
+| 1.1 | 2026-11-07 | §11.0 Dispositions added by the planner |
 
 ---
 

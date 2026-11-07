@@ -5,7 +5,7 @@ issue_info:
   id: "issue-e4428fd5"
   title: "Governance checkers: schema_type namespace, silent skips, TypeError on malformed values, terminal status for superseded tests, missing checker tests"
   date: "2026-11-07"
-  status: "resolved"  # change-e4428fd5 implemented 2026-11-07 (P03.7)
+  status: "closed"  # change-e4428fd5 verified 2026-11-07
   severity: "medium"
   type: "defect"
   iteration: 1
@@ -127,6 +127,9 @@ version_history:
   - version: "1.1"
     date: "2026-11-07"
     changes: ["Status resolved: change-e4428fd5 implemented with Amendment 1 (P03.7)"]
+  - version: "1.2"
+    date: "2026-11-07"
+    changes: ["Status closed: change-e4428fd5 verified (macOS suite 734 passed; follow-up audit audit-e4428fd5-followup-2026-11-07)"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
