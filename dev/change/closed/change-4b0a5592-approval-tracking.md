@@ -5,7 +5,7 @@ change_info:
   id: "change-4b0a5592"
   title: "Approval and tracking: track workspace tasks by location, restore approvals after a failed commit, read approvals in a nested project (Stage C work item 4)"
   date: "2026-11-07"
-  status: "implemented"  # operator approval 2026-11-07; implemented 2026-11-07
+  status: "verified"  # operator approval 2026-11-07; implemented and verified 2026-11-07 (audit-4b0a5592)
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -170,6 +170,13 @@ version_history:
       - "Report §5.0 interpretations 1 to 6 accepted. §6.0 item 1 (refusal text 'work item : no documents found' reachable only with a manifest that has no evidence stage before the loop stage): accepted, no action; item 2 (repo fixture without commit.gpgsign=false): registered as work item 6 (e)"
       - "Planner updates: design-14e05e35 v1.27 §8.3, §8.4; guide-engine-operations v1.31 §5.0"
       - "Open: operator macOS suite; follow-up audit (P02.8.2)"
+  - version: "1.3"
+    date: "2026-11-07"
+    changes:
+      - "Operator macOS suite: 746 passed. Checkers on dev/: linter 0 errors, 107 warnings; protocol_checker 0 errors, 20 warnings"
+      - "Follow-up audit audit-4b0a5592-followup-2026-11-07: 0 critical, 0 high, 0 medium, 4 low, 7 info; no finding blocks verification. Dispositions in audit §11.0 (operator decision 2026-11-07, option A)"
+      - "The benefit 'No workspace task reaches a loop or worker run without the pre-run check' does not hold for a symlink in ai/workspace/ that resolves outside it, or for a differently cased path on a case-insensitive file system (audit F-01, F-02); registered as dev/task.md work item 5 (m) and recorded in design-14e05e35 v1.28 §8.4 and guide-engine-operations v1.32 §5.0"
+      - "Status verified; closed with issue-4b0a5592 (P00.14.4)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

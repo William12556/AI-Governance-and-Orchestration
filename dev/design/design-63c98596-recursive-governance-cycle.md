@@ -418,7 +418,7 @@ The following would change on implementation. Nothing is changed by this documen
 
 ### 10.2 Transferred Register Items
 
-The following items were removed from `dev/task.md` on 2026-11-06 because this concept reshapes them. They are resolved in the requirements and design that implement it.
+The following items were removed from `dev/task.md` on 2026-11-06, or not registered there (2026-11-07), because this concept reshapes them. They are resolved in the requirements and design that implement it.
 
 | Item | Source | Reason for transfer |
 |---|---|---|
@@ -430,6 +430,7 @@ The following items were removed from `dev/task.md` on 2026-11-06 because this c
 | `.github/workflows` CI running `linter.py`, `protocol_checker.py`, pytest and the primer identity check | gap G1; decision 7.1 | Governed by P05 |
 | Tests for `bin/migrate-layout.sh` and `bin/propagate.sh` end to end | audit-5bcd46ad L-08 | Run under P05 CI |
 | Phase 3: second governance model (document authoring) under `ai/governance/<name>/` | proposal-5bcd46ad; requirements-14e05e35 out-of-scope table | Tests per-model ceilings and plan-check inputs (§5.3, §6.2) |
+| The CLI (`orchestrator._work_item_uuid`) and engine-mcp (`_PROMPT_NAME`) take the work-item UUID only from a `prompt-<uuid>-` name; with a manifest whose task stage has another prefix, every tracked CLI task is refused with `work item : no documents found`. Derive the UUID from the manifest's task stage | audit-4b0a5592 F-03 | Only arises with a second governance model (Phase 3, above) |
 | Evaluate splitting `governance.md` | proposal-5bcd46ad OQ-03 | Implementation amends governance.md |
 | Phase 4: central web GUI; `ai/webui/` is its component | proposal-5bcd46ad; report-14cf601f | Provides the human interface for veto windows, promotion confirmation and notifications (D4, D23) |
 | Project Overwatch FR-02 to FR-10; design-project-overwatch OQ-07 open by design | design-project-overwatch §9.2; proposal-5bcd46ad D-12 | Reconsidered within Phase 4 |
@@ -533,6 +534,7 @@ SHEWHART, Walter A., 1939. *Statistical Method from the Viewpoint of Quality Con
 |---|---|---|
 | 0.1 | 2026-11-06 | Initial concept: cycle model, levels, approval gates and autonomy, delegated approval, audit, autonomy evaluation, workflow, impact, decisions D1–D24, open questions |
 | 0.2 | 2026-11-06 | §10.0 split into §10.1 Required Changes and §10.2 Transferred Register Items (eleven items from nine `dev/task.md` rows; Anthropic provider note) |
+| 0.3 | 2026-11-07 | §10.2: task-stage prefix item (audit-4b0a5592 F-03) |
 
 ---
 

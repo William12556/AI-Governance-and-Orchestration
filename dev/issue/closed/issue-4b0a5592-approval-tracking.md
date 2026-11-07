@@ -5,7 +5,7 @@ issue_info:
   id: "issue-4b0a5592"
   title: "Approval and tracking: CLI tracks by name, non-regular workspace paths untracked, approve.py leaves state after a failed commit, approvals unreadable in a nested project"
   date: "2026-11-07"
-  status: "resolved"  # change-4b0a5592 implemented 2026-11-07 (P03.7)
+  status: "closed"  # change-4b0a5592 verified 2026-11-07
   severity: "low"
   type: "defect"
   iteration: 1
@@ -105,6 +105,9 @@ version_history:
   - version: "1.1"
     date: "2026-11-07"
     changes: ["Status resolved: change-4b0a5592 implemented (P03.7)"]
+  - version: "1.2"
+    date: "2026-11-07"
+    changes: ["Status closed: change-4b0a5592 verified (macOS suite 746 passed; follow-up audit audit-4b0a5592-followup-2026-11-07)"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

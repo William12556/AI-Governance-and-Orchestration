@@ -16,6 +16,7 @@ Created: 2026 November 7
 - [8.0 Findings](#80-findings)
 - [9.0 T08 Record](#90-t08-record)
 - [10.0 Closure Recommendation](#100-closure-recommendation)
+- [11.0 Dispositions](#110-dispositions)
 - [Version History](#version-history)
 
 ---
@@ -410,11 +411,33 @@ metadata:
 
 ---
 
+## 11.0 Dispositions
+
+Recorded by the planner, 2026-11-07, with operator approval (option A: close change-4b0a5592 and register the remaining items).
+
+| Finding | Disposition |
+|---|---|
+| F-01, F-02 | Registered: `dev/task.md` work item 5 (m), containment by file identity; F-02 to be confirmed on macOS then. Recorded as known limits in design-14e05e35 v1.28 §8.4 and guide-engine-operations v1.32 §5.0 |
+| F-03 | Transferred to design-63c98596 v0.3 §10.2 (second governance model); restriction recorded in design-14e05e35 v1.28 §8.4 |
+| F-04 | Registered: work item 5 (n) |
+| F-05, F-06, F-11 | No action |
+| F-07 | Registered: work item 6 (f); X02 and X04 in work item 5 (m) |
+| F-08 | Corrected by the planner: guide-engine-operations v1.32 §5.0 (`approve.py` commits the working file as it is) |
+| F-09 | Corrected by the planner: guide-engine-operations v1.32 §5.0 (broken symlink exits 1; outward symlink and letter-case exceptions) |
+| F-10 | Already registered: work item 6 (e), extended |
+
+The operator's macOS suite (746 passed) completed the validation criteria. change-4b0a5592 is verified and closed with issue-4b0a5592 and report-4b0a5592. This audit stays active until work items 5 and 6 are closed.
+
+[Return to Table of Contents](#table-of-contents)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-07 | Initial follow-up audit of change-4b0a5592 |
+| 1.1 | 2026-11-07 | §11.0 Dispositions added by the planner |
 
 ---
 
