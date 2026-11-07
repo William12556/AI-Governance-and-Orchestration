@@ -5,7 +5,7 @@ issue_info:
   id: "issue-e4428fd5"
   title: "Governance checkers: schema_type namespace, silent skips, TypeError on malformed values, terminal status for superseded tests, missing checker tests"
   date: "2026-11-07"
-  status: "open"
+  status: "resolved"  # change-e4428fd5 implemented 2026-11-07 (P03.7)
   severity: "medium"
   type: "defect"
   iteration: 1
@@ -124,6 +124,9 @@ version_history:
   - version: "1.0"
     date: "2026-11-07"
     changes: ["Initial issue for Stage C work item 3 (audit-caab2052 group 3)"]
+  - version: "1.1"
+    date: "2026-11-07"
+    changes: ["Status resolved: change-e4428fd5 implemented with Amendment 1 (P03.7)"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

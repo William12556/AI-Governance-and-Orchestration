@@ -182,7 +182,7 @@ python ai/engine/src/orchestrator.py --mode loop \
       - Issue: Resolved and verified, corresponding change implemented and tested
       - Change: Implemented, tested, design updated, human accepted
       - Prompt: Code generated successfully, human confirmed
-      - Test: Executed with passing results, result document created
+      - Test: Executed with passing results, result document created; or status `superseded` when the code it covers was removed
       - Result: Tests passed, no issues created, acceptance confirmed
       - Audit: Per P02.8 Audit Closure (P02.8.1 criteria, P02.8.2 process)
     - P00.14.4 Archival Procedure
@@ -1276,6 +1276,7 @@ See [workflow.md](workflow.md).
 | 12.6 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list. Non-breaking. |
 | 12.7 | 2026-11-04 | P00.10 cross-linking and P12.9: GitHub heading anchors replace Obsidian internal link syntax for all documents; anchor rule stated. Non-breaking. |
 | 12.8 | 2026-11-05 | P00.11 state files: `run.json` run record (change-b8a6c445). Non-breaking. |
+| 12.9 | 2026-11-07 | Appendix A.5: `schema_type` class words, numbered values accepted as aliases, class inferred from the root key for active documents; P00.14.3 and T04: test status `superseded` (change-e4428fd5). Non-breaking. |
 
 ---
 [Return to Table of Contents](#table-of-contents)
@@ -1391,31 +1392,36 @@ citations are dotted and fully qualified: `<identifier>.<a>[.<b>]`.
 Reserved identifiers carry no content. A citation resolving to one is a
 defect, not a reference.
 
-### A.5 Unmigrated Namespace — `schema_type`
+### A.5 Retired Namespace — `schema_type`
 
-Template document schemas carry a numeric identifier in their `schema_type`
-field: `t01_design`, `t02_change`, `t03_issue` and so on. **These were not
-migrated and retain the retired numbering.** `T02-design.md` declares
-`schema_type: "t01_design"`.
+Since governance 12.9 (change-e4428fd5), `metadata.schema_type` holds the
+document's class word: `requirements`, `design`, `prompt`, `test`, `result`,
+`issue`, `change` or `audit`. Templates T01, T02 and T04 to T08 emit it. T03
+prompts carry no governance metadata.
 
-This is a recorded exception, not an oversight left standing. The numeric
-prefix cannot be migrated in isolation: `linter.py` keys its validation rules,
-enum constraints, identifier patterns and coupling paths on these strings, and
-every document in the frozen corpus carries them. Migrating the namespace would
-require either editing frozen documents or breaking their validation, and
-`CON-04` forecloses both.
+The numbered values are retired but stay valid, so no document needs editing.
+`linter.py` and `protocol_checker.py` resolve a document's class in this order:
 
-| Field value | Template document |
-|---|---|
-| `t01_design` | `T02-design.md` |
-| `t02_change` | `T07-change.md` |
-| `t03_issue` | `T06-issue.md` |
-| `t04_prompt` | `T03-prompt.md` |
-| `t05_test` | `T04-test.md` |
-| `t06_result` | `T05-result.md` |
-| `t07_requirements` | `T01-requirements.md` |
-| `t08_audit` | `T08-audit.md` |
+1. A class word.
+2. A numbered value of either scheme, `t01_` to `t08_` followed by a class word,
+   as an alias for that class word (table below).
+3. With no `schema_type`, the class of its root key (`prompt_info`, `test_info`,
+   `result_info`, `issue_info`, `change_info`, `audit_info`), but only for a
+   document outside `closed/` whose file name prefix is that class. A closed
+   document without `schema_type` is not validated, as before 12.9.
+4. Any other value gives a warning naming the value.
 
-The durable remedy is to retire the numeric prefix in favour of the class word,
-which is scheme-independent — the same correction this migration made to
-protocol citations. That is deferred to its own change.
+| Class word | Template | Retired scheme | Template scheme |
+|---|---|---|---|
+| `requirements` | `T01-requirements.md` | `t07_requirements` | `t01_requirements` |
+| `design` | `T02-design.md` | `t01_design` | `t02_design` |
+| `prompt` | `T03-prompt.md` | `t04_prompt` | `t03_prompt` |
+| `test` | `T04-test.md` | `t05_test` | `t04_test` |
+| `result` | `T05-result.md` | `t06_result` | `t05_result` |
+| `issue` | `T06-issue.md` | `t03_issue` | `t06_issue` |
+| `change` | `T07-change.md` | `t02_change` | `t07_change` |
+| `audit` | `T08-audit.md` | `t08_audit` | `t08_audit` |
+
+In `protocol_checker.py`, a prompt in `closed/` that fails the self-containment
+check gives a warning marked `(closed record)`, not an error. Every other check
+keeps its severity in `closed/`.

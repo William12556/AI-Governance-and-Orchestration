@@ -5,7 +5,7 @@ change_info:
   id: "change-e4428fd5"
   title: "Governance checkers: class-word schema_type, aliases, type checks, superseded tests, checker tests (Stage C work item 3)"
   date: "2026-11-07"
-  status: "approved"  # operator approval 2026-11-07
+  status: "implemented"  # operator approval 2026-11-07; implemented with Amendment 1 2026-11-07
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -207,6 +207,14 @@ version_history:
       - "Planner simulation on the branch: inference outside closed/ only, with the file name class matching the root key (V3): linter 0 errors, 104 warnings; protocol_checker 0 errors, 20 warnings"
       - "Amendment 1 (operator decision 2026-11-07, option V3): root-key inference only for a document outside closed/ whose file name prefix matches the inferred class; with no path given the rule applies unconditionally; the corpus test asserts 0 errors. Closed documents without schema_type keep the validation they had (none). Implementation per prompt-e4428fd5 Amendment 1 (FR-A4)"
       - "Report §5.0 item 4 interpretations accepted, including the report of a non-string back-reference as a mismatch error"
+  - version: "1.3"
+    date: "2026-11-07"
+    changes:
+      - "Amendment 1 implemented in Claude Code cloud on branch claude/focused-goodall-z97wtk from 2da9bd8: engine f134abe, tests 970cf43 (AM1 to AM4; corpus test asserts 0 errors), report v1.1 and prompt move ec14a6e. Status implemented"
+      - "Planner review: linter.py dev 0 errors, 104 warnings; protocol_checker.py dev 0 errors, 20 warnings, matching the V3 simulation. Session suite 732 passed, 2 skipped (Linux); planner run without test_engine_mcp.py 710 passed, 2 skipped. Mutations M10 to M12 killed"
+      - "Planner updates: governance.md 12.9 (P00.14.3 Test: superseded; Appendix A.5 rewritten as the retired namespace) and manifest.yaml 12.9"
+      - "Report §8.6 dispositions: item 1 (FR-B reaches only closed prompts with schema_type) stated in Appendix A.5; item 2 (the 'closed' test covers the whole path) moved to Stage C work item 5 as part (j); item 3 (closed-record defects not reported) accepted as the V3 design"
+      - "Open: operator macOS suite; follow-up audit (P02.8.2)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
