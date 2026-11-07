@@ -163,15 +163,36 @@ def _get(obj: dict, dotpath: str):
     return obj
 
 
-def _extract_yaml(content: str) -> Optional[dict]:
-    """Parse first YAML fenced block in markdown content."""
+def _parse_yaml_block(content: str) -> tuple[object | None, str | None]:
+    """Parse the first YAML fenced block in markdown content.
+
+    change-9377f9b9 (audit-e4428fd5 F-01, F-02). Returns (data, problem):
+    (None, None) without a fenced YAML block; (data, None) for a block that
+    loads; (None, problem) for a block that does not parse, problem being
+    the YAMLError's problem text (or the first line of its message), or
+    'nesting too deep' for a RecursionError. Never raises.
+    """
     m = YAML_BLOCK_RE.search(content)
     if not m:
-        return None
+        return None, None
     try:
-        return yaml.safe_load(m.group(1))
-    except yaml.YAMLError:
-        return None
+        return yaml.safe_load(m.group(1)), None
+    except yaml.YAMLError as e:
+        problem = getattr(e, "problem", None)
+        if not isinstance(problem, str) or not problem:
+            problem = (str(e).splitlines() or [""])[0]
+        return None, problem
+    except RecursionError:
+        return None, "nesting too deep"
+
+
+def _extract_yaml(content: str) -> Optional[dict]:
+    """Parse first YAML fenced block in markdown content.
+
+    change-9377f9b9 (audit-e4428fd5 F-01, F-02): the data element of
+    _parse_yaml_block, so it never raises; None when no block parses.
+    """
+    return _parse_yaml_block(content)[0]
 
 
 def _github_slug(text: str) -> str:
@@ -304,7 +325,9 @@ def check_structure(path: str, content: str, fname: str = "") -> list[Finding]:
 
 # ── Check 3: YAML field validity (template schemas) ───────────────────────────
 
-def check_yaml(path: str, content: str) -> tuple[list[Finding], Optional[dict], Optional[str]]:
+def check_yaml(path: str, content: str,
+               workspace_dir: Optional[str] = None,
+               ) -> tuple[list[Finding], Optional[dict], Optional[str]]:
     """
     Extract and validate first YAML block.
     Returns (findings, parsed_data, doc_class).
@@ -313,9 +336,27 @@ def check_yaml(path: str, content: str) -> tuple[list[Finding], Optional[dict], 
     resolve_class and returned in place of the raw schema_type; a class
     without rules (requirements, design, audit) gives no finding; a value
     of the wrong type gives a finding instead of raising.
+
+    change-9377f9b9: the location path is path relative to workspace_dir
+    when workspace_dir is given, else path. A first YAML block that does
+    not parse gives 'YAML block does not parse: <problem>', ERROR, or WARN
+    ending ' (closed record)' when a component of the location path is
+    'closed' (audit-e4428fd5 F-01, F-02). resolve_class receives the
+    location path (report-e4428fd5 §8.6 item 2).
     """
     findings = []
-    data = _extract_yaml(content)
+    # change-9377f9b9 (report-e4428fd5 §8.6 item 2): workspace-relative path
+    loc_path = (os.path.relpath(path, workspace_dir)
+                if workspace_dir is not None else path)
+    data, problem = _parse_yaml_block(content)
+    # change-9377f9b9 (audit-e4428fd5 F-01, F-02): report a parse problem
+    if problem is not None:
+        in_closed = "closed" in re.split(r"[\\/]", loc_path)
+        findings.append(Finding(
+            "WARN" if in_closed else "ERROR", path, "yaml",
+            f"YAML block does not parse: {problem}"
+            + (" (closed record)" if in_closed else "")))
+        return findings, None, None
     if data is None:
         return findings, None, None
 
@@ -325,8 +366,9 @@ def check_yaml(path: str, content: str) -> tuple[list[Finding], Optional[dict], 
             "YAML block top level must be a mapping"))
         return findings, None, None
 
-    # change-e4428fd5 amendment 1: path limits root-key inference
-    doc_class, message = resolve_class(data, path)
+    # change-e4428fd5 amendment 1: path limits root-key inference;
+    # change-9377f9b9 (report-e4428fd5 §8.6 item 2): location path
+    doc_class, message = resolve_class(data, loc_path)
     if doc_class is None:
         findings.append(Finding("WARN", path, "yaml", message))
         return findings, data, None
@@ -369,7 +411,9 @@ def check_yaml(path: str, content: str) -> tuple[list[Finding], Optional[dict], 
     if doc_class in _ITER_FIELDS:
         iter_val = _get(data, _ITER_FIELDS[doc_class])
         if iter_val is not None:
-            if not isinstance(iter_val, int) or iter_val < 1:
+            # change-9377f9b9 (audit-e4428fd5 F-08): bool is not an iteration
+            if (isinstance(iter_val, bool) or not isinstance(iter_val, int)
+                    or iter_val < 1):
                 findings.append(Finding("ERROR", path, "yaml",
                     f"iteration must be integer ≥ 1, got '{iter_val}'"))
 
@@ -494,8 +538,10 @@ def run(workspace_dir: str) -> list[Finding]:
                 doc_index.setdefault(f"{_nm.group(1)}-{_nm.group(2)}", {})
             findings.extend(check_links(path, content, workspace_dir))
 
-            # change-e4428fd5: doc_class is the class resolved by check_yaml
-            yaml_findings, data, doc_class = check_yaml(path, content)
+            # change-e4428fd5: doc_class is the class resolved by check_yaml;
+            # change-9377f9b9: workspace_dir gives the location path
+            yaml_findings, data, doc_class = check_yaml(path, content,
+                                                        workspace_dir)
             findings.extend(yaml_findings)
 
             if data and doc_class and doc_class in _ID_FIELDS:

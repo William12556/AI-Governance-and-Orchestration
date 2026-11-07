@@ -125,6 +125,8 @@ def load_manifest(path: str) -> Manifest:
         raise ManifestError(f"{path}: cannot be read: {e}") from e
     except yaml.YAMLError as e:
         raise ManifestError(f"{path}: invalid YAML: {e}") from e
+    except RecursionError as e:  # change-9377f9b9 (audit-e4428fd5 F-01)
+        raise ManifestError(f"{path}: invalid YAML: nesting too deep") from e
     if not isinstance(data, dict):
         raise ManifestError(f"{path}: must be a mapping")
 
