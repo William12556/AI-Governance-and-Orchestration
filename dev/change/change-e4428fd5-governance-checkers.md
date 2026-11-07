@@ -5,7 +5,7 @@ change_info:
   id: "change-e4428fd5"
   title: "Governance checkers: class-word schema_type, aliases, type checks, superseded tests, checker tests (Stage C work item 3)"
   date: "2026-11-07"
-  status: "proposed"
+  status: "approved"  # operator approval 2026-11-07
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -195,6 +195,9 @@ version_history:
   - version: "1.0"
     date: "2026-11-07"
     changes: ["Initial change record"]
+  - version: "1.1"
+    date: "2026-11-07"
+    changes: ["Approved by the operator as drafted; implementation per prompt-e4428fd5"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
