@@ -153,6 +153,39 @@ def test_resolve_class_uses_first_root_key():
         "change", None)
 
 
+# --- Amendment 1 (FR-A4): root-key inference limited by path -------------------
+
+@pytest.mark.parametrize("path,expected", [
+    ("prompt/prompt-x.md", ("prompt", None)),
+    ("prompt/closed/prompt-x.md", (None, L.MISSING_SCHEMA_TYPE)),
+    (None, ("prompt", None)),
+])
+def test_am1_resolve_class_root_key_by_path(path, expected):
+    assert L.resolve_class({"prompt_info": {"id": "prompt-1a2b3c4d"}}, path) == expected
+
+
+@pytest.mark.parametrize("path,cls,findings", [
+    ("prompt/prompt-1a2b3c4d-x.md", "prompt", []),
+    ("prompt/closed/prompt-1a2b3c4d-x.md", None,
+     [("WARN", "yaml", "YAML block present but metadata.schema_type is missing")]),
+])
+def test_am1_check_yaml_passes_path(path, cls, findings):
+    found, _data, got = L.check_yaml(path, _md(_prompt()))
+    assert (got, _key(found)) == (cls, findings)
+
+
+def test_am2_proposal_with_change_info_is_not_a_change(tmp_path):
+    ws = tmp_path / "ws"
+    data = _change()
+    del data["metadata"]
+    path = _write(ws, "proposals/proposal-1a2b3c4d-x.md", data)
+    findings, _data, cls = L.check_yaml(path, _md(data))
+    assert cls is None
+    assert _key(findings) == [
+        ("WARN", "yaml", "YAML block present but metadata.schema_type is missing")]
+    assert P.load_workspace(str(ws)) == ([], [])
+
+
 # --- A2: rules applied by class -------------------------------------------------
 
 FOUR_DEFECTS = [
@@ -238,7 +271,9 @@ def test_missing_template_version_warned_only_with_schema_type():
     assert ("WARN", "yaml", "missing metadata.template_version") in _key(_yaml_findings(data))
     data = _change()
     del data["metadata"]
-    assert _key(_yaml_findings(data)) == []
+    # change-e4428fd5 amendment 1: inference needs a matching file name
+    findings, _data, _cls = L.check_yaml("change-1a2b3c4d-x.md", _md(data))
+    assert _key(findings) == []
 
 
 # --- A3: templates --------------------------------------------------------------
@@ -417,4 +452,8 @@ def test_checkers_complete_on_dev_corpus(checker):
                           os.path.join(REPO, "dev")], capture_output=True, text=True)
     assert out.returncode in (0, 1), out.stderr
     assert "Traceback" not in out.stderr
-    assert re.search(r"\d+ error\(s\)  \d+ warning\(s\)", out.stdout)
+    m = re.search(r"(\d+) error\(s\)  \d+ warning\(s\)", out.stdout)
+    assert m
+    # change-e4428fd5 amendment 1: each checker reports 0 errors on dev/
+    assert m.group(1) == "0", out.stdout
+    assert out.returncode == 0

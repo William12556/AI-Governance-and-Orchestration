@@ -99,14 +99,41 @@ def test_prompt_without_metadata_gets_prompt_checks(tmp_path):
     assert P.load_workspace(str(ws))[0][0].path == path
 
 
+# --- Amendment 1 (FR-A4): root-key inference limited by path -------------------
+
+def test_am3_closed_change_without_schema_type_is_not_validated(tmp_path):
+    ws = tmp_path / "ws"
+    change = _change(status="closed")
+    del change["metadata"]
+    change_path = _write(ws, "change/closed/change-1a2b3c4d-x.md", change)
+    _write(ws, "issue/closed/issue-1a2b3c4d-x.md", _issue(status="closed"))
+    lint = [(f.severity, f.check, f.message) for f in L.run(str(ws)) if f.path == change_path]
+    assert lint == [("WARN", "yaml", "YAML block present but metadata.schema_type is missing")]
+    proto = P.run(str(ws))
+    assert [f for f in proto if f.check in ("lifecycle", "status_consistency")] == []
+    assert [d.path for d in P.load_workspace(str(ws))[0]] == [
+        str(ws / "issue/closed/issue-1a2b3c4d-x.md")]
+
+
+def test_am4_active_prompt_without_metadata_gets_self_containment_error(tmp_path):
+    ws = tmp_path / "ws"
+    path = _write(ws, "prompt/prompt-1a2b3c4d-x.md", _prompt(description=""))
+    assert [(f.path, f.severity, f.message) for f in P.run(str(ws))
+            if f.check == "prompt_self_contained"] == [
+        (path, "ERROR", "specification.description is empty — prompt is not self-contained")]
+
+
 # --- B: closed prompts ----------------------------------------------------------
 
 def test_prompt_self_contained_active_error_closed_warn(tmp_path):
     ws = tmp_path / "ws"
     defective = _prompt(description="", components=[])
     _write(ws, "prompt/prompt-1a2b3c4d-x.md", defective)
-    _write(ws, "prompt/closed/prompt-2b3c4d5e-x.md", _prompt(uuid="2b3c4d5e", description="",
-                                                           components=[]))
+    # change-e4428fd5 amendment 1: no root-key inference in closed/, so the
+    # closed prompt carries schema_type
+    closed_prompt = _prompt(uuid="2b3c4d5e", description="", components=[])
+    closed_prompt["metadata"] = _meta("prompt")
+    _write(ws, "prompt/closed/prompt-2b3c4d5e-x.md", closed_prompt)
     findings = [f for f in P.run(str(ws)) if f.check == "prompt_self_contained"]
     active = sorted((f.severity, f.message) for f in findings if "/closed/" not in f.path)
     closed = sorted((f.severity, f.message) for f in findings if "/closed/" in f.path)
