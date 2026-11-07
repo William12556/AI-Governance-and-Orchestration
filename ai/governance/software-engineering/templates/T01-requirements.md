@@ -104,7 +104,7 @@ version_history:
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
   template_version: "1.0"
-  schema_type: "t07_requirements"
+  schema_type: "requirements"
 ```
 
 ---
@@ -371,7 +371,7 @@ properties:
       schema_type:
         type: string
         enum:
-          - t07_requirements
+          - requirements
 ```
 
 ---
@@ -383,6 +383,7 @@ properties:
 | 1.0     | 2025-12-13 | Initial creation for P10 Requirements protocol |
 | 1.1     | 2026-03-12 | Added naming_conventions section for early capture of element naming rules |
 | 1.2     | 2026-06-16 | Standardised copyright line format (template metadata default and document footer) |
+| 1.3     | 2026-11-07 | change-e4428fd5: schema_type class word |
 
 ---
 

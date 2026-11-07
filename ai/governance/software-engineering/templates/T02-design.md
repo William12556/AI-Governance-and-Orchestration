@@ -237,7 +237,7 @@ version_history:
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
   template_version: "1.0"
-  schema_type: "t01_design"
+  schema_type: "design"
 ```
 
 ---
@@ -769,7 +769,7 @@ properties:
       schema_type:
         type: string
         enum:
-          - t01_design
+          - design
 ```
 
 
@@ -782,6 +782,7 @@ properties:
 | 1.0     | 2025-12-12 | Split from governance.md into separate file for maintainability |
 | 1.1     | 2026-03-12 | Added element_registry section for incremental population across design tiers |
 | 1.2     | 2026-06-16 | Standardised copyright line format (template metadata default and document footer) |
+| 1.3     | 2026-11-07 | change-e4428fd5: schema_type class word |
 
 ---
 

@@ -23,7 +23,7 @@ test_info:
   title: ""
   date: ""
   author: ""
-  status: ""  # planned, in_progress, executed, passed, failed, blocked
+  status: ""  # planned, in_progress, executed, passed, failed, blocked, superseded
   type: ""  # unit, integration, system, acceptance, regression, performance
   priority: ""  # critical, high, medium, low
   iteration: 1  # Increments with each debug cycle
@@ -155,7 +155,7 @@ version_history:
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
   template_version: "1.0"
-  schema_type: "t05_test"
+  schema_type: "test"
 ```
 
 ---
@@ -202,6 +202,7 @@ properties:
           - passed
           - failed
           - blocked
+          - superseded
       type:
         type: string
         enum:
@@ -551,7 +552,7 @@ properties:
       schema_type:
         type: string
         enum:
-          - t05_test
+          - test
 ```
 
 ---
@@ -563,6 +564,7 @@ properties:
 | 1.0     | 2025-12-12 | Split from governance.md into separate file for maintainability |
 | 1.1     | 2025-12-12 | UUID pattern migration: Replaced NNNN sequence numbering with 8-character UUID format (^[0-9a-f]{8}$) in all fields |
 | 1.2     | 2026-06-16 | Standardised copyright line format (template metadata default and document footer) |
+| 1.3     | 2026-11-07 | change-e4428fd5: schema_type class word; test status superseded |
 
 ---
 

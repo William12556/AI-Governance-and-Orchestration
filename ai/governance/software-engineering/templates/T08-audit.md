@@ -83,7 +83,7 @@ version_history:
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
   template_version: "1.0"
-  schema_type: "t08_audit"
+  schema_type: "audit"
 ```
 
 ---
@@ -267,7 +267,7 @@ properties:
       schema_type:
         type: string
         enum:
-          - t08_audit
+          - audit
 ```
 
 ---
@@ -279,6 +279,7 @@ properties:
 | 1.0     | 2026-06-28 | Initial audit report template; supports strategic and tactical audit modes |
 | 1.1 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.2 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 1.3 | 2026-11-07 | change-e4428fd5: schema_type class word |
 
 ---
 
