@@ -5,7 +5,7 @@ issue_info:
   id: "issue-4b0a5592"
   title: "Approval and tracking: CLI tracks by name, non-regular workspace paths untracked, approve.py leaves state after a failed commit, approvals unreadable in a nested project"
   date: "2026-11-07"
-  status: "open"
+  status: "resolved"  # change-4b0a5592 implemented 2026-11-07 (P03.7)
   severity: "low"
   type: "defect"
   iteration: 1
@@ -102,6 +102,9 @@ version_history:
   - version: "1.0"
     date: "2026-11-07"
     changes: ["Initial issue for Stage C work item 4 (audit-caab2052 group 4)"]
+  - version: "1.1"
+    date: "2026-11-07"
+    changes: ["Status resolved: change-4b0a5592 implemented (P03.7)"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

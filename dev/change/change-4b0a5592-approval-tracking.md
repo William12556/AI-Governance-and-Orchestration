@@ -5,7 +5,7 @@ change_info:
   id: "change-4b0a5592"
   title: "Approval and tracking: track workspace tasks by location, restore approvals after a failed commit, read approvals in a nested project (Stage C work item 4)"
   date: "2026-11-07"
-  status: "approved"  # operator approval 2026-11-07
+  status: "implemented"  # operator approval 2026-11-07; implemented 2026-11-07
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -161,6 +161,15 @@ version_history:
   - version: "1.1"
     date: "2026-11-07"
     changes: ["Approved by the operator as drafted; implementation per prompt-4b0a5592"]
+  - version: "1.2"
+    date: "2026-11-07"
+    changes:
+      - "Implemented in Claude Code cloud on branch claude/inspiring-lamport-1o6pem from e555669: engine 404bf37, tests 7602712 and c2e5981, report and prompt move f74b26f (report-4b0a5592 v1.0). Status implemented"
+      - "Session: 732 passed, 2 skipped at baseline; 744 passed, 2 skipped after (Linux; 12 new cases). Mutations M1 to M6 caught"
+      - "Planner review: diff limited to the prompt scope; linter.py dev 0 errors, 107 warnings; protocol_checker.py dev 0 errors, 20 warnings. Suite with SDK stand-ins, without test_engine_mcp.py: 722 passed, 2 skipped (+22 = 744). Extra mutation (file not removed when the call created it): T6 [absent] fails"
+      - "Report §5.0 interpretations 1 to 6 accepted. §6.0 item 1 (refusal text 'work item : no documents found' reachable only with a manifest that has no evidence stage before the loop stage): accepted, no action; item 2 (repo fixture without commit.gpgsign=false): registered as work item 6 (e)"
+      - "Planner updates: design-14e05e35 v1.27 §8.3, §8.4; guide-engine-operations v1.31 §5.0"
+      - "Open: operator macOS suite; follow-up audit (P02.8.2)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
