@@ -203,7 +203,8 @@ def _headings(content: str) -> frozenset:
     return frozenset(anchors)
 
 
-def resolve_class(data: dict) -> tuple[Optional[str], Optional[str]]:
+def resolve_class(data: dict,
+                  path: Optional[str] = None) -> tuple[Optional[str], Optional[str]]:
     """
     Resolve a governance document's class from its first YAML block.
 
@@ -212,6 +213,11 @@ def resolve_class(data: dict) -> tuple[Optional[str], Optional[str]]:
     class; a numbered value t01_ to t08_ followed by a class word gives the
     class word; any other value gives no class and a message. With
     schema_type absent: the class of the first top-level key in ROOT_KEYS.
+    change-e4428fd5 amendment 1 (operator decision 2026-11-07, option V3):
+    when path is given, the root-key class is used only if no component of
+    path is 'closed' and the file name's prefix before the first '-' equals
+    that class; otherwise the schema_type is reported missing. With path
+    None the root-key rule applies without these conditions.
     Returns (class, message); message is set when class is None.
     """
     schema_type = _get(data, "metadata.schema_type")
@@ -226,7 +232,14 @@ def resolve_class(data: dict) -> tuple[Optional[str], Optional[str]]:
         return None, f"unknown schema_type '{schema_type}'"
     for key in data:
         if key in ROOT_KEYS:
-            return ROOT_KEYS[key], None
+            doc_class = ROOT_KEYS[key]
+            # change-e4428fd5 amendment 1 (operator decision 2026-11-07)
+            if path is not None:
+                parts = re.split(r"[\\/]", path)
+                if ("closed" in parts
+                        or parts[-1].split("-", 1)[0] != doc_class):
+                    return None, MISSING_SCHEMA_TYPE
+            return doc_class, None
     return None, MISSING_SCHEMA_TYPE
 
 
@@ -312,7 +325,8 @@ def check_yaml(path: str, content: str) -> tuple[list[Finding], Optional[dict], 
             "YAML block top level must be a mapping"))
         return findings, None, None
 
-    doc_class, message = resolve_class(data)
+    # change-e4428fd5 amendment 1: path limits root-key inference
+    doc_class, message = resolve_class(data, path)
     if doc_class is None:
         findings.append(Finding("WARN", path, "yaml", message))
         return findings, data, None

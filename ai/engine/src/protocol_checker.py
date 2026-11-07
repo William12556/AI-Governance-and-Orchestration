@@ -129,7 +129,9 @@ def load_workspace(workspace_dir: str) -> tuple[list[WorkspaceDoc], list[Finding
     change-e4428fd5 (audit-caab2052 M-03, L-11): the class is resolved by
     linter.resolve_class; a document whose YAML top level is not a mapping,
     whose class is None or whose id is not a string is skipped without a
-    finding (linter reports it).
+    finding (linter reports it). change-e4428fd5 amendment 1: the path is
+    passed to resolve_class, so a document without schema_type is inferred
+    only outside closed/ and when its file name class matches.
     """
     docs: list[WorkspaceDoc] = []
     warnings: list[Finding]  = []
@@ -146,7 +148,8 @@ def load_workspace(workspace_dir: str) -> tuple[list[WorkspaceDoc], list[Finding
             data = _extract_yaml(content)
             if not isinstance(data, dict):
                 continue
-            doc_class, _message = resolve_class(data)
+            # change-e4428fd5 amendment 1: path limits root-key inference
+            doc_class, _message = resolve_class(data, path)
             if doc_class is None or doc_class not in _ID_FIELD:
                 continue
             doc_id = _get(data, _ID_FIELD[doc_class])
