@@ -13,6 +13,7 @@ Created: 2026 November 7
 - [5.0 Deviations from this prompt](#50-deviations-from-this-prompt)
 - [6.0 Open points for the planner](#60-open-points-for-the-planner)
 - [7.0 Session branch, starting commit and commit hashes](#70-session-branch-starting-commit-and-commit-hashes)
+- [8.0 Amendment 1](#80-amendment-1)
 - [Version History](#version-history)
 
 ---
@@ -28,6 +29,7 @@ Created: 2026 November 7
   - Reaching 0 errors requires one of two things: edit `closed/` documents, which the prompt forbids, or change FR-A1.
   - Following the stop condition, I recorded the conflict (§5.0, §6.0) and did not work around it.
 - The prompt is moved to `dev/prompt/closed/` as instructed. The issue and change documents remain active.
+- Amendment 1 (FR-A4) resolves the stop condition: both checkers now report 0 errors on `dev/`. See §8.0.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -264,11 +266,114 @@ Commands: `python3 ai/engine/src/linter.py dev` and `python3 ai/engine/src/proto
 
 ---
 
+## 8.0 Amendment 1
+
+### 8.1 Summary
+
+- FR-A4 is implemented as specified (operator decision 2026-11-07, option V3; change-e4428fd5 v1.2). Root-key inference now applies only to a document outside `closed/` whose file name class matches the root key.
+- Both checkers report 0 errors on `dev/`. The baseline was 6 linter errors and 16 protocol_checker errors.
+- The suite has 732 passed and 2 skipped tests. The baseline was 724 passed and 2 skipped. There are no new failures.
+- Mutations M10, M11 and M12 each fail their named tests.
+- Two existing test fixtures depended on the behaviour that FR-A4 changes, and I updated them (§8.3). No FR-A1 to FR-E source code was changed except as FR-A4 states.
+- The prompt is moved back to `dev/prompt/closed/`. The issue and change documents remain active.
+
+### 8.2 Files changed
+
+| File | Change | Functions and names |
+|---|---|---|
+| `ai/engine/src/linter.py` | FR-A4 | `resolve_class(data, path=None)`: with `schema_type` absent and `path` given, the root-key class is returned only when no path component (split on `/` or `\`) is `closed` and the file name prefix before the first `-` equals the class; otherwise `(None, MISSING_SCHEMA_TYPE)`. With `path` None the root-key rule is unchanged. `check_yaml` passes its `path`. |
+| `ai/engine/src/protocol_checker.py` | FR-A4 | `load_workspace` passes its `path` to `resolve_class`; docstring updated. |
+| `tests/engine/test_linter.py` | AM1, AM2, corpus | New: `test_am1_resolve_class_root_key_by_path` (3 cases), `test_am1_check_yaml_passes_path` (2 cases), `test_am2_proposal_with_change_info_is_not_a_change`. Changed: `test_checkers_complete_on_dev_corpus` asserts 0 errors and exit code 0; `test_missing_template_version_warned_only_with_schema_type` (§8.3). |
+| `tests/engine/test_protocol_checker.py` | AM3, AM4 | New: `test_am3_closed_change_without_schema_type_is_not_validated`, `test_am4_active_prompt_without_metadata_gets_self_containment_error`. Changed: `test_prompt_self_contained_active_error_closed_warn` (§8.3). |
+| `dev/prompt/closed/prompt-e4428fd5-governance-checkers.md` | Move | `git mv` from `dev/prompt/`. |
+
+### 8.3 Test results
+
+**Baseline** (2da9bd8, before any edit): `python3 -m pytest tests/engine tests/webui -q` gave 724 passed and 2 skipped. pytest and the requirements were installed first. The corpus test passed at baseline because it then asserted only that the checkers completed.
+
+**Final:** 732 passed and 2 skipped: 8 new cases and no failures.
+
+**Fixture updates for behaviour changed by FR-A4:**
+
+1. `test_missing_template_version_warned_only_with_schema_type`: the second half checks a change without metadata through `check_yaml("doc.md", …)`. Under FR-A4, the file name `doc.md` does not allow inference, so the result was a missing-schema_type warning. It now uses the path `change-1a2b3c4d-x.md`. The assertion (no finding) is unchanged.
+2. `test_prompt_self_contained_active_error_closed_warn` (test B): the closed prompt had no metadata. Under FR-A4 it is no longer loaded, so the closed WARN findings disappeared. The closed fixture now carries `metadata.schema_type: prompt`. The assertions are unchanged, and the test still exercises FR-B: I re-ran mutation M4, and it fails this test and the protocol_checker corpus case.
+
+**Mutations** (not committed; each on a temporary copy of `ai/`, `tests/` and `dev/`, running `test_linter.py` and `test_protocol_checker.py`):
+
+| ID | Mutation | Named tests | Result |
+|---|---|---|---|
+| M10 | drop the `closed` condition | AM1, corpus | killed (5 failed: AM1 `resolve_class` closed case, AM1 `check_yaml` closed case, both corpus cases, AM3) |
+| M11 | drop the file-name condition | AM2 | killed (1 failed: AM2) |
+| M12 | `check_yaml` calls `resolve_class(data)` without its path | AM1 through `check_yaml` or AM3 | killed (4 failed: AM1 `check_yaml` closed case, AM2, linter corpus case, AM3) |
+| M4 (re-run) | closed downgrade removed in `check_prompt_self_contained` | B | killed (2 failed: B, protocol_checker corpus case) |
+
+### 8.4 Governance checks
+
+Commands: `python3 ai/engine/src/linter.py dev` and `python3 ai/engine/src/protocol_checker.py dev`. "Before" is 2da9bd8, with the prompt active in `dev/prompt/`. "FR-A4" is 970cf43, with the prompt still active. "Final" is the branch head, with the prompt in `closed/`. Values are errors / warnings.
+
+**linter.py**
+
+| Check | Before | FR-A4 | Final |
+|---|---|---|---|
+| naming | 0 / 0 | 0 / 0 | 0 / 0 |
+| structure | 0 / 26 | 0 / 26 | 0 / 26 |
+| yaml | 5 / 3 | 0 / 55 | 0 / 56 |
+| coupling | 1 / 9 | 0 / 8 | 0 / 8 |
+| links | 0 / 14 | 0 / 14 | 0 / 14 |
+| **Total** | **6 / 52** | **0 / 103** | **0 / 104** |
+
+**protocol_checker.py**
+
+| Check | Before | FR-A4 | Final |
+|---|---|---|---|
+| uuid_chain | 0 / 0 | 0 / 0 | 0 / 0 |
+| bidirectional | 0 / 42 | 0 / 8 | 0 / 7 |
+| one_to_one | 0 / 0 | 0 / 0 | 0 / 0 |
+| status_consistency | 1 / 0 | 0 / 0 | 0 / 0 |
+| lifecycle | 15 / 0 | 0 / 0 | 0 / 0 |
+| prompt_self_contained | 0 / 23 | 0 / 13 | 0 / 13 |
+| **Total** | **16 / 65** | **0 / 21** | **0 / 20** |
+
+**Findings removed (before → final):**
+
+- **linter:** the 6 errors in §4.0 (`change-3b9e6d72` status enum; task_type enum in `prompt-a7d3f8b1`, `prompt-b6e4a1c9` and `prompt-c4a9f2e1`; two in `proposal-d325514e`), and the coupling warning `prompt-19819f2e` empty `change_ref`.
+- **protocol_checker:** the 16 errors (15 lifecycle, 1 status_consistency); 35 bidirectional and 10 prompt_self_contained warnings from closed prompts without metadata.
+
+**Findings added:** 53 linter warnings `YAML block present but metadata.schema_type is missing`. These are the 52 closed documents without `schema_type` (5 changes, 10 issues, 35 prompts, 1 audit, 1 proposal) plus `prompt-e4428fd5` after its move to `closed/`. As FR-A4 intends, this restores the state before change-e4428fd5 for these documents. protocol_checker adds no findings. The two `links` warnings for `prompt-e4428fd5` are unchanged; they now carry the prompt's `closed/` path.
+
+**Planner simulation:** change-e4428fd5 v1.2 records linter 0 / 104 and protocol_checker 0 / 20 for V3. The final counts match. The FR-A4 column differs by one in each checker only because `prompt-e4428fd5` was then active: it was inferred as a prompt (linter −1 warning), and `change-e4428fd5` has no `prompt_ref` back-reference (protocol_checker +1 warning).
+
+### 8.5 Deviations from this prompt
+
+None. §8.3 records the two fixture updates; the scope constraint permits these.
+
+### 8.6 Open points for the planner
+
+1. **FR-B now applies only to closed prompts with `schema_type`.** T03 prompts carry no metadata, so FR-A4 excludes closed T03 prompts from protocol_checker, and FR-B's downgrade no longer reaches them. The 13 remaining prompt_self_contained warnings come from closed prompts that carry `metadata.schema_type`. This is consistent with V3, but governance.md P00.14.3 wording on closed-prompt WARN should reflect it.
+2. **The `closed` path test covers the whole path given to the checker,** including the workspace directory, as FR-A4 states ("no component of the path"). A workspace located under a directory named `closed` would disable root-key inference for all its documents. protocol_checker's own `in_closed` is computed relative to the workspace. Consider stating the path test relative to the workspace if this matters.
+3. **The closed-record defects are reported as warnings only:** 5 changes and 10 issues with non-terminal status, and 3 prompts with invalid `task_type`. Correcting them would need a separate change and an exception to requirements-eb782f83 CON-04.
+4. **Still pending from §6.0 item 5:** the governance.md P00.14.3 and Appendix A.5 update, and version 12.9 in governance.md and manifest.yaml; the follow-up audit (P02.8.2); the macOS suite run.
+
+### 8.7 Session branch, starting commit and commit hashes
+
+- **Branch:** `claude/focused-goodall-z97wtk`, pushed and not merged into `main`.
+- **Starting commit:** `2da9bd8c5791335e9337bc3ea5ef12a71463bcec`
+- **Commits:**
+  - `f134abe`: `fix(engine)`: limit root-key class inference by path (change-e4428fd5 amendment 1)
+  - `970cf43`: `test`: amendment 1 tests AM1-AM4; corpus test asserts 0 errors
+  - The `docs(dev)` commit that updates this report and moves the prompt; its hash is the branch head after `970cf43` (`git log -1`).
+- **Scope check:** `git diff 2da9bd8..HEAD --stat` touches only `ai/engine/src/linter.py`, `ai/engine/src/protocol_checker.py`, `tests/engine/test_linter.py`, `tests/engine/test_protocol_checker.py`, this report and the prompt move.
+
+[Return to Table of Contents](#table-of-contents)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-07 | Initial report for prompt-e4428fd5 |
+| 1.1 | 2026-11-07 | §8.0 Amendment 1 (FR-A4): results, tests AM1-AM4, mutations M10-M12, checker counts; §1.0 pointer |
 
 ---
 
