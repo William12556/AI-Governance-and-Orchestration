@@ -2669,14 +2669,21 @@ async def main_async(args: argparse.Namespace) -> int:
     if args.task and os.path.isfile(args.task):
         with open(args.task, "rb") as _fh:
             _task_bytes = _fh.read()
-    _tracked = bool(work_item) and ST.is_tracked_task(os.getcwd(), args.task)
+    # change-4b0a5592 (audit-caab2052 L-04): any existing path in
+    # ai/workspace/ is tracked, with or without a work-item UUID in its name;
+    # one that is not the approved prompt is refused below (exit 3).
+    _tracked = ST.is_tracked_task(os.getcwd(), args.task)
     if args.mode in ("loop", "worker") and _tracked:
         # change-82dbf16a iteration 5 (audit F4-02): prerun_missing refuses a
         # tracked task whose content was not read.
-        _missing = ST.prerun_missing(os.getcwd(), manifest, work_item, args.task, _task_bytes)
+        _missing = ST.prerun_missing(os.getcwd(), manifest, work_item or "", args.task, _task_bytes)
         if _missing:
-            console.print(f"[red][engine] work item {escape(work_item)} is not ready for "
-                          f"'{escape(loop_stage.id)}'; missing:[/red]")
+            if work_item:
+                console.print(f"[red][engine] work item {escape(work_item)} is not ready for "
+                              f"'{escape(loop_stage.id)}'; missing:[/red]")
+            else:
+                console.print(f"[red][engine] task {escape(args.task)} is not ready for "
+                              f"'{escape(loop_stage.id)}'; missing:[/red]")
             for _m in _missing:
                 console.print(f"[red]  - {escape(_m)}[/red]")
             return 3

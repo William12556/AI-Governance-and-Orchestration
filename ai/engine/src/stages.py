@@ -125,7 +125,9 @@ def committed_approvals(project_root: str) -> Approvals:
     """Approvals in git HEAD. Raises NotAGitRepository outside a git working tree."""
     if not is_git_repository(project_root):
         raise NotAGitRepository(f"{project_root} is not a git repository; approvals cannot be read")
-    proc = _git(project_root, "show", f"HEAD:{APPROVALS_FILE}")
+    # change-4b0a5592 (audit-caab2052 L-06): './' resolves the path from the
+    # -C directory, so a project nested in a larger repository is read.
+    proc = _git(project_root, "show", f"HEAD:./{APPROVALS_FILE}")
     return parse_approvals(proc.stdout) if proc.returncode == 0 else {}
 
 
@@ -321,12 +323,20 @@ def _flag_stale_approvals(project_root: str, item: WorkItem, manifest, approvals
 
 
 def is_tracked_task(project_root: str, task_path: str | None) -> bool:
-    """A T03 prompt file inside ai/workspace/ is a tracked work item."""
-    if not task_path or not os.path.isfile(task_path):
+    """
+    A task path that exists and resolves to ai/workspace/ or a path inside it
+    is tracked, whatever its name or file type (regular file, directory, FIFO
+    or any other). The pre-run check then refuses it unless it is the approved
+    prompt of its work item.
+    """
+    # change-4b0a5592 (audit-caab2052 L-04; audit-14e05e35 F5-01): tracked by
+    # resolved location only; any existing file type counts.
+    if not task_path or not os.path.exists(task_path):
         return False
     # L-01: symlinks resolved, as engine-mcp does.
     workspace = os.path.realpath(os.path.join(project_root, WORKSPACE))
-    return os.path.realpath(task_path).startswith(workspace + os.sep)
+    real = os.path.realpath(task_path)
+    return real == workspace or real.startswith(workspace + os.sep)
 
 
 def task_stage(manifest):
