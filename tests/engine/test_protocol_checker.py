@@ -309,3 +309,47 @@ def test_prompt_self_contained(tmp_path):
         ("ERROR", "deliverable.files is empty — no output target specified")]
     docs, _ = _docs(tmp_path, {"prompt/prompt-1a2b3c4d-x.md": _prompt()})
     assert P.check_prompt_self_contained(docs) == []
+
+
+# --- F: checker hygiene (change-9377f9b9) ----------------------------------------
+
+def test_t4_workspace_below_closed_prompt_self_containment(tmp_path):
+    ws = tmp_path / "closed" / "ws"
+    path = _write(ws, "prompt/prompt-1a2b3c4d-x.md", _prompt(description=""))
+    assert [(f.path, f.severity, f.message) for f in P.run(str(ws))
+            if f.check == "prompt_self_contained"] == [
+        (path, "ERROR", "specification.description is empty — prompt is not self-contained")]
+
+
+@pytest.mark.parametrize("text", ["change_info: [\n",
+                                  "change_info: " + "[" * 5000 + "]" * 5000 + "\n"])
+def test_t1_t2_unparsable_yaml_is_skipped(tmp_path, text):
+    ws = tmp_path / "ws"
+    _write(ws, "change/change-1a2b3c4d-x.md", text)
+    _write(ws, "change/closed/change-2b3c4d5e-x.md", text)
+    assert P.load_workspace(str(ws)) == ([], [])
+    assert P.run(str(ws)) == []
+
+
+@pytest.mark.parametrize("change_status,issue_status", [
+    ("implemented", ["resolved"]),
+    (["implemented"], "open"),
+])
+def test_t9_status_consistency_mixed_types(tmp_path, change_status, issue_status):
+    docs, _ = _docs(tmp_path, {"change/change-1a2b3c4d-x.md": _change(status=change_status),
+                               "issue/issue-1a2b3c4d-x.md": _issue(status=issue_status)})
+    assert len(docs) == 2
+    assert P.check_status_consistency(docs) == []
+
+
+def test_t10_closed_prompt_empty_deliverable_files_is_warn(tmp_path):
+    ws = tmp_path / "ws"
+    closed_prompt = _prompt(description="", components=[], files=[])
+    closed_prompt["metadata"] = _meta("prompt")
+    path = _write(ws, "prompt/closed/prompt-1a2b3c4d-x.md", closed_prompt)
+    findings = [(f.path, f.severity, f.message) for f in P.run(str(ws))
+                if f.check == "prompt_self_contained"]
+    assert (path, "WARN", "deliverable.files is empty — no output target specified "
+                          "(closed record)") in findings
+    assert all(sev == "WARN" and msg.endswith(" (closed record)")
+               for _p, sev, msg in findings)

@@ -444,6 +444,111 @@ def test_links(tmp_path):
     ]
 
 
+# --- F: checker hygiene (change-9377f9b9) ----------------------------------------
+
+DEEP = "[" * 5000 + "]" * 5000
+
+PARSE_CASES = [
+    ("change_info: [\n", "YAML block does not parse: "),
+    ("change_info: " + DEEP + "\n", "YAML block does not parse: nesting too deep"),
+]
+
+
+def _parse_case(tmp_path, rel, text):
+    ws = tmp_path / "ws"
+    path = _write(ws, rel, text)
+    lint = [f for f in L.run(str(ws)) if f.path == path and f.check == "yaml"]
+    proto = [f for f in P.run(str(ws)) if f.path == path]
+    return lint, proto
+
+
+@pytest.mark.parametrize("text,prefix", PARSE_CASES)
+def test_t1_t2_unparsable_yaml_active_is_error(tmp_path, text, prefix):
+    lint, proto = _parse_case(tmp_path, "change/change-1a2b3c4d-x.md", text)
+    assert len(lint) == 1
+    assert lint[0].severity == "ERROR"
+    assert lint[0].message.startswith(prefix)
+    assert not lint[0].message.endswith(" (closed record)")
+    if prefix.endswith("deep"):
+        assert lint[0].message == prefix
+    assert proto == []
+
+
+@pytest.mark.parametrize("text,prefix", PARSE_CASES)
+def test_t1_t2_unparsable_yaml_closed_is_warn(tmp_path, text, prefix):
+    lint, proto = _parse_case(tmp_path, "change/closed/change-1a2b3c4d-x.md", text)
+    assert len(lint) == 1
+    assert lint[0].severity == "WARN"
+    assert lint[0].message.startswith(prefix)
+    assert lint[0].message.endswith(" (closed record)")
+    if prefix.endswith("deep"):
+        assert lint[0].message == prefix + " (closed record)"
+    assert proto == []
+
+
+def test_t3_parse_yaml_block():
+    assert L._parse_yaml_block("# no block\n") == (None, None)
+    assert L._parse_yaml_block("```yaml\na: 1\n```\n") == ({"a": 1}, None)
+    data, problem = L._parse_yaml_block("```yaml\nchange_info: [\n```\n")
+    assert data is None
+    assert isinstance(problem, str) and problem
+    assert L._extract_yaml("```yaml\na: " + DEEP + "\n```\n") is None
+
+
+def test_t3_no_yaml_block_gives_no_parse_finding():
+    assert L.check_yaml("doc.md", "Created: x\n\nno block\n") == ([], None, None)
+
+
+def test_t4_workspace_below_closed_infers_class(tmp_path):
+    ws = tmp_path / "closed" / "ws"
+    change = _change(status="done")
+    del change["metadata"]
+    path = _write(ws, "change/change-1a2b3c4d-x.md", change)
+    _write(ws, "issue/issue-1a2b3c4d-x.md", _issue())
+    lint = [f for f in L.run(str(ws)) if f.path == path and f.check == "yaml"]
+    assert _key(lint) == [
+        ("ERROR", "yaml", "'change_info.status' value 'done' not in "
+                          "['approved', 'implemented', 'proposed', 'rejected', 'verified']")]
+    _found, _data, cls = L.check_yaml(path, _md(change), str(ws))
+    assert cls == "change"
+
+
+@pytest.mark.parametrize("value", [True, False])
+def test_t5_bool_iteration_is_error(value):
+    assert (("ERROR", "yaml", f"iteration must be integer ≥ 1, got '{value}'")
+            in _key(_yaml_findings(_change(iteration=value))))
+
+
+def test_t7_resolve_class_t02_changes():
+    assert L.resolve_class(_change(schema_type="t02_changes")) == (
+        None, "unknown schema_type 't02_changes'")
+
+
+@pytest.mark.parametrize("path", ["prompt/enclosed/prompt-x.md",
+                                  "prompt/prompt-1a2b3c4d-closed-loop.md"])
+def test_t8_closed_substring_does_not_block_inference(path):
+    assert L.resolve_class({"prompt_info": {"id": "prompt-1a2b3c4d"}}, path) == (
+        "prompt", None)
+
+
+@pytest.mark.parametrize("value", [[], 0])
+def test_t11_id_empty_list_or_zero_is_error(value):
+    assert ("ERROR", "yaml", "'change_info.id' must be a string") in _key(
+        _yaml_findings(_change(id=value)))
+
+
+def test_dev_corpus_unparsable_closed_prompts_are_warned():
+    out = subprocess.run([sys.executable, os.path.join(REPO, "ai", "engine", "src", "linter.py"),
+                          os.path.join(REPO, "dev")], capture_output=True, text=True)
+    lines = [ln for ln in out.stdout.splitlines() if "YAML block does not parse" in ln]
+    names = sorted(os.path.basename(ln.split(": ", 1)[0].split("] ", 1)[1]) for ln in lines)
+    assert names == ["prompt-5e8aea4f-loop-robustness-followup.md",
+                     "prompt-711a57d5-loop-robustness.md"], out.stdout
+    for ln in lines:
+        assert ln.startswith("WARN") and "/prompt/closed/" in ln.replace("\\", "/")
+        assert ln.endswith(" (closed record)")
+
+
 # --- corpus ---------------------------------------------------------------------
 
 @pytest.mark.parametrize("checker", ["linter.py", "protocol_checker.py"])

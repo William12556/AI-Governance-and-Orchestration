@@ -140,6 +140,18 @@ def test_unreadable_yaml_is_reported(tmp_path):
         M.load_manifest(str(d / "manifest.yaml"))
 
 
+def test_t6_deeply_nested_yaml_is_reported(tmp_path):
+    # change-9377f9b9 (audit-e4428fd5 F-01): RecursionError as ManifestError
+    d = tmp_path / "governance" / "x"
+    d.mkdir(parents=True)
+    path = str(d / "manifest.yaml")
+    (d / "manifest.yaml").write_text("model: " + "[" * 5000 + "]" * 5000 + "\n")
+    with pytest.raises(M.ManifestError) as exc:
+        M.load_manifest(path)
+    assert path in str(exc.value)
+    assert "invalid YAML: nesting too deep" in str(exc.value)
+
+
 # --- gates ----------------------------------------------------------------------
 
 def test_build_command_expands_placeholders():
