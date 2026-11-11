@@ -554,10 +554,9 @@ build/
 deprecated/
 ai/workspace/report/
 ai/workspace/ai/
-ai/workspace/proposal/
-ai/workspace/proposal/closed/
 ai/state/
 ai/dashboard-alerts.md
+ai-local/
 
 # Worker and Reviewer
 CLAUDE.local.md
@@ -1278,6 +1277,7 @@ See [workflow.md](workflow.md).
 | 12.8 | 2026-11-05 | P00.11 state files: `run.json` run record (change-b8a6c445). Non-breaking. |
 | 12.9 | 2026-11-07 | Appendix A.5: `schema_type` class words, numbered values accepted as aliases, class inferred from the root key for active documents; P00.14.3 and T04: test status `superseded` (change-e4428fd5). Non-breaking. |
 | 12.10 | 2026-11-07 | Appendix A.5: YAML that does not parse is reported (error, or warning for a closed record); `closed/` judged below the workspace directory (change-9377f9b9). Non-breaking. |
+| 12.11 | 2026-11-11 | P10.2 .gitignore: removed ai/workspace/proposal/ and ai/workspace/proposal/closed/; added ai-local/. Non-breaking. |
 
 ---
 [Return to Table of Contents](#table-of-contents)
