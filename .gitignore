@@ -42,6 +42,7 @@ venv/
 workspace/report/
 workspace/proposal/
 workspace/proposal/closed/
+ai-local/
 
 # Engine ephemeral state
 ai/state/
