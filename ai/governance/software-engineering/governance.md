@@ -612,7 +612,7 @@ test.txt
         │       │   └── closed/
         │       ├── issues/
         │       │   └── closed/
-        │       ├── proposal/         # (excluded from git)
+        │       ├── proposal/
         │       │   └── closed/
         │       ├── prompt/
         │       │   └── closed/
@@ -623,7 +623,7 @@ test.txt
         │       │   ├── closed/
         │       │   └── result/
         │       │       └── closed/
-        ├── ai-local/                 # Project files relocated from ai/ by propagation (see RELOCATED.md)
+        ├── ai-local/                 # Project files relocated from ai/ by propagation (see RELOCATED.md; excluded from git)
         ├── .claude/                  # Claude Code profiles only; most contents git-tracked (see P10.2 excludes)
         │   ├── settings.json         # Team-shared, git-tracked
         │   ├── hooks/                # Hook scripts (e.g. run-tests.sh), git-tracked
@@ -1277,7 +1277,7 @@ See [workflow.md](workflow.md).
 | 12.8 | 2026-11-05 | P00.11 state files: `run.json` run record (change-b8a6c445). Non-breaking. |
 | 12.9 | 2026-11-07 | Appendix A.5: `schema_type` class words, numbered values accepted as aliases, class inferred from the root key for active documents; P00.14.3 and T04: test status `superseded` (change-e4428fd5). Non-breaking. |
 | 12.10 | 2026-11-07 | Appendix A.5: YAML that does not parse is reported (error, or warning for a closed record); `closed/` judged below the workspace directory (change-9377f9b9). Non-breaking. |
-| 12.11 | 2026-11-11 | P10.2 .gitignore: removed ai/workspace/proposal/ and ai/workspace/proposal/closed/; added ai-local/. Non-breaking. |
+| 12.11 | 2026-11-11 | P10.2 .gitignore: removed ai/workspace/proposal/ and ai/workspace/proposal/closed/; added ai-local/. P10.6 layout comments aligned: proposal/ no longer marked excluded; ai-local/ marked excluded from git. Non-breaking. |
 
 ---
 [Return to Table of Contents](#table-of-contents)
