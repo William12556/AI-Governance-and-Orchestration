@@ -167,8 +167,8 @@ Each finding, observation and open point of the active audits and reports was ch
 | 3b | Work item 5B-2, engine runtime: tracking, state, Overwatch | `d4f527e7` | Completed; triple closed. Review: REVISE (file mode not kept by the atomic helpers; `approvals.yaml` encoding; one report count), then SHIP | `a5a3656` (issue, change), `98214f8` and `0a3b509` (source), `3c3b870` and `af46991` (tests), `b07b3b4`, `34730e5` and the closing commit (documents) |
 | 4 | Work item 5C, scripts and documents | `541f5c58` | Not started | |
 | 5 | Work item 6, test coverage gaps | `6d40f0dd` | Not started | |
-| 6 | Work item 7a, document layout conformance | — | Not started | |
-| 7 | Work item 7b, Mistral Vibe profile `ai/profiles/mistral-vibe.md` | — | Completed (performed during the review wait of unit 3b; web search and fetch were available for the Vibe repository and PyPI, not for docs.mistral.ai). Review result recorded when available | `docs(profiles):` commit |
+| 6 | Work item 7a, document layout conformance (README.md v4.5): 31 active documents corrected; 65 active documents with a Table of Contents checked | — | Completed; review result recorded when available | `docs: layout conformance` commit |
+| 7 | Work item 7b, Mistral Vibe profile `ai/profiles/mistral-vibe.md` | — | Completed (performed during the review wait of unit 3b; web search and fetch were available for the Vibe repository and PyPI, not for docs.mistral.ai). Review: SHIP on the first round; one optional remark taken (profile v1.1) | `e65bdaf`, `cd0082a` |
 | 8 | Defects registered under prompt §11.0 | — | Not started | |
 
 [Return to Table of Contents](#table-of-contents)
@@ -188,6 +188,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | 7 | change-bae631c7 decisions D1 to D5: escape the `[engine]` prefix at each site; `invalid YAML: nesting too deep`; a null `model_context_windows` is empty and any other invalid value is refused; the server connected last keeps a duplicate tool name and a run with no tools is not refused; only the pyflakes items and the `stages.py` type of L-16 are corrected | change-bae631c7 `notes` | Minimal options consistent with the findings and their recorded dispositions |
 | 8 | Mistral Vibe profile: written from the Vibe repository documentation and PyPI (version 3.1.2); the Mistral documentation site was not reachable. Facts taken only from a summary are marked in the profile's §7.0. The T03 template has no `target_profile` value for Vibe; the profile names `claude_code` as the nearest value and no governance change is made. The profile defines no test hook | `ai/profiles/mistral-vibe.md` §5.0 to §7.0 | A new `target_profile` value or hook would change governance, templates or checkers beyond work item 7b |
 | 9 | change-d4f527e7 decisions D1 to D6: temporary file and `os.replace` with three local helpers, state file names replaced and output links written through; numbered audit archive names and the project root as a parameter; log before `BLOCKED.md`; blocked detail only when blocked; tracking by file identity for the given and the resolved path, with a task that resolves outside `ai/workspace/` refused; non-regular evidence matches skipped with a scan warning | change-d4f527e7 `notes` | Minimal options consistent with the findings; `ai/core/` is not opened (L-17 transferred) |
+| 10 | Layout conformance (7a): the check covers every tracked Markdown file with a `## Table of Contents` outside `closed/`, `dev/smoke*`, `dev/prompt/`, `dev/audit/logs-2026-07-29/` and `dev/task.md`. Corrected: unbulleted and nested Table of Contents entries, entries for H3 sections removed, missing Return links added (the eight templates), each with a Version History row. Left unchanged and recorded: `governance.md` (its Table of Contents is grouped under bold labels and links the templates, as formatted by the operator in 12.6; Appendix A has no Return link; a change would need governance 12.13 for layout only); the angle-bracket anchors in `design-eb782f83`, which are quoted examples of the retired syntax | The 31 documents; this report | The task row names bullets, H2-only entries, GitHub anchors and Return links; the governance Table of Contents is a deliberate operator format |
 
 Further decisions are added here as each unit records them.
 
@@ -239,6 +240,7 @@ Completed in Phase D.
 | 0.3 | 2026-11-14 | Unit 3a (change-bae631c7) closed: status, counts, decision 7 |
 | 0.4 | 2026-11-14 | Unit 7 (Mistral Vibe profile): status, decision 8 |
 | 0.5 | 2026-11-14 | Unit 3b (change-d4f527e7) closed: status, counts, decision 9; two new skips explained |
+| 0.6 | 2026-11-14 | Units 6 and 7: layout conformance, decision 10; profile review result |
 
 ---
 

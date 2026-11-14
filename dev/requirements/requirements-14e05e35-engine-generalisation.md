@@ -11,27 +11,18 @@ Created: 2026 September 30
 
 ## Table of Contents
 
-[1.0 Purpose](#10-purpose)
-[2.0 Scope](#20-scope)
-[3.0 Constraints](#30-constraints)
-[4.0 Functional Requirements](#40-functional-requirements)
-[4.1 FR-01 Governance Model Manifest](#41-fr-01-governance-model-manifest)
-[4.2 FR-02 Stage Flow](#42-fr-02-stage-flow)
-[4.3 FR-03 Gates](#43-fr-03-gates)
-[4.4 FR-04 Role-to-Model Binding](#44-fr-04-role-to-model-binding)
-[4.5 FR-05 Write Scope](#45-fr-05-write-scope)
-[4.6 FR-06 engine-mcp](#46-fr-06-engine-mcp)
-[4.7 FR-07 Terminology](#47-fr-07-terminology)
-[4.8 FR-08 Stage Tracking](#48-fr-08-stage-tracking)
-[5.0 Non-Functional Requirements](#50-non-functional-requirements)
-[6.0 Verification Requirements](#60-verification-requirements)
-[6.1 Verification Results](#61-verification-results)
-[7.0 Out of Scope](#70-out-of-scope)
-[8.0 Open Questions](#80-open-questions)
-[9.0 Traceability](#90-traceability)
-[Glossary](#glossary)
-[References](#references)
-[Version History](#version-history)
+- [1.0 Purpose](#10-purpose)
+- [2.0 Scope](#20-scope)
+- [3.0 Constraints](#30-constraints)
+- [4.0 Functional Requirements](#40-functional-requirements)
+- [5.0 Non-Functional Requirements](#50-non-functional-requirements)
+- [6.0 Verification Requirements](#60-verification-requirements)
+- [7.0 Out of Scope](#70-out-of-scope)
+- [8.0 Open Questions](#80-open-questions)
+- [9.0 Traceability](#90-traceability)
+- [Glossary](#glossary)
+- [References](#references)
+- [Version History](#version-history)
 
 ---
 
@@ -330,6 +321,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 1.10 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list; Table of Contents lists the H2 sections only (dev/task.md work item 7a) |
 | 1.9 | 2026-11-05 | FR-03-04: collection-only pass in the pytest gate (operator decision; change-a5bd4fe1). |
 | 1.8 | 2026-11-05 | FR-03-04 amended: the syntax gate stays built in and its FAIL blocks SHIP (audit-caab2052 OQ-01, operator decision). |
 | 1.7 | 2026-10-23 | Out-of-scope table: dev/todo.md → dev/task.md (register consolidation). No change in meaning. |

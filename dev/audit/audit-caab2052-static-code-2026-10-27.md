@@ -6,21 +6,21 @@ Created: 2026 October 27
 
 ## Table of Contents
 
-[1.0 Summary](#10-summary)
-[2.0 Method](#20-method)
-[3.0 Scope and File Inventory](#30-scope-and-file-inventory)
-[4.0 Requirements and Design Compliance](#40-requirements-and-design-compliance)
-[5.0 Findings by Dimension](#50-findings-by-dimension)
-[6.0 Findings Register](#60-findings-register)
-[7.0 Prior-Finding Re-verification](#70-prior-finding-re-verification)
-[8.0 Test Coverage Gaps](#80-test-coverage-gaps)
-[9.0 Positive Findings](#90-positive-findings)
-[10.0 Recommended Remediation Order](#100-recommended-remediation-order)
-[11.0 Open Questions for the Operator](#110-open-questions-for-the-operator)
-[12.0 T08 Record](#120-t08-record)
-[13.0 Closure Recommendation](#130-closure-recommendation)
-[14.0 Operator Decisions](#140-operator-decisions)
-[Version History](#version-history)
+- [1.0 Summary](#10-summary)
+- [2.0 Method](#20-method)
+- [3.0 Scope and File Inventory](#30-scope-and-file-inventory)
+- [4.0 Requirements and Design Compliance](#40-requirements-and-design-compliance)
+- [5.0 Findings by Dimension](#50-findings-by-dimension)
+- [6.0 Findings Register](#60-findings-register)
+- [7.0 Prior-Finding Re-verification](#70-prior-finding-re-verification)
+- [8.0 Test Coverage Gaps](#80-test-coverage-gaps)
+- [9.0 Positive Findings](#90-positive-findings)
+- [10.0 Recommended Remediation Order](#100-recommended-remediation-order)
+- [11.0 Open Questions for the Operator](#110-open-questions-for-the-operator)
+- [12.0 T08 Record](#120-t08-record)
+- [13.0 Closure Recommendation](#130-closure-recommendation)
+- [14.0 Operator Decisions](#140-operator-decisions)
+- [Version History](#version-history)
 
 ---
 
@@ -598,6 +598,7 @@ Recorded by the planner on 2026-10-29 on the operator's decision.
 | 1.6 | 2026-11-14 | §14.0: M-03, L-04 to L-06 and L-11 recorded as closed (change-e4428fd5, change-4b0a5592, change-9377f9b9); decisions for L-10, L-13, L-14, L-16, L-19 and §8.0 recorded by the session under the one-time exemption (report-b3a503a2) |
 | 1.7 | 2026-11-14 | §14.0: L-13 and L-16 recorded as closed (change-bae631c7) |
 | 1.8 | 2026-11-14 | §14.0: L-10 and L-14 recorded as closed (change-d4f527e7) |
+| 1.9 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
 
 ---
 

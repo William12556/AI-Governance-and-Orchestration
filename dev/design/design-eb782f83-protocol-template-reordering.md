@@ -12,36 +12,22 @@ Created: 2026 September 22
 
 ## Table of Contents
 
-[1.0 Purpose](#10-purpose)
-[2.0 Scope](#20-scope)
-[3.0 Mapping Tables](#30-mapping-tables)
-[3.1 Protocol Mapping](#31-protocol-mapping)
-[3.2 Ordinal Mapping](#32-ordinal-mapping)
-[3.3 Template Mapping](#33-template-mapping)
-[3.4 Machine-Readable Form](#34-machine-readable-form)
-[4.0 Collision Analysis](#40-collision-analysis)
-[4.1 Protocol Namespace Overlap](#41-protocol-namespace-overlap)
-[4.2 Template Namespace Cycles](#42-template-namespace-cycles)
-[4.3 Consequences](#43-consequences)
-[4.4 The Combined Citation Form](#44-the-combined-citation-form)
-[5.0 Substitution Algorithm](#50-substitution-algorithm)
-[5.1 Token Classes](#51-token-classes)
-[5.2 Protected Regions](#52-protected-regions)
-[5.3 Two-Pass Sentinel Substitution](#53-two-pass-sentinel-substitution)
-[5.4 Range Expressions](#54-range-expressions)
-[5.5 Case Sensitivity](#55-case-sensitivity)
-[5.6 Idempotence](#56-idempotence)
-[6.0 Target Structure of governance.md](#60-target-structure-of-governancemd)
-[7.0 Alias Appendix](#70-alias-appendix)
-[8.0 Backup Design](#80-backup-design)
-[9.0 Write-Set Enforcement](#90-write-set-enforcement)
-[10.0 Components](#100-components)
-[11.0 Verification Design](#110-verification-design)
-[12.0 Boundary Conditions](#120-boundary-conditions)
-[13.0 Element Registry](#130-element-registry)
-[14.0 Requirements Traceability](#140-requirements-traceability)
-[Glossary](#glossary)
-[Version History](#version-history)
+- [1.0 Purpose](#10-purpose)
+- [2.0 Scope](#20-scope)
+- [3.0 Mapping Tables](#30-mapping-tables)
+- [4.0 Collision Analysis](#40-collision-analysis)
+- [5.0 Substitution Algorithm](#50-substitution-algorithm)
+- [6.0 Target Structure of governance.md](#60-target-structure-of-governancemd)
+- [7.0 Alias Appendix](#70-alias-appendix)
+- [8.0 Backup Design](#80-backup-design)
+- [9.0 Write-Set Enforcement](#90-write-set-enforcement)
+- [10.0 Components](#100-components)
+- [11.0 Verification Design](#110-verification-design)
+- [12.0 Boundary Conditions](#120-boundary-conditions)
+- [13.0 Element Registry](#130-element-registry)
+- [14.0 Requirements Traceability](#140-requirements-traceability)
+- [Glossary](#glossary)
+- [Version History](#version-history)
 
 ---
 
@@ -820,6 +806,7 @@ Test traceability is added when the test document exists.
 
 | Version | Date | Description |
 |---|---|---|
+| 0.7 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list; Table of Contents lists the H2 sections only (dev/task.md work item 7a) |
 | 0.6 | 2026-09-23 | §8.5: recorded the F-02 decision — refusal retained; the documented procedure (tag plus snapshot) is the rollback mechanism; pruning not implemented |
 | 0.5 | 2026-09-22 | Amended under change-9b8f1c47 from the strategic audit. §8.5 rewritten: the previous text claimed `--rollback` reverses the template renames, which it never did — the manifest cannot record files the migration creates (F-02). Documented rollback procedure added, anchored on the tag rather than the snapshot. §5.4.1 records that the baseline tag was placed after five preparatory edits, two of which changed clause meaning, making them invisible to every verification window (F-05), and states the rule that follows. §12.0 gains three boundary conditions: the absent marker file (F-03), the untracked file whose only recovery path is itself untracked (F-12), and namespaces whose tokens sit inside identifiers and are therefore invisible to the token patterns (F-04). |
 | 0.4 | 2026-09-22 | Records four defects found on the rehearsal and their fixes. §5.5 added: identifiers appear lowercase inside Obsidian anchors, so C1, C3 and C4 now match case-insensitively with case preserved; this recovered thirteen substitutions that were being silently missed. §12.0 gains the exclusion of ephemeral state and generated output from the write set, and the reporting of untracked files whose only rollback path is the snapshot. §7.0 table-of-contents generation corrected to derive entries from the actual headings rather than compose them from the mapping, and to emit template links; the appendix is now generated before the contents so that it can be listed. V-15 refined — see the requirements document. |

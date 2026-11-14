@@ -9,9 +9,6 @@ Created: 2026 June 02
 - [1.0 Overview](#10-overview)
 - [2.0 Decision Criteria](#20-decision-criteria)
 - [3.0 Profile Reference](#30-profile-reference)
-- [3.1 Engine — Automated Execution Loop](#31-engine--automated-execution-loop)
-- [3.2 Claude Code](#32-claude-code)
-- [3.3 claude-omlx](#33-claude-omlx)
 - [4.0 Trade-offs](#40-trade-offs)
 - [Version History](#version-history)
 
@@ -175,6 +172,7 @@ The engine profile is the only profile that supports the automated audit loop (`
 | 1.6 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 1.7 | 2026-10-01 | Terminology: worker/reviewer context file (audit-14e05e35 M-03, change-82dbf16a) |
 | 1.8 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
+| 1.9 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents lists the H2 sections only (dev/task.md work item 7a) |
 
 ---
 

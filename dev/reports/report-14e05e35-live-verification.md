@@ -12,16 +12,16 @@ Created: 2026 October 01
 
 ## Table of Contents
 
-[1.0 Purpose](#10-purpose)
-[2.0 Method](#20-method)
-[3.0 Pre-run Check](#30-pre-run-check)
-[4.0 V-02 SE Regression on oMLX](#40-v-02-se-regression-on-omlx)
-[5.0 V-04 Mistral API](#50-v-04-mistral-api)
-[6.0 V-04 Anthropic Provider](#60-v-04-anthropic-provider)
-[7.0 Observations](#70-observations)
-[8.0 Verdicts](#80-verdicts)
-[9.0 Open Items](#90-open-items)
-[Version History](#version-history)
+- [1.0 Purpose](#10-purpose)
+- [2.0 Method](#20-method)
+- [3.0 Pre-run Check](#30-pre-run-check)
+- [4.0 V-02 SE Regression on oMLX](#40-v-02-se-regression-on-omlx)
+- [5.0 V-04 Mistral API](#50-v-04-mistral-api)
+- [6.0 V-04 Anthropic Provider](#60-v-04-anthropic-provider)
+- [7.0 Observations](#70-observations)
+- [8.0 Verdicts](#80-verdicts)
+- [9.0 Open Items](#90-open-items)
+- [Version History](#version-history)
 
 ---
 
@@ -156,6 +156,7 @@ Not verified live: the Anthropic API itself, its acceptance of strict tool schem
 
 | Version | Date | Description |
 |---|---|---|
+| 1.5 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
 | 1.4 | 2026-10-23 | O-03: dev/todo.md → dev/task.md (register consolidation) |
 | 1.3 | 2026-10-01 | O-04 closed (V-14); O-03 remaining step names governance 12.x (Phase 2 closure) |
 | 1.2 | 2026-10-01 | §8.0: basis of the V-04 oMLX verdict stated (audit-14e05e35 L-16) |

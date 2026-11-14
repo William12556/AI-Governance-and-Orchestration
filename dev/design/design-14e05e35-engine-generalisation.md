@@ -11,23 +11,23 @@ Created: 2026 October 01
 
 ## Table of Contents
 
-[1.0 Purpose](#10-purpose)
-[2.0 Architecture](#20-architecture)
-[3.0 Configuration](#30-configuration)
-[4.0 Providers](#40-providers)
-[5.0 Manifest](#50-manifest)
-[6.0 Gates and Stage Flow](#60-gates-and-stage-flow)
-[7.0 Write Scope](#70-write-scope)
-[8.0 Stage Tracking and Approvals](#80-stage-tracking-and-approvals)
-[9.0 engine-mcp](#90-engine-mcp)
-[10.0 Terminology Migration](#100-terminology-migration)
-[11.0 Error Handling](#110-error-handling)
-[12.0 Testing](#120-testing)
-[13.0 Implementation Plan](#130-implementation-plan)
-[14.0 Open Issues](#140-open-issues)
-[15.0 Requirements Traceability](#150-requirements-traceability)
-[References](#references)
-[Version History](#version-history)
+- [1.0 Purpose](#10-purpose)
+- [2.0 Architecture](#20-architecture)
+- [3.0 Configuration](#30-configuration)
+- [4.0 Providers](#40-providers)
+- [5.0 Manifest](#50-manifest)
+- [6.0 Gates and Stage Flow](#60-gates-and-stage-flow)
+- [7.0 Write Scope](#70-write-scope)
+- [8.0 Stage Tracking and Approvals](#80-stage-tracking-and-approvals)
+- [9.0 engine-mcp](#90-engine-mcp)
+- [10.0 Terminology Migration](#100-terminology-migration)
+- [11.0 Error Handling](#110-error-handling)
+- [12.0 Testing](#120-testing)
+- [13.0 Implementation Plan](#130-implementation-plan)
+- [14.0 Open Issues](#140-open-issues)
+- [15.0 Requirements Traceability](#150-requirements-traceability)
+- [References](#references)
+- [Version History](#version-history)
 
 ---
 
@@ -463,6 +463,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.33 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
 | 1.32 | 2026-11-14 | §4.1: provider interface as built: `live_context_window`, `await_ready(..., interval, echo) -> None` raising `TimeoutError` or `ProviderError`, `redact`, `Completion.reasoning_content` (change-541f5c58; audit-caab2052 L-19) |
 | 1.31 | 2026-11-14 | §8.4: tracking by file identity, a task resolving outside `ai/workspace/` refused, non-regular evidence documents skipped; §11.0: atomic writes, audit archive names (change-d4f527e7) |
 | 1.30 | 2026-11-14 | §11.0: deeply nested configuration YAML and `context.model_context_windows` checks; MCP connection failures and duplicate tool names reported in the engine log (change-bae631c7) |

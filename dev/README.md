@@ -6,13 +6,13 @@ Created: 2026 October 23
 
 ## Table of Contents
 
-[1.0 Purpose](#10-purpose)
-[2.0 Governance](#20-governance)
-[3.0 Folder Map](#30-folder-map)
-[4.0 Task Register](#40-task-register)
-[5.0 Requirements](#50-requirements)
-[6.0 Repository Layout](#60-repository-layout)
-[Version History](#version-history)
+- [1.0 Purpose](#10-purpose)
+- [2.0 Governance](#20-governance)
+- [3.0 Folder Map](#30-folder-map)
+- [4.0 Task Register](#40-task-register)
+- [5.0 Requirements](#50-requirements)
+- [6.0 Repository Layout](#60-repository-layout)
+- [Version History](#version-history)
 
 ---
 
@@ -92,6 +92,7 @@ Moved from governance P10.6 and corrected (governance 12.4).
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-10-23 | Initial document: dev/ rules moved out of governance.md (P11.7, P10.6 repository note) and the project instructions; task register replaces dev/todo.md and dev/backlog.md |
+| 1.1 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
 
 ---
 

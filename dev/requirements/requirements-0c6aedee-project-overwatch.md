@@ -6,26 +6,16 @@ Created: 2026 August 21
 
 ## Table of Contents
 
-[1.0 Purpose](#10-purpose)
-[2.0 Scope](#20-scope)
-[3.0 Constraints](#30-constraints)
-[4.0 Functional Requirements](#40-functional-requirements)
-[4.1 FR-01 Monitoring Panel (Migrated)](#41-fr-01-monitoring-panel-migrated)
-[4.2 FR-02 Contextual Explain-This Overlay](#42-fr-02-contextual-explain-this-overlay)
-[4.3 FR-03 Governance Decision-Tree Navigator](#43-fr-03-governance-decision-tree-navigator)
-[4.4 FR-04 Config-as-Code Panel](#44-fr-04-config-as-code-panel)
-[4.5 FR-05 Requirements/Design Surfacing](#45-fr-05-requirementsdesign-surfacing)
-[4.6 FR-06 Stage-Gate Pipeline View](#46-fr-06-stage-gate-pipeline-view)
-[4.7 FR-07 ai/task.md Kanban View](#47-fr-07-aitaskmd-kanban-view)
-[4.8 FR-08 Document Diff Viewer](#48-fr-08-document-diff-viewer)
-[4.9 FR-09 Guided Next-Step Advisor](#49-fr-09-guided-next-step-advisor)
-[4.10 FR-10 First-Run Setup Wizard](#410-fr-10-first-run-setup-wizard)
-[5.0 Non-Functional Requirements](#50-non-functional-requirements)
-[6.0 Document Parsing Assumptions](#60-document-parsing-assumptions)
-[7.0 Out of Scope](#70-out-of-scope)
-[8.0 Open Questions](#80-open-questions)
-[9.0 Design Notes](#90-design-notes)
-[Version History](#version-history)
+- [1.0 Purpose](#10-purpose)
+- [2.0 Scope](#20-scope)
+- [3.0 Constraints](#30-constraints)
+- [4.0 Functional Requirements](#40-functional-requirements)
+- [5.0 Non-Functional Requirements](#50-non-functional-requirements)
+- [6.0 Document Parsing Assumptions](#60-document-parsing-assumptions)
+- [7.0 Out of Scope](#70-out-of-scope)
+- [8.0 Open Questions](#80-open-questions)
+- [9.0 Design Notes](#90-design-notes)
+- [Version History](#version-history)
 
 ---
 
@@ -309,6 +299,7 @@ a single-effort ("Big Bang") delivery.
 | 0.7 | 2026-11-05 | FR-01-01, FR-01-02: "unmodified" limited to the FR-01 port; later changes by change-b8a6c445 noted |
 | 0.8 | 2026-11-05 | FR-01-03: "unmodified" limited to the FR-01 port; later change by change-b8a6c445 noted (audit-b8a6c445 F-06) |
 | 0.9 | 2026-11-14 | FR-01-02: FR-02-06 qualified as govwatch FR-02-06 (report-0fce4169 F2); §9.1: dataclass row limited to the FR-01 port, `EngineState` named |
+| 0.10 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list; Table of Contents lists the H2 sections only (dev/task.md work item 7a) |
 
 ---
 

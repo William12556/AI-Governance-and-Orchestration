@@ -11,28 +11,18 @@ Created: 2026 September 22
 
 ## Table of Contents
 
-[1.0 Purpose](#10-purpose)
-[2.0 Scope](#20-scope)
-[3.0 Constraints](#30-constraints)
-[4.0 Functional Requirements](#40-functional-requirements)
-[4.1 FR-01 Protocol Identity](#41-fr-01-protocol-identity)
-[4.2 FR-02 Template Identity](#42-fr-02-template-identity)
-[4.3 FR-03 Governance Restructuring](#43-fr-03-governance-restructuring)
-[4.4 FR-04 Citation Conversion](#44-fr-04-citation-conversion)
-[4.5 FR-05 Alias Appendix](#45-fr-05-alias-appendix)
-[4.6 FR-06 Reserved Slots](#46-fr-06-reserved-slots)
-[4.7 FR-07 Derived Artefact Regeneration](#47-fr-07-derived-artefact-regeneration)
-[4.8 FR-08 Primer Canonicalisation](#48-fr-08-primer-canonicalisation)
-[4.9 FR-09 Smoke Harness Regeneration](#49-fr-09-smoke-harness-regeneration)
-[4.10 FR-10 Release](#410-fr-10-release)
-[5.0 Tooling Requirements](#50-tooling-requirements)
-[6.0 Non-Functional Requirements](#60-non-functional-requirements)
-[7.0 Verification Requirements](#70-verification-requirements)
-[8.0 Out of Scope](#80-out-of-scope)
-[9.0 Open Questions](#90-open-questions)
-[10.0 Traceability](#100-traceability)
-[Glossary](#glossary)
-[Version History](#version-history)
+- [1.0 Purpose](#10-purpose)
+- [2.0 Scope](#20-scope)
+- [3.0 Constraints](#30-constraints)
+- [4.0 Functional Requirements](#40-functional-requirements)
+- [5.0 Tooling Requirements](#50-tooling-requirements)
+- [6.0 Non-Functional Requirements](#60-non-functional-requirements)
+- [7.0 Verification Requirements](#70-verification-requirements)
+- [8.0 Out of Scope](#80-out-of-scope)
+- [9.0 Open Questions](#90-open-questions)
+- [10.0 Traceability](#100-traceability)
+- [Glossary](#glossary)
+- [Version History](#version-history)
 
 ---
 
@@ -359,6 +349,7 @@ Design, test and code traceability entries are added when those documents exist.
 
 | Version | Date | Description |
 |---|---|---|
+| 0.8 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list; Table of Contents lists the H2 sections only (dev/task.md work item 7a) |
 | 0.7 | 2026-09-22 | Amended under change-9b8f1c47 from the strategic audit. FR-07-04 restated to the decision delivery actually took, with the reversal recorded as a CON-08 exception rather than a discharge (F-01). V-14 rationale corrected to match. V-05 and V-06 now name `compare_migration.py` as their method, the earlier ad-hoc commands having been unreproducible (F-13); the earlier two-tree comparison is recorded as unsound. |
 | 0.6 | 2026-09-22 | V-17 restated as a comparison bounded at both ends. As originally written it compared the pre-migration tag against the working tree, which answers a different question and fails permanently once any legitimate edit lands under `dev/`. |
 | 0.5 | 2026-09-22 | V-15 restated after the rehearsal: plain AST equivalence forbade the one string change the migration requires, in the `orchestrator.py` guidance block. Replaced with a blanked-skeleton comparison plus per-string verification. V-04 and V-14 gain their expected post-migration results, 1 and 9. |

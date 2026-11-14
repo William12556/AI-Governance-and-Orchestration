@@ -149,6 +149,8 @@ metadata:
   schema_type: "change"
 ```
 
+[Return to Table of Contents](#table-of-contents)
+
 ---
 
 ## Schema
@@ -530,6 +532,8 @@ properties:
           - change
 ```
 
+[Return to Table of Contents](#table-of-contents)
+
 ---
 
 ## Version History
@@ -540,6 +544,7 @@ properties:
 | 1.1     | 2025-12-12 | UUID pattern migration: Replaced NNNN sequence numbering with 8-character UUID format (^[0-9a-f]{8}$) in all fields |
 | 1.2     | 2026-06-16 | Standardised copyright line format (template metadata default and document footer) |
 | 1.3     | 2026-11-07 | change-e4428fd5: schema_type class word |
+| 1.4 | 2026-11-14 | Layout conformance with README.md v4.5: Return to Table of Contents links added (dev/task.md work item 7a) |
 
 ---
 

@@ -6,35 +6,22 @@ Created: 2026 August 21
 
 ## Table of Contents
 
-[1.0 Purpose](#10-purpose)
-[2.0 Scope](#20-scope)
-[3.0 Architecture](#30-architecture)
-[3.1 Rendering Architecture — Resolution of OQ-01](#31-rendering-architecture--resolution-of-oq-01)
-[3.2 Component Diagram](#32-component-diagram)
-[3.3 Module Structure](#33-module-structure)
-[4.0 Data Model](#40-data-model)
-[5.0 Components](#50-components)
-[6.0 Stage Inference Logic — Resolution of OQ-05](#60-stage-inference-logic--resolution-of-oq-05)
-[7.0 Panel Specifications](#70-panel-specifications)
-[7.1 Monitoring Panel (FR-01)](#71-monitoring-panel-fr-01)
-[7.2 Explain-This Overlay (FR-02)](#72-explain-this-overlay-fr-02)
-[7.3 Decision-Tree Navigator (FR-03)](#73-decision-tree-navigator-fr-03)
-[7.4 Config-as-Code Panel (FR-04)](#74-config-as-code-panel-fr-04)
-[7.5 Requirements/Design Panel (FR-05) — Resolution of OQ-04](#75-requirementsdesign-panel-fr-05--resolution-of-oq-04)
-[7.6 Stage-Gate Pipeline (FR-06)](#76-stage-gate-pipeline-fr-06)
-[7.7 Task Board (FR-07) — Resolution of OQ-06](#77-task-board-fr-07--resolution-of-oq-06)
-[7.8 Document Diff (FR-08) — Resolution of OQ-08](#78-document-diff-fr-08--resolution-of-oq-08)
-[7.9 Guided Next-Step Advisor (FR-09) — Resolution of OQ-02](#79-guided-next-step-advisor-fr-09--resolution-of-oq-02)
-[7.10 First-Run Wizard (FR-10)](#710-first-run-wizard-fr-10)
-[8.0 Interfaces](#80-interfaces)
-[9.0 Document Parsing](#90-document-parsing)
-[10.0 Error Handling](#100-error-handling)
-[11.0 Non-Functional Compliance](#110-non-functional-compliance)
-[12.0 Element Registry](#120-element-registry)
-[13.0 Resolved Open Questions](#130-resolved-open-questions)
-[14.0 Propagation and Coexistence with govwatch](#140-propagation-and-coexistence-with-govwatch)
-[15.0 Requirements Traceability](#150-requirements-traceability)
-[Version History](#version-history)
+- [1.0 Purpose](#10-purpose)
+- [2.0 Scope](#20-scope)
+- [3.0 Architecture](#30-architecture)
+- [4.0 Data Model](#40-data-model)
+- [5.0 Components](#50-components)
+- [6.0 Stage Inference Logic — Resolution of OQ-05](#60-stage-inference-logic--resolution-of-oq-05)
+- [7.0 Panel Specifications](#70-panel-specifications)
+- [8.0 Interfaces](#80-interfaces)
+- [9.0 Document Parsing](#90-document-parsing)
+- [10.0 Error Handling](#100-error-handling)
+- [11.0 Non-Functional Compliance](#110-non-functional-compliance)
+- [12.0 Element Registry](#120-element-registry)
+- [13.0 Resolved Open Questions](#130-resolved-open-questions)
+- [14.0 Propagation and Coexistence with govwatch](#140-propagation-and-coexistence-with-govwatch)
+- [15.0 Requirements Traceability](#150-requirements-traceability)
+- [Version History](#version-history)
 
 ---
 
@@ -532,6 +519,7 @@ bounded interval, not an open-ended dual-maintenance commitment.
 | 0.9 | 2026-11-06 | §4.0: marker age against the run record's start; §5.0: FR-02-06 only while running, by file identity (change-86c958dd) |
 | 0.10 | 2026-11-14 | §4.0 and §12.0: "reused unmodified" limited to the FR-01 port, `EngineState` named with its added fields; §5.0: FR-02-06 qualified as govwatch FR-02-06 (report-0fce4169 F1, F2) |
 | 0.11 | 2026-11-14 | §4.0: blocked detail only when the status is blocked; atomic output writes (change-d4f527e7) |
+| 0.12 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list; Table of Contents lists the H2 sections only (dev/task.md work item 7a) |
 
 ---
 

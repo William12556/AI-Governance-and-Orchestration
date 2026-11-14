@@ -10,11 +10,7 @@ Created: 2026 March 26
 - [Scope](#scope)
 - [Terminology](#terminology)
 - [As-Built Requirements](#as-built-requirements)
-  - [Functional](#functional)
-  - [Non-Functional](#non-functional)
 - [Proposed Requirements](#proposed-requirements)
-  - [Strategic Domain Task Authoring](#strategic-domain-task-authoring)
-  - [Pipeline Mode](#pipeline-mode)
 - [Constraints](#constraints)
 - [Open Issues](#open-issues)
 - [Version History](#version-history)
@@ -224,6 +220,7 @@ The tasks directory path shall be configurable via `config.yaml` under `pipeline
 | 1.3 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.4 | 2026-11-05 | FR-AEL-013, NFR-AEL-001 and NFR-AEL-005 amended to the behaviour as built (audit-caab2052 OQ-03, operator decision) |
 | 1.5 | 2026-11-06 | FR-AEL-008 amended to the context-window order as built (change-86c958dd, operator approval) |
+| 1.6 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents lists the H2 sections only (dev/task.md work item 7a) |
 
 ---
 

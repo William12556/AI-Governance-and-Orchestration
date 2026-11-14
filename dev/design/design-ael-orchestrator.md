@@ -6,40 +6,21 @@ Created: 2026 July 09
 
 ## Table of Contents
 
-[1.0 Purpose](#10-purpose)
-[2.0 Scope](#20-scope)
-[3.0 Architecture](#30-architecture)
-[3.1 Component Diagram](#31-component-diagram)
-[3.2 Module Structure](#32-module-structure)
-[4.0 Data Model](#40-data-model)
-[4.1 State Files](#41-state-files)
-[4.2 Configuration Schema](#42-configuration-schema)
-[5.0 Components](#50-components)
-[5.1 Context Resolution](#51-context-resolution)
-[5.2 Task Resolution](#52-task-resolution)
-[5.3 Phase Runner](#53-phase-runner)
-[5.4 Loop Controller](#54-loop-controller)
-[5.5 MCPClient](#55-mcpclient)
-[5.6 Tool Call Parser](#56-tool-call-parser)
-[5.7 Validation Guards](#57-validation-guards)
-[5.8 Audit Support](#58-audit-support)
-[5.9 Entry Point](#59-entry-point)
-[6.0 Control Flow](#60-control-flow)
-[6.1 Loop State Diagram](#61-loop-state-diagram)
-[6.2 Phase Iteration Flow](#62-phase-iteration-flow)
-[7.0 Context Window Resolution](#70-context-window-resolution)
-[8.0 Interfaces](#80-interfaces)
-[8.1 Command Line](#81-command-line)
-[8.2 config.yaml Schema](#82-configyaml-schema)
-[8.3 State File Contract](#83-state-file-contract)
-[8.4 MCP Tool Dispatch](#84-mcp-tool-dispatch)
-[9.0 Boundary Conditions and Error Handling](#90-boundary-conditions-and-error-handling)
-[10.0 Non-Functional Compliance](#100-non-functional-compliance)
-[11.0 Element Registry](#110-element-registry)
-[12.0 Proposed Extensions (Not Implemented)](#120-proposed-extensions-not-implemented)
-[13.0 Open Issues](#130-open-issues)
-[14.0 Requirements Traceability](#140-requirements-traceability)
-[Version History](#version-history)
+- [1.0 Purpose](#10-purpose)
+- [2.0 Scope](#20-scope)
+- [3.0 Architecture](#30-architecture)
+- [4.0 Data Model](#40-data-model)
+- [5.0 Components](#50-components)
+- [6.0 Control Flow](#60-control-flow)
+- [7.0 Context Window Resolution](#70-context-window-resolution)
+- [8.0 Interfaces](#80-interfaces)
+- [9.0 Boundary Conditions and Error Handling](#90-boundary-conditions-and-error-handling)
+- [10.0 Non-Functional Compliance](#100-non-functional-compliance)
+- [11.0 Element Registry](#110-element-registry)
+- [12.0 Proposed Extensions (Not Implemented)](#120-proposed-extensions-not-implemented)
+- [13.0 Open Issues](#130-open-issues)
+- [14.0 Requirements Traceability](#140-requirements-traceability)
+- [Version History](#version-history)
 
 ---
 
@@ -704,6 +685,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | 0.11 | 2026-11-06 | §4.1: `run.json` error field (change-86c958dd; audit-86c958dd F-05) |
 | 0.12 | 2026-11-14 | §4.1: FR-02-06 qualified as govwatch FR-02-06 (report-0fce4169 F2); §3.1, §4.2 and §5.1: the live query is tier 3 and the per-model entry tier 2 (report-53b0e016 F-01; §3.1 and §4.2 found in the unit 2 review) |
 | 0.13 | 2026-11-14 | §4.1: atomic state writes; audit archive below the project root without overwrite (change-d4f527e7) |
+| 0.14 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list; Table of Contents lists the H2 sections only (dev/task.md work item 7a) |
 
 ---
 
