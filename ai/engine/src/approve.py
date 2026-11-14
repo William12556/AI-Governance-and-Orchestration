@@ -17,7 +17,9 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import locale
 import os
+import stat
 import subprocess
 import sys
 
@@ -43,6 +45,10 @@ def _write_atomic(path: str, data: bytes) -> None:
     try:
         with open(tmp_path, "wb") as fh:
             fh.write(data)
+        try:  # an existing file keeps its permission bits
+            os.chmod(tmp_path, stat.S_IMODE(os.stat(target).st_mode))
+        except OSError:
+            pass
         os.replace(tmp_path, target)
     except BaseException:
         try:
@@ -101,7 +107,8 @@ def approve(project_root: str, uuid: str, stage: str, manifest=None,
         content = current + entry
     else:
         content = HEADER + entry
-    _write_atomic(path, content.encode())
+    # Encoded as the text-mode read above decodes (the locale's encoding).
+    _write_atomic(path, content.encode(locale.getpreferredencoding(False)))
 
     rel = ST.APPROVALS_FILE
     for cmd in (["git", "-C", project_root, "add", "--", rel],

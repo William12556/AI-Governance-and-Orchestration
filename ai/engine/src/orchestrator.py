@@ -45,6 +45,7 @@ import math
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -730,18 +731,30 @@ def read_state(state_dir: str, filename: str) -> str:
     return open(path).read().strip() if os.path.exists(path) else ""
 
 
+def _keep_mode(tmp_path: str, path: str) -> None:
+    """Give the temporary file the permission bits of an existing regular file at path."""
+    try:
+        st = os.lstat(path)
+        if stat.S_ISREG(st.st_mode):
+            os.chmod(tmp_path, stat.S_IMODE(st.st_mode))
+    except OSError:
+        pass
+
+
 def _write_atomic(path: str, content: str) -> None:
     """
     change-d4f527e7 (audit-caab2052 L-10): write content to a temporary file
     beside path and move it into place with os.replace, so a reader sees the
     previous content or the new content, never a partial file. The name itself
-    is replaced; a symlink at path is not followed. On any failure the
-    temporary file is removed and the exception re-raised.
+    is replaced; a symlink at path is not followed. An existing regular file
+    keeps its permission bits. On any failure the temporary file is removed
+    and the exception re-raised.
     """
     tmp_path = os.path.join(os.path.dirname(path), f".{os.path.basename(path)}.{os.getpid()}.tmp")
     try:
         with open(tmp_path, "w") as f:
             f.write(content)
+        _keep_mode(tmp_path, path)
         os.replace(tmp_path, path)
     except BaseException:
         try:

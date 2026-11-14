@@ -30,6 +30,7 @@ import html
 import json
 import os
 import re
+import stat
 import sys
 import time
 from dataclasses import dataclass, field
@@ -429,6 +430,10 @@ def _write_text_atomic(path: Path, content: str) -> None:
     tmp_path = target.with_name(f".{target.name}.{os.getpid()}.tmp")
     try:
         tmp_path.write_text(content, encoding="utf-8")
+        try:  # an existing file keeps its permission bits
+            os.chmod(tmp_path, stat.S_IMODE(target.stat().st_mode))
+        except OSError:
+            pass
         os.replace(tmp_path, target)
     except BaseException:
         try:
