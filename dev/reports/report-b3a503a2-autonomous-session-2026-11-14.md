@@ -168,7 +168,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | 4 | Work item 5C, scripts and documents | `541f5c58` | Not started | |
 | 5 | Work item 6, test coverage gaps | `6d40f0dd` | Not started | |
 | 6 | Work item 7a, document layout conformance | — | Not started | |
-| 7 | Work item 7b, Mistral Vibe profile | — | Not started | |
+| 7 | Work item 7b, Mistral Vibe profile `ai/profiles/mistral-vibe.md` | — | Completed (performed during the review wait of unit 3b; web search and fetch were available for the Vibe repository and PyPI, not for docs.mistral.ai). Review result recorded when available | `docs(profiles):` commit |
 | 8 | Defects registered under prompt §11.0 | — | Not started | |
 
 [Return to Table of Contents](#table-of-contents)
@@ -186,6 +186,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | 5 | Scheduled reports have no status field; "closed" is recorded as a Version History row beginning "Status: closed" before the move to `dev/reports/closed/` | Six reports in `dev/reports/closed/` | Minimal reading of prompt §9.2 item 1 |
 | 6 | design-14e05e35 §12.0 Gates row: the first suggested resolution is taken and the existing tests of change-a5bd4fe1 are named; no test is added | design-14e05e35 v1.29 | The tests exist (`test_d1_syntax_fail_overrides_ship` and others) |
 | 7 | change-bae631c7 decisions D1 to D5: escape the `[engine]` prefix at each site; `invalid YAML: nesting too deep`; a null `model_context_windows` is empty and any other invalid value is refused; the server connected last keeps a duplicate tool name and a run with no tools is not refused; only the pyflakes items and the `stages.py` type of L-16 are corrected | change-bae631c7 `notes` | Minimal options consistent with the findings and their recorded dispositions |
+| 8 | Mistral Vibe profile: written from the Vibe repository documentation and PyPI (version 3.1.2); the Mistral documentation site was not reachable. Facts taken only from a summary are marked in the profile's §7.0. The T03 template has no `target_profile` value for Vibe; the profile names `claude_code` as the nearest value and no governance change is made. The profile defines no test hook | `ai/profiles/mistral-vibe.md` §5.0 to §7.0 | A new `target_profile` value or hook would change governance, templates or checkers beyond work item 7b |
 
 Further decisions are added here as each unit records them.
 
@@ -233,6 +234,7 @@ Completed in Phase D.
 | 0.1 | 2026-11-14 | Created at the end of Phase A with the triage table |
 | 0.2 | 2026-11-14 | Phase B and units 1 and 2: work-unit status, DD-03 and DD-04, decisions 3 to 6, counts |
 | 0.3 | 2026-11-14 | Unit 3a (change-bae631c7) closed: status, counts, decision 7 |
+| 0.4 | 2026-11-14 | Unit 7 (Mistral Vibe profile): status, decision 8 |
 
 ---
 
