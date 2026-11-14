@@ -95,7 +95,8 @@ done
 # ai/config.yaml; report any value other than the standard one.
 for cfg in "${AI}/config.yaml" "${AI}/ael/config.yaml"; do
     [[ -f "${cfg}" ]] || continue
-    sd="$(sed -nE 's/^[[:space:]]*state_dir:[[:space:]]*"?([^"#]*[^"#[:space:]])"?.*$/\1/p' "${cfg}" | head -1)"
+    # change-541f5c58 (audit-14e05e35 L-10): double or single quotes are stripped.
+    sd="$(sed -nE "s/^[[:space:]]*state_dir:[[:space:]]*[\"']?([^\"'#]*[^\"'#[:space:]])[\"']?.*\$/\\1/p" "${cfg}" | head -1)"
     if [[ -n "${sd}" && "${sd}" != "ai/state" && "${sd}" != "ai/state/ralph" ]]; then
         echo "warn   ${cfg#"${PROJECT_ROOT}/"}: loop.state_dir is \"${sd}\" (standard: \"ai/state\"); engine-mcp and overwatch will use it"
     fi

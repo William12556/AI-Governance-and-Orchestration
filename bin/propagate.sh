@@ -29,7 +29,9 @@
 #   - Seeds ai/config.yaml, ai/context.md and ai/task.md when absent, from
 #     ai/engine/config.template.yaml and ai/governance/<model>/seed/.
 #   - Creates the ai/workspace/ folders listed in the model's manifest.yaml
-#     when absent; existing paths are never changed (change-e58fd295).
+#     when absent; existing paths are never changed (change-e58fd295). The
+#     folders are listed in the preview and created after the confirmation,
+#     also when no framework file differs (change-541f5c58).
 #
 # Exit codes: 0 done or up to date; 1 usage; 2 confirmation required;
 #   3 refused before the copy (unsafe ai-local/ or declared path, target or
@@ -112,6 +114,36 @@ gov_version() {
 # Creates each ai/workspace/<folder> listed under workspace_folders: in the
 # governance model manifest when absent. Existing paths are never changed; a
 # non-directory in the way is reported and left alone.
+# Prints the folders declared under workspace_folders: in a manifest, one per
+# line. Reads a block list ('- name' lines) and a single-line flow list
+# ('workspace_folders: [a, "b"]'); a flow list that does not close on the same
+# line is not read (change-541f5c58; audit-14e05e35 L-10).
+workspace_folders_of() {
+    awk '
+        /^workspace_folders:[[:space:]]*\[.*\]/ {
+            s = $0
+            sub(/^workspace_folders:[[:space:]]*\[/, "", s)
+            sub(/\][^\]]*$/, "", s)
+            n = split(s, a, ",")
+            for (i = 1; i <= n; i++) {
+                x = a[i]
+                gsub(/^[[:space:]]+|[[:space:]]+$/, "", x)
+                gsub(/["\047]/, "", x)
+                if (x != "") print x
+            }
+            next
+        }
+        /^workspace_folders:/ { f = 1; next }
+        f && /^[^[:space:]#]/ { f = 0 }
+        f && /^[[:space:]]*-[[:space:]]/ {
+            sub(/^[[:space:]]*-[[:space:]]*/, "")
+            sub(/[[:space:]]*#.*$/, "")
+            gsub(/["\047]/, "")
+            print
+        }
+    ' "$1"
+}
+
 create_workspace_folders() {
     local manifest="$1" workspace="$2" d
     [[ -f "${manifest}" ]] || { echo "workspace: no manifest at ${manifest}; folders not created"; return 0; }
@@ -122,7 +154,7 @@ create_workspace_folders() {
             continue
         fi
         mkdir -p "${workspace}/${d}" && echo "workspace: created ${d}/"
-    done < <(awk '/^workspace_folders:/{f=1;next} f&&/^[^[:space:]#]/{f=0} f&&/^[[:space:]]*-[[:space:]]/{sub(/^[[:space:]]*-[[:space:]]*/,"");sub(/[[:space:]]*#.*$/,"");gsub(/["\047]/,"");print}' "${manifest}")
+    done < <(workspace_folders_of "${manifest}")
 }
 
 SRC_VER="$(gov_version "${GOV_SRC}/governance.md")"
@@ -447,14 +479,25 @@ NEEDS_SEED_CONFIG="false";  [[ -f "${PROJECT_AI}/config.yaml" ]] || NEEDS_SEED_C
 NEEDS_SEED_CONTEXT="false"; [[ -f "${PROJECT_AI}/context.md" ]] || NEEDS_SEED_CONTEXT="true"
 NEEDS_SEED_TASK="false";    [[ -f "${PROJECT_AI}/task.md" ]]    || NEEDS_SEED_TASK="true"
 
+# change-541f5c58 (audit-14e05e35 L-10): workspace folders that the run would
+# create, read from the source manifest (the one the copy installs). They are
+# shown in the preview and created only after the plan-error check and the
+# confirmation, like every other write.
+MISSING_WS=()
+if [[ -f "${GOV_SRC}/manifest.yaml" ]]; then
+    while IFS= read -r d; do
+        [[ -z "${d}" || "${d}" == /* || "/${d}/" == */../* ]] && continue
+        [[ -e "${PROJECT_AI}/workspace/${d}" || -L "${PROJECT_AI}/workspace/${d}" ]] || MISSING_WS+=("${d}")
+    done < <(workspace_folders_of "${GOV_SRC}/manifest.yaml")
+fi
+
 echo "=== Preview: ai -> ${PROJECT_AI} ==="
 echo ""
 
 if [[ "${UPDATE_COUNT}" -eq 0 && "${CAND_COUNT}" -eq 0 && "${BACKUP_COUNT}" -eq 0 \
       && "${NEEDS_SEED_CONFIG}" == "false" && "${NEEDS_SEED_CONTEXT}" == "false" \
-      && "${NEEDS_SEED_TASK}" == "false" ]]; then
+      && "${NEEDS_SEED_TASK}" == "false" && ${#MISSING_WS[@]} -eq 0 ]]; then
     echo "Target is up to date. No changes to apply."
-    create_workspace_folders "${PROJECT_AI}/governance/${MODEL}/manifest.yaml" "${PROJECT_AI}/workspace"
     exit 0
 fi
 
@@ -476,6 +519,11 @@ done < "${RECS}"
 [[ "${NEEDS_SEED_CONFIG}" == "true" ]] && echo "seed         config.yaml (absent in target)"
 [[ "${NEEDS_SEED_CONTEXT}" == "true" ]] && echo "seed         context.md (absent in target)"
 [[ "${NEEDS_SEED_TASK}" == "true" ]] && echo "seed         task.md (absent in target)"
+if [[ ${#MISSING_WS[@]} -gt 0 ]]; then
+    for d in "${MISSING_WS[@]}"; do
+        echo "create       workspace/$(disp "${d}")/"
+    done
+fi
 
 echo ""
 echo "governance: source ${SRC_VER}, target ${DST_VER}"

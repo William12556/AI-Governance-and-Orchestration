@@ -67,6 +67,19 @@ TARBALL="${TMPWORK}/${ASSET}"
 echo "==> Downloading ${ASSET}..."
 curl -fsSL --output "${TARBALL}" "${URL}"
 
+# --- Verify -----------------------------------------------------------------
+# change-541f5c58 (audit-5bcd46ad H-01 option): a release in the pre-5bcd46ad
+# layout has no ai/engine/. Refuse it before anything is extracted.
+
+# The listing is read in full first: with pipefail, a reader that stops early
+# would make tar fail.
+LISTING="$(tar -tzf "${TARBALL}")"
+if ! grep -q '^ai/engine/' <<< "${LISTING}"; then
+    echo "Error: release ${TAG} does not contain ai/engine/ (pre-5bcd46ad layout or damaged archive). Nothing installed." >&2
+    rm -rf "${TMPWORK}"
+    exit 1
+fi
+
 # --- Extract ----------------------------------------------------------------
 
 echo "==> Extracting to ${PROJECT_ROOT}/ai/..."
@@ -84,6 +97,36 @@ MODEL="software-engineering"
 # Creates each ai/workspace/<folder> listed under workspace_folders: in the
 # governance model manifest when absent. Existing paths are never changed; a
 # non-directory in the way is reported and left alone.
+# Prints the folders declared under workspace_folders: in a manifest, one per
+# line. Reads a block list ('- name' lines) and a single-line flow list
+# ('workspace_folders: [a, "b"]'); a flow list that does not close on the same
+# line is not read (change-541f5c58; audit-14e05e35 L-10).
+workspace_folders_of() {
+    awk '
+        /^workspace_folders:[[:space:]]*\[.*\]/ {
+            s = $0
+            sub(/^workspace_folders:[[:space:]]*\[/, "", s)
+            sub(/\][^\]]*$/, "", s)
+            n = split(s, a, ",")
+            for (i = 1; i <= n; i++) {
+                x = a[i]
+                gsub(/^[[:space:]]+|[[:space:]]+$/, "", x)
+                gsub(/["\047]/, "", x)
+                if (x != "") print x
+            }
+            next
+        }
+        /^workspace_folders:/ { f = 1; next }
+        f && /^[^[:space:]#]/ { f = 0 }
+        f && /^[[:space:]]*-[[:space:]]/ {
+            sub(/^[[:space:]]*-[[:space:]]*/, "")
+            sub(/[[:space:]]*#.*$/, "")
+            gsub(/["\047]/, "")
+            print
+        }
+    ' "$1"
+}
+
 create_workspace_folders() {
     local manifest="$1" workspace="$2" d
     [[ -f "${manifest}" ]] || { echo "workspace: no manifest at ${manifest}; folders not created"; return 0; }
@@ -94,7 +137,7 @@ create_workspace_folders() {
             continue
         fi
         mkdir -p "${workspace}/${d}" && echo "workspace: created ${d}/"
-    done < <(awk '/^workspace_folders:/{f=1;next} f&&/^[^[:space:]#]/{f=0} f&&/^[[:space:]]*-[[:space:]]/{sub(/^[[:space:]]*-[[:space:]]*/,"");sub(/[[:space:]]*#.*$/,"");gsub(/["\047]/,"");print}' "${manifest}")
+    done < <(workspace_folders_of "${manifest}")
 }
 create_workspace_folders "${PROJECT_AI}/governance/${MODEL}/manifest.yaml" "${PROJECT_AI}/workspace"
 
