@@ -58,7 +58,8 @@ def _flow_style(manifest_path):
         end += 1
     assert items == _declared_folders()
     quoted = [items[0], f'"{items[1]}"', f"'{items[2]}'"] + items[3:]
-    lines[start:end] = [f"workspace_folders: [{', '.join(quoted)}]  # flow style", ""]
+    # the trailing comment holds brackets: the list ends at its own closing bracket
+    lines[start:end] = [f"workspace_folders: [{', '.join(quoted)}]  # flow style [see notes]", ""]
     with open(manifest_path, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines))
     with open(manifest_path, encoding="utf-8") as fh:
@@ -113,6 +114,15 @@ fi
     env = dict(os.environ, PATH=f"{fake_bin}{os.pathsep}{os.environ['PATH']}", FAKE_TARBALL=str(archive))
     proc = _run(["bash", os.path.join(REPO, "bin", "bootstrap.sh"), str(project)], env=env)
     return project, proc
+
+
+def test_t1_bootstrap_refuses_an_unreadable_archive(tmp_path):
+    archive = tmp_path / "release-damaged.tar.gz"
+    archive.write_text("this is not a gzip archive\n")
+    project, proc = _bootstrap(tmp_path, archive)
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "does not contain ai/engine/" in proc.stderr
+    assert list(project.iterdir()) == []
 
 
 def test_t1_bootstrap_refuses_a_tarball_without_engine(tmp_path):
@@ -188,7 +198,7 @@ def test_t3_propagate_gates_workspace_folder_creation(tmp_path, framework):
     absent.rmdir()
     proc = _propagate(root, env, project)  # stdin is not a terminal, no --yes
     assert proc.returncode == 2, proc.stdout + proc.stderr
-    assert f"workspace/{leaf}/" in proc.stdout
+    assert f"create       workspace/{leaf}/" in proc.stdout
     assert not absent.exists()
 
     proc = _propagate(root, env, project, "--yes")
