@@ -158,7 +158,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | # | Unit | UUID | Status | Commits |
 |---|---|---|---|---|
 | A | Review and triage | `b3a503a2` (this report) | Completed | This commit |
-| B | Task register | — | Not started | |
+| B | Task register | — | Completed | `docs(dev): task register after audit and report triage` |
 | 1 | Close triple 9377f9b9 | `9377f9b9` | Not started | |
 | 2 | Document fixes | — | Not started | |
 | 3 | Work item 5B, engine runtime | `bae631c7` (configuration, console, logging); `d4f527e7` (tracking, state, Overwatch) | Not started | |
