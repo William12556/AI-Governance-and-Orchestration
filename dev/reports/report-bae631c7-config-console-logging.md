@@ -53,7 +53,7 @@ All parts are implemented. The suite passes, and mutations M1 to M9 each fail a 
 | `dev/design/design-14e05e35-engine-generalisation.md` | §11.0 | v1.30 |
 | `ai/engine/doc/guide-engine-operations.md` | §3.0 | v1.33 |
 
-Source lines changed in `ai/engine/src/`: 127 insertions, 83 deletions over five files, of which 75 lines are the one-token prefix escape.
+Source lines changed in `ai/engine/src/`: 127 insertions, 84 deletions over five files, of which 75 lines are the one-token prefix escape.
 
 [Return to Table of Contents](#table-of-contents)
 
