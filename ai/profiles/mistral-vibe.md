@@ -157,7 +157,7 @@ Remove the `.vibe/` line if the project shares a `.vibe/config.toml` between its
 | Configuration locations, `AGENTS.md` loading, `[[providers]]` and `[[models]]` keys, `active_model`, key locations | Read from the documentation shipped in the Vibe repository on 2026-11-14 [2] |
 | `[[mcp_servers]]` keys, hook files | Taken from a summary of the same document, not from its full text; check with `vibe config schema` |
 | A task run with this profile on a project | Not performed |
-| Vibe with a local server (oMLX) | Not performed; the `api_base` and model id above are examples |
+| Vibe with a local server (oMLX) | Not performed; the `api_base`, the empty `api_key_env_var` and the model id above are examples |
 
 The Mistral documentation site was not reachable from the session that wrote this profile; its configuration reference [4] is listed for the reader.
 
@@ -184,6 +184,7 @@ The Mistral documentation site was not reachable from the session that wrote thi
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-14 | Initial document (dev/task.md work item 7b; proposal-5bcd46ad OQ-01, D-16). Written from the Vibe documentation; not run against a project |
+| 1.1 | 2026-11-14 | §7.0: the empty `api_key_env_var` of the local-server example named as an example value (review remark) |
 
 ---
 

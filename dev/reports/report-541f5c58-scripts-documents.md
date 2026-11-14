@@ -27,9 +27,9 @@ This report records the implementation of change-541f5c58 (issue-541f5c58; Stage
 - D (work item 5 (e)): `migrate-layout.sh` strips single quotes from `loop.state_dir`.
 - E (work item 5 (b)): `audit-review.yaml` 1.2.1 and guide-engine-operations §5.0 describe the duration-limit exit as the engine implements it; `ai/profiles/README.md` no longer links to a file that is not distributed.
 - F (work item 5 (a); audit-caab2052 L-19): design-14e05e35 §4.1 states the provider interface as built.
-- G: 12 new test cases, T1 to T7.
+- G: 13 new test cases, T1 to T7 (one added after the review).
 
-All parts are implemented. The suite passes on Linux. The scripts were run with GNU bash 5, GNU awk, sed and tar; bash 3.2 and the BSD tools of macOS were not available.
+All parts are implemented. The suite passes on Linux. The scripts were run with GNU bash 5, mawk 1.3.4, GNU sed and GNU tar; bash 3.2 and the BSD tools of macOS were not available.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -62,15 +62,16 @@ Command: `python3 -m pytest tests/engine tests/webui -q` (Linux container, Pytho
 
 | Run | Passed | Failed | Skipped |
 |---|---|---|---|
-| Baseline of the unit (`42c7fef`) | 812 | 0 | 4 |
-| New tests against the unchanged scripts (`42c7fef`) | 4 of 12 | 8 | — |
-| Final | 824 | 0 | 4 |
+| Baseline of the implementation (`fd7f4cc`, the parent of `1a1b1cd`) | 812 | 0 | 4 |
+| New tests against the unchanged scripts (`fd7f4cc`) | 4 of 12 | 8 | — |
+| After `1a1b1cd` and `ff11a94` | 824 | 0 | 4 |
+| Final, after the review corrections | 825 | 0 | 4 |
 
 The four cases that pass before the change state kept behaviour: `test_t2_bootstrap_installs_and_creates_workspace_folders[new]` and three `test_t6` cases (double-quoted and unquoted values).
 
 | Scenario | Test | Cases |
 |---|---|---|
-| T1 | `test_t1_bootstrap_refuses_a_tarball_without_engine` | 1 |
+| T1 | `test_t1_bootstrap_refuses_a_tarball_without_engine`, `test_t1_bootstrap_refuses_an_unreadable_archive` (added after the review) | 2 |
 | T2 | `test_t2_bootstrap_installs_and_creates_workspace_folders[new]`, `[flow]` | 2 |
 | T3 | `test_t3_propagate_gates_workspace_folder_creation` | 1 |
 | T4 | `test_t4_propagate_plan_error_precedes_folder_creation` | 1 |
@@ -115,7 +116,7 @@ None in scope or behaviour. Interpretations:
 
 1. `propagate.sh` reads the absent folders from the source manifest for the preview; the creation step after the copy reads the target manifest, which the copy has made equal to the source.
 2. On an up-to-date target with absent folders the run prints `(no framework files differ)` in the preview and then follows the usual path, including the copy step, which transfers nothing.
-3. A flow list is read only when `[` and `]` are on the `workspace_folders:` line. Text after the closing bracket (a comment) is ignored. Items are split at commas; a folder name containing a comma is not supported, as in the block form's handling of `#`.
+3. A flow list is read only when `[` and `]` are on the `workspace_folders:` line. The list ends at the first `]`; text after it (a comment, also one that holds brackets) is ignored. Items are split at commas; a folder name containing a comma is not supported, as in the block form's handling of `#`.
 4. design-14e05e35 §4.1: `await_ready` raises `TimeoutError` when the endpoint is not reachable in time and `ProviderError` when the model is not available. The change document names only `ProviderError`; the design states both, as the code does.
 5. `ai/profiles/README.md`: the Claude Desktop row names the planner primer (`ai/governance/software-engineering/primer.md`), which is distributed, as the reference; the project instructions themselves are kept locally by each user.
 6. The existing test `test_workspace_folders_created_and_existing_paths_untouched` sources the text of `create_workspace_folders` from the scripts; its extraction helper now includes `workspace_folders_of`. No assertion changed.
@@ -126,6 +127,7 @@ None in scope or behaviour. Interpretations:
 
 ## 6.0 Open Points
 
+0. Review (fresh reviewer subagent, prompt-cf99f3f3 §8.4), round 1: REVISE with two findings. A1: the flow-list branch cut the line at the last `]`, so a trailing comment holding a bracket gave a wrong folder name; corrected to the first `]` in both scripts, and the flow-style fixture now carries such a comment (mutation: the earlier pattern fails T2 `[flow]` and T5). A2: the baseline commit and the awk implementation were misstated in this report and in the change record; corrected. Optional remarks taken: the comment block of `create_workspace_folders` moved back above it; an archive that `tar` cannot list is refused with the same message (`test_t1_bootstrap_refuses_an_unreadable_archive`); T3 asserts the `create` prefix of the preview line.
 1. The scripts were not run with bash 3.2 or with BSD awk, sed and tar. The constructs used are a here-string, an indexed array with a length test before expansion, POSIX character classes in awk and sed, and `tar -tzf`. The operator's macOS suite runs `tests/engine/test_bin_scripts.py` and is the check.
 2. `bootstrap.sh` is fetched from `main` by the documented install command; the change takes effect at the merge.
 3. The recipe change reaches downstream projects with the propagation of work item 8e.
@@ -138,13 +140,14 @@ None in scope or behaviour. Interpretations:
 ## 7.0 Session Branch, Starting Commit and Commit Hashes
 
 - Session branch: `claude/blissful-keller-mn2avc`
-- Starting commit of the unit: `42c7fef` (issue and change raised)
+- Issue and change raised: `42c7fef`. Implementation baseline: `fd7f4cc` (the commits of change-d4f527e7's review lie between the two)
 
 | Commit | Subject |
 |---|---|
 | `42c7fef` | docs(dev): raise issue-541f5c58; change-541f5c58 approved |
 | `1a1b1cd` | fix(bin): bootstrap refuses an old-layout tarball; propagate gates workspace folders |
 | `ff11a94` | test: bin script cases T1 to T7 for change-541f5c58 |
+| review corrections | `fix(bin)` and `test` commits after `2db6b2b` (flow list ends at its first closing bracket; unreadable archive) |
 
 The guide, design, profiles index, this report and the status updates follow as `docs` commits; a commit cannot list its own hash.
 
@@ -157,6 +160,7 @@ The guide, design, profiles index, this report and the status updates follow as 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-14 | Initial report |
+| 1.1 | 2026-11-14 | Review round 1 corrections: baseline commit and counts, awk implementation, flow-list interpretation, §6.0 item 0 |
 
 ---
 

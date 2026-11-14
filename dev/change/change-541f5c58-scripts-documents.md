@@ -185,8 +185,8 @@ version_history:
   - version: "1.2"
     date: "2026-11-14"
     changes:
-      - "Implemented on branch claude/blissful-keller-mn2avc from 42c7fef: scripts and recipe 1a1b1cd, tests ff11a94 (report-541f5c58 v1.0). Status implemented"
-      - "812 passed, 4 skipped at the unit baseline; 824 passed, 4 skipped after (Linux; 12 new cases). Mutations M1 to M5 caught. bash -n passes"
+      - "Implemented on branch claude/blissful-keller-mn2avc from fd7f4cc: scripts and recipe 1a1b1cd, tests ff11a94 (report-541f5c58 v1.0). Status implemented"
+      - "812 passed, 4 skipped at fd7f4cc; 824 passed, 4 skipped after (Linux; 12 new cases). Mutations M1 to M5 caught. bash -n passes"
       - "linter.py dev 0 errors, 113 warnings; protocol_checker.py dev 0 errors, 20 warnings"
       - "guide-engine-operations v1.35 §5.0; ai/profiles/README.md v1.16 §4.0; design-14e05e35 v1.32 §4.1 (await_ready raises TimeoutError or ProviderError); docs/guide-install.md v0.14 §3.3"
 
