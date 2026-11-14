@@ -261,7 +261,7 @@ def test_t9_scan_outside_a_repository_uses_an_empty_approvals_mapping(tmp_path, 
 
     (tmp_path / "ai" / "workspace").mkdir(parents=True)
     monkeypatch.setattr(ST, "is_git_repository", lambda root: False)
-    monkeypatch.setattr(ST, "_documents", lambda root, manifest: {"1a2b3c4d": []})
+    monkeypatch.setattr(ST, "_documents", lambda root, manifest, skipped=None: {"1a2b3c4d": []})
     captured = []
     monkeypatch.setattr(ST, "_evaluate", lambda item, manifest, approvals: captured.append(approvals))
     monkeypatch.setattr(ST, "_flag_stale_approvals", lambda *a: None)

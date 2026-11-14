@@ -675,3 +675,73 @@ def test_c_o3_document_directly_in_test_dir(tmp_path: Path) -> None:
         ("result", "result-1a2b3c4d-x.md"),
         ("test", "test-5e6f7a8b-y.md"),
     ]
+
+
+# ---------------------------------------------------------------------------
+# change-d4f527e7: atomic outputs (audit-caab2052 L-10) and blocked detail
+# only when blocked (audit-86c958dd F-01)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("which", ["alerts", "html"])
+def test_t2_overwatch_outputs_are_atomic(paths, snapshot, monkeypatch, capsys, which) -> None:
+    """T2 (A2): a failed move leaves the earlier output complete and no temporary file."""
+    snap = snapshot
+    paths.alerts_file.parent.mkdir(parents=True, exist_ok=True)
+    if which == "alerts":
+        target = paths.alerts_file
+        write = lambda: overwatch.AlertWriter(paths).write(snap)  # noqa: E731
+    else:
+        target = Path(paths.root) / overwatch.HtmlRenderer.OUTPUT_NAME
+        write = lambda: overwatch.HtmlRenderer(paths, interval=5).write(snap)  # noqa: E731
+    assert write() is None
+    first = target.read_text(encoding="utf-8")
+    assert first
+    names = sorted(p.name for p in target.parent.iterdir())
+
+    def failing_replace(src, dst):
+        assert Path(dst).read_text(encoding="utf-8") == first
+        raise OSError("replace failed")
+
+    monkeypatch.setattr(overwatch.os, "replace", failing_replace)
+    result = write()
+    if which == "alerts":
+        assert result is not None and "replace failed" in result
+    else:
+        assert "replace failed" in capsys.readouterr().err
+    assert target.read_text(encoding="utf-8") == first
+    assert sorted(p.name for p in target.parent.iterdir()) == names
+
+
+def test_t2_overwatch_output_symlink_is_written_through(paths, snapshot, tmp_path_factory) -> None:
+    """T2 (A2): an output that is a symlink stays a link; its target gets the content."""
+    snap = snapshot
+    real = tmp_path_factory.mktemp("served") / "page.html"
+    real.write_text("old")
+    link = Path(paths.root) / overwatch.HtmlRenderer.OUTPUT_NAME
+    link.symlink_to(real)
+    overwatch.HtmlRenderer(paths, interval=5).write(snap)
+    assert link.is_symlink()
+    assert "<html" in real.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    "case, status, detail",
+    [("stale-ended", "ended", None), ("stale-running", "running", None),
+     ("current", "blocked", "# BLOCKED\n\nold run")],
+)
+def test_d_blocked_detail_only_when_blocked(tmp_path: Path, case, status, detail) -> None:
+    """T6 (D): BLOCKED.md is shown as blocked detail only when the status is blocked."""
+    paths = overwatch.resolve_paths(tmp_path)
+    paths.engine_state.mkdir(parents=True)
+    ended = None if case == "stale-running" else _ENDED
+    (paths.engine_state / "run.json").write_text(
+        _run_json(os.getpid(), ended=ended, rc=None if ended is None else 1))
+    marker = paths.engine_state / "BLOCKED.md"
+    marker.write_text("# BLOCKED\n\nold run\n")
+    t = _started_ts(_STARTED) + (10 if case == "current" else -10)
+    os.utime(marker, (t, t))
+
+    eng = overwatch.Scanner(paths)._read_engine_state()
+    assert eng.status == status
+    assert eng.blocked_detail == detail
