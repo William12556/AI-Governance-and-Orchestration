@@ -147,6 +147,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | ID | Defect | Disposition | Outcome |
 |---|---|---|---|
 | DD-01 | The two `guide-audit-loop.md` copies differ: the governance copy lacks the 2026-07-16 edit (`mcp-ripgrep`, `src/orchestrator.py`) and its Version History row | doc-fix | Unit 2 |
+| DD-03 | `requirements-0c6aedee` §9.1 states the dataclasses, including `AelState`, as "Reused unmodified"; same contradiction as report-0fce4169 F1 | doc-fix | Unit 2 (requirements-0c6aedee v0.9) |
 | DD-02 | `ai/engine/doc/guide-engine-operations.md` §5.0 states that a duration-limit exit writes `.complete` with `DURATION_LIMIT: iteration N`; the engine writes `.timeout` with `TIMEOUT: iteration N` (`orchestrator.py:2150`). Same subject as work item 5C (b) | doc-fix (in the 5C triple) | Unit 4 |
 
 [Return to Table of Contents](#table-of-contents)
@@ -159,8 +160,8 @@ Each finding, observation and open point of the active audits and reports was ch
 |---|---|---|---|---|
 | A | Review and triage | `b3a503a2` (this report) | Completed | This commit |
 | B | Task register | — | Completed | `docs(dev): task register after audit and report triage` |
-| 1 | Close triple 9377f9b9 | `9377f9b9` | Not started | |
-| 2 | Document fixes | — | Not started | |
+| 1 | Close triple 9377f9b9 | `9377f9b9` | Completed. Review: REVISE (one date in audit-caab2052 §14.0), then SHIP | `6ada3b7`, `5b006f5` |
+| 2 | Document fixes (governance 12.12; six reports closed) | — | Completed; review result below when recorded | `docs:` and `docs(dev):` commits after `5b006f5` |
 | 3 | Work item 5B, engine runtime | `bae631c7` (configuration, console, logging); `d4f527e7` (tracking, state, Overwatch) | Not started | |
 | 4 | Work item 5C, scripts and documents | `541f5c58` | Not started | |
 | 5 | Work item 6, test coverage gaps | `6d40f0dd` | Not started | |
@@ -178,6 +179,11 @@ Each finding, observation and open point of the active audits and reports was ch
 |---|---|---|---|
 | 1 | No T03 prompts are created for the session's triples (prompt §8.3) | This report | The session is planner-less worker and reviewer in one; a T03 prompt would restate the change document to its own author. The acceptance criteria that the operator's follow-up audits need are written in each change document (`testing_requirements.test_cases`, naming the tests, and `validation_criteria`). `protocol_checker.py` reports no finding for a change without a prompt; an active prompt would add a `prompt_ref` back-reference warning until closed |
 | 2 | Work item 5B is split into two triples: `bae631c7` (configuration, console and logging: (f), (g), (h), L-13, L-16) and `d4f527e7` (tracking, state and Overwatch: L-10, L-14, (c), (i), (m), (n)) | This report; the two change documents | One triple would mix unrelated modules and exceed about 400 changed source lines; the split follows the suggestion of prompt §8.1 |
+
+| 3 | report-7e96c15c F-01: the first option is taken. Appendix A.5 states that the template schemas describe new documents and that numbered values are valid for the checkers only | governance.md 12.12 Appendix A.5; manifest.yaml 12.12 | Planner note in prompt §5.2; the templates stay unchanged, so no closed or downstream document is affected |
+| 4 | The two `guide-audit-loop.md` copies are aligned by copying `docs/guide-audit-loop.md` over the governance copy before the fence correction | Both copies, v1.7 | The `docs/` copy carried the later edit (2026-07-16: `mcp-ripgrep`, `src/orchestrator.py`), which matches the current code and requirements |
+| 5 | Scheduled reports have no status field; "closed" is recorded as a Version History row beginning "Status: closed" before the move to `dev/reports/closed/` | Six reports in `dev/reports/closed/` | Minimal reading of prompt §9.2 item 1 |
+| 6 | design-14e05e35 §12.0 Gates row: the first suggested resolution is taken and the existing tests of change-a5bd4fe1 are named; no test is added | design-14e05e35 v1.29 | The tests exist (`test_d1_syntax_fail_overrides_ship` and others) |
 
 Further decisions are added here as each unit records them.
 
@@ -198,6 +204,12 @@ Completed in Phase D. Standing items from the prompt: every P02.8.2 follow-up au
 | Point | Suite | `linter.py dev` | `protocol_checker.py dev` |
 |---|---|---|---|
 | Baseline (`9b75595`) | 766 passed, 2 skipped | 0 errors, 112 warnings | 0 errors, 20 warnings |
+| After unit 1 | 766 passed, 2 skipped | 0 errors, 112 warnings | 0 errors, 20 warnings |
+| After unit 2 | 766 passed, 2 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
+
+Warning changes against the baseline:
+
+- Unit 2, linter +1: `dev/reports/closed/report-0419b48d-scheduled-daily-2026-11-05.md: linked file '../requirements/closed/requirements-govwatch.md' not found`. The report quotes the broken link it reports; from `dev/reports/` the quoted path happened to resolve, from `dev/reports/closed/` it does not. The existing anchor warning for the same report now names its closed path.
 
 [Return to Table of Contents](#table-of-contents)
 

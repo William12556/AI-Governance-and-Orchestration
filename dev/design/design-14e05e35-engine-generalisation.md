@@ -365,7 +365,7 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 |---|---|---|
 | Manifest | Valid and invalid fixtures; named-field errors | V-01 |
 | Providers | Message conversion both ways; ID format; stub HTTP servers for both kinds | V-03 |
-| Gates | Command gate placeholders and outcomes; syntax gate unchanged | V-02 (live) |
+| Gates | Command gate placeholders and outcomes; syntax gate results as before Phase 2 (V-02). Since change-a5bd4fe1: a syntax FAIL overrides SHIP and paths outside the project are skipped (`tests/engine/test_scope_gate_hardening.py`) | V-02 (live) |
 | Scope | Deliverable, prefix and state-dir writes allowed; others rejected and logged | V-05 |
 | Reviewer paths | `[DELIVERABLES]` block holds absolute paths | V-06 |
 | Stages | Fixture workspaces for each SE path, closed documents and anomalies | V-10 |
@@ -453,6 +453,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.29 | 2026-11-14 | §12.0 Gates row: "syntax gate unchanged" limited to V-02; tests of change-a5bd4fe1 named (report-0fce4169 F3) |
 | 1.28 | 2026-11-07 | §8.4: known limits of tracking and the `prompt-` prefix (audit-4b0a5592 F-01 to F-03). |
 | 1.27 | 2026-11-07 | §8.3: approvals read with `HEAD:./ai/approvals.yaml`; `approve.py` restores the file after a failed commit. §8.4: tracking by location whatever the name or file type (change-4b0a5592). |
 | 1.26 | 2026-11-06 | §4.2: context-window tiers (per-model entry before the live query); §11.0: HTTP 404 not retried, run record build failure and exception record (change-86c958dd). |

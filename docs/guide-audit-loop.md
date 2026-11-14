@@ -43,7 +43,7 @@ The UML serves two purposes:
 
 Minimum content for `audit-uml.md`:
 
-```markdown
+````markdown
 # Codebase UML — <project name>
 
 Generated: <date>
@@ -63,8 +63,7 @@ classDiagram
 
 - `src/module_a.py` — <brief description>
 - `src/module_b.py` — <brief description>
-```
-```
+````
 
 Present `audit-uml.md` to the human for review before proceeding.
 
@@ -265,6 +264,7 @@ mv ai/workspace/audit/audit-<uuid>-<name>.md ai/workspace/audit/closed/
 | 1.4 | 2026-07-16 | §2.1: mcp-grep → mcp-ripgrep. §2.2: example checklist item src/budget.py → src/orchestrator.py (resolve_context_window moved into orchestrator.py; budget.py retired) |
 | 1.5 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.6 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
+| 1.7 | 2026-11-14 | §2.1: the `audit-uml.md` example uses a four-backtick outer fence, so the nested Mermaid fence no longer ends it (report-0419b48d). The copy in `ai/governance/software-engineering/doc/` aligned with `docs/guide-audit-loop.md` (it lacked the 1.4 edit of 2026-07-16) |
 
 ---
 

@@ -163,8 +163,9 @@ ai/webui/
 ## 4.0 Data Model
 
 Extends `govwatch`'s dataclasses (`ProjectPaths`, `DocumentRecord`,
-`AelState`, `BudgetState`, `Alert`, `Snapshot` — reused unmodified, see
-§12.0) with:
+`EngineState` (`AelState` in `govwatch`), `BudgetState`, `Alert`, `Snapshot`
+— reused unmodified at the FR-01 port; `EngineState` and `Snapshot` have
+since been extended as stated below, see §12.0) with:
 
 | Type | Fields |
 |---|---|
@@ -196,7 +197,7 @@ the precedence above applies unchanged (change-86c958dd).
 
 | Component | Disposition |
 |---|---|
-| `Scanner`, `ComplianceEngine`, `AlertWriter` | Reused from `govwatch.py`; modified by change-b8a6c445: engine status from `run.json` (§4.0), FR-02-06 compares the run's task file with the open prompts by file identity (`os.path.samefile`) and is evaluated only while the engine status is `running` (change-86c958dd), each document scanned once for its most specific class directory, `closed/` tested inside the workspace only, alert heading `# Overwatch alerts` |
+| `Scanner`, `ComplianceEngine`, `AlertWriter` | Reused from `govwatch.py`; modified by change-b8a6c445: engine status from `run.json` (§4.0), govwatch FR-02-06 (requirements-govwatch, closed) compares the run's task file with the open prompts by file identity (`os.path.samefile`) and is evaluated only while the engine status is `running` (change-86c958dd), each document scanned once for its most specific class directory, `closed/` tested inside the workspace only, alert heading `# Overwatch alerts` |
 | `PhaseInference` | Reused for the project-wide phase shown in §7.1; not replaced. Since change-b8a6c445 an ended run with an open prompt also gives "Awaiting prompt execution" |
 | `StageInference` | New. Wraps `PhaseInference`'s document-grouping logic per UUID rather than project-wide (§6.0) |
 | `TaskParser` | New. Parses `ai/task.md`'s four-column table into `TaskRow` records (§9.0) |
@@ -439,8 +440,8 @@ not an unhandled exception.
 
 | Element | Type | Signature / note |
 |---|---|---|
-| `ProjectPaths`, `DocumentRecord`, `AelState`, `BudgetState`, `Alert`, `Snapshot` | class | reused from `govwatch`, `Snapshot` extended (§4.0) |
-| `Scanner`, `PhaseInference`, `ComplianceEngine`, `AlertWriter` | class | reused unmodified |
+| `ProjectPaths`, `DocumentRecord`, `EngineState` (`AelState` in `govwatch`), `BudgetState`, `Alert`, `Snapshot` | class | reused from `govwatch`; `Snapshot` extended, and `EngineState` extended by change-b8a6c445 (`task_file`, `rc`, `has_run_record`; §4.0) |
+| `Scanner`, `PhaseInference`, `ComplianceEngine`, `AlertWriter` | class | reused from `govwatch`; modified by change-b8a6c445 and change-86c958dd (§5.0) |
 | `TaskRow`, `ConfigFile`, `StageToken`, `DiffResult` | class | new (§4.0) |
 | `TaskParser` | class | `parse(path: Path) -> list[TaskRow]` |
 | `ConfigReader` | class | `read(paths: list[Path]) -> list[ConfigFile]` |
@@ -524,6 +525,7 @@ bounded interval, not an open-ended dual-maintenance commitment.
 | 0.7 | 2026-11-05 | §4.0 engine status from the run record; §5.0 Scanner, ComplianceEngine, AlertWriter and PhaseInference changes; §8.4 heading and ended status (change-b8a6c445) |
 | 0.8 | 2026-11-05 | §1.0 and §3.2: "unmodified" removed or limited to the FR-01 port; §7.1 engine status values and styles (change-b8a6c445; audit-b8a6c445 F-06) |
 | 0.9 | 2026-11-06 | §4.0: marker age against the run record's start; §5.0: FR-02-06 only while running, by file identity (change-86c958dd) |
+| 0.10 | 2026-11-14 | §4.0 and §12.0: "reused unmodified" limited to the FR-01 port, `EngineState` named with its added fields; §5.0: FR-02-06 qualified as govwatch FR-02-06 (report-0fce4169 F1, F2) |
 
 ---
 

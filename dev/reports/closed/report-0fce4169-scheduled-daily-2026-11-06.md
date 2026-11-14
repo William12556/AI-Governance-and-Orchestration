@@ -163,6 +163,7 @@ The window changed the syntax gate's behaviour and removed "results unchanged" f
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-06 | Initial report: one Confirmed finding (Low), two Speculative findings (Low). |
+| 1.1 | 2026-11-14 | Status: closed. F1 and F2 corrected in design-project-overwatch v0.10, requirements-0c6aedee v0.9 and design-ael-orchestrator v0.12; F3 corrected in design-14e05e35 v1.29. O-01 resolved with change-b8c75bac; O-02 no action. Dispositions: report-b3a503a2 §3.6 |
 
 ---
 

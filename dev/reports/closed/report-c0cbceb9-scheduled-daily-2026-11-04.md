@@ -127,6 +127,7 @@ This report records conflicts between Markdown documents that changed in the 24 
 | Version | Date | Description |
 |---|---|---|
 | 0.1 | 2026-11-04 | Initial report |
+| 0.2 | 2026-11-14 | Status: closed. F1 superseded (the register was restructured; change-711a57d5 and its follow-up triple are closed); F2 corrected in guide-engine-operations v1.21; F3 resolved by governance 12.7 (P00.10, P12.9); the §7.0 sentence in design-project-overwatch is repaired. Dispositions: report-b3a503a2 §3.6 |
 
 ---
 

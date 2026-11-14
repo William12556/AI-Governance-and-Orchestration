@@ -168,7 +168,7 @@ All paths relative to `state_dir` (`ai/state/` by default, per `config.yaml`
 | `.timeout` | `run_loop` | Strategic Domain / govwatch | Duration-limit exit sentinel |
 | `BLOCKED.md` | `run_phase`, `run_loop`, `_completion_with_retry` | Strategic Domain (T03 issue seed) | Failure detail; loop exits non-zero |
 | `context-budget.md` | `write_context_report` (startup) | Strategic Domain (T04 authoring precondition) | Context window, thresholds, headroom, guidance |
-| `run.json` | `main_async` (start of the run, and in the final `finally`) | Overwatch (engine status, FR-02-06) | Run record: mode, task file, pid, start, end, exit code, or null with `error` naming the exception type when the run ends with an exception (change-86c958dd); written atomically; protected from worker writes (change-b8a6c445) |
+| `run.json` | `main_async` (start of the run, and in the final `finally`) | Overwatch (engine status, govwatch FR-02-06 (requirements-govwatch, closed)) | Run record: mode, task file, pid, start, end, exit code, or null with `error` naming the exception type when the run ends with an exception (change-86c958dd); written atomically; protected from worker writes (change-b8a6c445) |
 | `audit-index.md` | Strategic Domain (pre-loop, audit runs only) | `run_phase`, `run_loop` (item injection, scope lock) | Checklist of audit items; presence selects audit recipe pair |
 | `audit-report.md` | Tactical Domain, via MCP append; initialised zero-byte by `main_async` | `_archive_audit_artifacts` | Accumulated audit findings; append-only guarded (§5.7) |
 | `ael_YYYYMMDD-HHMMSS.LOG` | `setup_logging` | Strategic Domain (post-mortem) | Structured DEBUG/INFO/WARNING/ERROR log; final line always `engine end rc=N` |
@@ -216,7 +216,7 @@ Responsibility: resolve the model's context window, estimate token usage, and
 enforce/report budget thresholds.
 
 - `resolve_context_window()` — four-tier chain (§7.0).
-- `_query_omlx_context_window()` — tier 2 live query against the oMLX admin API;
+- `_query_omlx_context_window()` — tier 3 live query against the oMLX admin API;
   never raises, returns `None` on any failure (logged at WARNING).
 - `estimate_tokens()` — `len(content) // 4` heuristic over message content plus
   serialized tool-schema JSON; intentionally biased toward overestimation.
@@ -700,6 +700,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | 0.9 | 2026-11-05 | §4.1: `run.json` run record (change-b8a6c445; audit-b8a6c445 F-06) |
 | 0.10 | 2026-11-06 | §7.0: per-model entry is tier 2, before the live query (tier 3) (change-86c958dd) |
 | 0.11 | 2026-11-06 | §4.1: `run.json` error field (change-86c958dd; audit-86c958dd F-05) |
+| 0.12 | 2026-11-14 | §4.1: FR-02-06 qualified as govwatch FR-02-06 (report-0fce4169 F2); §5.1: the live query is tier 3 (report-53b0e016 F-01) |
 
 ---
 

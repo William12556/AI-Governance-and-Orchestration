@@ -91,7 +91,7 @@ inference, diff generation) are additive.
 | ID | Requirement |
 |---|---|
 | FR-01-01 | Render workflow phase, engine state, and budget state, reusing `PhaseInference` and existing state-reading logic unmodified at the FR-01 port; the engine status has since been derived from the engine's run record (change-b8a6c445). |
-| FR-01-02 | Render compliance alerts (tier1/tier2), colour-coded by severity, reusing `ComplianceEngine` unmodified at the FR-01 port; FR-02-06 has since compared the run record's task file with the open prompts (change-b8a6c445). |
+| FR-01-02 | Render compliance alerts (tier1/tier2), colour-coded by severity, reusing `ComplianceEngine` unmodified at the FR-01 port; govwatch FR-02-06 (requirements-govwatch, closed) has since compared the run record's task file with the open prompts (change-b8a6c445). |
 | FR-01-03 | Render the document registry, grouped by UUID, open documents only, reusing `Scanner` unmodified at the FR-01 port; each document has since been listed once, for its most specific class directory, and only `closed/` folders inside the workspace exclude documents (change-b8a6c445). |
 | FR-01-04 | This panel constitutes shipped parity with the current TUI. Retirement of `govwatch.py` and its removal from `ai/src/` propagation is gated on this phase shipping and being validated — not on approval of this document. |
 
@@ -281,7 +281,7 @@ with the same caveat carried in `requirements-govwatch.md` §6.0.
 
 | Component | Disposition |
 |---|---|
-| `ProjectPaths`, `DocumentRecord`, `AelState`, `BudgetState`, `Alert`, `Snapshot` | Reused unmodified |
+| `ProjectPaths`, `DocumentRecord`, `AelState`, `BudgetState`, `Alert`, `Snapshot` | Reused unmodified at the FR-01 port; `AelState` is now `EngineState`, extended by change-b8a6c445 (design §4.0) |
 | `Scanner`, `PhaseInference`, `ComplianceEngine`, `AlertWriter` | Reused unmodified for FR-01; `PhaseInference` additionally extended (not replaced) for FR-06-02 |
 | `GovwatchApp` (Textual presentation layer) | Discarded; replaced by the browser presentation layer |
 
@@ -308,6 +308,7 @@ a single-effort ("Big Bang") delivery.
 | 0.6 | 2026-11-05 | NFR-01 states the two permitted outputs, as design §3.1 and §11.0 specify; CON-01 `.ael/` → `ai/state/` (audit-caab2052 OQ-02, operator decision) |
 | 0.7 | 2026-11-05 | FR-01-01, FR-01-02: "unmodified" limited to the FR-01 port; later changes by change-b8a6c445 noted |
 | 0.8 | 2026-11-05 | FR-01-03: "unmodified" limited to the FR-01 port; later change by change-b8a6c445 noted (audit-b8a6c445 F-06) |
+| 0.9 | 2026-11-14 | FR-01-02: FR-02-06 qualified as govwatch FR-02-06 (report-0fce4169 F2); §9.1: dataclass row limited to the FR-01 port, `EngineState` named |
 
 ---
 
