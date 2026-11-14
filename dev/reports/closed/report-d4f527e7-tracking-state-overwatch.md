@@ -39,7 +39,7 @@ All parts are implemented. The suite passes, and mutations M1 to M17 each fail a
 
 | File | Function | Change |
 |---|---|---|
-| `ai/engine/src/orchestrator.py` | `_write_atomic` (new), `write_state` | A: temporary file `.<name>.<pid>.tmp` in the state directory, then `os.replace`; the name itself is replaced |
+| `ai/engine/src/orchestrator.py` | `_write_atomic` (new), `_keep_mode` (new), `write_state` | A: temporary file `.<name>.<pid>.tmp` in the state directory, then `os.replace`; the name itself is replaced |
 | `ai/engine/src/orchestrator.py` | `_archive_audit_artifacts`, `main_async` | B: `project_root` parameter (default: working directory), passed by `main_async`; the smallest free `n` from 2 for `audit-<uid>-index-<n>.md` and `audit-<uid>-report-<n>.md` when an archive exists; a warning is logged |
 | `ai/engine/src/orchestrator.py` | `run_loop` | C: `log.error` before `write_state(…, "BLOCKED.md", …)` at loop start and after the gates |
 | `ai/engine/src/approve.py` | `_write_atomic` (new), `approve` | A: the write of `ai/approvals.yaml` and the write-back of the prior bytes, on the resolved path |
@@ -56,7 +56,7 @@ All parts are implemented. The suite passes, and mutations M1 to M17 each fail a
 | `dev/design/design-project-overwatch.md` | §4.0 | v0.11 |
 | `ai/engine/doc/guide-engine-operations.md` | §2.0, §5.0 | v1.34 |
 
-Source lines changed: 159 insertions, 27 deletions over four files (`approve.py` 24/4, `orchestrator.py` 50/8, `stages.py` 59/12, `overwatch.py` 26/3).
+Source lines changed: 159 insertions, 27 deletions over four files in `98214f8` (`approve.py` 24/4, `orchestrator.py` 50/8, `stages.py` 59/12, `overwatch.py` 26/3); with the review corrections of `0a3b509`, 184 insertions, 27 deletions in total (`approve.py` 31/4, `orchestrator.py` 63/8, `stages.py` 59/12, `overwatch.py` 31/3).
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -79,7 +79,7 @@ New skips: `test_t5_real_unremovable_entry` (root removes entries from a read-on
 
 | Scenario | Test | File | Cases |
 |---|---|---|---|
-| T1 | `test_t1_write_state_is_atomic`, `test_t1_write_state_creates_the_directory`, `test_t1_write_state_replaces_a_symlink` | `test_tracking_state_hygiene.py` | 3 |
+| T1 | `test_t1_write_state_is_atomic`, `test_t1_write_state_keeps_the_mode_of_an_existing_file` (added after the review), `test_t1_write_state_creates_the_directory`, `test_t1_write_state_replaces_a_symlink` | `test_tracking_state_hygiene.py` | 4 |
 | T2 | `test_t2_overwatch_outputs_are_atomic` (2), `test_t2_overwatch_output_symlink_is_written_through` | `test_overwatch.py` | 3 |
 | T3 | `test_t3_approve_writes_atomically` | `test_stages.py` | 1 |
 | T4 | `test_t4_audit_archive_does_not_overwrite`, `test_t4_audit_archive_uses_the_project_root` | `test_tracking_state_hygiene.py` | 2 |
@@ -134,13 +134,13 @@ One deviation from the change document's file list: T3, T7 and T8 are in `tests/
 Interpretations:
 
 1. The temporary file is named `.<name>.<pid>.tmp` and opened in the ordinary way, so a newly created file follows the process umask as before. An existing regular file keeps its permission bits: the helpers copy them to the temporary file before the move (review correction R1). A read-only target is replaced, where the in-place write failed with a permission error. A temporary file left by a killed process is overwritten by the next write of that name from the same pid, or stays as a dot file; reset does not remove it.
-7. `ai/approvals.yaml` is encoded with the locale's preferred encoding, the encoding with which the text-mode read decodes it and the earlier text-mode write encoded it (review correction R2).
-8. A task below a symlinked directory in `ai/workspace/` that leads outside it is refused in the same way as an outward file link (E2).
 2. State file names are replaced, not written through (decision D1). The outputs of Overwatch and `ai/approvals.yaml` resolve the path first, so a symlinked output keeps working.
 3. `_archive_audit_artifacts` uses `os.path.lexists` for the free-name search, so a dangling symlink at an archive name also counts as occupied.
 4. T5 uses a stand-in for `_remove_state_path` for the ordering and loop-start cases. The case with a real unremovable entry (a read-only state directory) cannot hold for root and is skipped here; it checks `clear_state` and `reset_state` only, since `BLOCKED.md` cannot be written to a read-only directory either.
 5. With an outward link named like a prompt beside the approved prompt, the scan lists the link as a second prompt document of the work item. `task_document_error` refuses the link as a task (E2). A run with the approved prompt itself is then refused as well when the approval's blob map does not hold the link, by the existing rule that an added document invalidates the approval.
 6. `is_tracked_task` returns False when `ai/workspace/` does not exist, as before.
+7. `ai/approvals.yaml` is encoded with the locale's preferred encoding, the encoding with which the text-mode read decodes it and the earlier text-mode write encoded it (review correction R2).
+8. A task below a symlinked directory in `ai/workspace/` that leads outside it is refused in the same way as an outward file link (E2).
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -148,7 +148,7 @@ Interpretations:
 
 ## 6.0 Open Points
 
-0. Review (fresh reviewer subagent, prompt-cf99f3f3 §8.4), round 1: REVISE with three findings. R1: the atomic helpers did not keep the permission bits of an existing file; corrected in the three helpers, with assertions in T1 (`test_t1_write_state_keeps_the_mode_of_an_existing_file`), T2 and T3. R2: `ai/approvals.yaml` was written as UTF-8 whatever the locale; corrected to the locale's encoding. R3: the count of new tests passing before the change was 4, not 3; corrected in §3.0. Optional remarks taken: the guide's duplicated sentence, and the symlinked-directory case stated in the guide and in §5.0.
+0. Review (fresh reviewer subagent, prompt-cf99f3f3 §8.4), round 1: REVISE with three findings. R1: the atomic helpers did not keep the permission bits of an existing file; corrected in the three helpers, with assertions in T1 (`test_t1_write_state_keeps_the_mode_of_an_existing_file`), T2 and T3. R2: `ai/approvals.yaml` was written as UTF-8 whatever the locale; corrected to the locale's encoding. R3: the count of new tests passing before the change was 4, not 3; corrected in §3.0. Optional remarks taken: the guide's duplicated sentence, and the symlinked-directory case stated in the guide and in §5.0. Round 2: SHIP.
 1. Letter case (audit-4b0a5592 F-02) is not verified. On macOS, `test_t7_case_variant_is_tracked` should run and pass. A loop run with `AI/Workspace/prompt/<approved prompt>` is expected to exit 3, because `task_document_error` compares resolved path strings; if `os.path.realpath` normalises case there, it is expected to pass the check instead. Either outcome keeps the pre-run check in force.
 2. engine-mcp `_tracked_task_error` still compares resolved paths; it refuses an outward link as outside, which agrees with the CLI result (refused).
 3. The appends to `BLOCKED.md` (`Return to stage:`) and the log files are not atomic; they are outside L-10 as registered.
@@ -168,6 +168,8 @@ Interpretations:
 | `a5a3656` | docs(dev): raise issue-d4f527e7; change-d4f527e7 approved |
 | `98214f8` | fix(engine): atomic writes, tracking by file identity, non-regular documents |
 | `3c3b870` | test: tracking, state and Overwatch cases T1 to T8 for change-d4f527e7 |
+| `0a3b509` | fix(engine): atomic writes keep the mode of an existing file; approvals encoding |
+| `af46991` | test: an existing file keeps its mode across an atomic write (change-d4f527e7 review) |
 
 The design, guide, this report and the status updates follow as `docs` commits; a commit cannot list its own hash.
 
@@ -181,6 +183,7 @@ The design, guide, this report and the status updates follow as `docs` commits; 
 |---|---|---|
 | 1.0 | 2026-11-14 | Initial report |
 | 1.1 | 2026-11-14 | Review round 1 corrections: §3.0 counts, §5.0 interpretations 1, 7 and 8, §6.0 item 0 |
+| 1.2 | 2026-11-14 | Review round 2 (SHIP): §2.0 functions and line counts, §3.0 T1 row, §7.0 commits; closed with change-d4f527e7 and issue-d4f527e7 |
 
 ---
 

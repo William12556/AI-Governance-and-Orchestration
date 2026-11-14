@@ -5,7 +5,7 @@ issue_info:
   id: "issue-d4f527e7"
   title: "Engine runtime hygiene: non-atomic writes, audit archive overwrite, BLOCKED log order, stale blocked detail in Overwatch, tracking by path string, non-regular evidence documents"
   date: "2026-11-14"
-  status: "resolved"  # change-d4f527e7 implemented 2026-11-14 (P03.7)
+  status: "closed"  # change-d4f527e7 verified 2026-11-14
   severity: "low"
   type: "defect"
   iteration: 1
@@ -115,6 +115,9 @@ version_history:
   - version: "1.1"
     date: "2026-11-14"
     changes: ["Status resolved: change-d4f527e7 implemented (P03.7)"]
+  - version: "1.2"
+    date: "2026-11-14"
+    changes: ["Status closed: change-d4f527e7 verified. Approver: operator (one-time session exemption, 2026-11-14). Linux cloud suite 812 passed, 4 skipped; macOS operator suite and P02.8.2 follow-up audit deferred to after the session"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

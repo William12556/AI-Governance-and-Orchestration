@@ -164,7 +164,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | 1 | Close triple 9377f9b9 | `9377f9b9` | Completed. Review: REVISE (one date in audit-caab2052 §14.0), then SHIP | `6ada3b7`, `5b006f5` |
 | 2 | Document fixes (governance 12.12; six reports closed) | — | Completed. Review: REVISE (table break and Version History row in this report; two further tier numbers in design-ael-orchestrator), then SHIP | `4c55301`, `5573430` |
 | 3a | Work item 5B-1, engine runtime: configuration, console, logging | `bae631c7` | Completed; triple closed. Review: SHIP on the first round | `90f98a8` (issue, change), `f176b07` (source), `962238e` and `5c3e540` (tests), `99bdd9e`, `cee4cb6` and the closing commit (documents) |
-| 3b | Work item 5B-2, engine runtime: tracking, state, Overwatch | `d4f527e7` | In progress | |
+| 3b | Work item 5B-2, engine runtime: tracking, state, Overwatch | `d4f527e7` | Completed; triple closed. Review: REVISE (file mode not kept by the atomic helpers; `approvals.yaml` encoding; one report count), then SHIP | `a5a3656` (issue, change), `98214f8` and `0a3b509` (source), `3c3b870` and `af46991` (tests), `b07b3b4`, `34730e5` and the closing commit (documents) |
 | 4 | Work item 5C, scripts and documents | `541f5c58` | Not started | |
 | 5 | Work item 6, test coverage gaps | `6d40f0dd` | Not started | |
 | 6 | Work item 7a, document layout conformance | — | Not started | |
@@ -187,6 +187,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | 6 | design-14e05e35 §12.0 Gates row: the first suggested resolution is taken and the existing tests of change-a5bd4fe1 are named; no test is added | design-14e05e35 v1.29 | The tests exist (`test_d1_syntax_fail_overrides_ship` and others) |
 | 7 | change-bae631c7 decisions D1 to D5: escape the `[engine]` prefix at each site; `invalid YAML: nesting too deep`; a null `model_context_windows` is empty and any other invalid value is refused; the server connected last keeps a duplicate tool name and a run with no tools is not refused; only the pyflakes items and the `stages.py` type of L-16 are corrected | change-bae631c7 `notes` | Minimal options consistent with the findings and their recorded dispositions |
 | 8 | Mistral Vibe profile: written from the Vibe repository documentation and PyPI (version 3.1.2); the Mistral documentation site was not reachable. Facts taken only from a summary are marked in the profile's §7.0. The T03 template has no `target_profile` value for Vibe; the profile names `claude_code` as the nearest value and no governance change is made. The profile defines no test hook | `ai/profiles/mistral-vibe.md` §5.0 to §7.0 | A new `target_profile` value or hook would change governance, templates or checkers beyond work item 7b |
+| 9 | change-d4f527e7 decisions D1 to D6: temporary file and `os.replace` with three local helpers, state file names replaced and output links written through; numbered audit archive names and the project root as a parameter; log before `BLOCKED.md`; blocked detail only when blocked; tracking by file identity for the given and the resolved path, with a task that resolves outside `ai/workspace/` refused; non-regular evidence matches skipped with a scan warning | change-d4f527e7 `notes` | Minimal options consistent with the findings; `ai/core/` is not opened (L-17 transferred) |
 
 Further decisions are added here as each unit records them.
 
@@ -210,9 +211,11 @@ Completed in Phase D. Standing items from the prompt: every P02.8.2 follow-up au
 | After unit 1 | 766 passed, 2 skipped | 0 errors, 112 warnings | 0 errors, 20 warnings |
 | After unit 2 | 766 passed, 2 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
 | After unit 3a (change-bae631c7) | 788 passed, 2 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
+| After unit 3b (change-d4f527e7) | 812 passed, 4 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
 
 Warning changes against the baseline:
 
+- Unit 3b, suite +2 skipped: `test_t5_real_unremovable_entry` (root removes entries from a read-only directory) and `test_t7_case_variant_is_tracked` (case-sensitive file system). Both are expected to run on the operator's macOS machine.
 - Unit 2, linter +1: `dev/reports/closed/report-0419b48d-scheduled-daily-2026-11-05.md: linked file '../requirements/closed/requirements-govwatch.md' not found`. The report quotes the broken link it reports; from `dev/reports/` the quoted path happened to resolve, from `dev/reports/closed/` it does not. The existing anchor warning for the same report now names its closed path.
 
 [Return to Table of Contents](#table-of-contents)
@@ -235,6 +238,7 @@ Completed in Phase D.
 | 0.2 | 2026-11-14 | Phase B and units 1 and 2: work-unit status, DD-03 and DD-04, decisions 3 to 6, counts |
 | 0.3 | 2026-11-14 | Unit 3a (change-bae631c7) closed: status, counts, decision 7 |
 | 0.4 | 2026-11-14 | Unit 7 (Mistral Vibe profile): status, decision 8 |
+| 0.5 | 2026-11-14 | Unit 3b (change-d4f527e7) closed: status, counts, decision 9; two new skips explained |
 
 ---
 

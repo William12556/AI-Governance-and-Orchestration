@@ -5,7 +5,7 @@ change_info:
   id: "change-d4f527e7"
   title: "Engine runtime hygiene: atomic writes, audit archive without overwrite, BLOCKED log order, blocked detail only when blocked, tracking by file identity, non-regular evidence documents skipped (Stage C work item 5B-2)"
   date: "2026-11-14"
-  status: "implemented"  # approver: operator (one-time session exemption, 2026-11-14); implemented 2026-11-14
+  status: "verified"  # approver: operator (one-time session exemption, 2026-11-14); implemented and verified 2026-11-14
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -203,6 +203,13 @@ version_history:
       - "788 passed, 2 skipped at the unit baseline; 811 passed, 4 skipped after (Linux; 23 new cases, 2 new skips: root and case-sensitive file system). Mutations M1 to M17 caught"
       - "linter.py dev 0 errors, 113 warnings; protocol_checker.py dev 0 errors, 20 warnings"
       - "design-14e05e35 v1.31 §8.4, §11.0; design-ael-orchestrator v0.13 §4.1; design-project-overwatch v0.11 §4.0; guide-engine-operations v1.34 §2.0, §5.0. The guide-audit-loop copies needed no edit"
+  - version: "1.3"
+    date: "2026-11-14"
+    changes:
+      - "Review by a fresh reviewer subagent (prompt-cf99f3f3 §8.4): round 1 REVISE (the atomic helpers did not keep the mode of an existing file; approvals.yaml encoding; one count in the report), corrected in 0a3b509 (source), af46991 (tests) and report-d4f527e7 v1.1; round 2 SHIP. Not an audit"
+      - "Added to proposed_behavior A by the review: an existing regular file keeps its permission bits; ai/approvals.yaml is encoded with the locale's preferred encoding, as before"
+      - "Status verified; closed with issue-d4f527e7 and report-d4f527e7 (P00.14.4). Approver: operator (one-time session exemption, 2026-11-14)"
+      - "Linux cloud suite 812 passed, 4 skipped; macOS operator suite (including the letter-case test and the real unremovable entry test, skipped on Linux as root) and P02.8.2 follow-up audit deferred to after the session (report-b3a503a2 §6.0)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
