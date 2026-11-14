@@ -417,6 +417,27 @@ def _same_file(a: str, b: str) -> bool:
         return False
 
 
+def _write_text_atomic(path: Path, content: str) -> None:
+    """Write content as UTF-8 to a temporary file and move it into place.
+
+    change-d4f527e7 (audit-caab2052 L-10): a reader (the browser, the planner)
+    sees the previous file or the new one, never a partial file. A symlink at
+    path is written through, as before. On any failure the temporary file is
+    removed and the exception re-raised for the caller's own handling.
+    """
+    target = Path(os.path.realpath(path))
+    tmp_path = target.with_name(f".{target.name}.{os.getpid()}.tmp")
+    try:
+        tmp_path.write_text(content, encoding="utf-8")
+        os.replace(tmp_path, target)
+    except BaseException:
+        try:
+            tmp_path.unlink()
+        except OSError:
+            pass
+        raise
+
+
 class Scanner:
     """Produce a Snapshot from the project filesystem.
 
@@ -596,7 +617,9 @@ class Scanner:
         return EngineState(
             status=status,
             iteration=iteration,
-            blocked_detail=blocked_content,
+            # change-d4f527e7 (audit-86c958dd F-01): an earlier run's BLOCKED.md
+            # is not shown while the status is ended or running.
+            blocked_detail=blocked_content if status == "blocked" else None,
             task_ref=task_ref,
             task_file=task_file,
             rc=rc,
@@ -1003,7 +1026,7 @@ class AlertWriter:
         """
         content = self.payload(snapshot)
         try:
-            self.paths.alerts_file.write_text(content, encoding="utf-8")
+            _write_text_atomic(self.paths.alerts_file, content)
             return None
         except Exception as exc:  # noqa: BLE001
             return f"dashboard-alerts.md write failed: {exc}"
@@ -1184,7 +1207,7 @@ class HtmlRenderer:
         target = Path(root) / self.OUTPUT_NAME
         try:
             content = self.render(snapshot)
-            target.write_text(content, encoding="utf-8")
+            _write_text_atomic(target, content)
         except Exception as exc:  # noqa: BLE001 — must not end the loop
             print(f"overwatch: {self.OUTPUT_NAME} write failed ({target}): {exc}",
                   file=sys.stderr)

@@ -564,13 +564,20 @@ async def _completion_with_retry(
     raise RuntimeError("Unexpected: completion retry loop exited without return or raise")
 
 
-def _archive_audit_artifacts(state_dir: str, task_path: str | None, log: logging.Logger) -> None:
+def _archive_audit_artifacts(state_dir: str, task_path: str | None, log: logging.Logger,
+                             project_root: str | None = None) -> None:
     """
     Copy audit-index.md and audit-report.md from state_dir to ai/workspace/audit/
     with canonical naming: audit-<uuid>-index.md and audit-<uuid>-report.md.
     Called after a successful audit loop SHIP. No-op if audit-report.md is absent.
     UUID is extracted from the task file path basename (first 8-hex substring).
     Falls back to yyyymmdd timestamp if UUID cannot be determined.
+
+    change-d4f527e7 (audit-caab2052 L-14): the folder lies below project_root
+    (default: the working directory), and an existing archive is never
+    replaced: a later archive of the same work item is named
+    audit-<uuid>-index-<n>.md and audit-<uuid>-report-<n>.md with the smallest
+    n >= 2 for which neither name exists.
     """
     report_src = os.path.join(state_dir, "audit-report.md")
     if not os.path.exists(report_src):
@@ -586,13 +593,26 @@ def _archive_audit_artifacts(state_dir: str, task_path: str | None, log: logging
         uid = datetime.datetime.now().strftime("%Y%m%d")
         log.warning("archive audit: UUID not found in task path — using date fallback: %s", uid)
 
-    output_dir = os.path.join(os.getcwd(), "ai", "workspace", "audit")
+    output_dir = os.path.join(project_root or os.getcwd(), "ai", "workspace", "audit")
     os.makedirs(output_dir, exist_ok=True)
+
+    def _names(n: int) -> dict[str, str]:
+        tail = "" if n == 1 else f"-{n}"
+        return {suffix: os.path.join(output_dir, f"audit-{uid}-{suffix}{tail}.md")
+                for suffix in ("index", "report")}
+
+    n = 1
+    while any(os.path.lexists(p) for p in _names(n).values()):
+        n += 1
+    targets = _names(n)
+    if n > 1:
+        log.warning("archive audit: an archive for %s exists — writing %s",
+                    uid, os.path.basename(targets["report"]))
 
     archived = 0
     for src, suffix in [(index_src, "index"), (report_src, "report")]:
         if os.path.exists(src):
-            dst = os.path.join(output_dir, f"audit-{uid}-{suffix}.md")
+            dst = targets[suffix]
             shutil.copy2(src, dst)
             archived += 1
             log.info("archive audit: %s -> %s", src, dst)
@@ -710,10 +730,30 @@ def read_state(state_dir: str, filename: str) -> str:
     return open(path).read().strip() if os.path.exists(path) else ""
 
 
+def _write_atomic(path: str, content: str) -> None:
+    """
+    change-d4f527e7 (audit-caab2052 L-10): write content to a temporary file
+    beside path and move it into place with os.replace, so a reader sees the
+    previous content or the new content, never a partial file. The name itself
+    is replaced; a symlink at path is not followed. On any failure the
+    temporary file is removed and the exception re-raised.
+    """
+    tmp_path = os.path.join(os.path.dirname(path), f".{os.path.basename(path)}.{os.getpid()}.tmp")
+    try:
+        with open(tmp_path, "w") as f:
+            f.write(content)
+        os.replace(tmp_path, path)
+    except BaseException:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
+        raise
+
+
 def write_state(state_dir: str, filename: str, content: str) -> None:
     os.makedirs(state_dir, exist_ok=True)
-    with open(os.path.join(state_dir, filename), "w") as f:
-        f.write(content)
+    _write_atomic(os.path.join(state_dir, filename), content)
 
 
 def _write_run_record(state_dir: str, record: dict) -> None:
@@ -2142,10 +2182,11 @@ async def run_loop(
                 "work-complete.txt", "work-summary.txt", ".complete", ".timeout",
                 "awaiting-approval.md")
     if _not_cleared:  # change-82dbf16a iteration 5 (F4-01)
+        # change-d4f527e7: logged before BLOCKED.md is written
+        log.error("BLOCKED: state files could not be removed: %s", ", ".join(_not_cleared))
         write_state(state_dir, "BLOCKED.md",
                     "# BLOCKED\n\nState files could not be removed at loop start: "
                     f"{', '.join(_not_cleared)}. Remove them by hand.\n")
-        log.error("BLOCKED: state files could not be removed: %s", ", ".join(_not_cleared))
         console.print(f"[red]\\[engine] BLOCKED: state files could not be removed: "
                       f"{escape(', '.join(_not_cleared))}[/red]")
         return 1
@@ -2295,10 +2336,11 @@ async def run_loop(
         _not_cleared = clear_state(state_dir, "work-complete.txt", "review-feedback.txt",
                                    "review-result.txt", ".complete", "awaiting-approval.md")
         if _not_cleared:  # change-82dbf16a iteration 5 (F4-01)
+            # change-d4f527e7: logged before BLOCKED.md is written
+            log.error("BLOCKED: state files could not be removed: %s", ", ".join(_not_cleared))
             write_state(state_dir, "BLOCKED.md",
                         "# BLOCKED\n\nState files could not be removed after the gates: "
                         f"{', '.join(_not_cleared)}. Remove them by hand.\n")
-            log.error("BLOCKED: state files could not be removed: %s", ", ".join(_not_cleared))
             console.print(f"[red]\\[engine] BLOCKED: state files could not be removed: "
                           f"{escape(', '.join(_not_cleared))}[/red]")
             return 1
@@ -3022,7 +3064,7 @@ async def main_async(args: argparse.Namespace) -> int:
                                 max_completion_tokens=max_completion_tokens,
                                 max_tool_result_chars=max_tool_result_chars)
             if rc == 0:
-                _archive_audit_artifacts(state_dir, args.task, log)
+                _archive_audit_artifacts(state_dir, args.task, log, project_root=project_root)
         _finish_run(args.mode, rc, state_dir, manifest, loop_stage, work_item,
                     _gate_outcomes if args.mode == "loop" else {}, _run_started, log)
     except BaseException as exc:
