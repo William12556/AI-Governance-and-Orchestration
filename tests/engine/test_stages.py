@@ -30,6 +30,8 @@ def repo(project, monkeypatch):
                  ("GIT_COMMITTER_NAME", "t"), ("GIT_COMMITTER_EMAIL", "t@example.com")):
         monkeypatch.setenv(k, v)
     _git(project, "init", "-q")
+    # change-6d40f0dd (audit-4b0a5592 F-10): independent of the machine's signing configuration
+    _git(project, "config", "commit.gpgsign", "false")
     (project / "README.md").write_text("x\n")
     _git(project, "add", "README.md")
     _git(project, "commit", "-q", "-m", "init")
@@ -870,3 +872,124 @@ def test_t8_prerun_passes_beside_a_non_regular_entry(repo, se, kind):
     _non_regular(repo, kind)
     missing = _in_thread(lambda: ST.prerun_missing(str(repo), se, U, str(prompt), prompt.read_bytes()))
     assert missing == []
+
+
+# --- change-6d40f0dd: coverage gaps (audit-4b0a5592 F-07, F-10; work item 6 (e), (f)) ----------
+
+def test_e_repo_fixture_disables_commit_signing(repo, tmp_path_factory, monkeypatch):
+    """E (F-10): the fixture repository commits unsigned whatever the machine's configuration."""
+    assert _git(repo, "config", "--local", "--get", "commit.gpgsign").stdout.strip() == "false"
+    # a global configuration that asks for signing with a signer that cannot run
+    global_config = tmp_path_factory.mktemp("gitconfig") / "config"
+    global_config.write_text("[commit]\n\tgpgsign = true\n[gpg]\n\tprogram = /nonexistent/signer\n")
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", str(global_config))
+    (repo / "note.txt").write_text("x\n")
+    _git(repo, "add", "note.txt")
+    _git(repo, "commit", "-q", "-m", "unsigned")  # check=True: raises if the commit fails
+
+
+def test_f_free_text_task_prints_no_tracking_warning(orch, repo, se, monkeypatch):
+    """X07: a free-text loop task is untracked without the 'not tracked' warning."""
+    seen = {}
+
+    def stop(state_dir, archive_dir):
+        seen["reached"] = True
+        raise _Stop()
+
+    monkeypatch.setattr(orch, "archive_prior_logs", stop)
+    import io
+    from rich.console import Console
+    buf = io.StringIO()
+    monkeypatch.setattr(orch, "console", Console(file=buf, width=10000, highlight=False))
+    with pytest.raises(_Stop):
+        asyncio.run(orch.main_async(_loop_args(repo, "implement x")))
+    out = buf.getvalue()
+    assert seen == {"reached": True}
+    assert "not tracked" not in out
+    assert "work item" not in out
+
+
+def test_f_failed_git_add_restores_the_file(repo, se):
+    """X10: when git add fails, ai/approvals.yaml is removed again and nothing is staged."""
+    _doc(repo, "prompt", "prompt")
+    (repo / ".gitignore").write_text("ai/approvals.yaml\n")
+    _git(repo, "add", ".gitignore")
+    _git(repo, "commit", "-q", "-m", "ignore approvals")
+    code, message = A.approve(str(repo), U, "prompt", se)
+    assert code == 1
+    assert message.startswith("git failed (add --): ")
+    assert "ignored" in message
+    assert "could not be restored" not in message
+    assert not (repo / "ai" / "approvals.yaml").exists()
+    assert _git(repo, "status", "--porcelain", "--", "ai/approvals.yaml").stdout == ""
+    assert _git(repo, "diff", "--cached", "--name-only").stdout == ""
+
+
+def test_f_failure_detail_prefers_stderr(repo, se, monkeypatch):
+    """X12: with output on both streams, the failure detail is the stderr text.
+
+    git passes a hook's stdout to its own stderr, so the commit step is replaced by a
+    result that carries both streams.
+    """
+    _doc(repo, "prompt", "prompt")
+    real_run = subprocess.run
+
+    def run(cmd, *args, **kwargs):
+        if cmd[:1] == ["git"] and "commit" in cmd:
+            return subprocess.CompletedProcess(cmd, 1, stdout="on stdout\n", stderr="on stderr\n")
+        return real_run(cmd, *args, **kwargs)
+
+    monkeypatch.setattr(A.subprocess, "run", run)
+    code, message = A.approve(str(repo), U, "prompt", se)
+    assert code == 1
+    assert message == "git failed (commit -q): on stderr"
+    monkeypatch.setattr(A.subprocess, "run", real_run)
+    assert _git(repo, "status", "--porcelain", "--", "ai/approvals.yaml").stdout == ""
+
+
+def test_f_restoration_failure_is_reported(repo, se, monkeypatch):
+    """X13, X17: a failed write-back is reported after the git failure."""
+    _doc(repo, "prompt", "prompt")
+    approvals = repo / "ai" / "approvals.yaml"
+    approvals.parent.mkdir(exist_ok=True)
+    approvals.write_text(A.HEADER)
+    _git(repo, "add", "ai/approvals.yaml")
+    _git(repo, "commit", "-q", "-m", "approvals header")
+    _hook(repo, "#!/bin/sh\necho 'hook says no' >&2\nexit 1\n")
+    real = A._write_atomic
+    calls = []
+
+    def failing_restore(path, data):
+        calls.append(path)
+        if len(calls) == 2:  # the write-back of the prior bytes
+            raise OSError("disk full")
+        return real(path, data)
+
+    monkeypatch.setattr(A, "_write_atomic", failing_restore)
+    code, message = A.approve(str(repo), U, "prompt", se)
+    assert code == 1 and len(calls) == 2
+    assert message == ("git failed (commit -q): hook says no; "
+                       "ai/approvals.yaml could not be restored: disk full")
+
+
+def test_f_failed_call_leaves_other_staged_files(repo, se):
+    """X14: the index reset after a failed call names ai/approvals.yaml only."""
+    _doc(repo, "prompt", "prompt")
+    (repo / "other.txt").write_text("staged by the operator\n")
+    _git(repo, "add", "other.txt")
+    _hook(repo, "#!/bin/sh\nexit 1\n")
+    code, _ = A.approve(str(repo), U, "prompt", se)
+    assert code == 1
+    assert _git(repo, "diff", "--cached", "--name-only").stdout.split() == ["other.txt"]
+
+
+def test_f_nested_project_does_not_read_the_outer_approvals(repo, se):
+    """X18: a nested project without ai/approvals.yaml does not see the outer project's file."""
+    _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    assert (U, "prompt") in ST.committed_approvals(str(repo))
+    nested = repo / "x"
+    _doc(nested, "prompt", "prompt")
+    assert ST.committed_approvals(str(nested)) == {}
+    missing = ST.prerun_missing(str(nested), se, U)
+    assert any("approval" in m for m in missing)

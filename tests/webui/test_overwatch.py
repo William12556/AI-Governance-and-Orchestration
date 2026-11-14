@@ -749,3 +749,54 @@ def test_d_blocked_detail_only_when_blocked(tmp_path: Path, case, status, detail
     eng = overwatch.Scanner(paths)._read_engine_state()
     assert eng.status == status
     assert eng.blocked_detail == detail
+
+
+# ---------------------------------------------------------------------------
+# change-6d40f0dd: coverage gaps (audit-86c958dd F-03: X05, X09, M7)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("marker, status", [("BLOCKED.md", "blocked"), (".complete", "ship")])
+def test_c_marker_at_the_start_second_counts(tmp_path: Path, marker, status) -> None:
+    """X05: a marker whose mtime equals the record's start second is not earlier than it."""
+    paths = overwatch.resolve_paths(tmp_path)
+    paths.engine_state.mkdir(parents=True)
+    (paths.engine_state / "run.json").write_text(_run_json(os.getpid(), ended=_ENDED, rc=1))
+    marker_path = paths.engine_state / marker
+    marker_path.write_text("# BLOCKED\n" if marker == "BLOCKED.md" else "")
+    t = _started_ts(_STARTED)
+    os.utime(marker_path, (t, t))
+
+    assert overwatch.Scanner(paths)._read_engine_state().status == status
+
+
+@pytest.mark.parametrize("started", ["absent", 5, None, ["2026-11-05T10:00:00+00:00"]])
+def test_c_absent_or_non_string_started_keeps_the_precedence(tmp_path: Path, started) -> None:
+    """X09: without a usable started value the marker age is not checked (design §4.0)."""
+    paths = overwatch.resolve_paths(tmp_path)
+    paths.engine_state.mkdir(parents=True)
+    record = json.loads(_run_json(os.getpid(), ended=_ENDED, rc=1))
+    if started == "absent":
+        del record["started"]
+    else:
+        record["started"] = started
+    (paths.engine_state / "run.json").write_text(json.dumps(record))
+    marker_path = paths.engine_state / "BLOCKED.md"
+    marker_path.write_text("# BLOCKED\n")
+    old = _started_ts(_STARTED) - 3600
+    os.utime(marker_path, (old, old))
+
+    assert overwatch.Scanner(paths)._read_engine_state().status == "blocked"
+
+
+def test_c_fr_02_06_hard_link_is_the_same_file(tmp_path: Path) -> None:
+    """M7: a hard link to the open prompt is the same file; path equality would differ."""
+    prompt = _workspace_with_prompt(tmp_path)
+    link = tmp_path / "hard-link.md"
+    try:
+        os.link(prompt, link)
+    except (OSError, NotImplementedError, AttributeError):
+        pytest.skip("hard links not available")
+    assert os.path.realpath(link) != os.path.realpath(prompt)
+
+    assert _fr_02_06(tmp_path, _run_json(os.getpid(), task_file=str(link))) == []
