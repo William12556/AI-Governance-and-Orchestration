@@ -5,7 +5,7 @@ issue_info:
   id: "issue-d4f527e7"
   title: "Engine runtime hygiene: non-atomic writes, audit archive overwrite, BLOCKED log order, stale blocked detail in Overwatch, tracking by path string, non-regular evidence documents"
   date: "2026-11-14"
-  status: "open"
+  status: "resolved"  # change-d4f527e7 implemented 2026-11-14 (P03.7)
   severity: "low"
   type: "defect"
   iteration: 1
@@ -112,6 +112,9 @@ version_history:
   - version: "1.0"
     date: "2026-11-14"
     changes: ["Initial issue for Stage C work item 5B-2"]
+  - version: "1.1"
+    date: "2026-11-14"
+    changes: ["Status resolved: change-d4f527e7 implemented (P03.7)"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

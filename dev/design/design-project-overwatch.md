@@ -187,7 +187,12 @@ unreadable record, or `task.md` without a record → `unknown`; otherwise
 count only when their modification time is not earlier than the record's
 `started` time (whole seconds); an older marker belongs to an earlier run
 and the status is `ended`. When `started` is absent or cannot be parsed,
-the precedence above applies unchanged (change-86c958dd).
+the precedence above applies unchanged (change-86c958dd). The content of
+`BLOCKED.md` is kept as blocked detail only when the status is `blocked`, so
+the page does not show an earlier run's failure text beside `ended` or
+`running`. `overwatch.html` and `ai/dashboard-alerts.md` are written to a
+temporary file and moved into place, so a reader never sees a partial file
+(change-d4f527e7; audit-86c958dd F-01, audit-caab2052 L-10).
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -526,6 +531,7 @@ bounded interval, not an open-ended dual-maintenance commitment.
 | 0.8 | 2026-11-05 | §1.0 and §3.2: "unmodified" removed or limited to the FR-01 port; §7.1 engine status values and styles (change-b8a6c445; audit-b8a6c445 F-06) |
 | 0.9 | 2026-11-06 | §4.0: marker age against the run record's start; §5.0: FR-02-06 only while running, by file identity (change-86c958dd) |
 | 0.10 | 2026-11-14 | §4.0 and §12.0: "reused unmodified" limited to the FR-01 port, `EngineState` named with its added fields; §5.0: FR-02-06 qualified as govwatch FR-02-06 (report-0fce4169 F1, F2) |
+| 0.11 | 2026-11-14 | §4.0: blocked detail only when the status is blocked; atomic output writes (change-d4f527e7) |
 
 ---
 

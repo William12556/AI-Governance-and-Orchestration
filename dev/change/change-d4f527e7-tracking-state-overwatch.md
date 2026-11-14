@@ -5,7 +5,7 @@ change_info:
   id: "change-d4f527e7"
   title: "Engine runtime hygiene: atomic writes, audit archive without overwrite, BLOCKED log order, blocked detail only when blocked, tracking by file identity, non-regular evidence documents skipped (Stage C work item 5B-2)"
   date: "2026-11-14"
-  status: "approved"  # approver: operator (one-time session exemption, 2026-11-14)
+  status: "implemented"  # approver: operator (one-time session exemption, 2026-11-14); implemented 2026-11-14
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -195,7 +195,14 @@ version_history:
     changes: ["Initial change record"]
   - version: "1.1"
     date: "2026-11-14"
-    changes: ["Approved as drafted. Approver: operator (one-time session exemption, 2026-11-14)"]
+    changes: ["Approved as drafted. Approver: operator (one-time session exemption, 2026-11-14). Test file list amended before implementation: T3, T7 and T8 in tests/engine/test_stages.py"]
+  - version: "1.2"
+    date: "2026-11-14"
+    changes:
+      - "Implemented on branch claude/blissful-keller-mn2avc from a5a3656: source 98214f8, tests 3c3b870 (report-d4f527e7 v1.0). Status implemented"
+      - "788 passed, 2 skipped at the unit baseline; 811 passed, 4 skipped after (Linux; 23 new cases, 2 new skips: root and case-sensitive file system). Mutations M1 to M17 caught"
+      - "linter.py dev 0 errors, 113 warnings; protocol_checker.py dev 0 errors, 20 warnings"
+      - "design-14e05e35 v1.31 §8.4, §11.0; design-ael-orchestrator v0.13 §4.1; design-project-overwatch v0.11 §4.0; guide-engine-operations v1.34 §2.0, §5.0. The guide-audit-loop copies needed no edit"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

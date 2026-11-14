@@ -170,10 +170,12 @@ All paths relative to `state_dir` (`ai/state/` by default, per `config.yaml`
 | `context-budget.md` | `write_context_report` (startup) | Strategic Domain (T04 authoring precondition) | Context window, thresholds, headroom, guidance |
 | `run.json` | `main_async` (start of the run, and in the final `finally`) | Overwatch (engine status, govwatch FR-02-06 (requirements-govwatch, closed)) | Run record: mode, task file, pid, start, end, exit code, or null with `error` naming the exception type when the run ends with an exception (change-86c958dd); written atomically; protected from worker writes (change-b8a6c445) |
 | `audit-index.md` | Strategic Domain (pre-loop, audit runs only) | `run_phase`, `run_loop` (item injection, scope lock) | Checklist of audit items; presence selects audit recipe pair |
-| `audit-report.md` | Tactical Domain, via MCP append; initialised zero-byte by `main_async` | `_archive_audit_artifacts` | Accumulated audit findings; append-only guarded (§5.7) |
+| `audit-report.md` | Tactical Domain, via MCP append; initialised zero-byte by `main_async` | `_archive_audit_artifacts` | Accumulated audit findings; append-only guarded (§5.7). After SHIP it is copied with the index to `<project root>/ai/workspace/audit/`; an existing archive is not overwritten, a later one takes the suffix `-2`, `-3`, … (change-d4f527e7) |
 | `ael_YYYYMMDD-HHMMSS.LOG` | `setup_logging` | Strategic Domain (post-mortem) | Structured DEBUG/INFO/WARNING/ERROR log; final line always `engine end rc=N` |
 
 Not cleared by reset: `engine_*.LOG` and `context-budget.md`.
+
+State files written by `write_state` are written to a temporary file in the state directory and moved into place with `os.replace`, as `run.json` is; a reader sees the previous or the new content. The name itself is replaced, so a symlink at a state file name is not written through (change-d4f527e7; audit-caab2052 L-10).
 
 ### 4.2 Configuration Schema
 
@@ -701,6 +703,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | 0.10 | 2026-11-06 | §7.0: per-model entry is tier 2, before the live query (tier 3) (change-86c958dd) |
 | 0.11 | 2026-11-06 | §4.1: `run.json` error field (change-86c958dd; audit-86c958dd F-05) |
 | 0.12 | 2026-11-14 | §4.1: FR-02-06 qualified as govwatch FR-02-06 (report-0fce4169 F2); §3.1, §4.2 and §5.1: the live query is tier 3 and the per-model entry tier 2 (report-53b0e016 F-01; §3.1 and §4.2 found in the unit 2 review) |
+| 0.13 | 2026-11-14 | §4.1: atomic state writes; audit archive below the project root without overwrite (change-d4f527e7) |
 
 ---
 
