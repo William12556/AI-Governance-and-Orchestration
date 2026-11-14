@@ -105,7 +105,7 @@ graph TD
     T04 --> MAIN
     CFG --> MAIN
     MAIN --> CTXR
-    CTXR -->|tier 2 query| OMLXADMIN
+    CTXR -->|tier 3 query| OMLXADMIN
     MAIN --> MCPC
     MCPC -->|stdio| MCPS
     MAIN --> RUNLOOP
@@ -202,7 +202,7 @@ Derived from `ai/config.yaml`. CLI flags override where noted (§8.1).
 | `context.context_window` | int \| null | null | Tier 1 explicit override (§7.0) |
 | `context.budget_warn_pct` | float | 0.80 | Warn threshold fraction |
 | `context.budget_abort_pct` | float | 0.95 | Abort threshold fraction |
-| `context.model_context_windows.<model>` | int | — | Tier 3 per-model override |
+| `context.model_context_windows.<model>` | int | — | Tier 2 per-model override |
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -700,7 +700,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | 0.9 | 2026-11-05 | §4.1: `run.json` run record (change-b8a6c445; audit-b8a6c445 F-06) |
 | 0.10 | 2026-11-06 | §7.0: per-model entry is tier 2, before the live query (tier 3) (change-86c958dd) |
 | 0.11 | 2026-11-06 | §4.1: `run.json` error field (change-86c958dd; audit-86c958dd F-05) |
-| 0.12 | 2026-11-14 | §4.1: FR-02-06 qualified as govwatch FR-02-06 (report-0fce4169 F2); §5.1: the live query is tier 3 (report-53b0e016 F-01) |
+| 0.12 | 2026-11-14 | §4.1: FR-02-06 qualified as govwatch FR-02-06 (report-0fce4169 F2); §3.1, §4.2 and §5.1: the live query is tier 3 and the per-model entry tier 2 (report-53b0e016 F-01; §3.1 and §4.2 found in the unit 2 review) |
 
 ---
 
