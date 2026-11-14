@@ -111,9 +111,6 @@ gov_version() {
 }
 
 # --- Workspace folders (change-e58fd295, FR-01-04) ---------------------------
-# Creates each ai/workspace/<folder> listed under workspace_folders: in the
-# governance model manifest when absent. Existing paths are never changed; a
-# non-directory in the way is reported and left alone.
 # Prints the folders declared under workspace_folders: in a manifest, one per
 # line. Reads a block list ('- name' lines) and a single-line flow list
 # ('workspace_folders: [a, "b"]'); a flow list that does not close on the same
@@ -123,7 +120,7 @@ workspace_folders_of() {
         /^workspace_folders:[[:space:]]*\[.*\]/ {
             s = $0
             sub(/^workspace_folders:[[:space:]]*\[/, "", s)
-            sub(/\][^\]]*$/, "", s)
+            sub(/\].*$/, "", s)
             n = split(s, a, ",")
             for (i = 1; i <= n; i++) {
                 x = a[i]
@@ -144,6 +141,9 @@ workspace_folders_of() {
     ' "$1"
 }
 
+# Creates each ai/workspace/<folder> listed under workspace_folders: in the
+# governance model manifest when absent. Existing paths are never changed; a
+# non-directory in the way is reported and left alone.
 create_workspace_folders() {
     local manifest="$1" workspace="$2" d
     [[ -f "${manifest}" ]] || { echo "workspace: no manifest at ${manifest}; folders not created"; return 0; }
