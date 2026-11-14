@@ -5,7 +5,7 @@ issue_info:
   id: "issue-6d40f0dd"
   title: "Test coverage gaps: surviving mutations of the follow-up audits, the repo fixture's signing configuration, and the re-measurement of audit-caab2052 §8.0"
   date: "2026-11-14"
-  status: "open"
+  status: "resolved"  # change-6d40f0dd implemented 2026-11-14 (P03.7)
   severity: "low"
   type: "defect"
   iteration: 1
@@ -86,6 +86,9 @@ version_history:
   - version: "1.0"
     date: "2026-11-14"
     changes: ["Initial issue for Stage C work item 6"]
+  - version: "1.1"
+    date: "2026-11-14"
+    changes: ["Status resolved: change-6d40f0dd implemented (P03.7)"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

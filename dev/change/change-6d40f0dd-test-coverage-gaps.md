@@ -5,7 +5,7 @@ change_info:
   id: "change-6d40f0dd"
   title: "Test coverage gaps: tests for the surviving mutations of the follow-up audits, repo fixture without commit signing, re-measured audit-caab2052 §8.0 with tests for pure helpers (Stage C work item 6)"
   date: "2026-11-14"
-  status: "approved"  # approver: operator (one-time session exemption, 2026-11-14)
+  status: "implemented"  # approver: operator (one-time session exemption, 2026-11-14); implemented 2026-11-14
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -122,6 +122,13 @@ version_history:
   - version: "1.1"
     date: "2026-11-14"
     changes: ["Approved as drafted. Approver: operator (one-time session exemption, 2026-11-14)"]
+  - version: "1.2"
+    date: "2026-11-14"
+    changes:
+      - "Implemented on branch claude/blissful-keller-mn2avc from 32d1a6a: tests 0c7595c (report-6d40f0dd v1.0). Status implemented"
+      - "824 passed, 4 skipped at the unit baseline; 857 passed, 4 skipped after (Linux; 33 new cases). 14 mutations, each failing its named test"
+      - "X12 is tested with a stand-in for the commit step, because git passes hook stdout to its stderr (report-6d40f0dd §6.0 item 1)"
+      - "linter.py dev 0 errors, 113 warnings; protocol_checker.py dev 0 errors, 20 warnings. Remaining §8.0 gaps registered in dev/task.md"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
