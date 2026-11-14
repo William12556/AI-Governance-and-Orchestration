@@ -332,7 +332,7 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 
 | Condition | Behaviour |
 |---|---|
-| Missing or invalid manifest or configuration | Stop before any model call; message names file and field (NFR-04). For `ai/config.yaml`: a file that cannot be read, invalid YAML, a top level that is not a mapping, a missing `loop` or `loop.state_dir`, a `loop.max_iterations` that is not a positive integer without `--max-iterations`, an invalid timeout, a `max_tokens` that is not a positive integer, or a gate `timeout_seconds` override that is not a positive number gives `configuration error (<file>): <field>: <reason>` and exit 1 before any state is written, in reset mode too for the file and `loop` checks (change-b8c75bac). |
+| Missing or invalid manifest or configuration | Stop before any model call; message names file and field (NFR-04). For `ai/config.yaml`: a file that cannot be read, invalid YAML, a top level that is not a mapping, a missing `loop` or `loop.state_dir`, a `loop.max_iterations` that is not a positive integer without `--max-iterations`, an invalid timeout, a `max_tokens` that is not a positive integer, or a gate `timeout_seconds` override that is not a positive number gives `configuration error (<file>): <field>: <reason>` and exit 1 before any state is written, in reset mode too for the file and `loop` checks (change-b8c75bac). The same holds for YAML nested too deeply to load (`invalid YAML: nesting too deep`), for a `context.model_context_windows` that is neither null nor a mapping, and for an entry of it that is not a positive integer; a null `model_context_windows` is treated as empty (change-bae631c7). |
 | Missing API key environment variable | Stop at startup naming the variable; the value is never logged (NFR-05). |
 | Keychain lookup fails (not macOS, `security` missing, non-zero exit, timeout, output not valid text, empty item) | Stop at startup naming the provider and service; the message holds the exit code at most, never the command output (NFR-05; change-7d953510). |
 | Provider not ready within the readiness timeout | `BLOCKED.md`, as today. |
@@ -351,6 +351,7 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 | Write call in an audit run whose path or content is not a string | The `audit-report.md` check ignores non-string paths and treats non-string content as empty; it never raises (change-b8c75bac). |
 | Compile at the edit-failure or post-write check raises (other than a timeout) | Warning logged; the file is not checked; run continues. The edit-failure check runs only for a dispatched call (change-b8c75bac). |
 | Closing the MCP client raises (for example a late answer after a timeout) | Warning printed; the run's exit status is unchanged (change-5e8aea4f). |
+| An MCP server fails to connect, or two servers offer a tool of the same name | Warning on the console and in the engine log; the run continues without that server, or with the tool of the server connected last (change-bae631c7; audit-caab2052 L-13). |
 | Run record (`run.json`) cannot be built or written at start or end | Warning `run record not written` logged; the run continues and its exit code is unchanged (change-b8a6c445; change-86c958dd). |
 | Run ends with an exception after the run record was started | The end record has `rc` null and `error` naming the exception type; the exception propagates (change-86c958dd). |
 | Provider error text on the completion or readiness path | A key from `api_key_env` or `api_key_keychain` is replaced by `API-KEY-REDACTED` before the text is logged, printed, written to `BLOCKED.md` or raised. Literal keys (kind `omlx` or a local `base_url`) are not secrets and are not replaced (NFR-05; change-5e8aea4f). |
@@ -453,6 +454,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.30 | 2026-11-14 | §11.0: deeply nested configuration YAML and `context.model_context_windows` checks; MCP connection failures and duplicate tool names reported in the engine log (change-bae631c7) |
 | 1.29 | 2026-11-14 | §12.0 Gates row: "syntax gate unchanged" limited to V-02; tests of change-a5bd4fe1 named (report-0fce4169 F3) |
 | 1.28 | 2026-11-07 | §8.4: known limits of tracking and the `prompt-` prefix (audit-4b0a5592 F-01 to F-03). |
 | 1.27 | 2026-11-07 | §8.3: approvals read with `HEAD:./ai/approvals.yaml`; `approve.py` restores the file after a failed commit. §8.4: tracking by location whatever the name or file type (change-4b0a5592). |

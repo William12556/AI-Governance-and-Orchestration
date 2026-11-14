@@ -5,7 +5,7 @@ change_info:
   id: "change-bae631c7"
   title: "Engine runtime hygiene: keep the console prefix, report deeply nested configuration YAML, validate model_context_windows, report MCP catalogue problems in the log, remove dead code (Stage C work item 5B-1)"
   date: "2026-11-14"
-  status: "approved"  # approver: operator (one-time session exemption, 2026-11-14)
+  status: "implemented"  # approver: operator (one-time session exemption, 2026-11-14); implemented 2026-11-14
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -174,6 +174,13 @@ version_history:
   - version: "1.1"
     date: "2026-11-14"
     changes: ["Approved as drafted. Approver: operator (one-time session exemption, 2026-11-14)"]
+  - version: "1.2"
+    date: "2026-11-14"
+    changes:
+      - "Implemented on branch claude/blissful-keller-mn2avc from 90f98a8: engine f176b07, tests 962238e (report-bae631c7 v1.0). Status implemented"
+      - "766 passed, 2 skipped at the unit baseline; 787 passed, 2 skipped after (Linux; 21 new cases). Mutations M1 to M9 caught. ruff F: no finding"
+      - "linter.py dev 0 errors, 113 warnings; protocol_checker.py dev 0 errors, 20 warnings"
+      - "design-14e05e35 v1.30 §11.0; guide-engine-operations v1.33 §3.0"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
