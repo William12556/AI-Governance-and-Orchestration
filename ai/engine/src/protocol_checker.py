@@ -177,7 +177,6 @@ def check_uuid_chain(docs: list[WorkspaceDoc]) -> list[Finding]:
     All documents in a workflow chain must share the same 8-char UUID.
     """
     findings: list[Finding] = []
-    by_id = {d.doc_id: d for d in docs}
 
     for doc in docs:
         if doc.schema_type not in _COUPLING_PAIRS:

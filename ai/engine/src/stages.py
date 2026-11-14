@@ -295,7 +295,7 @@ def scan(project_root: str, manifest) -> Report:
             warnings.append(f"uncommitted changes to {APPROVALS_FILE} are ignored; "
                             f"record approvals with ai/engine/src/approve.py")
     except NotAGitRepository as e:
-        approvals = set()
+        approvals = {}  # change-bae631c7 (audit-caab2052 L-16): the declared type
         warnings.append(str(e))
     items: dict[str, WorkItem] = {}
     for uuid, docs in _documents(project_root, manifest).items():

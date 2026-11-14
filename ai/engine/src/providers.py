@@ -643,7 +643,7 @@ def build_role_bindings(config: dict, args: Any = None,
         for role in ROLES:
             model = cli_role[role] or omlx_cfg.get(f"{role}_model") or default
             if not model:
-                raise ConfigError(f"omlx.default_model: required when roles: is absent")
+                raise ConfigError("omlx.default_model: required when roles: is absent")
             bindings[role] = Binding(role, "omlx", provider_for("omlx"), model)
         return bindings
 

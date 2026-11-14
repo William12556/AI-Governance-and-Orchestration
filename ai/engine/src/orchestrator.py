@@ -71,7 +71,6 @@ from scope import is_write_tool, written_targets as _written_targets
 from rich.console import Console
 from rich.markup import escape
 from rich.panel import Panel
-from rich.rule import Rule
 
 console = Console(highlight=False)
 
@@ -520,8 +519,8 @@ async def _completion_with_retry(
                 "completion call failed (attempt %d/%d): %s",
                 attempt, max_retries, err_text,
             )
-            # change-711a57d5 (audit-14e05e35 L-09): HTTP 400/401/403 end BLOCKED
-            # at once; a retry cannot succeed.
+            # change-711a57d5 (audit-14e05e35 L-09): HTTP 400, 401, 403 and 404
+            # (404 since change-86c958dd) end BLOCKED at once; a retry cannot succeed.
             _status = getattr(e, "status_code", None)
             if _status in _NON_RETRYABLE_STATUS:
                 tb = _redact(provider, traceback.format_exc())
@@ -534,13 +533,13 @@ async def _completion_with_retry(
                 )
                 write_state(state_dir, "BLOCKED.md", blocked_msg)
                 console.print(
-                    f"[red][engine] BLOCKED: completion call failed with HTTP {_status} "
+                    f"[red]\\[engine] BLOCKED: completion call failed with HTTP {_status} "
                     f"(not retried)[/red]"
                 )
                 raise RuntimeError(f"Completion call failed: {err_text}") from e
             if attempt < max_retries:
                 console.print(
-                    f"[yellow][engine] completion error (attempt {attempt}/{max_retries}), "
+                    f"[yellow]\\[engine] completion error (attempt {attempt}/{max_retries}), "
                     f"retrying in {backoff:.1f}s: {err_text}[/yellow]"
                 )
                 await asyncio.sleep(backoff)
@@ -557,7 +556,7 @@ async def _completion_with_retry(
                 )
                 write_state(state_dir, "BLOCKED.md", blocked_msg)
                 console.print(
-                    f"[red][engine] BLOCKED: completion call failed after {max_retries} attempts[/red]"
+                    f"[red]\\[engine] BLOCKED: completion call failed after {max_retries} attempts[/red]"
                 )
                 raise RuntimeError(f"Completion call failed: {err_text}") from last_error
 
@@ -597,13 +596,13 @@ def _archive_audit_artifacts(state_dir: str, task_path: str | None, log: logging
             shutil.copy2(src, dst)
             archived += 1
             log.info("archive audit: %s -> %s", src, dst)
-            console.print(f"[green][engine] audit archived: {escape(dst)}[/green]")
+            console.print(f"[green]\\[engine] audit archived: {escape(dst)}[/green]")
         else:
             log.warning("archive audit: %s not found — skipping", src)
 
     if archived:
         console.print(
-            f"[green][engine] {archived} audit artifact(s) archived to {escape(output_dir)}[/green]"
+            f"[green]\\[engine] {archived} audit artifact(s) archived to {escape(output_dir)}[/green]"
         )
 
 
@@ -631,9 +630,34 @@ def _load_config(path: str) -> dict:
         raise ConfigError(f"invalid YAML: {e.problem} at line {e.problem_mark.line + 1}") from None
     except yaml.YAMLError:
         raise ConfigError("invalid YAML") from None
+    except RecursionError:
+        # change-bae631c7 (audit-b8c75bac F-05): deeply nested YAML
+        raise ConfigError("invalid YAML: nesting too deep") from None
     if not isinstance(config, dict):
         raise ConfigError("top level must be a mapping")
     return config
+
+
+def _validate_context_windows(config: dict) -> None:
+    """
+    Check context.model_context_windows (change-bae631c7, audit-86c958dd F-02).
+
+    A null mapping is treated as empty. Raises ConfigError for a value that is
+    not a mapping, or for an entry that is not a positive integer (bool
+    excluded). Called before any state is written (NFR-04).
+    """
+    ctx_cfg = config.get("context")
+    if not isinstance(ctx_cfg, dict):
+        return
+    windows = ctx_cfg.get("model_context_windows")
+    if windows is None:
+        return
+    if not isinstance(windows, dict):
+        raise ConfigError("context.model_context_windows: must be a mapping")
+    for model_name, value in windows.items():
+        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+            raise ConfigError(
+                f"context.model_context_windows.{model_name}: must be a positive integer")
 
 
 def _substitute_project_root(config: dict) -> dict:
@@ -731,8 +755,8 @@ def reset_state(state_dir: str) -> int:
     engine-mcp's reset_engine as a spurious error on any project that had not yet run.
     """
     if not os.path.isdir(state_dir):
-        console.print(f"[yellow][engine] reset: state directory not present: {state_dir}[/yellow]")
-        console.print("[green][engine] reset: nothing to clear[/green]")
+        console.print(f"[yellow]\\[engine] reset: state directory not present: {state_dir}[/yellow]")
+        console.print("[green]\\[engine] reset: nothing to clear[/green]")
         return 0
     removed, failed = [], []
     for name in _RESET_FILES:
@@ -740,14 +764,14 @@ def reset_state(state_dir: str) -> int:
         if os.path.lexists(path):  # change-82dbf16a iteration 5 (F4-01): symlinks and directories too
             (removed if _remove_state_path(path) else failed).append(name)
     if failed:
-        console.print(f"[red][engine] reset: could not remove: {escape(', '.join(failed))}[/red]")
+        console.print(f"[red]\\[engine] reset: could not remove: {escape(', '.join(failed))}[/red]")
         return 1
     if removed:
-        console.print(f"[green][engine] reset: removed {len(removed)} state file(s)[/green]")
+        console.print(f"[green]\\[engine] reset: removed {len(removed)} state file(s)[/green]")
         for name in removed:
             console.print(f"[dim]  {name}[/dim]")
     else:
-        console.print("[yellow][engine] reset: state directory already clean[/yellow]")
+        console.print("[yellow]\\[engine] reset: state directory already clean[/yellow]")
     return 0
 
 
@@ -790,7 +814,8 @@ def resolve_context_window(model_name: str, config: dict,
 
     # change-86c958dd (operator decision 2026-11-05): per-model entry before the live query
     # Tier 2: Per-model override from config
-    model_overrides = ctx_cfg.get("model_context_windows", {})
+    # change-bae631c7 (report-86c958dd §6.0): a null mapping is treated as empty
+    model_overrides = ctx_cfg.get("model_context_windows") or {}
     if model_name in model_overrides:
         ctx = model_overrides[model_name]
         log.info("context window: %d (tier 2: config per-model override for '%s')", ctx, model_name)
@@ -997,10 +1022,10 @@ def archive_prior_logs(state_dir: str, archive_dir: str | None) -> int:
             shutil.copy2(src, dst)
             copied += 1
         except Exception as exc:
-            console.print(f"[yellow][engine] log archive: could not copy {escape(name)}: {escape(str(exc))}[/yellow]")
+            console.print(f"[yellow]\\[engine] log archive: could not copy {escape(name)}: {escape(str(exc))}[/yellow]")
 
     if copied:
-        console.print(f"[dim][engine] log archive: {copied} prior log(s) -> {escape(archive_dir)}[/dim]")
+        console.print(f"[dim]\\[engine] log archive: {copied} prior log(s) -> {escape(archive_dir)}[/dim]")
     return copied
 
 
@@ -1268,8 +1293,8 @@ async def run_phase(
 
     label = f"{phase_label} " if phase_label else ""
     console.rule(f"[blue]{label or 'engine'} — {escape(model)}[/blue]", style="blue")
-    console.print(f"[blue][engine] tools:  {len(tools)}[/blue]")
-    console.print(f"[blue][engine] task:   {escape(task[:80])}{'...' if len(task) > 80 else ''}[/blue]")
+    console.print(f"[blue]\\[engine] tools:  {len(tools)}[/blue]")
+    console.print(f"[blue]\\[engine] task:   {escape(task[:80])}{'...' if len(task) > 80 else ''}[/blue]")
     log.info("phase start phase=%s model=%s tools=%d task=%s", phase_label or "?", model, len(tools), task)
 
     _phase_start = time.monotonic()  # F28: phase wall-clock cap
@@ -1285,7 +1310,7 @@ async def run_phase(
         # the reviewer issues REVISE, and the next loop iteration retries it
         # under a fresh cap rather than aborting the entire run.
         if phase_duration_seconds is not None and (time.monotonic() - _phase_start) > phase_duration_seconds:
-            console.print(f"\n[yellow][engine] phase wall-clock cap ({phase_duration_seconds/60:.0f} min) reached[/yellow]")
+            console.print(f"\n[yellow]\\[engine] phase wall-clock cap ({phase_duration_seconds/60:.0f} min) reached[/yellow]")
             log.warning("phase wall-clock cap (%.0fs) reached at iteration %d", phase_duration_seconds, iteration)
             # change-a2f9c4d1: persist a deliverable manifest before returning
             if is_worker_phase:
@@ -1300,7 +1325,6 @@ async def run_phase(
             status, fraction = check_context_budget(
                 estimated, context_window, budget_warn_pct, budget_abort_pct
             )
-            pct_str = f"{fraction*100:.1f}%"
             if status == "abort":
                 console.print(_ctx_bar(estimated, context_window, status))
                 console.print("[red]  budget exceeded — aborting phase[/red]")
@@ -1359,7 +1383,7 @@ async def run_phase(
                 "iteration %d: %d tool calls exceeds cap %d — truncating",
                 iteration, len(tool_calls), max_tool_calls_per_iter,
             )
-            console.print(f"[yellow][engine] tool call cap ({max_tool_calls_per_iter}) exceeded "
+            console.print(f"[yellow]\\[engine] tool call cap ({max_tool_calls_per_iter}) exceeded "
                           f"({len(tool_calls)} calls) — truncating[/yellow]")
             tool_calls = tool_calls[:max_tool_calls_per_iter]
 
@@ -1392,7 +1416,7 @@ async def run_phase(
                 )
                 write_state(state_dir, "BLOCKED.md", blocked_msg)
                 log.error("BLOCKED: worker final response contains unparsed tool markers")
-                console.print("[red][engine] BLOCKED: worker final response malformed[/red]")
+                console.print("[red]\\[engine] BLOCKED: worker final response malformed[/red]")
                 return 1, "", set()
             console.print(Panel(escape(content), title="[green]response[/green]", border_style="green"))
             # F13: only worker phase writes work-summary.txt; review phase preserves it
@@ -1420,7 +1444,7 @@ async def run_phase(
                 _args_msg = (f"arguments for tool '{tc['name']}' must be a JSON object "
                              f"of named arguments, got {_arg_type}")
                 log.warning("malformed tool arguments tool=%s type=%s", tc["name"], _arg_type)
-                console.print(f"[red][engine] malformed tool arguments: {escape(tc['name'])}[/red]")
+                console.print(f"[red]\\[engine] malformed tool arguments: {escape(tc['name'])}[/red]")
                 result = f"Error: {_args_msg}"
                 _scope_err = _args_msg
                 _report_err = None
@@ -1442,16 +1466,16 @@ async def run_phase(
                 _report_err = (_validate_audit_report_write(tc["name"], tc["arguments"], state_dir)
                                if not _refusal else None)
                 if _refusal:
-                    console.print(f"[red][engine] tool refused: {escape(_refusal[:200])}[/red]")
+                    console.print(f"[red]\\[engine] tool refused: {escape(_refusal[:200])}[/red]")
                     result = f"Error: {_refusal}"
                     _scope_err = _refusal
                 elif _scope_err:
                     log.warning("scope violation: %s", _scope_err)
-                    console.print(f"[red][engine] scope violation: {escape(_scope_err[:200])}[/red]")
+                    console.print(f"[red]\\[engine] scope violation: {escape(_scope_err[:200])}[/red]")
                     result = f"Error: {_scope_err}"
                 elif _report_err:
                     log.warning("audit-report.md overwrite blocked: %s", _report_err)
-                    console.print(f"[red][engine] audit-report.md overwrite blocked[/red]")
+                    console.print("[red]\\[engine] audit-report.md overwrite blocked[/red]")
                     result = _report_err
                 else:
                     result = await mcp.call_tool(tc["name"], tc["arguments"])
@@ -1536,7 +1560,7 @@ async def run_phase(
                     write_state(state_dir, "BLOCKED.md", blocked_msg)
                     log.error("BLOCKED: repeated identical failed call (%d attempts)", _fail_n)
                     console.print(
-                        f"[red][engine] BLOCKED: repeated identical failed call "
+                        f"[red]\\[engine] BLOCKED: repeated identical failed call "
                         f"({_fail_n} attempts)[/red]"
                     )
                     return 1, "", set()
@@ -1565,7 +1589,7 @@ async def run_phase(
                     _ep_path = ""
                 log.warning("edit pattern mismatch tool=%s path=%s", tc["name"], _ep_path)
                 console.print(
-                    f"[yellow][engine] edit pattern mismatch: {escape(tc['name'])}: "
+                    f"[yellow]\\[engine] edit pattern mismatch: {escape(tc['name'])}: "
                     f"{escape(result[:200])}[/yellow]"
                 )
                 _ep_msg = (
@@ -1610,7 +1634,7 @@ async def run_phase(
             elif _is_mcp_error(result):
                 mcp_error_count += 1
                 console.print(
-                    f"[red][engine] MCP error "
+                    f"[red]\\[engine] MCP error "
                     f"({mcp_error_count}/{mcp_error_threshold}): "
                     f"{escape(tc['name'])}: {escape(result[:200])}[/red]"
                 )
@@ -1639,7 +1663,7 @@ async def run_phase(
                         "BLOCKED: MCP error threshold %d reached", mcp_error_threshold
                     )
                     console.print(
-                        f"[red][engine] BLOCKED: MCP error threshold "
+                        f"[red]\\[engine] BLOCKED: MCP error threshold "
                         f"({mcp_error_threshold}) reached[/red]"
                     )
                     return 1, "", set()
@@ -1667,7 +1691,7 @@ async def run_phase(
                             err = proc.stderr.strip()
                             log.warning("syntax error in %s: %s", _py_path, err)
                             console.print(
-                                f"[red][engine] syntax error: {escape(_py_path)}: "
+                                f"[red]\\[engine] syntax error: {escape(_py_path)}: "
                                 f"{escape(err[:200])}[/red]"
                             )
                             _corrective += (
@@ -1686,14 +1710,14 @@ async def run_phase(
         if os.path.exists(os.path.join(state_dir, "work-complete.txt")):
             log.info("work-complete.txt detected — phase complete")
             console.print()
-            console.print("[green][engine] work-complete detected[/green]")
+            console.print("[green]\\[engine] work-complete detected[/green]")
             # change-a2f9c4d1: persist a deliverable manifest before returning
             if is_worker_phase:
                 _synthesize_work_summary(state_dir, _written_paths, "work-complete signal", log)
             _read_paths = {os.path.abspath(p) for p in _read_counts.keys()} if not is_worker_phase else set()
             return 0, "", _read_paths
 
-    console.print(f"\n[red][engine] max iterations ({max_iterations}) reached[/red]")
+    console.print(f"\n[red]\\[engine] max iterations ({max_iterations}) reached[/red]")
     log.warning("max iterations %d reached", max_iterations)
     _read_paths = {os.path.abspath(p) for p in _read_counts.keys()} if not is_worker_phase else set()
     # change-a2f9c4d1: iteration exhaustion is a budget boundary, not a failure.
@@ -1841,7 +1865,7 @@ def run_preflight_check(task: str, log: logging.Logger) -> str:
     log.info("preflight: %d criteria, %d satisfied, %d remaining, %d unchecked",
              len(criteria), satisfied, remaining, unchecked)
     console.print(
-        f"[dim][engine] pre-flight: {len(criteria)} criteria — "
+        f"[dim]\\[engine] pre-flight: {len(criteria)} criteria — "
         f"{satisfied} satisfied, {remaining} remaining, {unchecked} unchecked[/dim]"
     )
     return summary
@@ -1858,7 +1882,7 @@ def _run_syntax_gate(state_dir: str, log: logging.Logger, project_root: str = ""
     if block:
         status = G.gate_status(block)
         style = "dim" if status == "PASS" else "yellow"
-        console.print(f"[{style}][engine] syntax gate: {status} ({count} files)[/{style}]")
+        console.print(f"[{style}]\\[engine] syntax gate: {status} ({count} files)[/{style}]")
     return block
 
 
@@ -1891,10 +1915,10 @@ def _run_pytest_gate(state_dir: str, log: logging.Logger, project_root: str,
     status = G.gate_status(block)
     if status == "PASS":
         log.info("pytest gate: %d target(s), status=%s", len(targets), status)
-        console.print(f"[dim][engine] pytest gate: {status} ({len(targets)} targets)[/dim]")
+        console.print(f"[dim]\\[engine] pytest gate: {status} ({len(targets)} targets)[/dim]")
     else:
         log.warning("pytest gate: %d target(s), status=%s", len(targets), status)
-        console.print(f"[yellow][engine] pytest gate: {status} ({len(targets)} targets)[/yellow]")
+        console.print(f"[yellow]\\[engine] pytest gate: {status} ({len(targets)} targets)[/yellow]")
     return block
 
 
@@ -1911,7 +1935,7 @@ def _run_command_gate(name: str, spec: dict, state_dir: str, log: logging.Logger
     block = G.run_command_gate(name, spec, targets, project_root, log)
     status = G.gate_status(block)
     style = "dim" if status == "PASS" else "yellow"
-    console.print(f"[{style}][engine] {escape(name)} gate: {status}[/{style}]")
+    console.print(f"[{style}]\\[engine] {escape(name)} gate: {status}[/{style}]")
     return block
 
 
@@ -2122,7 +2146,7 @@ async def run_loop(
                     "# BLOCKED\n\nState files could not be removed at loop start: "
                     f"{', '.join(_not_cleared)}. Remove them by hand.\n")
         log.error("BLOCKED: state files could not be removed: %s", ", ".join(_not_cleared))
-        console.print(f"[red][engine] BLOCKED: state files could not be removed: "
+        console.print(f"[red]\\[engine] BLOCKED: state files could not be removed: "
                       f"{escape(', '.join(_not_cleared))}[/red]")
         return 1
 
@@ -2145,7 +2169,7 @@ async def run_loop(
         i += 1
         # F10: Duration-limit exit returns distinct code and writes .timeout
         if deadline and time.monotonic() > deadline:
-            console.print("[yellow][engine] duration limit reached — exiting[/yellow]")
+            console.print("[yellow]\\[engine] duration limit reached — exiting[/yellow]")
             log.info("duration limit reached at loop iteration %d", i)
             write_state(state_dir, ".timeout", f"TIMEOUT: iteration {i}")
             return 2  # Distinct non-zero code for timeout
@@ -2162,13 +2186,13 @@ async def run_loop(
             if not sys.stdin.isatty():
                 log.info("max iterations reached, stdin is not a terminal — declining to continue")
                 console.print(
-                    f"[yellow][engine] Continue for another {max_iterations} iteration(s)? "
+                    f"[yellow]\\[engine] Continue for another {max_iterations} iteration(s)? "
                     f"[y/N]: N (non-interactive)[/yellow]"
                 )
                 answer = "n"
             else:
                 try:
-                    console.print(f"[yellow][engine] Continue for another {max_iterations} iteration(s)? [y/N]: [/yellow]", end="")
+                    console.print(f"[yellow]\\[engine] Continue for another {max_iterations} iteration(s)? [y/N]: [/yellow]", end="")
                     answer = input().strip().lower()
                 except (EOFError, KeyboardInterrupt):
                     answer = "n"
@@ -2229,7 +2253,7 @@ async def run_loop(
         if _scope_error:
             log.warning("audit scope lock: %s", _scope_error)
             console.print(
-                "[yellow][engine] audit scope lock: item count changed "
+                "[yellow]\\[engine] audit scope lock: item count changed "
                 "\u2014 injecting corrective feedback[/yellow]"
             )
             write_state(state_dir, "review-feedback.txt", _scope_error)
@@ -2275,7 +2299,7 @@ async def run_loop(
                         "# BLOCKED\n\nState files could not be removed after the gates: "
                         f"{', '.join(_not_cleared)}. Remove them by hand.\n")
             log.error("BLOCKED: state files could not be removed: %s", ", ".join(_not_cleared))
-            console.print(f"[red][engine] BLOCKED: state files could not be removed: "
+            console.print(f"[red]\\[engine] BLOCKED: state files could not be removed: "
                           f"{escape(', '.join(_not_cleared))}[/red]")
             return 1
 
@@ -2293,7 +2317,7 @@ async def run_loop(
                         "gates.python in ai/config.yaml.\n\n"
                         + "\n".join(_res for _, _res in _not_run))
             log.error("BLOCKED: gate could not run: %s", _names)
-            console.print(f"[red][engine] BLOCKED: gate could not run: {escape(_names)}[/red]")
+            console.print(f"[red]\\[engine] BLOCKED: gate could not run: {escape(_names)}[/red]")
             return 1
 
         # F16: Prepend [ENGINE RUNTIME CONTEXT] to review_task for consistent framing
@@ -2368,7 +2392,7 @@ async def run_loop(
             if _gate_scope_err:
                 log.warning("audit SHIP gate: scope violation — %s", _gate_scope_err)
                 console.print(
-                    "[yellow][engine] audit SHIP gate: scope violation "
+                    "[yellow]\\[engine] audit SHIP gate: scope violation "
                     "— overriding SHIP to REVISE[/yellow]"
                 )
                 write_state(state_dir, "review-feedback.txt", _gate_scope_err)
@@ -2380,7 +2404,7 @@ async def run_loop(
                         _unchecked,
                     )
                     console.print(
-                        f"[yellow][engine] audit SHIP gate: {_unchecked} unchecked item(s) remain "
+                        f"[yellow]\\[engine] audit SHIP gate: {_unchecked} unchecked item(s) remain "
                         f"— overriding SHIP to REVISE[/yellow]"
                     )
                     write_state(
@@ -2404,7 +2428,7 @@ async def run_loop(
                                     len(_unread),
                                 )
                                 console.print(
-                                    f"[yellow][engine] read-evidence SHIP gate: {len(_unread)} unread deliverable(s) "
+                                    f"[yellow]\\[engine] read-evidence SHIP gate: {len(_unread)} unread deliverable(s) "
                                     f"— overriding SHIP to REVISE[/yellow]"
                                 )
                                 _unread_list = "\n".join(f"  - {p}" for p in sorted(_unread))
@@ -2424,7 +2448,7 @@ async def run_loop(
                             _read_gate_pass = False
                             log.warning("syntax SHIP gate: FAIL — overriding SHIP")
                             console.print(
-                                "[yellow][engine] syntax SHIP gate: FAIL "
+                                "[yellow]\\[engine] syntax SHIP gate: FAIL "
                                 "— overriding SHIP to REVISE[/yellow]"
                             )
                             write_state(state_dir, "review-feedback.txt",
@@ -2442,7 +2466,7 @@ async def run_loop(
                             if _g == G.PYTEST_GATE:
                                 log.warning("pytest SHIP gate: test failures detected — overriding SHIP")
                                 console.print(
-                                    "[yellow][engine] pytest SHIP gate: test failures detected "
+                                    "[yellow]\\[engine] pytest SHIP gate: test failures detected "
                                     "— overriding SHIP to REVISE[/yellow]"
                                 )
                                 write_state(
@@ -2452,7 +2476,7 @@ async def run_loop(
                             else:
                                 log.warning("%s SHIP gate: FAIL — overriding SHIP", _g)
                                 console.print(
-                                    f"[yellow][engine] {escape(_g)} SHIP gate: FAIL "
+                                    f"[yellow]\\[engine] {escape(_g)} SHIP gate: FAIL "
                                     f"— overriding SHIP to REVISE[/yellow]"
                                 )
                                 write_state(state_dir, "review-feedback.txt",
@@ -2489,7 +2513,7 @@ async def run_loop(
                 write_state(state_dir, "BLOCKED.md", blocked_msg)
                 log.error("BLOCKED: stall detected — %d consecutive identical feedbacks", stall_threshold)
                 console.print(
-                    f"[red][engine] BLOCKED: stall detected — {stall_threshold} consecutive identical feedbacks[/red]"
+                    f"[red]\\[engine] BLOCKED: stall detected — {stall_threshold} consecutive identical feedbacks[/red]"
                 )
                 return 1
         else:
@@ -2572,7 +2596,7 @@ def _write_awaiting_approval(state_dir: str, manifest, loop_stage_id: str,
                 "The loop shipped. The engine does not pass human approval gates; "
                 "the operator reviews the result and records the approval.\n" + na)
     log.info("awaiting approval: work item=%s stage=%s", item, stage.id)
-    console.print(f"[blue][engine] awaiting operator approval: {escape(item)} → {escape(stage.id)}[/blue]")
+    console.print(f"[blue]\\[engine] awaiting operator approval: {escape(item)} → {escape(stage.id)}[/blue]")
 
 
 def _finish_run(mode: str, rc: int, state_dir: str, manifest, loop_stage, work_item: str | None,
@@ -2616,7 +2640,7 @@ async def main_async(args: argparse.Namespace) -> int:
         if not isinstance(_state_rel, str) or not _state_rel:
             raise ConfigError("loop.state_dir: required and must be a non-empty string")
     except ConfigError as e:
-        console.print(f"[red][engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
+        console.print(f"[red]\\[engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
         return 1
     state_dir = os.path.abspath(_state_rel)
 
@@ -2628,20 +2652,20 @@ async def main_async(args: argparse.Namespace) -> int:
     # exists. Checked before any state change so a mistyped path cannot start
     # an unscoped run with the literal path as its task text.
     if args.task and not os.path.exists(args.task) and _looks_like_task_path(args.task):
-        console.print(f"[red][engine] error: task file not found: {escape(args.task)} (cwd {escape(os.getcwd())})[/red]")
+        console.print(f"[red]\\[engine] error: task file not found: {escape(args.task)} (cwd {escape(os.getcwd())})[/red]")
         return 1
 
     # Warn if a prior SHIP is present and not yet cleared
     if os.path.exists(os.path.join(state_dir, ".complete")):
-        console.print(f"[yellow][engine] warning: prior SHIP detected in {state_dir}[/yellow]")
-        console.print("[yellow][engine]          run --mode reset after human acceptance to clear[/yellow]")
+        console.print(f"[yellow]\\[engine] warning: prior SHIP detected in {state_dir}[/yellow]")
+        console.print("[yellow]\\[engine]          run --mode reset after human acceptance to clear[/yellow]")
 
     # change-53c6f252: role-to-model binding (FR-04-01, FR-04-08). Resolved
     # before any state change so a configuration error stops the run cleanly.
     try:
         bindings, _binding_records = _resolve_bindings_capturing(config, args)
     except ConfigError as e:
-        console.print(f"[red][engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
+        console.print(f"[red]\\[engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
         return 1
     worker_b, reviewer_b = bindings["worker"], bindings["reviewer"]
 
@@ -2649,12 +2673,12 @@ async def main_async(args: argparse.Namespace) -> int:
     try:
         manifest = load_manifest(locate_manifest())
     except ManifestError as e:
-        console.print(f"[red][engine] manifest error: {escape(str(e))}[/red]")
+        console.print(f"[red]\\[engine] manifest error: {escape(str(e))}[/red]")
         return 1
     try:
         gate_specs = _resolve_gate_specs(manifest, config)
     except ConfigError as e:
-        console.print(f"[red][engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
+        console.print(f"[red]\\[engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
         return 1
     loop_stage = manifest.loop_stage()
     work_item = _work_item_uuid(args.task)
@@ -2679,25 +2703,25 @@ async def main_async(args: argparse.Namespace) -> int:
         _missing = ST.prerun_missing(os.getcwd(), manifest, work_item or "", args.task, _task_bytes)
         if _missing:
             if work_item:
-                console.print(f"[red][engine] work item {escape(work_item)} is not ready for "
+                console.print(f"[red]\\[engine] work item {escape(work_item)} is not ready for "
                               f"'{escape(loop_stage.id)}'; missing:[/red]")
             else:
-                console.print(f"[red][engine] task {escape(args.task)} is not ready for "
+                console.print(f"[red]\\[engine] task {escape(args.task)} is not ready for "
                               f"'{escape(loop_stage.id)}'; missing:[/red]")
             for _m in _missing:
                 console.print(f"[red]  - {escape(_m)}[/red]")
             return 3
-        console.print(f"[blue][engine] work item {escape(work_item)}: prerequisites for "
+        console.print(f"[blue]\\[engine] work item {escape(work_item)}: prerequisites for "
                       f"'{escape(loop_stage.id)}' met[/blue]")
     elif work_item and not _tracked:
-        console.print(f"[yellow][engine] work item {escape(work_item)}: prompt is outside "
+        console.print(f"[yellow]\\[engine] work item {escape(work_item)}: prompt is outside "
                       f"ai/workspace/ — not tracked[/yellow]")
     # change-b8c75bac (audit-14e05e35 L-08; NFR-04): checked before any state change.
     if not args.max_iterations:
         _cfg_max_iter = config["loop"].get("max_iterations")
         if (isinstance(_cfg_max_iter, bool) or not isinstance(_cfg_max_iter, int)
                 or _cfg_max_iter <= 0):
-            console.print(f"[red][engine] configuration error ({escape(args.config)}): "
+            console.print(f"[red]\\[engine] configuration error ({escape(args.config)}): "
                           "loop.max_iterations: required as a positive integer "
                           "unless --max-iterations is given[/red]")
             return 1
@@ -2721,8 +2745,15 @@ async def main_async(args: argparse.Namespace) -> int:
         try:
             mcp_timeout = validate_timeout(mcp_timeout, "loop.mcp_timeout_seconds")
         except ConfigError as e:
-            console.print(f"[red][engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
+            console.print(f"[red]\\[engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
             return 1
+    # change-bae631c7 (audit-86c958dd F-02): per-model context windows, checked
+    # before any state is written.
+    try:
+        _validate_context_windows(config)
+    except ConfigError as e:
+        console.print(f"[red]\\[engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
+        return 1
     model          = worker_b.model  # worker binding; used for banners and the context report
 
     # Execution controls (opt-in, default disabled)
@@ -2784,12 +2815,12 @@ async def main_async(args: argparse.Namespace) -> int:
         try:
             _work_path, _rev_path = manifest.recipe_paths(recipe_set)
         except ManifestError as e:
-            console.print(f"[red][engine] manifest error: {escape(str(e))}[/red]")
+            console.print(f"[red]\\[engine] manifest error: {escape(str(e))}[/red]")
             rc = 1  # change-86c958dd (audit-b8a6c445 F-01): rc assigned before return
             return rc
         work_recipe = load_yaml(_work_path)
         rev_recipe  = load_yaml(_rev_path)
-        console.print(f"[blue][engine] governance model: {escape(manifest.name)} {escape(manifest.version)}; "
+        console.print(f"[blue]\\[engine] governance model: {escape(manifest.name)} {escape(manifest.version)}; "
                       f"recipe set: {recipe_set}[/blue]")
         log.info("governance model: %s %s; recipe set: %s (%s, %s)", manifest.name, manifest.version,
                  recipe_set, _work_path, _rev_path)
@@ -2817,12 +2848,12 @@ async def main_async(args: argparse.Namespace) -> int:
                     b.model,
                     timeout=readiness.get("timeout_seconds", 60.0),
                     interval=readiness.get("poll_interval_seconds", 2.0),
-                    echo=lambda msg, _r=b.role: console.print(f"[blue][engine] {_r}: {escape(msg)}[/blue]"),
+                    echo=lambda msg, _r=b.role: console.print(f"[blue]\\[engine] {_r}: {escape(msg)}[/blue]"),
                 )
             except (TimeoutError, ProviderError) as e:
                 write_state(state_dir, "BLOCKED.md",
                             f"# BLOCKED\n\n{b.role} provider '{b.provider_name}' not ready: {e}\n")
-                console.print(f"[red][engine] BLOCKED: {b.role} provider '{escape(b.provider_name)}' not ready: {escape(str(e))}[/red]")
+                console.print(f"[red]\\[engine] BLOCKED: {b.role} provider '{escape(b.provider_name)}' not ready: {escape(str(e))}[/red]")
                 log.error("provider not ready role=%s provider=%s: %s", b.role, b.provider_name, e)
                 rc = 1  # change-86c958dd (audit-b8a6c445 F-01): rc assigned before return
                 return rc
@@ -2835,9 +2866,9 @@ async def main_async(args: argparse.Namespace) -> int:
             ctx = resolve_context_window(b.model, config, live_query=b.provider.live_context_window)
             context_windows[b.role] = ctx
             if ctx:
-                console.print(f"[blue][engine] context window ({b.role}): {ctx:,} tokens ({escape(b.model)})[/blue]")
+                console.print(f"[blue]\\[engine] context window ({b.role}): {ctx:,} tokens ({escape(b.model)})[/blue]")
             else:
-                console.print(f"[yellow][engine] context window ({b.role}): unknown — budget tracking disabled[/yellow]")
+                console.print(f"[yellow]\\[engine] context window ({b.role}): unknown — budget tracking disabled[/yellow]")
         context_window = context_windows["worker"]
 
         # Substitute {PROJECT_ROOT} placeholders in mcp_servers before connection
@@ -2856,11 +2887,11 @@ async def main_async(args: argparse.Namespace) -> int:
                 target_profile = extract_target_profile(raw, log)
                 if target_profile in ("engine", "ael"):  # "ael": legacy value in closed documents
                     console.print(
-                        "[red][engine] error: strict_tactical_brief enabled and target_profile is 'engine' "
+                        "[red]\\[engine] error: strict_tactical_brief enabled and target_profile is 'engine' "
                         "but no valid tactical_brief found in task file[/red]"
                     )
                     console.print(
-                        "[red][engine]        Author a YAML block with 'tactical_brief:' as root key, "
+                        "[red]\\[engine]        Author a YAML block with 'tactical_brief:' as root key, "
                         "or set strict_tactical_brief: false in config.yaml[/red]"
                     )
                     log.error(
@@ -2875,7 +2906,7 @@ async def main_async(args: argparse.Namespace) -> int:
             task = args.task or read_state(state_dir, "task.md")
 
         if not task:
-            console.print(f"[red][engine] error: no task provided (--task or {state_dir}/task.md)[/red]")
+            console.print(f"[red]\\[engine] error: no task provided (--task or {state_dir}/task.md)[/red]")
             rc = 1  # change-86c958dd (audit-b8a6c445 F-01): rc assigned before return
             return rc
 
@@ -2888,7 +2919,7 @@ async def main_async(args: argparse.Namespace) -> int:
                 write_scope = S.build_write_scope(project_root, _deliverables,
                                                   manifest.writable_paths, state_dir)
         if write_scope is not None:
-            console.print(f"[blue][engine] write scope: {escape(write_scope.describe())}[/blue]")
+            console.print(f"[blue]\\[engine] write scope: {escape(write_scope.describe())}[/blue]")
             log.info("write scope: %s", write_scope.describe())
         else:
             log.info("write scope: project root (task is not a T03 prompt)")
@@ -2921,8 +2952,8 @@ async def main_async(args: argparse.Namespace) -> int:
         )
         if context_window:
             pct = (initial_tokens / context_window) * 100
-            console.print(f"[blue][engine] initial task: ~{initial_tokens:,} tokens ({pct:.1f}% of window)[/blue]")
-            console.print(f"[dim][engine] context report: {state_dir}/context-budget.md[/dim]")
+            console.print(f"[blue]\\[engine] initial task: ~{initial_tokens:,} tokens ({pct:.1f}% of window)[/blue]")
+            console.print(f"[dim]\\[engine] context report: {state_dir}/context-budget.md[/dim]")
 
         _run_started = time.time()  # change-e58fd295: BLOCKED.md written by this run
         if args.mode == "worker":
@@ -2930,7 +2961,7 @@ async def main_async(args: argparse.Namespace) -> int:
             _stale = os.path.join(state_dir, "work-complete.txt")
             if os.path.exists(_stale):
                 log.warning("clearing stale work-complete.txt from prior run")
-                console.print("[yellow][engine] clearing stale work-complete.txt from prior run[/yellow]")
+                console.print("[yellow]\\[engine] clearing stale work-complete.txt from prior run[/yellow]")
                 os.remove(_stale)
             rc, _, _ = await run_phase(worker_b.provider, mcp, worker_b.model, work_recipe, task, phase_max_iter,
                                        state_dir, log, phase_label="WORKER",
@@ -2948,7 +2979,7 @@ async def main_async(args: argparse.Namespace) -> int:
             _stale = os.path.join(state_dir, "work-complete.txt")
             if os.path.exists(_stale):
                 log.warning("clearing stale work-complete.txt from prior run")
-                console.print("[yellow][engine] clearing stale work-complete.txt from prior run[/yellow]")
+                console.print("[yellow]\\[engine] clearing stale work-complete.txt from prior run[/yellow]")
                 os.remove(_stale)
             # F16: Use consistent review task with runtime context (not the worker task)
             _review_task = (
