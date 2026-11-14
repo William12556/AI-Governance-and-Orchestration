@@ -65,7 +65,9 @@ Command: `python3 -m pytest tests/engine tests/webui -q` (Linux container, Pytho
 | Baseline of the implementation (`fd7f4cc`, the parent of `1a1b1cd`) | 812 | 0 | 4 |
 | New tests against the unchanged scripts (`fd7f4cc`) | 4 of 12 | 8 | — |
 | After `1a1b1cd` and `ff11a94` | 824 | 0 | 4 |
-| Final, after the review corrections | 825 | 0 | 4 |
+| Final, after the review corrections (`9f35a03`) | 858 | 0 | 4 |
+
+The final count includes the 33 cases of change-6d40f0dd (`0c7595c`), committed between the two runs, and one case of this change added after the review (824 + 33 + 1).
 
 The four cases that pass before the change state kept behaviour: `test_t2_bootstrap_installs_and_creates_workspace_folders[new]` and three `test_t6` cases (double-quoted and unquoted values).
 
