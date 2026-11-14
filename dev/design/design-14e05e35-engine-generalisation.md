@@ -138,13 +138,20 @@ class Completion:
     tool_calls: list[ToolCall]
     finish_reason: str            # "stop", "tool_calls", "length"
     usage: dict | None            # input/output tokens where reported
+    reasoning_content: str | None # reasoning text where the provider returns it
 
 class Provider(Protocol):
     async def complete(self, model: str, messages: list[dict],
-                       tools: list[dict], max_tokens: int | None) -> Completion: ...
-    async def await_ready(self, model: str, timeout: float, poll: float) -> bool: ...
-    def context_window(self, model: str) -> int | None: ...
+                       tools: list[dict] | None,
+                       max_tokens: int | None = None) -> Completion: ...
+    async def await_ready(self, model: str, timeout: float = 60.0,
+                          interval: float = 2.0,
+                          echo: Callable[[str], None] = ...) -> None: ...
+    def live_context_window(self, model: str) -> int | None: ...
+    def redact(self, text: str) -> str: ...
 ```
+
+The interface is stated as built in `providers.py` (change-541f5c58; audit-caab2052 L-19). `await_ready` polls every `interval` seconds, reports progress through `echo`, returns when the provider is ready, raises `TimeoutError` when the endpoint is not reachable within `timeout`, and raises `ProviderError` when the endpoint answers but the model is not available (for `omlx` an unlisted model is accepted). `live_context_window` is the provider's live query for tier 3 of the context-window chain (§3.0); it returns `None` where the provider has none. `redact` replaces the provider's key in error text (change-5e8aea4f). `Completion` also carries `reasoning_content: str | None`.
 
 The engine's message history stays in the current OpenAI chat format. Each provider converts at its boundary, so the loop does not branch on provider (NFR-03).
 
@@ -456,6 +463,7 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.32 | 2026-11-14 | §4.1: provider interface as built: `live_context_window`, `await_ready(..., interval, echo) -> None` raising `TimeoutError` or `ProviderError`, `redact`, `Completion.reasoning_content` (change-541f5c58; audit-caab2052 L-19) |
 | 1.31 | 2026-11-14 | §8.4: tracking by file identity, a task resolving outside `ai/workspace/` refused, non-regular evidence documents skipped; §11.0: atomic writes, audit archive names (change-d4f527e7) |
 | 1.30 | 2026-11-14 | §11.0: deeply nested configuration YAML and `context.model_context_windows` checks; MCP connection failures and duplicate tool names reported in the engine log (change-bae631c7) |
 | 1.29 | 2026-11-14 | §12.0 Gates row: "syntax gate unchanged" limited to V-02; tests of change-a5bd4fe1 named (report-0fce4169 F3) |

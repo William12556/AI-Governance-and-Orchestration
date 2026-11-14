@@ -188,7 +188,7 @@ python ai/engine/src/orchestrator.py --mode reset
 | Condition | `.complete` content | Action for planner |
 |---|---|---|
 | Reviewer issued SHIP | `COMPLETE: iteration N` | Review `work-summary.txt`; proceed to P15 test |
-| Duration limit reached | `DURATION_LIMIT: iteration N` | Review `audit-report.md`; archive and reset |
+| Duration limit reached (`--duration`) | Not written; `.timeout` holds `TIMEOUT: iteration N`; exit code 2 | Review `audit-report.md`; archive and reset |
 | BLOCKED | Not written | Read `BLOCKED.md`; create T06 issue via P03 |
 | `max_iterations` exhausted | Not written | Review partial state; extend or retry |
 | Context budget abort | Not written | Reduce `tactical_brief`; run `--mode reset`; retry |
@@ -375,6 +375,7 @@ Related refusals (change-82dbf16a): `write refused: … is or contains an engine
 | 1.32 | 2026-11-07 | §5.0: `approve.py` commits the working file as it is; untracked symlink and letter-case exceptions (audit-4b0a5592 F-01, F-02, F-08, F-09) |
 | 1.33 | 2026-11-14 | §3.0: configuration checks for deeply nested YAML and `context.model_context_windows`; MCP connection, failure and duplicate-tool lines in the engine log; console lines begin with `[engine]` (change-bae631c7) |
 | 1.34 | 2026-11-14 | §2.0: audit archive names; §5.0: tracking by file identity, outward symlink refused, non-regular entries ignored with a warning (change-d4f527e7) |
+| 1.35 | 2026-11-14 | §5.0: a duration-limit exit writes `.timeout` and returns exit code 2; it does not write `.complete` (change-541f5c58) |
 
 ---
 

@@ -48,7 +48,7 @@ Select one profile per project. Copy the profile-specific `.gitignore` additions
 
 | Profile | Domain | File |
 |---|---|---|
-| Claude Desktop | Planner | [project_information.md](../../docs/claude/project_information.md) |
+| Claude Desktop | Planner | Claude Desktop project instructions (kept locally by each user; not distributed). Planner reference: [primer.md](../governance/software-engineering/primer.md) |
 | Claude Code (optional) | Worker and reviewer | [claude-code.md](claude-code.md) |
 | claude-omlx | Worker and reviewer | [claude-omlx.md](claude-omlx.md) |
 | Mistral Vibe (optional; documented, not tested) | Worker and reviewer | [mistral-vibe.md](mistral-vibe.md) |
@@ -82,6 +82,7 @@ Planner is not prescribed. Any frontier model with sufficient reasoning capabili
 | 1.13 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 1.14 | 2026-10-02 | §4.0: added Mistral API profile (mistral_api.md) |
 | 1.15 | 2026-11-14 | §4.0: added Mistral Vibe manual profile (mistral-vibe.md) |
+| 1.16 | 2026-11-14 | §4.0: the Claude Desktop row no longer links to a file that is not distributed; it names the planner primer (change-541f5c58; audit-5bcd46ad L-12) |
 
 ---
 
