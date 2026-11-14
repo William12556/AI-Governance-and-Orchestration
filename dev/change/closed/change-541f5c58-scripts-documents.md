@@ -5,7 +5,7 @@ change_info:
   id: "change-541f5c58"
   title: "Scripts and documents: bootstrap refuses an old-layout tarball, propagate.sh gates workspace folder creation, flow-style workspace_folders, single-quoted state_dir, duration-limit text, provider interface in the design (Stage C work item 5C)"
   date: "2026-11-14"
-  status: "implemented"  # approver: operator (one-time session exemption, 2026-11-14); implemented 2026-11-14
+  status: "verified"  # approver: operator (one-time session exemption, 2026-11-14); implemented and verified 2026-11-14
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -189,6 +189,13 @@ version_history:
       - "812 passed, 4 skipped at fd7f4cc; 824 passed, 4 skipped after (Linux; 12 new cases). Mutations M1 to M5 caught. bash -n passes"
       - "linter.py dev 0 errors, 113 warnings; protocol_checker.py dev 0 errors, 20 warnings"
       - "guide-engine-operations v1.35 §5.0; ai/profiles/README.md v1.16 §4.0; design-14e05e35 v1.32 §4.1 (await_ready raises TimeoutError or ProviderError); docs/guide-install.md v0.14 §3.3"
+  - version: "1.3"
+    date: "2026-11-14"
+    changes:
+      - "Review by a fresh reviewer subagent (prompt-cf99f3f3 §8.4): round 1 REVISE (a flow list was cut at the last closing bracket; baseline facts in the report), corrected in e4e7e99 (scripts), 9f35a03 (tests) and report-541f5c58 v1.1; round 2 SHIP. Not an audit"
+      - "Added by the review: a flow list ends at its first closing bracket; an archive that tar cannot list is refused with the same message as one without ai/engine/"
+      - "Status verified; closed with issue-541f5c58 and report-541f5c58 (P00.14.4). Approver: operator (one-time session exemption, 2026-11-14)"
+      - "Linux cloud suite 858 passed, 4 skipped (with the tests of change-6d40f0dd); macOS operator suite (bash 3.2, BSD awk, sed and tar) and P02.8.2 follow-up audit deferred to after the session (report-b3a503a2 §6.0)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

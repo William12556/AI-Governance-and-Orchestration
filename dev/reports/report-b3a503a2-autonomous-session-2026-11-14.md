@@ -165,7 +165,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | 2 | Document fixes (governance 12.12; six reports closed) | — | Completed. Review: REVISE (table break and Version History row in this report; two further tier numbers in design-ael-orchestrator), then SHIP | `4c55301`, `5573430` |
 | 3a | Work item 5B-1, engine runtime: configuration, console, logging | `bae631c7` | Completed; triple closed. Review: SHIP on the first round | `90f98a8` (issue, change), `f176b07` (source), `962238e` and `5c3e540` (tests), `99bdd9e`, `cee4cb6` and the closing commit (documents) |
 | 3b | Work item 5B-2, engine runtime: tracking, state, Overwatch | `d4f527e7` | Completed; triple closed. Review: REVISE (file mode not kept by the atomic helpers; `approvals.yaml` encoding; one report count), then SHIP | `a5a3656` (issue, change), `98214f8` and `0a3b509` (source), `3c3b870` and `af46991` (tests), `b07b3b4`, `34730e5` and the closing commit (documents) |
-| 4 | Work item 5C, scripts and documents | `541f5c58` | Not started | |
+| 4 | Work item 5C, scripts and documents | `541f5c58` | Completed; triple closed. Review: REVISE (flow list cut at the last closing bracket; baseline facts in the report), then SHIP | `42c7fef` (issue, change), `1a1b1cd` and `e4e7e99` (scripts, recipe), `ff11a94` and `9f35a03` (tests), `51d0f26`, `cd0082a`, `5aad2c2` and the closing commit (documents) |
 | 5 | Work item 6, test coverage gaps | `6d40f0dd` | Not started | |
 | 6 | Work item 7a, document layout conformance (README.md v4.5): 31 active documents corrected; 65 active documents with a Table of Contents checked | — | Completed; review result recorded when available | `docs: layout conformance` commit |
 | 7 | Work item 7b, Mistral Vibe profile `ai/profiles/mistral-vibe.md` | — | Completed (performed during the review wait of unit 3b; web search and fetch were available for the Vibe repository and PyPI, not for docs.mistral.ai). Review: SHIP on the first round; one optional remark taken (profile v1.1) | `e65bdaf`, `cd0082a` |
@@ -189,6 +189,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | 8 | Mistral Vibe profile: written from the Vibe repository documentation and PyPI (version 3.1.2); the Mistral documentation site was not reachable. Facts taken only from a summary are marked in the profile's §7.0. The T03 template has no `target_profile` value for Vibe; the profile names `claude_code` as the nearest value and no governance change is made. The profile defines no test hook | `ai/profiles/mistral-vibe.md` §5.0 to §7.0 | A new `target_profile` value or hook would change governance, templates or checkers beyond work item 7b |
 | 9 | change-d4f527e7 decisions D1 to D6: temporary file and `os.replace` with three local helpers, state file names replaced and output links written through; numbered audit archive names and the project root as a parameter; log before `BLOCKED.md`; blocked detail only when blocked; tracking by file identity for the given and the resolved path, with a task that resolves outside `ai/workspace/` refused; non-regular evidence matches skipped with a scan warning | change-d4f527e7 `notes` | Minimal options consistent with the findings; `ai/core/` is not opened (L-17 transferred) |
 | 10 | Layout conformance (7a): the check covers every tracked Markdown file with a `## Table of Contents` outside `closed/`, `dev/smoke*`, `dev/prompt/`, `dev/audit/logs-2026-07-29/` and `dev/task.md`. Corrected: unbulleted and nested Table of Contents entries, entries for H3 sections removed, missing Return links added (the eight templates), each with a Version History row. Left unchanged and recorded: `governance.md` (its Table of Contents is grouped under bold labels and links the templates, as formatted by the operator in 12.6; Appendix A has no Return link; a change would need governance 12.13 for layout only); the angle-bracket anchors in `design-eb782f83`, which are quoted examples of the retired syntax | The 31 documents; this report | The task row names bullets, H2-only entries, GitHub anchors and Return links; the governance Table of Contents is a deliberate operator format |
+| 11 | change-541f5c58 decisions D1 to D5: tarball listing checked before extraction; workspace folder creation behind the plan-error check and the confirmation, shown in the preview; single-line flow lists read; either quote stripped from `state_dir`; recipe, guide and design follow the engine, which is not changed | change-541f5c58 `notes` | The recommendations of audit-14e05e35 L-10 and audit-5bcd46ad L-12; no change of the state-file contract |
 
 Further decisions are added here as each unit records them.
 
@@ -213,6 +214,7 @@ Completed in Phase D. Standing items from the prompt: every P02.8.2 follow-up au
 | After unit 2 | 766 passed, 2 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
 | After unit 3a (change-bae631c7) | 788 passed, 2 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
 | After unit 3b (change-d4f527e7) | 812 passed, 4 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
+| After units 4, 5 (tests) and 6 | 858 passed, 4 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
 
 Warning changes against the baseline:
 
@@ -241,6 +243,7 @@ Completed in Phase D.
 | 0.4 | 2026-11-14 | Unit 7 (Mistral Vibe profile): status, decision 8 |
 | 0.5 | 2026-11-14 | Unit 3b (change-d4f527e7) closed: status, counts, decision 9; two new skips explained |
 | 0.6 | 2026-11-14 | Units 6 and 7: layout conformance, decision 10; profile review result |
+| 0.7 | 2026-11-14 | Unit 4 (change-541f5c58) closed: status, counts, decision 11 |
 
 ---
 

@@ -5,7 +5,7 @@ issue_info:
   id: "issue-541f5c58"
   title: "Scripts and documents: bootstrap with an old-layout tarball, propagate.sh workspace folders before confirmation, flow-style workspace_folders, single-quoted state_dir, DURATION_LIMIT text, provider interface drift"
   date: "2026-11-14"
-  status: "resolved"  # change-541f5c58 implemented 2026-11-14 (P03.7)
+  status: "closed"  # change-541f5c58 verified 2026-11-14
   severity: "low"
   type: "defect"
   iteration: 1
@@ -119,6 +119,9 @@ version_history:
   - version: "1.1"
     date: "2026-11-14"
     changes: ["Status resolved: change-541f5c58 implemented (P03.7)"]
+  - version: "1.2"
+    date: "2026-11-14"
+    changes: ["Status closed: change-541f5c58 verified. Approver: operator (one-time session exemption, 2026-11-14). Linux cloud suite 858 passed, 4 skipped; macOS operator suite and P02.8.2 follow-up audit deferred to after the session"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

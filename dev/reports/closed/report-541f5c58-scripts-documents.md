@@ -129,7 +129,7 @@ None in scope or behaviour. Interpretations:
 
 ## 6.0 Open Points
 
-0. Review (fresh reviewer subagent, prompt-cf99f3f3 §8.4), round 1: REVISE with two findings. A1: the flow-list branch cut the line at the last `]`, so a trailing comment holding a bracket gave a wrong folder name; corrected to the first `]` in both scripts, and the flow-style fixture now carries such a comment (mutation: the earlier pattern fails T2 `[flow]` and T5). A2: the baseline commit and the awk implementation were misstated in this report and in the change record; corrected. Optional remarks taken: the comment block of `create_workspace_folders` moved back above it; an archive that `tar` cannot list is refused with the same message (`test_t1_bootstrap_refuses_an_unreadable_archive`); T3 asserts the `create` prefix of the preview line.
+0. Review (fresh reviewer subagent, prompt-cf99f3f3 §8.4), round 1: REVISE with two findings. A1: the flow-list branch cut the line at the last `]`, so a trailing comment holding a bracket gave a wrong folder name; corrected to the first `]` in both scripts, and the flow-style fixture now carries such a comment (mutation: the earlier pattern fails T2 `[flow]` and T5). A2: the baseline commit and the awk implementation were misstated in this report and in the change record; corrected. Optional remarks taken: the comment block of `create_workspace_folders` moved back above it; an archive that `tar` cannot list is refused with the same message (`test_t1_bootstrap_refuses_an_unreadable_archive`); T3 asserts the `create` prefix of the preview line. Round 2: SHIP.
 1. The scripts were not run with bash 3.2 or with BSD awk, sed and tar. The constructs used are a here-string, an indexed array with a length test before expansion, POSIX character classes in awk and sed, and `tar -tzf`. The operator's macOS suite runs `tests/engine/test_bin_scripts.py` and is the check.
 2. `bootstrap.sh` is fetched from `main` by the documented install command; the change takes effect at the merge.
 3. The recipe change reaches downstream projects with the propagation of work item 8e.
@@ -149,7 +149,8 @@ None in scope or behaviour. Interpretations:
 | `42c7fef` | docs(dev): raise issue-541f5c58; change-541f5c58 approved |
 | `1a1b1cd` | fix(bin): bootstrap refuses an old-layout tarball; propagate gates workspace folders |
 | `ff11a94` | test: bin script cases T1 to T7 for change-541f5c58 |
-| review corrections | `fix(bin)` and `test` commits after `2db6b2b` (flow list ends at its first closing bracket; unreadable archive) |
+| `e4e7e99` | fix(bin): a flow-style workspace_folders list ends at its first closing bracket |
+| `9f35a03` | test: flow list with a bracket in its comment; unreadable archive (change-541f5c58 review) |
 
 The guide, design, profiles index, this report and the status updates follow as `docs` commits; a commit cannot list its own hash.
 
@@ -163,6 +164,7 @@ The guide, design, profiles index, this report and the status updates follow as 
 |---|---|---|
 | 1.0 | 2026-11-14 | Initial report |
 | 1.1 | 2026-11-14 | Review round 1 corrections: baseline commit and counts, awk implementation, flow-list interpretation, §6.0 item 0 |
+| 1.2 | 2026-11-14 | Review round 2 (SHIP): §7.0 commit hashes; closed with change-541f5c58 and issue-541f5c58 |
 
 ---
 
