@@ -162,8 +162,9 @@ Each finding, observation and open point of the active audits and reports was ch
 | A | Review and triage | `b3a503a2` (this report) | Completed | This commit |
 | B | Task register | — | Completed | `docs(dev): task register after audit and report triage` |
 | 1 | Close triple 9377f9b9 | `9377f9b9` | Completed. Review: REVISE (one date in audit-caab2052 §14.0), then SHIP | `6ada3b7`, `5b006f5` |
-| 2 | Document fixes (governance 12.12; six reports closed) | — | Completed. Review: REVISE (table break and Version History row in this report; two further tier numbers in design-ael-orchestrator), then re-reviewed | `4c55301` and the correction commit after it |
-| 3 | Work item 5B, engine runtime | `bae631c7` (configuration, console, logging); `d4f527e7` (tracking, state, Overwatch) | Not started | |
+| 2 | Document fixes (governance 12.12; six reports closed) | — | Completed. Review: REVISE (table break and Version History row in this report; two further tier numbers in design-ael-orchestrator), then SHIP | `4c55301`, `5573430` |
+| 3a | Work item 5B-1, engine runtime: configuration, console, logging | `bae631c7` | Completed; triple closed. Review: SHIP on the first round | `90f98a8` (issue, change), `f176b07` (source), `962238e` and `5c3e540` (tests), `99bdd9e`, `cee4cb6` and the closing commit (documents) |
+| 3b | Work item 5B-2, engine runtime: tracking, state, Overwatch | `d4f527e7` | In progress | |
 | 4 | Work item 5C, scripts and documents | `541f5c58` | Not started | |
 | 5 | Work item 6, test coverage gaps | `6d40f0dd` | Not started | |
 | 6 | Work item 7a, document layout conformance | — | Not started | |
@@ -184,6 +185,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | 4 | The two `guide-audit-loop.md` copies are aligned by copying `docs/guide-audit-loop.md` over the governance copy before the fence correction | Both copies, v1.7 | The `docs/` copy carried the later edit (2026-07-16: `mcp-ripgrep`, `src/orchestrator.py`), which matches the current code and requirements |
 | 5 | Scheduled reports have no status field; "closed" is recorded as a Version History row beginning "Status: closed" before the move to `dev/reports/closed/` | Six reports in `dev/reports/closed/` | Minimal reading of prompt §9.2 item 1 |
 | 6 | design-14e05e35 §12.0 Gates row: the first suggested resolution is taken and the existing tests of change-a5bd4fe1 are named; no test is added | design-14e05e35 v1.29 | The tests exist (`test_d1_syntax_fail_overrides_ship` and others) |
+| 7 | change-bae631c7 decisions D1 to D5: escape the `[engine]` prefix at each site; `invalid YAML: nesting too deep`; a null `model_context_windows` is empty and any other invalid value is refused; the server connected last keeps a duplicate tool name and a run with no tools is not refused; only the pyflakes items and the `stages.py` type of L-16 are corrected | change-bae631c7 `notes` | Minimal options consistent with the findings and their recorded dispositions |
 
 Further decisions are added here as each unit records them.
 
@@ -206,6 +208,7 @@ Completed in Phase D. Standing items from the prompt: every P02.8.2 follow-up au
 | Baseline (`9b75595`) | 766 passed, 2 skipped | 0 errors, 112 warnings | 0 errors, 20 warnings |
 | After unit 1 | 766 passed, 2 skipped | 0 errors, 112 warnings | 0 errors, 20 warnings |
 | After unit 2 | 766 passed, 2 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
+| After unit 3a (change-bae631c7) | 788 passed, 2 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
 
 Warning changes against the baseline:
 
@@ -229,6 +232,7 @@ Completed in Phase D.
 |---|---|---|
 | 0.1 | 2026-11-14 | Created at the end of Phase A with the triage table |
 | 0.2 | 2026-11-14 | Phase B and units 1 and 2: work-unit status, DD-03 and DD-04, decisions 3 to 6, counts |
+| 0.3 | 2026-11-14 | Unit 3a (change-bae631c7) closed: status, counts, decision 7 |
 
 ---
 

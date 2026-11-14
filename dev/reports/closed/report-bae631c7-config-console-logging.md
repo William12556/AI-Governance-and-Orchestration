@@ -135,6 +135,7 @@ None in scope or behaviour. Interpretations:
 
 ## 6.0 Open Points
 
+0. Review (fresh reviewer subagent, prompt-cf99f3f3 §8.4): SHIP on the first round, no concrete defect. Two optional remarks were taken: the test `test_t7_one_server_listing_a_tool_twice_is_not_reported` was added (`5c3e540`; the suite is then 788 passed, 2 skipped, with 22 new cases), and design-14e05e35 §3.0, which the change lists, needed no edit because it does not state `model_context_windows`; guide-engine-operations §3.0 carries the configuration text. One remark is recorded for the follow-up audit: a failed MCP connection now writes the exception text to the engine log as well as to the console; the key redaction of change-5e8aea4f covers provider error text, not this path.
 1. A null or non-mapping `context:` block still raises `AttributeError` in `main_async` (`config.get("context", {})` returns the null). It is outside the findings; not changed.
 2. The three `print` lines of `mcp_client.py` write `[engine] …` without Rich and were always shown with the prefix; they are unchanged.
 3. Deferred to the operator: the macOS suite, and the follow-up audit of this change (P02.8.2).
@@ -166,6 +167,7 @@ The design, guide, this report and the status updates follow as `docs` commits; 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-14 | Initial report |
+| 1.1 | 2026-11-14 | §6.0: review outcome and the test added after it (788 passed, 2 skipped); closed with change-bae631c7 and issue-bae631c7 |
 
 ---
 

@@ -5,7 +5,7 @@ issue_info:
   id: "issue-bae631c7"
   title: "Engine runtime hygiene: console prefix consumed by Rich, RecursionError in _load_config, unvalidated model_context_windows, MCP catalogue reporting, dead code"
   date: "2026-11-14"
-  status: "resolved"  # change-bae631c7 implemented 2026-11-14 (P03.7)
+  status: "closed"  # change-bae631c7 verified 2026-11-14
   severity: "low"
   type: "defect"
   iteration: 1
@@ -111,6 +111,9 @@ version_history:
   - version: "1.1"
     date: "2026-11-14"
     changes: ["Status resolved: change-bae631c7 implemented (P03.7)"]
+  - version: "1.2"
+    date: "2026-11-14"
+    changes: ["Status closed: change-bae631c7 verified. Approver: operator (one-time session exemption, 2026-11-14). Linux cloud suite 788 passed, 2 skipped; macOS operator suite and P02.8.2 follow-up audit deferred to after the session"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

@@ -317,6 +317,12 @@ Recorded by the planner on operator approval, 2026-11-06.
 
 The full suite on macOS, including `tests/engine/test_engine_mcp.py`, gave 552 passed (operator, 2026-11-06, at `a80bc0d`); `protocol_checker.py dev` 0 errors. change-b8c75bac is verified and closed. This audit stays active until work item 6 resolves F-03.
 
+Outcome recorded 2026-11-14 (session report-b3a503a2; approver: operator, one-time session exemption, 2026-11-14):
+
+| Finding | Outcome |
+|---|---|
+| F-05 | Resolved by change-bae631c7 (`f176b07`): `_load_config` maps `RecursionError` to `configuration error (<file>): invalid YAML: nesting too deep`. Test (`962238e`): `test_t3_deeply_nested_config_is_a_configuration_error` |
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -327,6 +333,7 @@ The full suite on macOS, including `tests/engine/test_engine_mcp.py`, gave 552 p
 |---|---|---|
 | 1.0 | 2026-11-06 | Initial follow-up audit of change-b8c75bac |
 | 1.1 | 2026-11-06 | §11.0 Dispositions added by the planner (operator approval) |
+| 1.2 | 2026-11-14 | §11.0: outcome of F-05 (change-bae631c7) |
 
 ---
 

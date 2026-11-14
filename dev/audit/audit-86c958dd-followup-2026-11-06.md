@@ -311,6 +311,12 @@ Recorded by the planner on operator approval, 2026-11-06.
 
 change-86c958dd is verified and closed. This audit stays active until work items 5 and 6 resolve F-01 to F-03.
 
+Outcome recorded 2026-11-14 (session report-b3a503a2; approver: operator, one-time session exemption, 2026-11-14):
+
+| Finding | Outcome |
+|---|---|
+| F-02 | Resolved by change-bae631c7 (`f176b07`): `context.model_context_windows` is checked before any state is written; a null mapping is treated as empty; a non-mapping value and an entry that is not a positive integer are refused with `configuration error (<file>): context.model_context_windows[.<model>]: …`. Tests (`962238e`): `test_t4_null_model_context_windows_is_empty`, `test_t5_invalid_model_context_windows_are_refused`, `test_t5_invalid_model_context_windows_mapping_is_refused`, `test_t6_valid_model_context_windows_entry_passes` |
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -321,6 +327,7 @@ change-86c958dd is verified and closed. This audit stays active until work items
 |---|---|---|
 | 1.0 | 2026-11-06 | Initial follow-up audit of change-86c958dd |
 | 1.1 | 2026-11-06 | §11.0 Dispositions added by the planner (operator approval) |
+| 1.2 | 2026-11-14 | §11.0: outcome of F-02 (change-bae631c7) |
 
 ---
 

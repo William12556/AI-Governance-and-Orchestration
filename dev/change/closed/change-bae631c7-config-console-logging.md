@@ -5,7 +5,7 @@ change_info:
   id: "change-bae631c7"
   title: "Engine runtime hygiene: keep the console prefix, report deeply nested configuration YAML, validate model_context_windows, report MCP catalogue problems in the log, remove dead code (Stage C work item 5B-1)"
   date: "2026-11-14"
-  status: "implemented"  # approver: operator (one-time session exemption, 2026-11-14); implemented 2026-11-14
+  status: "verified"  # approver: operator (one-time session exemption, 2026-11-14); implemented and verified 2026-11-14
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -181,6 +181,13 @@ version_history:
       - "766 passed, 2 skipped at the unit baseline; 787 passed, 2 skipped after (Linux; 21 new cases). Mutations M1 to M9 caught. ruff F: no finding"
       - "linter.py dev 0 errors, 113 warnings; protocol_checker.py dev 0 errors, 20 warnings"
       - "design-14e05e35 v1.30 §11.0; guide-engine-operations v1.33 §3.0"
+  - version: "1.3"
+    date: "2026-11-14"
+    changes:
+      - "Review by a fresh reviewer subagent (prompt-cf99f3f3 §8.4): SHIP; not an audit. One test added after the review (5c3e540): a server listing its own tool twice is not reported"
+      - "Status verified; closed with issue-bae631c7 and report-bae631c7 (P00.14.4). Approver: operator (one-time session exemption, 2026-11-14)"
+      - "Linux cloud suite 788 passed, 2 skipped; macOS operator suite and P02.8.2 follow-up audit deferred to after the session (report-b3a503a2 §6.0)"
+      - "design-14e05e35 §3.0, listed under affected_designs, needed no edit (it does not state model_context_windows)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
