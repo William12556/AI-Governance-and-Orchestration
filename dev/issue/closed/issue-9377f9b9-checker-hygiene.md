@@ -5,7 +5,7 @@ issue_info:
   id: "issue-9377f9b9"
   title: "Checker hygiene: unparsable and deeply nested YAML, closed test on the full path, boolean iteration, checker test gaps"
   date: "2026-11-07"
-  status: "resolved"  # change-9377f9b9 implemented 2026-11-07 (P03.7)
+  status: "closed"  # change-9377f9b9 verified 2026-11-14
   severity: "low"
   type: "defect"
   iteration: 1
@@ -102,6 +102,9 @@ version_history:
   - version: "1.1"
     date: "2026-11-07"
     changes: ["Status resolved: change-9377f9b9 implemented (P03.7)"]
+  - version: "1.2"
+    date: "2026-11-14"
+    changes: ["Status closed: change-9377f9b9 verified. Approver: operator (one-time session exemption, 2026-11-14). Linux cloud suite 766 passed, 2 skipped; macOS operator suite and P02.8.2 follow-up audit deferred to after the session"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
