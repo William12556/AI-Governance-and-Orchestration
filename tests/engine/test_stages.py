@@ -564,8 +564,8 @@ def test_engine_refuses_a_workspace_prompt_without_a_uuid_name(orch, repo, se, m
     rel = os.path.join("ai", "workspace", "prompt", "my-task.md")
     code, out = _run_captured(orch, monkeypatch, _loop_args(repo, rel, mode))
     assert code == 3
-    # rich renders '[engine]' as markup, so the console text starts after it
-    assert f" task {rel} is not ready for 'implement'; missing:" in out
+    # change-bae631c7: the console line keeps its '[engine]' prefix
+    assert f"[engine] task {rel} is not ready for 'implement'; missing:" in out
     assert "is not an active prompt document" in out
     assert _state_entries(repo) == before
 
