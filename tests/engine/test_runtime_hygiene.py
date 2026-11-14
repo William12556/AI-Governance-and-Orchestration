@@ -228,6 +228,17 @@ def test_t7_duplicate_tool_name_is_reported(monkeypatch, isolated_engine_logger,
     assert not any("'list'" in m for m in warnings)
 
 
+def test_t7_one_server_listing_a_tool_twice_is_not_reported(monkeypatch, isolated_engine_logger,
+                                                            caplog, capsys):
+    isolated_engine_logger.propagate = True
+    _fake_transport(monkeypatch, {"a": ["read_file", "read_file"]})
+    with caplog.at_level(logging.INFO, logger="engine"):
+        client = _connect({"fs": {"command": "a"}})
+    assert "is offered by" not in capsys.readouterr().out
+    assert not [r for r in caplog.records if r.levelno == logging.WARNING]
+    assert client._tools["read_file"]["server"] == "fs"
+
+
 def test_t8_failed_connection_is_logged(monkeypatch, isolated_engine_logger, caplog, capsys):
     isolated_engine_logger.propagate = True
     _fake_transport(monkeypatch, {"a": ["read_file"]}, failing=("missing",))
