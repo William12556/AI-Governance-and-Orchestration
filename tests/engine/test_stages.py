@@ -719,6 +719,8 @@ def test_t3_approve_writes_atomically(repo, se, monkeypatch):
     assert code == 0, message
     assert [dst for _, dst in replaced] == [os.path.realpath(approvals)]
     assert replaced[0][0] != "approvals.yaml"
+    # an existing file keeps its permission bits
+    approvals.chmod(0o600)
     assert sorted(p.name for p in (repo / "ai").iterdir() if p.is_file()) == ["approvals.yaml"]
 
     # a failed commit writes the prior bytes back the same way and leaves no temporary file
@@ -730,6 +732,7 @@ def test_t3_approve_writes_atomically(repo, se, monkeypatch):
     assert code == 1 and "hook says no" in message
     assert approvals.read_bytes() == before
     assert len(replaced) == 2 and all(dst == os.path.realpath(approvals) for _, dst in replaced)
+    assert os.stat(approvals).st_mode & 0o777 == 0o600
     assert sorted(p.name for p in (repo / "ai").iterdir() if p.is_file()) == ["approvals.yaml"]
 
 

@@ -8,6 +8,7 @@ import asyncio
 import io
 import logging
 import os
+import stat
 
 import pytest
 
@@ -48,6 +49,16 @@ def test_t1_write_state_is_atomic(orch, project, monkeypatch):
         orch.write_state(str(state), "work-summary.txt", "second\n")
     assert (state / "work-summary.txt").read_text() == "first\n"
     assert sorted(p.name for p in state.iterdir()) == ["work-summary.txt"]
+
+
+def test_t1_write_state_keeps_the_mode_of_an_existing_file(orch, project):
+    state = project / "ai" / "state"
+    target = state / "work-summary.txt"
+    target.write_text("first\n")
+    target.chmod(0o600)
+    orch.write_state(str(state), "work-summary.txt", "second\n")
+    assert target.read_text() == "second\n"
+    assert stat.S_IMODE(target.stat().st_mode) == 0o600
 
 
 def test_t1_write_state_creates_the_directory(orch, tmp_path):

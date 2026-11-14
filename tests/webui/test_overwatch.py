@@ -697,6 +697,10 @@ def test_t2_overwatch_outputs_are_atomic(paths, snapshot, monkeypatch, capsys, w
     assert write() is None
     first = target.read_text(encoding="utf-8")
     assert first
+    # an existing output keeps its permission bits across a rewrite
+    target.chmod(0o600)
+    assert write() is None
+    assert stat.S_IMODE(target.stat().st_mode) == 0o600
     names = sorted(p.name for p in target.parent.iterdir())
 
     def failing_replace(src, dst):
