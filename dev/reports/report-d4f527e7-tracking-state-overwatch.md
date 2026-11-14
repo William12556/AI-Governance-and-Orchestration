@@ -27,7 +27,7 @@ This report records the implementation of change-d4f527e7 (issue-d4f527e7; Stage
 - D (work item 5 (i); audit-86c958dd F-01): Overwatch keeps blocked detail only when the status is `blocked`.
 - E (work item 5 (m); audit-4b0a5592 F-01, F-02): a task is tracked by file identity with `ai/workspace/`, as given or resolved; a task that resolves outside it is refused.
 - F (work item 5 (n); audit-4b0a5592 F-04): evidence matches that are not regular files are skipped and reported as a scan warning.
-- G: 23 new test cases (T1 to T8); two more are skipped on this machine.
+- G: 24 new test cases (T1 to T8, one of them added after the review); two more are skipped on this machine.
 
 All parts are implemented. The suite passes, and mutations M1 to M17 each fail a test. The letter-case behaviour of E is not confirmed: this file system is case-sensitive.
 
@@ -69,10 +69,11 @@ Command: `python3 -m pytest tests/engine tests/webui -q` (Linux container, Pytho
 | Run | Passed | Failed | Skipped |
 |---|---|---|---|
 | Baseline of the unit (`a5a3656`) | 788 | 0 | 2 |
-| New tests against the unchanged source (`a5a3656`) | 3 of 23 | 20 | 2 |
-| Final | 811 | 0 | 4 |
+| New tests as committed in `3c3b870` against the unchanged source (`a5a3656`) | 4 of 23 | 19 | 2 |
+| After `98214f8` and `3c3b870` | 811 | 0 | 4 |
+| Final, after the review corrections | 812 | 0 | 4 |
 
-Before the change three new cases pass: `test_t1_write_state_creates_the_directory`, `test_t5_reset_state_returns_1` and `test_t2_overwatch_output_symlink_is_written_through`. They state behaviour that the change must keep. Before the change `test_d_blocked_detail_only_when_blocked[current…]` failed on a test expectation (a trailing newline that Overwatch strips), corrected before the final run.
+Before the change four new cases pass: `test_t1_write_state_creates_the_directory`, `test_t5_reset_state_returns_1`, `test_t2_overwatch_output_symlink_is_written_through` and `test_d_blocked_detail_only_when_blocked[current…]`. They state behaviour that the change must keep. In the session's first run, before the tests were committed, the `[current…]` case failed on a wrong test expectation (a trailing newline that Overwatch strips); the expectation was corrected before the commit.
 
 New skips: `test_t5_real_unremovable_entry` (root removes entries from a read-only directory) and `test_t7_case_variant_is_tracked` (case-sensitive file system). Both are expected to run on the operator's macOS machine.
 
@@ -132,7 +133,9 @@ One deviation from the change document's file list: T3, T7 and T8 are in `tests/
 
 Interpretations:
 
-1. The temporary file is named `.<name>.<pid>.tmp` and opened in the ordinary way, so the final file keeps the process umask as before; a temporary file left by a killed process is overwritten by the next write of that name from the same pid, or stays as a dot file.
+1. The temporary file is named `.<name>.<pid>.tmp` and opened in the ordinary way, so a newly created file follows the process umask as before. An existing regular file keeps its permission bits: the helpers copy them to the temporary file before the move (review correction R1). A read-only target is replaced, where the in-place write failed with a permission error. A temporary file left by a killed process is overwritten by the next write of that name from the same pid, or stays as a dot file; reset does not remove it.
+7. `ai/approvals.yaml` is encoded with the locale's preferred encoding, the encoding with which the text-mode read decodes it and the earlier text-mode write encoded it (review correction R2).
+8. A task below a symlinked directory in `ai/workspace/` that leads outside it is refused in the same way as an outward file link (E2).
 2. State file names are replaced, not written through (decision D1). The outputs of Overwatch and `ai/approvals.yaml` resolve the path first, so a symlinked output keeps working.
 3. `_archive_audit_artifacts` uses `os.path.lexists` for the free-name search, so a dangling symlink at an archive name also counts as occupied.
 4. T5 uses a stand-in for `_remove_state_path` for the ordering and loop-start cases. The case with a real unremovable entry (a read-only state directory) cannot hold for root and is skipped here; it checks `clear_state` and `reset_state` only, since `BLOCKED.md` cannot be written to a read-only directory either.
@@ -145,6 +148,7 @@ Interpretations:
 
 ## 6.0 Open Points
 
+0. Review (fresh reviewer subagent, prompt-cf99f3f3 §8.4), round 1: REVISE with three findings. R1: the atomic helpers did not keep the permission bits of an existing file; corrected in the three helpers, with assertions in T1 (`test_t1_write_state_keeps_the_mode_of_an_existing_file`), T2 and T3. R2: `ai/approvals.yaml` was written as UTF-8 whatever the locale; corrected to the locale's encoding. R3: the count of new tests passing before the change was 4, not 3; corrected in §3.0. Optional remarks taken: the guide's duplicated sentence, and the symlinked-directory case stated in the guide and in §5.0.
 1. Letter case (audit-4b0a5592 F-02) is not verified. On macOS, `test_t7_case_variant_is_tracked` should run and pass. A loop run with `AI/Workspace/prompt/<approved prompt>` is expected to exit 3, because `task_document_error` compares resolved path strings; if `os.path.realpath` normalises case there, it is expected to pass the check instead. Either outcome keeps the pre-run check in force.
 2. engine-mcp `_tracked_task_error` still compares resolved paths; it refuses an outward link as outside, which agrees with the CLI result (refused).
 3. The appends to `BLOCKED.md` (`Return to stage:`) and the log files are not atomic; they are outside L-10 as registered.
@@ -176,6 +180,7 @@ The design, guide, this report and the status updates follow as `docs` commits; 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-14 | Initial report |
+| 1.1 | 2026-11-14 | Review round 1 corrections: §3.0 counts, §5.0 interpretations 1, 7 and 8, §6.0 item 0 |
 
 ---
 
