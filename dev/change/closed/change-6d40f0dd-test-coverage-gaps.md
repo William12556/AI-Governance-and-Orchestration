@@ -5,7 +5,7 @@ change_info:
   id: "change-6d40f0dd"
   title: "Test coverage gaps: tests for the surviving mutations of the follow-up audits, repo fixture without commit signing, re-measured audit-caab2052 §8.0 with tests for pure helpers (Stage C work item 6)"
   date: "2026-11-14"
-  status: "implemented"  # approver: operator (one-time session exemption, 2026-11-14); implemented 2026-11-14
+  status: "verified"  # approver: operator (one-time session exemption, 2026-11-14); implemented 2026-11-14; verified 2026-11-15
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -129,6 +129,13 @@ version_history:
       - "824 passed, 4 skipped at the unit baseline; 857 passed, 4 skipped after (Linux; 33 new cases). 14 mutations, each failing its named test"
       - "X12 is tested with a stand-in for the commit step, because git passes hook stdout to its stderr (report-6d40f0dd §6.0 item 1)"
       - "linter.py dev 0 errors, 113 warnings; protocol_checker.py dev 0 errors, 20 warnings. Remaining §8.0 gaps registered in dev/task.md"
+  - version: "1.3"
+    date: "2026-11-15"
+    changes:
+      - "Review by a fresh reviewer subagent (prompt-cf99f3f3 §8.4): round 1 REVISE (two rows of the re-measurement; one assertion fixing an inaccurate count), corrected in 6de3a63 (tests) and report-6d40f0dd v1.1; round 2 SHIP. 15 mutations, X13 and X17 counted separately; all re-run by the reviewer. Not an audit"
+      - "Found by the review and registered in dev/task.md, not changed here: the omitted-character count of orchestrator._truncate_tool_result"
+      - "Status verified; closed with issue-6d40f0dd and report-6d40f0dd (P00.14.4). Approver: operator (one-time session exemption, 2026-11-14)"
+      - "Linux cloud suite 858 passed, 4 skipped; macOS operator suite deferred to after the session. No follow-up audit is required for a tests-only change (P02.8.2)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

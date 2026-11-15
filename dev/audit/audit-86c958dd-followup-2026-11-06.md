@@ -317,6 +317,9 @@ Outcome recorded 2026-11-14 (session report-b3a503a2; approver: operator, one-ti
 |---|---|
 | F-01 | Resolved by change-d4f527e7 (`98214f8`): `blocked_detail` is set only when the status is `blocked`. Test (`3c3b870`): `test_d_blocked_detail_only_when_blocked` |
 | F-02 | Resolved by change-bae631c7 (`f176b07`): `context.model_context_windows` is checked before any state is written; a null mapping is treated as empty; a non-mapping value and an entry that is not a positive integer are refused with `configuration error (<file>): context.model_context_windows[.<model>]: …`. Tests (`962238e`): `test_t4_null_model_context_windows_is_empty`, `test_t5_invalid_model_context_windows_are_refused`, `test_t5_invalid_model_context_windows_mapping_is_refused`, `test_t6_valid_model_context_windows_entry_passes` |
+| F-03 | Resolved by change-6d40f0dd (tests `0c7595c`): X05 `test_c_marker_at_the_start_second_counts`; X09 `test_c_absent_or_non_string_started_keeps_the_precedence`; M7 `test_c_fr_02_06_hard_link_is_the_same_file`. Each mutation fails its test (report-6d40f0dd §3.0). X03 and X06 were optional and are not taken |
+
+**Closure block.** All findings of this audit are resolved or dispositioned. Findings F-01 and F-02 were remediated by source changes (change-d4f527e7, change-bae631c7), so closure requires a follow-up audit (P02.8.2), which is deferred to the operator. Status: ready for follow-up audit; closure pending operator.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -330,6 +333,7 @@ Outcome recorded 2026-11-14 (session report-b3a503a2; approver: operator, one-ti
 | 1.1 | 2026-11-06 | §11.0 Dispositions added by the planner (operator approval) |
 | 1.2 | 2026-11-14 | §11.0: outcome of F-02 (change-bae631c7) |
 | 1.3 | 2026-11-14 | §11.0: outcome of F-01 (change-d4f527e7) |
+| 1.4 | 2026-11-15 | §11.0: outcome of F-03 (change-6d40f0dd) and closure block (ready for follow-up audit; closure pending operator) |
 
 ---
 

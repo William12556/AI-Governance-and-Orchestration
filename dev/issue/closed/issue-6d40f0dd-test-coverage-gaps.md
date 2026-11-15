@@ -5,7 +5,7 @@ issue_info:
   id: "issue-6d40f0dd"
   title: "Test coverage gaps: surviving mutations of the follow-up audits, the repo fixture's signing configuration, and the re-measurement of audit-caab2052 §8.0"
   date: "2026-11-14"
-  status: "resolved"  # change-6d40f0dd implemented 2026-11-14 (P03.7)
+  status: "closed"  # change-6d40f0dd verified 2026-11-15
   severity: "low"
   type: "defect"
   iteration: 1
@@ -89,6 +89,9 @@ version_history:
   - version: "1.1"
     date: "2026-11-14"
     changes: ["Status resolved: change-6d40f0dd implemented (P03.7)"]
+  - version: "1.2"
+    date: "2026-11-15"
+    changes: ["Status closed: change-6d40f0dd verified. Approver: operator (one-time session exemption, 2026-11-14). Linux cloud suite 858 passed, 4 skipped; macOS operator suite deferred to after the session"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

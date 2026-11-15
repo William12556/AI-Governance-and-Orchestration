@@ -575,11 +575,13 @@ Recorded by the planner on 2026-10-29 on the operator's decision.
 | L-13, L-16 | Remediate. Decided by the session under the one-time exemption (2026-11-14) | Work item 5B-1 (change-bae631c7). L-13: a warning for a tool name offered by two servers; connection failures and status messages through the engine logger; a run with no tools is not refused (no change of behaviour beyond the finding). L-16: the pyflakes items and the `stages.py` type are corrected; the annotation-style and remaining mypy items are not changed. Follow-up audit required (P02.8.2), deferred to the operator. **Closed 2026-11-14:** change-bae631c7 verified and closed (`f176b07`; tests `962238e`, `5c3e540`: `test_t7_duplicate_tool_name_is_reported`, `test_t8_failed_connection_is_logged`, `test_t9_scan_outside_a_repository_uses_an_empty_approvals_mapping`; ruff F clean) |
 | L-17, L-18 | Transferred (2026-11-06) | `design-63c98596` §10.2 |
 | L-19 | Amend the design. Decided by the session under the one-time exemption (2026-11-14) | Work item 5C (change-541f5c58): design-14e05e35 §4.1 states the provider interface as built. **Closed 2026-11-14:** design-14e05e35 v1.32 §4.1 (`live_context_window`, `await_ready(..., interval, echo) -> None`, `redact`, `Completion.reasoning_content`); change-541f5c58 verified and closed. A document change only for this finding |
-| §8.0 test gaps | Re-measure. Decided by the session under the one-time exemption (2026-11-14) | Work item 6 (a) (to be raised as change-6d40f0dd) |
+| §8.0 test gaps | Re-measure. Decided by the session under the one-time exemption (2026-11-14) | Work item 6 (a) (change-6d40f0dd). **Closed 2026-11-15:** re-measured in report-6d40f0dd §4.0; tests added for nine helper functions; the gaps that remain are registered in `dev/task.md` as open work |
 | OQ-01 | Decided (2026-11-05): a syntax FAIL blocks SHIP | The syntax gate stays built in; a syntax FAIL overrides SHIP as a command gate FAIL does. FR-03-04 amended (requirements-14e05e35 v1.8). Source change with group 5. Converting syntax to a declared command gate is left to the Phase 3 governance split. **Closed 2026-11-05:** implemented by change-a5bd4fe1 |
 | OQ-02 | Decided (2026-11-05): the design is authoritative | NFR-01 and CON-01 amended (requirements-0c6aedee v0.6). The CON-07 citation at `overwatch.py:828` is corrected in the group 2 triple. **Closed 2026-11-05:** citation corrected by change-b8a6c445 |
 | OQ-03 | Decided (2026-11-05): amend the baseline in place | FR-AEL-013, NFR-AEL-001, NFR-AEL-005 (requirements-1c1f4ef6 v1.4) and design-ael §3.2, §10.0 (v0.8) describe the engine as built |
 | OQ-04 | Decided (2026-11-05): remove the phrase | "the run type's own paths" removed from design-14e05e35 §7.0 (v1.19) |
+
+**Closure block (2026-11-15).** Every finding and open question of this audit has a recorded decision and outcome. No critical or high finding was raised. Groups 1 to 5 were followed by their own audits. The group 6 findings L-10, L-13, L-14 and L-16 were remediated by source changes in the session of 2026-11-14 (change-bae631c7, change-d4f527e7), so closure requires a follow-up audit (P02.8.2), which is deferred to the operator. Status: ready for follow-up audit; closure pending operator.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -600,6 +602,7 @@ Recorded by the planner on 2026-10-29 on the operator's decision.
 | 1.8 | 2026-11-14 | §14.0: L-10 and L-14 recorded as closed (change-d4f527e7) |
 | 1.9 | 2026-11-14 | §14.0: L-19 recorded as closed (change-541f5c58; design-14e05e35 v1.32) |
 | 1.9 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
+| 1.10 | 2026-11-15 | §14.0: §8.0 re-measurement recorded (change-6d40f0dd); closure block (ready for follow-up audit; closure pending operator) |
 
 ---
 

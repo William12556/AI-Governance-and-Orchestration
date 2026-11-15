@@ -139,7 +139,7 @@ None in scope. Interpretations:
 1. The remaining §8.0 gaps (§4.0) are open work in `dev/task.md`.
 2. Not taken (optional in the audit dispositions): audit-b8c75bac X03 and X09; audit-86c958dd X03 and X06.
 3. Deferred to the operator: the macOS suite. This change touches tests only, so it needs no follow-up audit of its own (P02.8.2); the audits it serves are listed in report-b3a503a2 §6.0.
-4. Review (fresh reviewer subagent, prompt-cf99f3f3 §8.4), round 1: REVISE with three findings. F1 and F2: §4.0 listed `--task-check` and `PhaseInference` as untested although one test each exists; corrected here and in `dev/task.md`. F3: `test_a_truncate_tool_result` asserted the marker's count, which the function computes inaccurately; the assertion no longer fixes the count (item 5). Optional remarks taken: the `git add` test no longer depends on git's English message text; X13 and X17 are listed separately. The reviewer re-ran all mutations, including X13 as the audit defines it.
+4. Review (fresh reviewer subagent, prompt-cf99f3f3 §8.4), round 1: REVISE with three findings. F1 and F2: §4.0 listed `--task-check` and `PhaseInference` as untested although one test each exists; corrected here and in `dev/task.md`. F3: `test_a_truncate_tool_result` asserted the marker's count, which the function computes inaccurately; the assertion no longer fixes the count (item 5). Optional remarks taken: the `git add` test no longer depends on git's English message text; X13 and X17 are listed separately. The reviewer re-ran all mutations, including X13 as the audit defines it. Round 2: SHIP.
 5. Observation, not changed (tests only): the elision marker of `_truncate_tool_result` states `len(content) - max_chars` characters as omitted. The number actually left out is larger by the marker's own length (836 against a stated 800 for 1,000 characters and a limit of 200). Registered in `dev/task.md`.
 
 [Return to Table of Contents](#table-of-contents)
@@ -168,6 +168,7 @@ This report and the status updates follow as `docs(dev)` commits; a commit canno
 |---|---|---|
 | 1.0 | 2026-11-14 | Initial report |
 | 1.1 | 2026-11-15 | Review round 1 corrections: §4.0 stages.py and overwatch.py rows, §3.0 X13 and X17, §6.0 item 5, §7.0 items 4 and 5 |
+| 1.2 | 2026-11-15 | Review round 2 (SHIP); closed with change-6d40f0dd and issue-6d40f0dd |
 
 ---
 

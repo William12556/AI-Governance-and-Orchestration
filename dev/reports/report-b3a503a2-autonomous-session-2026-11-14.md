@@ -29,9 +29,9 @@ Result:
 - Every finding of the five active audits and of the ten active reports has one disposition (§3.0).
 - Triple 9377f9b9 (work item 5A) is closed. Four triples were raised, implemented, reviewed and closed in the session: bae631c7 (5B-1), d4f527e7 (5B-2), 541f5c58 (5C) and 6d40f0dd (6).
 - Document fixes: governance 12.12 (Appendix A.5), eleven further documents corrected, layout conformance for 31 active documents, the Mistral Vibe profile.
-- Seven reports are closed (six scheduled or implementation reports of earlier work, and report-9377f9b9); the four implementation reports of the session are closed with their triples. No audit was moved to `closed/`; each carries a closure block (§6.1).
+- Seven reports of earlier work are closed (five scheduled reports, report-14cf601f and report-9377f9b9); the four implementation reports of the session are closed with their triples. This report and the three reports tied to operator rows stay active. No audit was moved to `closed/`; each carries a closure block (§6.1).
 - Suite: 766 passed, 2 skipped at the start; the final counts are in §7.0. Both checkers report 0 errors.
-- No unit ended blocked. One row of open work remains from the session's scope: the remaining test coverage gaps of audit-caab2052 §8.0 (`dev/task.md`).
+- No unit ended blocked. Two rows of open work remain from the session's scope in `dev/task.md`: the remaining test coverage gaps of audit-caab2052 §8.0, and the omitted-character count of `_truncate_tool_result` (DD-05), found in a review and not resolved.
 - Not done, by the prompt: every P02.8.2 follow-up audit and all macOS testing (§6.0).
 
 `main` was not changed and no pull request was opened. No closed record that existed at the start was edited; documents were only moved into `closed/` after their own closing edit.
@@ -179,7 +179,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | 3a | Work item 5B-1, engine runtime: configuration, console, logging | `bae631c7` | Completed; triple closed. Review: SHIP on the first round | `90f98a8` (issue, change), `f176b07` (source), `962238e` and `5c3e540` (tests), `99bdd9e`, `cee4cb6` and the closing commit (documents) |
 | 3b | Work item 5B-2, engine runtime: tracking, state, Overwatch | `d4f527e7` | Completed; triple closed. Review: REVISE (file mode not kept by the atomic helpers; `approvals.yaml` encoding; one report count), then SHIP | `a5a3656` (issue, change), `98214f8` and `0a3b509` (source), `3c3b870` and `af46991` (tests), `b07b3b4`, `34730e5` and the closing commit (documents) |
 | 4 | Work item 5C, scripts and documents | `541f5c58` | Completed; triple closed. Review: REVISE (flow list cut at the last closing bracket; baseline facts in the report), then SHIP | `42c7fef` (issue, change), `1a1b1cd` and `e4e7e99` (scripts, recipe), `ff11a94` and `9f35a03` (tests), `51d0f26`, `cd0082a`, `5aad2c2` and the closing commit (documents) |
-| 5 | Work item 6, test coverage gaps | `6d40f0dd` | Implemented; review result recorded when available | `32d1a6a` (issue, change), `0c7595c` (tests), `2db6b2b` (report) |
+| 5 | Work item 6, test coverage gaps | `6d40f0dd` | Completed; triple closed. Review: REVISE (two rows of the re-measurement; one assertion fixing an inaccurate count), then SHIP | `32d1a6a` (issue, change), `0c7595c` and `6de3a63` (tests), `2db6b2b`, `1674e82` and the closing commit (documents) |
 | 6 | Work item 7a, document layout conformance (README.md v4.5): 31 active documents corrected; 58 in-scope documents with a Table of Contents checked | — | Completed. Review: SHIP on the first round | `222fc73` |
 | 7 | Work item 7b, Mistral Vibe profile `ai/profiles/mistral-vibe.md` | — | Completed (performed during the review wait of unit 3b; web search and fetch were available for the Vibe repository and PyPI, not for docs.mistral.ai). Review: SHIP on the first round; one optional remark taken (profile v1.1) | `e65bdaf`, `cd0082a` |
 | 8 | Defects registered under prompt §11.0 | — | Completed within units 2 and 4: DD-01, DD-03, DD-04 (unit 2), DD-02 (unit 4). No defect remains unresolved | See units 2 and 4 |
@@ -203,8 +203,8 @@ Each finding, observation and open point of the active audits and reports was ch
 | 9 | change-d4f527e7 decisions D1 to D6: temporary file and `os.replace` with three local helpers, state file names replaced and output links written through; numbered audit archive names and the project root as a parameter; log before `BLOCKED.md`; blocked detail only when blocked; tracking by file identity for the given and the resolved path, with a task that resolves outside `ai/workspace/` refused; non-regular evidence matches skipped with a scan warning | change-d4f527e7 `notes` | Minimal options consistent with the findings; `ai/core/` is not opened (L-17 transferred) |
 | 10 | Layout conformance (7a): the check covers every tracked Markdown file with a `## Table of Contents` outside `closed/`, `dev/smoke*`, `dev/prompt/`, `dev/audit/logs-2026-07-29/` and `dev/task.md`. Corrected: unbulleted and nested Table of Contents entries, entries for H3 sections removed, missing Return links added (the eight templates), each with a Version History row. Left unchanged and recorded: `governance.md` (its Table of Contents is grouped under bold labels and links the templates, as formatted by the operator in 12.6; Appendix A has no Return link; a change would need governance 12.13 for layout only); the angle-bracket anchors in `design-eb782f83`, which are quoted examples of the retired syntax | The 31 documents; this report | The task row names bullets, H2-only entries, GitHub anchors and Return links; the governance Table of Contents is a deliberate operator format |
 | 11 | change-541f5c58 decisions D1 to D5: tarball listing checked before extraction; workspace folder creation behind the plan-error check and the confirmation, shown in the preview; single-line flow lists read; either quote stripped from `state_dir`; recipe, guide and design follow the engine, which is not changed | change-541f5c58 `notes` | The recommendations of audit-14e05e35 L-10 and audit-5bcd46ad L-12; no change of the state-file contract |
-
-Further decisions are added here as each unit records them.
+| 12 | change-6d40f0dd decisions D1 to D3: the optional mutation X06 is taken and X03, X09 (audit-b8c75bac) and X03, X06 (audit-86c958dd) are not; part (a) is a re-measurement by name with tests for nine pure helpers; the remaining gaps are one row in `dev/task.md` | change-6d40f0dd `notes` | The untaken mutations need fault injection into narrow except clauses; a coverage tool would be a new dependency |
+| 13 | Dates: approvals are recorded with the session date 2026-11-14 throughout; documents written after midnight carry 2026-11-15 | Version History rows of 2026-11-15 | The exemption names one session date; the Version History states when an edit was made |
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -270,6 +270,9 @@ Expected on macOS, relative to the Linux counts of §7.0:
 | After unit 3a (change-bae631c7) | 788 passed, 2 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
 | After unit 3b (change-d4f527e7) | 812 passed, 4 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
 | After units 4, 5 (tests) and 6 | 858 passed, 4 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
+| Final (Phase D) | 858 passed, 4 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
+
+Against the baseline: 92 more tests pass (766 to 858), none fails, and two more are skipped. The 862 collected items are 858 passed and 4 skipped.
 
 Warning changes against the baseline:
 
@@ -283,6 +286,7 @@ Warning changes against the baseline:
 ## 8.0 Open Points
 
 1. Remaining test coverage gaps of audit-caab2052 §8.0 (`dev/task.md` row `caab2052` 6 (a); report-6d40f0dd §4.0). Status `Open — not raised`.
+11. `orchestrator._truncate_tool_result` states an omitted-character count that is too small by the marker's own length (DD-05; `dev/task.md`, `Open — not raised`). It was found in the unit 5 review. It is not resolved because the correct count needs a small design decision and lies outside the audits in scope (prompt §11.0 item 3).
 2. Letter case on a case-insensitive file system (audit-4b0a5592 F-02): implemented by file identity, not verified (§6.2).
 3. `governance.md` was left out of the layout conformance: its Table of Contents is grouped under bold labels and links the templates, and Appendix A has no Return link (decision 10). The unit 6 reviewer also noted that its Return link at the end sits inside Version History, that Appendix A follows the copyright line, and that there is no `---` between the protocol sections. A layout-only governance version would settle it if wanted.
 10. Layout points that the 7a row does not name remain in a few documents: unnumbered content sections in `requirements-1c1f4ef6-ael.md` and `docs/setup-apple-silicon-mlx.md`, and Return links after H3 subsections in four requirements documents, `docs/guide-profile-selection.md` and `docs/setup-apple-silicon-mlx.md`. Every link resolves.
@@ -310,6 +314,7 @@ Warning changes against the baseline:
 | 0.7 | 2026-11-14 | Unit 4 (change-541f5c58) closed: status, counts, decision 11 |
 | 0.8 | 2026-11-15 | §1.0 summary, §6.0 deferred items, §8.0 open points; units 5 and 8 status |
 | 0.9 | 2026-11-15 | Unit 6 review result; document count corrected to 58; §8.0 items 3 and 10 |
+| 1.0 | 2026-11-15 | Phase D: unit 5 closed; final counts; decisions 12 and 13; DD-05; audit closure blocks recorded; prompt-cf99f3f3 moved to `dev/prompt/closed/` |
 
 ---
 
