@@ -22,7 +22,19 @@ Created: 2026 November 14
 
 This report records the session run from `dev/prompt/prompt-cf99f3f3-autonomous-session.md` on 2026-11-14. The session acts as worker and reviewer under the operator's one-time exemption from the approval steps of `governance.md` (prompt §1.0). Approvals are recorded as `operator (one-time session exemption, 2026-11-14)`.
 
-Status: Phase A (review and triage) complete. Phases B to D follow; §4.0 and §7.0 are updated after each work unit.
+The session ran on 2026-11-14 and, after three usage-limit interruptions, into 2026-11-15; documents carry the date on which they were written. Each restart followed prompt §12.1 item 3 and found a clean working tree.
+
+Result:
+
+- Every finding of the five active audits and of the ten active reports has one disposition (§3.0).
+- Triple 9377f9b9 (work item 5A) is closed. Four triples were raised, implemented, reviewed and closed in the session: bae631c7 (5B-1), d4f527e7 (5B-2), 541f5c58 (5C) and 6d40f0dd (6).
+- Document fixes: governance 12.12 (Appendix A.5), eleven further documents corrected, layout conformance for 31 active documents, the Mistral Vibe profile.
+- Seven reports are closed (six scheduled or implementation reports of earlier work, and report-9377f9b9); the four implementation reports of the session are closed with their triples. No audit was moved to `closed/`; each carries a closure block (§6.1).
+- Suite: 766 passed, 2 skipped at the start; the final counts are in §7.0. Both checkers report 0 errors.
+- No unit ended blocked. One row of open work remains from the session's scope: the remaining test coverage gaps of audit-caab2052 §8.0 (`dev/task.md`).
+- Not done, by the prompt: every P02.8.2 follow-up audit and all macOS testing (§6.0).
+
+`main` was not changed and no pull request was opened. No closed record that existed at the start was edited; documents were only moved into `closed/` after their own closing edit.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -34,7 +46,7 @@ Status: Phase A (review and triage) complete. Phases B to D follow; §4.0 and §
 |---|---|
 | Session branch | `claude/blissful-keller-mn2avc` |
 | Starting commit | `9b7559528c9ee69e7860e6f18cc57cbdb7159734` (`9b75595`, equal to `main` and `origin/main`) |
-| Environment | Claude Code cloud container, Linux, Python 3.13.18, git present, running as root |
+| Environment | Claude Code cloud container, Linux, Python 3.13.18, git present, running as root; GNU bash 5, mawk, GNU sed and tar; no rsync |
 | Installation | `pip install -r ai/engine/requirements.txt -r ai/webui/requirements.txt pytest` completed (mcp 1.30.0, openai 3.51.0, anthropic 2.8.0, rich 15.0.0, pytest 9.2.0) |
 | Signing | `commit.gpgsign` was `true`; set to `false` in the working repository (prompt §4.2 item 3) |
 
@@ -166,10 +178,10 @@ Each finding, observation and open point of the active audits and reports was ch
 | 3a | Work item 5B-1, engine runtime: configuration, console, logging | `bae631c7` | Completed; triple closed. Review: SHIP on the first round | `90f98a8` (issue, change), `f176b07` (source), `962238e` and `5c3e540` (tests), `99bdd9e`, `cee4cb6` and the closing commit (documents) |
 | 3b | Work item 5B-2, engine runtime: tracking, state, Overwatch | `d4f527e7` | Completed; triple closed. Review: REVISE (file mode not kept by the atomic helpers; `approvals.yaml` encoding; one report count), then SHIP | `a5a3656` (issue, change), `98214f8` and `0a3b509` (source), `3c3b870` and `af46991` (tests), `b07b3b4`, `34730e5` and the closing commit (documents) |
 | 4 | Work item 5C, scripts and documents | `541f5c58` | Completed; triple closed. Review: REVISE (flow list cut at the last closing bracket; baseline facts in the report), then SHIP | `42c7fef` (issue, change), `1a1b1cd` and `e4e7e99` (scripts, recipe), `ff11a94` and `9f35a03` (tests), `51d0f26`, `cd0082a`, `5aad2c2` and the closing commit (documents) |
-| 5 | Work item 6, test coverage gaps | `6d40f0dd` | Not started | |
+| 5 | Work item 6, test coverage gaps | `6d40f0dd` | Implemented; review result recorded when available | `32d1a6a` (issue, change), `0c7595c` (tests), `2db6b2b` (report) |
 | 6 | Work item 7a, document layout conformance (README.md v4.5): 31 active documents corrected; 65 active documents with a Table of Contents checked | — | Completed; review result recorded when available | `docs: layout conformance` commit |
 | 7 | Work item 7b, Mistral Vibe profile `ai/profiles/mistral-vibe.md` | — | Completed (performed during the review wait of unit 3b; web search and fetch were available for the Vibe repository and PyPI, not for docs.mistral.ai). Review: SHIP on the first round; one optional remark taken (profile v1.1) | `e65bdaf`, `cd0082a` |
-| 8 | Defects registered under prompt §11.0 | — | Not started | |
+| 8 | Defects registered under prompt §11.0 | — | Completed within units 2 and 4: DD-01, DD-03, DD-04 (unit 2), DD-02 (unit 4). No defect remains unresolved | See units 2 and 4 |
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -199,7 +211,49 @@ Further decisions are added here as each unit records them.
 
 ## 6.0 Deferred to the Operator
 
-Completed in Phase D. Standing items from the prompt: every P02.8.2 follow-up audit, and the macOS suite.
+### 6.1 Follow-up Audits (P02.8.2)
+
+None was performed. Each audit below has findings remediated by source changes; its closure needs a follow-up audit by an independent session and the operator's approval. The reviewer verdicts of §4.0 are not audits.
+
+| Audit | Changes the follow-up audit must cover | State of the audit document |
+|---|---|---|
+| `audit-caab2052-static-code-2026-10-27` | change-bae631c7 (L-13, L-16), change-d4f527e7 (L-10, L-14), change-541f5c58 (L-19, a design text). Earlier groups were audited with their own follow-up audits. The §8.0 re-measurement is in report-6d40f0dd §4.0 | §14.0 complete; closure block added |
+| `audit-b8c75bac-followup-2026-11-06` | change-bae631c7 (F-05, `_load_config`). F-03 is closed by tests only (change-6d40f0dd) | §11.0 outcomes; closure block added |
+| `audit-86c958dd-followup-2026-11-06` | change-d4f527e7 (F-01, Overwatch blocked detail), change-bae631c7 (F-02, `model_context_windows`). F-03 is closed by tests only | §11.0 outcomes; closure block added |
+| `audit-e4428fd5-followup-2026-11-07` | change-9377f9b9 (F-01, F-02, F-08; implemented before the session) | §11.0 outcomes; closure block added (unit 1) |
+| `audit-4b0a5592-followup-2026-11-07` | change-d4f527e7 (F-01, F-02, F-04: tracking by file identity, non-regular documents). F-07 and F-10 are closed by tests only | §11.0 outcomes; closure block added |
+
+One follow-up audit per change is sufficient: change-9377f9b9, change-bae631c7, change-d4f527e7 and change-541f5c58. change-6d40f0dd changed tests only; P02.8.2 requires no follow-up audit for it.
+
+Points recorded for the auditors:
+
+- change-bae631c7: a failed MCP connection now writes the exception text to the engine log; the key redaction of change-5e8aea4f covers provider error text, not this path (report-bae631c7 §6.0).
+- change-d4f527e7: the atomic write helpers replace a read-only target, where the in-place write failed; a state file name that is a symlink is replaced, not written through; a task below a symlinked directory in `ai/workspace/` that leads outside is refused (report-d4f527e7 §5.0, §6.0).
+- change-541f5c58: an up-to-date target that lacks a workspace folder now needs `--yes` or a terminal confirmation in `propagate.sh` (change `interface_changes`).
+
+### 6.2 macOS Testing
+
+Not performed. Command, from the repository root in the engine environment (`pip install -r ai/engine/requirements.txt -r ai/webui/requirements.txt pytest`):
+
+```bash
+python3 -m pytest tests/engine tests/webui -v
+```
+
+Expected on macOS, relative to the Linux counts of §7.0:
+
+- The Linux run skips four cases. Two are skipped because the session ran as root (`tests/webui/test_overwatch.py:298`, `test_t5_real_unremovable_entry`); they should run for an ordinary user. Two are skipped on a case-sensitive file system (`test_b3_fr_02_06_compares_file_identity[case]`, `test_t7_case_variant_is_tracked`); they should run on default APFS. With all four running, the expected result is the Linux passed count plus four, and no skip.
+- `tests/engine/test_engine_mcp.py` ran in the session (the MCP SDK was installed).
+- `test_t7_case_variant_is_tracked` is the confirmation of audit-4b0a5592 F-02 that `dev/task.md` asked for. In addition, a loop run with a differently cased path to an approved prompt (for example `AI/Workspace/prompt/<name>`) is expected to exit 3 (report-d4f527e7 §6.0 item 1).
+- `tests/engine/test_bin_scripts.py` exercises `bin/bootstrap.sh`, `bin/propagate.sh` and `bin/migrate-layout.sh` with bash 3.2 and BSD awk, sed and tar for the first time; the session had GNU bash 5, mawk, GNU sed and GNU tar. With rsync installed the propagate tests use it instead of the stand-in.
+- Checkers: `python3 ai/engine/src/linter.py dev` and `python3 ai/engine/src/protocol_checker.py dev`, 0 errors each.
+
+### 6.3 Other Items for the Operator
+
+- Merge: fast-forward only, after review (`CLAUDE.md` §4.0); the command is in the session's final message.
+- Before the propagation of work item 8e: check each downstream `ai/config.yaml` for `context.model_context_windows` entries that are not positive integers, which are now refused (change-bae631c7).
+- `bin/bootstrap.sh` is fetched from `main` by the documented install command; its change takes effect at the merge.
+- The Mistral Vibe profile was written from documentation and not run; `docs.mistral.ai` was not reachable from the session (`ai/profiles/mistral-vibe.md` §7.0).
+- Nothing ended blocked.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -227,7 +281,15 @@ Warning changes against the baseline:
 
 ## 8.0 Open Points
 
-Completed in Phase D.
+1. Remaining test coverage gaps of audit-caab2052 §8.0 (`dev/task.md` row `caab2052` 6 (a); report-6d40f0dd §4.0). Status `Open — not raised`.
+2. Letter case on a case-insensitive file system (audit-4b0a5592 F-02): implemented by file identity, not verified (§6.2).
+3. `governance.md` was left out of the layout conformance: its Table of Contents is grouped under bold labels and links the templates, and Appendix A has no Return link (decision 10). A layout-only governance version would settle it if wanted.
+4. The T03 template has no `target_profile` value for Mistral Vibe; the profile names `claude_code`, although P00.18 makes the run-tests skill mandatory for that value and the profile states that the skill does not apply to Vibe (decision 8).
+5. A null or non-mapping `context:` block in `ai/config.yaml` still ends a run with `AttributeError`; outside the findings (report-bae631c7 §6.0 item 1).
+6. Temporary files `.<name>.<pid>.tmp` left by a killed process are not removed by `--mode reset` (report-d4f527e7 §5.0 item 1).
+7. `ai/profiles/README.md` now names the planner primer as the tracked reference for Claude Desktop; the project instructions themselves remain a local, untracked file.
+8. Not taken, optional in the audit dispositions: audit-b8c75bac X03 and X09; audit-86c958dd X03 and X06.
+9. The linter reports one more warning than at the start (§7.0); it concerns a quoted link in a closed report.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -244,6 +306,7 @@ Completed in Phase D.
 | 0.5 | 2026-11-14 | Unit 3b (change-d4f527e7) closed: status, counts, decision 9; two new skips explained |
 | 0.6 | 2026-11-14 | Units 6 and 7: layout conformance, decision 10; profile review result |
 | 0.7 | 2026-11-14 | Unit 4 (change-541f5c58) closed: status, counts, decision 11 |
+| 0.8 | 2026-11-15 | §1.0 summary, §6.0 deferred items, §8.0 open points; units 5 and 8 status |
 
 ---
 
