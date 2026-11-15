@@ -28,7 +28,7 @@ This report records the implementation of change-6d40f0dd (issue-6d40f0dd; Stage
 - (f) audit-4b0a5592 F-07: X07, X10, X12, X13 and X17, X14 and X18 each have a test.
 - (a) audit-caab2052 §8.0 was re-measured (§4.0); nine helper functions without a direct test now have one; the remaining gaps are registered in `dev/task.md`.
 
-33 test cases were added. Each of the 14 mutations fails its named test.
+33 test cases were added. Each of the 15 mutations fails its named test.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -70,7 +70,8 @@ The new tests state existing behaviour, so they pass against the unchanged sourc
 | X07 (4b0a5592) | Warning branch `elif not _tracked` | `test_f_free_text_task_prints_no_tracking_warning` | Caught |
 | X10 (4b0a5592) | No restoration after a failed `git add` | `test_f_failed_git_add_restores_the_file` | Caught |
 | X12 (4b0a5592) | Detail prefers stdout to stderr | `test_f_failure_detail_prefers_stderr` | Caught |
-| X13, X17 (4b0a5592) | `OSError` of the write-back swallowed | `test_f_restoration_failure_is_reported` | Caught |
+| X13 (4b0a5592) | Restoration-failure suffix never appended | `test_f_restoration_failure_is_reported` | Caught (run by the reviewer) |
+| X17 (4b0a5592) | `OSError` of the write-back swallowed | `test_f_restoration_failure_is_reported` | Caught |
 | X14 (4b0a5592) | `git reset -q` without the pathspec | `test_f_failed_call_leaves_other_staged_files` | Caught |
 | X18 (4b0a5592) | `HEAD:ai/approvals.yaml` from the repository root | `test_f_nested_project_does_not_read_the_outer_approvals` | Caught |
 | Fixture line removed | `repo` fixture without `commit.gpgsign=false` | `test_e_repo_fixture_disables_commit_signing` | Caught |
@@ -97,9 +98,9 @@ Method, as in the audit: `pytest --collect-only` (861 items at the final commit,
 | `orchestrator.py` startup | Covered | `_substitute_project_root`: this change; strict tactical brief, readiness BLOCKED and `engine end` on early exits: `test_run_record.py` (change-86c958dd A1b) |
 | `mcp_client.py` | Covered with stand-ins | Connection failure and name collision: `test_runtime_hygiene.py` T7, T8 (change-bae631c7); `call_tool` error text: `test_t9_call_tool_timeout_is_a_tool_error`. A real stdio server is not started |
 | `providers.py` | Partly covered | SDK timeout and retry configuration: `test_providers.py`, `test_loop_robustness.py` (change-711a57d5). Remaining: `strict_tools` given as a string |
-| `stages.py` | Partly covered | Nested project: `test_approvals_in_a_project_nested_in_a_repository`, `test_f_nested_project_does_not_read_the_outer_approvals`. Remaining: `main` output (`--json`, `--task-check`) |
+| `stages.py` | Partly covered | Nested project: `test_approvals_in_a_project_nested_in_a_repository`, `test_f_nested_project_does_not_read_the_outer_approvals`. `--task-check`: `test_task_check_command_line`. Remaining: the `main` report output (`--json` and plain text) and its manifest-error branch |
 | `approve.py` | Covered | Commit and add failure paths: `test_failed_approval_commit_*`, `test_t3_approve_writes_atomically`, `test_f_*` |
-| `overwatch.py` | Partly covered | `Scanner._read_engine_state`, FR-02-06, document scan, `AlertWriter.payload` heading: tests O1 to O6, B1 to B3, C, T2, T6. Remaining: `PhaseInference`; the `ComplianceEngine` rules other than FR-02-06 (FR-02-01 to FR-02-05, FR-02-07 to FR-02-12); `_read_budget` |
+| `overwatch.py` | Partly covered | `Scanner._read_engine_state`, FR-02-06, document scan, `AlertWriter.payload` heading: tests O1 to O6, B1 to B3, C, T2, T6. `PhaseInference` for an ended run with an open prompt: `test_o6_ended_run_with_open_prompt_awaits_execution`. Remaining: the other `PhaseInference` cases; the `ComplianceEngine` rules other than FR-02-06 (FR-02-01 to FR-02-05, FR-02-07 to FR-02-12); `_read_budget` |
 
 The remaining gaps are registered as one row in `dev/task.md` (decision D3).
 
@@ -126,7 +127,7 @@ None in scope. Interpretations:
 2. X13 and X17: the write-back is made to fail by a stand-in for `approve._write_atomic` that raises on its second call.
 3. X10: `git add` is made to fail by ignoring `ai/approvals.yaml` in `.gitignore`, the case of audit-4b0a5592 §4.3.
 4. E: `test_e_repo_fixture_disables_commit_signing` also commits with a global configuration that asks for signing with a signer that does not exist (`GIT_CONFIG_GLOBAL`), which fails without the fixture line.
-5. The helper tests of part (a) assert the behaviour that each function's docstring states. They do not judge whether that behaviour is the desired one.
+5. The helper tests of part (a) assert the behaviour that each function's docstring states. They do not judge whether that behaviour is the desired one. Three assertions are characterisations of behaviour the docstrings do not state: with a provider-supplied `reasoning_content`, `extract_reasoning` leaves `<think>` tags in the content; format 2 of `parse_tool_calls` with unparsable arguments yields a call with empty arguments; and `_truncate_tool_result` is tested without its omitted-character count (§7.0 item 5).
 6. The hard-link test is skipped where `os.link` is not available.
 
 [Return to Table of Contents](#table-of-contents)
@@ -138,6 +139,8 @@ None in scope. Interpretations:
 1. The remaining §8.0 gaps (§4.0) are open work in `dev/task.md`.
 2. Not taken (optional in the audit dispositions): audit-b8c75bac X03 and X09; audit-86c958dd X03 and X06.
 3. Deferred to the operator: the macOS suite. This change touches tests only, so it needs no follow-up audit of its own (P02.8.2); the audits it serves are listed in report-b3a503a2 §6.0.
+4. Review (fresh reviewer subagent, prompt-cf99f3f3 §8.4), round 1: REVISE with three findings. F1 and F2: §4.0 listed `--task-check` and `PhaseInference` as untested although one test each exists; corrected here and in `dev/task.md`. F3: `test_a_truncate_tool_result` asserted the marker's count, which the function computes inaccurately; the assertion no longer fixes the count (item 5). Optional remarks taken: the `git add` test no longer depends on git's English message text; X13 and X17 are listed separately. The reviewer re-ran all mutations, including X13 as the audit defines it.
+5. Observation, not changed (tests only): the elision marker of `_truncate_tool_result` states `len(content) - max_chars` characters as omitted. The number actually left out is larger by the marker's own length (836 against a stated 800 for 1,000 characters and a limit of 200). Registered in `dev/task.md`.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -164,6 +167,7 @@ This report and the status updates follow as `docs(dev)` commits; a commit canno
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-14 | Initial report |
+| 1.1 | 2026-11-15 | Review round 1 corrections: §4.0 stages.py and overwatch.py rows, §3.0 X13 and X17, §6.0 item 5, §7.0 items 4 and 5 |
 
 ---
 

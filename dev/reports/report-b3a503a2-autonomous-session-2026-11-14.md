@@ -162,6 +162,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | DD-02 | `ai/engine/doc/guide-engine-operations.md` §5.0 states that a duration-limit exit writes `.complete` with `DURATION_LIMIT: iteration N`; the engine writes `.timeout` with `TIMEOUT: iteration N` (`orchestrator.py:2150`). Same subject as work item 5C (b) | doc-fix (in the 5C triple) | Unit 4 |
 | DD-03 | `requirements-0c6aedee` §9.1 states the dataclasses, including `AelState`, as "Reused unmodified"; same contradiction as report-0fce4169 F1 | doc-fix | Unit 2 (requirements-0c6aedee v0.9) |
 | DD-04 | `design-ael-orchestrator` §3.1 (diagram label "tier 2 query") and §4.2 ("Tier 3 per-model override") carried the tier numbers that report-53b0e016 F-01 reported for §5.1; found by the unit 2 reviewer | doc-fix | Unit 2 (design-ael-orchestrator v0.12) |
+| DD-05 | `orchestrator._truncate_tool_result` states `len(content) - max_chars` characters as omitted; the number left out is larger by the marker's own length. Found by the unit 5 reviewer | source-fix | Not resolved; registered in `dev/task.md` as `Open — not raised` (prompt §11.0 item 3): the correct count needs a small design decision and the finding lies outside the audits in scope |
 
 [Return to Table of Contents](#table-of-contents)
 
