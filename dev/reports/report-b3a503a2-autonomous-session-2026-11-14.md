@@ -179,7 +179,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | 3b | Work item 5B-2, engine runtime: tracking, state, Overwatch | `d4f527e7` | Completed; triple closed. Review: REVISE (file mode not kept by the atomic helpers; `approvals.yaml` encoding; one report count), then SHIP | `a5a3656` (issue, change), `98214f8` and `0a3b509` (source), `3c3b870` and `af46991` (tests), `b07b3b4`, `34730e5` and the closing commit (documents) |
 | 4 | Work item 5C, scripts and documents | `541f5c58` | Completed; triple closed. Review: REVISE (flow list cut at the last closing bracket; baseline facts in the report), then SHIP | `42c7fef` (issue, change), `1a1b1cd` and `e4e7e99` (scripts, recipe), `ff11a94` and `9f35a03` (tests), `51d0f26`, `cd0082a`, `5aad2c2` and the closing commit (documents) |
 | 5 | Work item 6, test coverage gaps | `6d40f0dd` | Implemented; review result recorded when available | `32d1a6a` (issue, change), `0c7595c` (tests), `2db6b2b` (report) |
-| 6 | Work item 7a, document layout conformance (README.md v4.5): 31 active documents corrected; 65 active documents with a Table of Contents checked | — | Completed; review result recorded when available | `docs: layout conformance` commit |
+| 6 | Work item 7a, document layout conformance (README.md v4.5): 31 active documents corrected; 58 in-scope documents with a Table of Contents checked | — | Completed. Review: SHIP on the first round | `222fc73` |
 | 7 | Work item 7b, Mistral Vibe profile `ai/profiles/mistral-vibe.md` | — | Completed (performed during the review wait of unit 3b; web search and fetch were available for the Vibe repository and PyPI, not for docs.mistral.ai). Review: SHIP on the first round; one optional remark taken (profile v1.1) | `e65bdaf`, `cd0082a` |
 | 8 | Defects registered under prompt §11.0 | — | Completed within units 2 and 4: DD-01, DD-03, DD-04 (unit 2), DD-02 (unit 4). No defect remains unresolved | See units 2 and 4 |
 
@@ -283,7 +283,8 @@ Warning changes against the baseline:
 
 1. Remaining test coverage gaps of audit-caab2052 §8.0 (`dev/task.md` row `caab2052` 6 (a); report-6d40f0dd §4.0). Status `Open — not raised`.
 2. Letter case on a case-insensitive file system (audit-4b0a5592 F-02): implemented by file identity, not verified (§6.2).
-3. `governance.md` was left out of the layout conformance: its Table of Contents is grouped under bold labels and links the templates, and Appendix A has no Return link (decision 10). A layout-only governance version would settle it if wanted.
+3. `governance.md` was left out of the layout conformance: its Table of Contents is grouped under bold labels and links the templates, and Appendix A has no Return link (decision 10). The unit 6 reviewer also noted that its Return link at the end sits inside Version History, that Appendix A follows the copyright line, and that there is no `---` between the protocol sections. A layout-only governance version would settle it if wanted.
+10. Layout points that the 7a row does not name remain in a few documents: unnumbered content sections in `requirements-1c1f4ef6-ael.md` and `docs/setup-apple-silicon-mlx.md`, and Return links after H3 subsections in four requirements documents, `docs/guide-profile-selection.md` and `docs/setup-apple-silicon-mlx.md`. Every link resolves.
 4. The T03 template has no `target_profile` value for Mistral Vibe; the profile names `claude_code`, although P00.18 makes the run-tests skill mandatory for that value and the profile states that the skill does not apply to Vibe (decision 8).
 5. A null or non-mapping `context:` block in `ai/config.yaml` still ends a run with `AttributeError`; outside the findings (report-bae631c7 §6.0 item 1).
 6. Temporary files `.<name>.<pid>.tmp` left by a killed process are not removed by `--mode reset` (report-d4f527e7 §5.0 item 1).
@@ -307,6 +308,7 @@ Warning changes against the baseline:
 | 0.6 | 2026-11-14 | Units 6 and 7: layout conformance, decision 10; profile review result |
 | 0.7 | 2026-11-14 | Unit 4 (change-541f5c58) closed: status, counts, decision 11 |
 | 0.8 | 2026-11-15 | §1.0 summary, §6.0 deferred items, §8.0 open points; units 5 and 8 status |
+| 0.9 | 2026-11-15 | Unit 6 review result; document count corrected to 58; §8.0 items 3 and 10 |
 
 ---
 
