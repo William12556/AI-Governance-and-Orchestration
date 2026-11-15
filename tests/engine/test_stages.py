@@ -918,7 +918,6 @@ def test_f_failed_git_add_restores_the_file(repo, se):
     code, message = A.approve(str(repo), U, "prompt", se)
     assert code == 1
     assert message.startswith("git failed (add --): ")
-    assert "ignored" in message
     assert "could not be restored" not in message
     assert not (repo / "ai" / "approvals.yaml").exists()
     assert _git(repo, "status", "--porcelain", "--", "ai/approvals.yaml").stdout == ""

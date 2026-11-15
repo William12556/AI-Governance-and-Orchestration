@@ -133,13 +133,16 @@ def test_a_truncate_tool_result(orch):
     content = "H" * 500 + "T" * 500
     out = orch._truncate_tool_result(content, 200)
     assert len(out) <= 200
-    assert "[800 characters omitted]" in out
+    # the marker's count is not asserted: it states len(content) - max_chars,
+    # which is not the number of characters left out (report-6d40f0dd §7.0)
+    assert "characters omitted]" in out
     assert out.startswith("H") and out.endswith("T")
     # too small for the marker: a plain cut
     assert orch._truncate_tool_result(content, 10) == "H" * 10
 
 
 def test_a_extract_reasoning(orch, log):
+    # a provider-supplied reasoning_content takes precedence; the content is then left as it is
     message = types.SimpleNamespace(reasoning_content="from the provider")
     assert orch.extract_reasoning(message, "<think>x</think>answer", log) == (
         "from the provider", "<think>x</think>answer")
