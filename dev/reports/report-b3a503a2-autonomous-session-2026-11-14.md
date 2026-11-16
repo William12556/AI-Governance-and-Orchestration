@@ -182,7 +182,7 @@ Each finding, observation and open point of the active audits and reports was ch
 | 5 | Work item 6, test coverage gaps | `6d40f0dd` | Completed; triple closed. Review: REVISE (two rows of the re-measurement; one assertion fixing an inaccurate count), then SHIP | `32d1a6a` (issue, change), `0c7595c` and `6de3a63` (tests), `2db6b2b`, `1674e82` and the closing commit (documents) |
 | 6 | Work item 7a, document layout conformance (README.md v4.5): 31 active documents corrected; 58 in-scope documents with a Table of Contents checked | — | Completed. Review: SHIP on the first round | `222fc73` |
 | 7 | Work item 7b, Mistral Vibe profile `ai/profiles/mistral-vibe.md` | — | Completed (performed during the review wait of unit 3b; web search and fetch were available for the Vibe repository and PyPI, not for docs.mistral.ai). Review: SHIP on the first round; one optional remark taken (profile v1.1) | `e65bdaf`, `cd0082a` |
-| 8 | Defects registered under prompt §11.0 | — | Completed within units 2 and 4: DD-01, DD-03, DD-04 (unit 2), DD-02 (unit 4). No defect remains unresolved | See units 2 and 4 |
+| 8 | Defects registered under prompt §11.0 | — | Completed within units 2 and 4: DD-01, DD-03, DD-04 (unit 2), DD-02 (unit 4). DD-05, found in the unit 5 review, is not resolved and is registered in `dev/task.md` (§3.7) | See units 2 and 4 |
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -234,7 +234,7 @@ Points recorded for the auditors:
 
 ### 6.2 macOS Testing
 
-Not performed. Command, from the repository root in the engine environment (`pip install -r ai/engine/requirements.txt -r ai/webui/requirements.txt pytest`):
+Not performed in the session. The operator ran the suite on macOS on 2026-11-16 after the merge: 862 passed, 0 skipped (§7.0). The loop run with a differently cased path and the two checkers were not reported. Command, from the repository root in the engine environment (`pip install -r ai/engine/requirements.txt -r ai/webui/requirements.txt pytest`):
 
 ```bash
 python3 -m pytest tests/engine tests/webui -v
@@ -271,8 +271,9 @@ Expected on macOS, relative to the Linux counts of §7.0:
 | After unit 3b (change-d4f527e7) | 812 passed, 4 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
 | After units 4, 5 (tests) and 6 | 858 passed, 4 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
 | Final (Phase D) | 858 passed, 4 skipped | 0 errors, 113 warnings | 0 errors, 20 warnings |
+| macOS, operator (2026-11-16, after the merge) | 862 passed | not reported | not reported |
 
-Against the baseline: 92 more tests pass (766 to 858), none fails, and two more are skipped. The 862 collected items are 858 passed and 4 skipped.
+Against the baseline: 92 more tests pass (766 to 858), none fails, and two more are skipped. The 862 collected items are 858 passed and 4 skipped on Linux; on macOS all 862 pass, as expected in §6.2.
 
 Warning changes against the baseline:
 
@@ -286,16 +287,16 @@ Warning changes against the baseline:
 ## 8.0 Open Points
 
 1. Remaining test coverage gaps of audit-caab2052 §8.0 (`dev/task.md` row `caab2052` 6 (a); report-6d40f0dd §4.0). Status `Open — not raised`.
-11. `orchestrator._truncate_tool_result` states an omitted-character count that is too small by the marker's own length (DD-05; `dev/task.md`, `Open — not raised`). It was found in the unit 5 review. It is not resolved because the correct count needs a small design decision and lies outside the audits in scope (prompt §11.0 item 3).
-2. Letter case on a case-insensitive file system (audit-4b0a5592 F-02): implemented by file identity, not verified (§6.2).
-3. `governance.md` was left out of the layout conformance: its Table of Contents is grouped under bold labels and links the templates, and Appendix A has no Return link (decision 10). The unit 6 reviewer also noted that its Return link at the end sits inside Version History, that Appendix A follows the copyright line, and that there is no `---` between the protocol sections. A layout-only governance version would settle it if wanted.
-10. Layout points that the 7a row does not name remain in a few documents: unnumbered content sections in `requirements-1c1f4ef6-ael.md` and `docs/setup-apple-silicon-mlx.md`, and Return links after H3 subsections in four requirements documents, `docs/guide-profile-selection.md` and `docs/setup-apple-silicon-mlx.md`. Every link resolves.
-4. The T03 template has no `target_profile` value for Mistral Vibe; the profile names `claude_code`, although P00.18 makes the run-tests skill mandatory for that value and the profile states that the skill does not apply to Vibe (decision 8).
-5. A null or non-mapping `context:` block in `ai/config.yaml` still ends a run with `AttributeError`; outside the findings (report-bae631c7 §6.0 item 1).
-6. Temporary files `.<name>.<pid>.tmp` left by a killed process are not removed by `--mode reset` (report-d4f527e7 §5.0 item 1).
-7. `ai/profiles/README.md` now names the planner primer as the tracked reference for Claude Desktop; the project instructions themselves remain a local, untracked file.
-8. Not taken, optional in the audit dispositions: audit-b8c75bac X03 and X09; audit-86c958dd X03 and X06.
-9. The linter reports one more warning than at the start (§7.0); it concerns a quoted link in a closed report.
+2. `orchestrator._truncate_tool_result` states an omitted-character count that is too small by the marker's own length (DD-05; `dev/task.md`, `Open — not raised`). It was found in the unit 5 review. It is not resolved because the correct count needs a small design decision and lies outside the audits in scope (prompt §11.0 item 3).
+3. Letter case on a case-insensitive file system (audit-4b0a5592 F-02): implemented by file identity. `test_t7_case_variant_is_tracked` passed on macOS on 2026-11-16 (§6.2); the loop run with a differently cased path (expected exit 3) has not been reported.
+4. `governance.md` was left out of the layout conformance: its Table of Contents is grouped under bold labels and links the templates, and Appendix A has no Return link (decision 10). The unit 6 reviewer also noted that its Return link at the end sits inside Version History, that Appendix A follows the copyright line, and that there is no `---` between the protocol sections. A layout-only governance version would settle it if wanted.
+5. Layout points that the 7a row does not name remain in a few documents: unnumbered content sections in `requirements-1c1f4ef6-ael.md` and `docs/setup-apple-silicon-mlx.md`, and Return links after H3 subsections in four requirements documents, `docs/guide-profile-selection.md` and `docs/setup-apple-silicon-mlx.md`. Every link resolves.
+6. The T03 template has no `target_profile` value for Mistral Vibe; the profile names `claude_code`, although P00.18 makes the run-tests skill mandatory for that value and the profile states that the skill does not apply to Vibe (decision 8).
+7. A null or non-mapping `context:` block in `ai/config.yaml` still ends a run with `AttributeError`; outside the findings (report-bae631c7 §6.0 item 1).
+8. Temporary files `.<name>.<pid>.tmp` left by a killed process are not removed by `--mode reset` (report-d4f527e7 §5.0 item 1).
+9. `ai/profiles/README.md` now names the planner primer as the tracked reference for Claude Desktop; the project instructions themselves remain a local, untracked file.
+10. Not taken, optional in the audit dispositions: audit-b8c75bac X03 and X09; audit-86c958dd X03 and X06.
+11. The linter reports one more warning than at the start (§7.0); it concerns a quoted link in a closed report.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -315,6 +316,7 @@ Warning changes against the baseline:
 | 0.8 | 2026-11-15 | §1.0 summary, §6.0 deferred items, §8.0 open points; units 5 and 8 status |
 | 0.9 | 2026-11-15 | Unit 6 review result; document count corrected to 58; §8.0 items 3 and 10 |
 | 1.0 | 2026-11-15 | Phase D: unit 5 closed; final counts; decisions 12 and 13; DD-05; audit closure blocks recorded; prompt-cf99f3f3 moved to `dev/prompt/closed/` |
+| 1.1 | 2026-11-16 | §4.0 unit 8: DD-05 stated as unresolved; §6.2, §7.0: operator macOS run (862 passed); §8.0: items renumbered in sequence, item 3 updated |
 
 ---
 
