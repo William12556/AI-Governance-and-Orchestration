@@ -428,6 +428,20 @@ Recorded by the planner, 2026-11-07, with operator approval (option A: close cha
 
 The operator's macOS suite (746 passed) completed the validation criteria. change-4b0a5592 is verified and closed with issue-4b0a5592 and report-4b0a5592. This audit stays active until work items 5 and 6 are closed.
 
+Outcomes recorded 2026-11-14 (session report-b3a503a2; approver: operator, one-time session exemption, 2026-11-14):
+
+| Finding | Outcome |
+|---|---|
+| F-01 | Resolved by change-d4f527e7 (`98214f8`): a task is tracked when it lies in `ai/workspace/` by file identity, as given or as resolved, and a task that resolves outside `ai/workspace/` is refused (exit 3). Tests (`3c3b870`): `test_t7_tracking_by_file_identity`, `test_t7_outward_link_is_refused` (the two probe cases of §4.1) |
+| F-02 | Implemented by change-d4f527e7 (`98214f8`): containment by `os.path.samestat` against `ai/workspace/`. Not verified: the Linux file system is case-sensitive, so `test_t7_case_variant_is_tracked` is skipped. Confirmation on macOS is deferred to the operator; a differently cased path to the approved prompt is expected to be tracked and then refused |
+| F-04 | Resolved by change-d4f527e7 (`98214f8`): an evidence match that is not a regular file is skipped without being opened and reported as the scan warning `<path>: not a regular file; ignored`. Tests: `test_t8_non_regular_documents_are_skipped` (FIFO, directory, dangling symlink), `test_t8_prerun_passes_beside_a_non_regular_entry` |
+| F-07, X02 and X04 | Covered by `test_t7_tracking_by_file_identity` (a sibling `ai/workspace-x/`; a symlinked project root). The remaining gaps of F-07 continue in work item 6 (f) |
+| F-09 | guide-engine-operations v1.34 §5.0 restated for the new behaviour |
+| F-07 | Resolved by change-6d40f0dd (tests `0c7595c`): X07 `test_f_free_text_task_prints_no_tracking_warning`; X10 `test_f_failed_git_add_restores_the_file`; X12 `test_f_failure_detail_prefers_stderr`; X13 and X17 `test_f_restoration_failure_is_reported`; X14 `test_f_failed_call_leaves_other_staged_files`; X18 `test_f_nested_project_does_not_read_the_outer_approvals`. Each mutation fails its test (report-6d40f0dd §3.0) |
+| F-10 | Resolved by change-6d40f0dd: the `repo` fixture sets `commit.gpgsign=false`; `test_e_repo_fixture_disables_commit_signing` |
+
+**Closure block.** All findings of this audit are resolved or dispositioned. Findings F-01, F-02 and F-04 were remediated by a source change (change-d4f527e7), and F-02 awaits confirmation on macOS, so closure requires a follow-up audit (P02.8.2), which is deferred to the operator. Status: ready for follow-up audit; closure pending operator.
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -438,6 +452,8 @@ The operator's macOS suite (746 passed) completed the validation criteria. chang
 |---|---|---|
 | 1.0 | 2026-11-07 | Initial follow-up audit of change-4b0a5592 |
 | 1.1 | 2026-11-07 | §11.0 Dispositions added by the planner |
+| 1.2 | 2026-11-14 | §11.0: outcomes of F-01, F-02, F-04 and of X02 and X04 (change-d4f527e7) |
+| 1.3 | 2026-11-15 | §11.0: outcomes of F-07 and F-10 (change-6d40f0dd) and closure block (ready for follow-up audit; closure pending operator) |
 
 ---
 

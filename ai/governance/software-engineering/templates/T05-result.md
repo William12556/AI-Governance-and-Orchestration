@@ -96,6 +96,8 @@ metadata:
   schema_type: "result"
 ```
 
+[Return to Table of Contents](#table-of-contents)
+
 ---
 
 ## Schema
@@ -313,6 +315,8 @@ properties:
           - result
 ```
 
+[Return to Table of Contents](#table-of-contents)
+
 ---
 
 ## Version History
@@ -325,6 +329,7 @@ properties:
 | 1.3     | 2026-06-16 | Standardised copyright line format (template metadata default and document footer) |
 | 1.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.5 | 2026-11-07 | change-e4428fd5: schema_type class word |
+| 1.6 | 2026-11-14 | Layout conformance with README.md v4.5: Return to Table of Contents links added (dev/task.md work item 7a) |
 
 ---
 

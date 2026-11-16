@@ -199,6 +199,7 @@ The link resolves to `dev/design/requirements/closed/requirements-govwatch.md`, 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-05 | Initial report: one Confirmed finding (Low). |
+| 1.1 | 2026-11-14 | Status: closed. F1: no action, closed record (P00.14.6). Nested code fence corrected in both `guide-audit-loop.md` copies (v1.7). `docs/claude/project_information.md` is a gitignored local file; no action. Dispositions: report-b3a503a2 §3.6 |
 
 ---
 

@@ -155,6 +155,7 @@ Suggested resolution: `dev/task.md` should change. Mark parts (g) for the checke
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-08 | Initial report |
+| 1.1 | 2026-11-14 | Status: closed. F-01 decided by the first option: governance 12.12 Appendix A.5 states that the template schemas describe new documents and that numbered values are valid for the checkers only. F-02 corrected in `dev/task.md` (parts implemented by change-9377f9b9 removed; work item 5A closed). Dispositions: report-b3a503a2 §3.6 |
 
 ---
 

@@ -5,7 +5,7 @@ change_info:
   id: "change-9377f9b9"
   title: "Checker hygiene: report unparsable and deeply nested YAML, closed test below the workspace, reject boolean iteration, checker tests (Stage C work item 5A)"
   date: "2026-11-07"
-  status: "implemented"  # operator approval 2026-11-07; implemented 2026-11-07
+  status: "verified"  # operator approval 2026-11-07; implemented 2026-11-07; verified 2026-11-14 (operator, one-time session exemption)
   priority: "low"
   iteration: 1
   coupled_docs:
@@ -168,6 +168,12 @@ version_history:
       - "Report §6.0: item 1 (M7 is caught by iteration true only, since false < 1 is already rejected) accepted; items 2 and 3 accepted as existing behaviour"
       - "Planner updates: governance.md 12.10 Appendix A.5; manifest.yaml 12.10"
       - "Open: operator macOS suite; follow-up audit (P02.8.2)"
+  - version: "1.3"
+    date: "2026-11-14"
+    changes:
+      - "Status verified; closed with issue-9377f9b9 and report-9377f9b9 (P00.14.4). Approver: operator (one-time session exemption, 2026-11-14), prompt-cf99f3f3 §1.0"
+      - "Linux cloud suite 766 passed, 2 skipped at 9b75595; linter.py dev 0 errors, 112 warnings; protocol_checker.py dev 0 errors, 20 warnings. macOS operator suite and P02.8.2 follow-up audit deferred to after the session (report-b3a503a2 §6.0)"
+      - "Source audit dispositions recorded in audit-e4428fd5 §11.0 (F-01 to F-04, F-08)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

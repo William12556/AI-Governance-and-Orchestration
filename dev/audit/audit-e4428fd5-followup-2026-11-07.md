@@ -421,6 +421,19 @@ Recorded by the planner, 2026-11-07, with operator approval.
 
 The operator's macOS suite (734 passed) completed the validation criteria. change-e4428fd5 is verified and closed with issue-e4428fd5 and report-e4428fd5. The pre-propagation checker run of §5.0 is added to work item 8e. This audit stays active until work items 5 and 6 are closed.
 
+Outcomes recorded 2026-11-14 (session report-b3a503a2; approver: operator, one-time session exemption, 2026-11-14):
+
+| Finding | Outcome |
+|---|---|
+| F-01 | Resolved by change-9377f9b9 (`6c13f98`): `linter._parse_yaml_block` and `manifest.load_manifest` map `RecursionError`. Tests (`096875e`): `test_t1_t2_unparsable_yaml_active_is_error`, `test_t1_t2_unparsable_yaml_closed_is_warn`, `test_t1_t2_unparsable_yaml_is_skipped`, `test_t6_deeply_nested_yaml_is_reported`. The `_load_config` site (audit-b8c75bac F-05) is work item 5B-1 |
+| F-02 | Resolved by change-9377f9b9 (`6c13f98`): `YAML block does not parse: <problem>`, ERROR outside `closed/`, WARN `(closed record)` inside (decision D1; governance 12.10). Tests: the T1/T2 cases above, `test_t3_parse_yaml_block` |
+| F-03, F-04 | Resolved by change-9377f9b9 tests (`096875e`): `test_t7_resolve_class_t02_changes`, `test_t8_closed_substring_does_not_block_inference`, `test_t9_status_consistency_mixed_types`, `test_t10_closed_prompt_empty_deliverable_files_is_warn`, `test_t11_id_empty_list_or_zero_is_error` |
+| F-08 | Resolved by change-9377f9b9 (`6c13f98`): a boolean `iteration` gives the iteration ERROR. Test: `test_t5_bool_iteration_is_error` |
+
+change-9377f9b9 is verified and closed with issue-9377f9b9 and report-9377f9b9 (2026-11-14; Linux cloud suite 766 passed, 2 skipped).
+
+**Closure block.** All findings of this audit are resolved or dispositioned. Findings F-01, F-02 and F-08 were remediated by a source change (change-9377f9b9), so closure requires a follow-up audit (P02.8.2), which is deferred to the operator. Status: ready for follow-up audit; closure pending operator.
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -431,6 +444,7 @@ The operator's macOS suite (734 passed) completed the validation criteria. chang
 |---|---|---|
 | 1.0 | 2026-11-07 | Initial follow-up audit of change-e4428fd5 |
 | 1.1 | 2026-11-07 | §11.0 Dispositions added by the planner |
+| 1.2 | 2026-11-14 | §11.0: outcomes of change-9377f9b9 and closure block (ready for follow-up audit; closure pending operator) |
 
 ---
 

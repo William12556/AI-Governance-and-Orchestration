@@ -138,6 +138,7 @@ Residue search (`ai/src`, `tests/overwatch`, `requirements-overwatch`, with the 
 | Version | Date | Description |
 |---|---|---|
 | 0.1 | 2026-10-23 | Initial report |
+| 0.2 | 2026-11-14 | Status: closed. §6.0 open points superseded: the suite is run with every change (766 passed, 2 skipped at `9b75595`); propagation was performed on 2026-11-04; `CLAUDE.md` v0.9 and `docs/guide-orchestration.md` v1.6 carry the Version History rows; issue-14cf601f and change-14cf601f were closed on 2026-10-23. Dispositions: report-b3a503a2 §3.6 |
 
 ---
 

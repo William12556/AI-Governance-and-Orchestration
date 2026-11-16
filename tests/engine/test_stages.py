@@ -30,6 +30,8 @@ def repo(project, monkeypatch):
                  ("GIT_COMMITTER_NAME", "t"), ("GIT_COMMITTER_EMAIL", "t@example.com")):
         monkeypatch.setenv(k, v)
     _git(project, "init", "-q")
+    # change-6d40f0dd (audit-4b0a5592 F-10): independent of the machine's signing configuration
+    _git(project, "config", "commit.gpgsign", "false")
     (project / "README.md").write_text("x\n")
     _git(project, "add", "README.md")
     _git(project, "commit", "-q", "-m", "init")
@@ -564,8 +566,8 @@ def test_engine_refuses_a_workspace_prompt_without_a_uuid_name(orch, repo, se, m
     rel = os.path.join("ai", "workspace", "prompt", "my-task.md")
     code, out = _run_captured(orch, monkeypatch, _loop_args(repo, rel, mode))
     assert code == 3
-    # rich renders '[engine]' as markup, so the console text starts after it
-    assert f" task {rel} is not ready for 'implement'; missing:" in out
+    # change-bae631c7: the console line keeps its '[engine]' prefix
+    assert f"[engine] task {rel} is not ready for 'implement'; missing:" in out
     assert "is not an active prompt document" in out
     assert _state_entries(repo) == before
 
@@ -694,3 +696,299 @@ def test_approvals_in_a_project_nested_in_a_repository(project, se, monkeypatch)
     assert _git(project, "show", "--name-only", "--format=", "HEAD").stdout.split() == ["sub/ai/approvals.yaml"]
     assert (U, "prompt") in ST.committed_approvals(str(sub))
     assert ST.prerun_missing(str(sub), se, U, str(prompt), prompt.read_bytes()) == []
+
+
+# --- change-d4f527e7: atomic approvals write, tracking by file identity, non-regular documents --
+
+def _signed_off(root):
+    _git(root, "config", "commit.gpgsign", "false")
+
+
+def test_t3_approve_writes_atomically(repo, se, monkeypatch):
+    """T3 (A3, audit-caab2052 L-10): ai/approvals.yaml is written to a temporary file and moved."""
+    _signed_off(repo)
+    _doc(repo, "prompt", "prompt")
+    approvals = repo / "ai" / "approvals.yaml"
+    replaced = []
+    real_replace = os.replace
+
+    def spy(src, dst):
+        replaced.append((os.path.basename(str(src)), os.path.realpath(str(dst))))
+        return real_replace(src, dst)
+
+    monkeypatch.setattr(A.os, "replace", spy)
+    code, message = A.approve(str(repo), U, "prompt", se)
+    assert code == 0, message
+    assert [dst for _, dst in replaced] == [os.path.realpath(approvals)]
+    assert replaced[0][0] != "approvals.yaml"
+    # an existing file keeps its permission bits
+    approvals.chmod(0o600)
+    assert sorted(p.name for p in (repo / "ai").iterdir() if p.is_file()) == ["approvals.yaml"]
+
+    # a failed commit writes the prior bytes back the same way and leaves no temporary file
+    before = approvals.read_bytes()
+    _doc(repo, "prompt", "prompt", uuid=V)
+    _hook(repo, "#!/bin/sh\necho 'hook says no' >&2\nexit 1\n")
+    replaced.clear()
+    code, message = A.approve(str(repo), V, "prompt", se)
+    assert code == 1 and "hook says no" in message
+    assert approvals.read_bytes() == before
+    assert len(replaced) == 2 and all(dst == os.path.realpath(approvals) for _, dst in replaced)
+    assert os.stat(approvals).st_mode & 0o777 == 0o600
+    assert sorted(p.name for p in (repo / "ai").iterdir() if p.is_file()) == ["approvals.yaml"]
+
+
+def test_t7_tracking_by_file_identity(project, tmp_path_factory):
+    """T7 (E, audit-4b0a5592 F-01, X02, X04): containment in ai/workspace/ by file identity."""
+    prompt = _doc(project, "prompt", "prompt")
+    outside = project / "outside.md"
+    outside.write_text("x\n")
+    link = project / "ai" / "workspace" / "prompt" / f"prompt-{U}-link.md"
+    link.symlink_to(outside)
+    sibling = project / "ai" / "workspace-x"
+    sibling.mkdir()
+    (sibling / f"prompt-{U}-work.md").write_text("x\n")
+    alias = tmp_path_factory.mktemp("alias") / "root"
+    alias.symlink_to(project, target_is_directory=True)
+
+    # an outward link is tracked: it lies in ai/workspace/ as given
+    assert ST.is_tracked_task(str(project), str(link))
+    # a relative path, from the project root
+    assert ST.is_tracked_task(str(project), os.path.join("ai", "workspace", "prompt", link.name))
+    # X02: a sibling directory whose name begins with 'workspace' is not ai/workspace/
+    assert not ST.is_tracked_task(str(project), str(sibling / f"prompt-{U}-work.md"))
+    assert not ST.is_tracked_task(str(project), str(outside))
+    # X04: the project root, or the task, reached through a symlinked directory
+    assert ST.is_tracked_task(str(alias), str(prompt))
+    assert ST.is_tracked_task(str(project), str(alias / "ai" / "workspace" / "prompt" / prompt.name))
+    assert ST.is_tracked_task(str(alias), str(alias / "ai" / "workspace" / "prompt" / prompt.name))
+    # no workspace directory: nothing is tracked
+    bare = tmp_path_factory.mktemp("bare")
+    (bare / "x.md").write_text("x\n")
+    assert not ST.is_tracked_task(str(bare), str(bare / "x.md"))
+
+
+@pytest.mark.parametrize("case", ["plain", "replaced"])
+def test_t7_outward_link_is_refused(orch, repo, se, monkeypatch, case):
+    """T7 (E): an outward symlink in ai/workspace/prompt/ is tracked and refused with exit 3."""
+    _signed_off(repo)
+    prompt = _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    outside = repo / "outside-prompt.md"
+    if case == "plain":
+        # another name beside the approved prompt, pointing outside
+        outside.write_text("Created: 2026 November 14\n\n```yaml\nprompt_info:\n  id: \"prompt-x\"\n```\n")
+        task = prompt.parent / f"prompt-{U}-link.md"
+    else:
+        # the approved prompt itself replaced by a link to a file with the approved content
+        outside.write_bytes(prompt.read_bytes())
+        prompt.unlink()
+        task = prompt
+    task.symlink_to(outside)
+    assert ST.is_tracked_task(str(repo), str(task))
+    assert ST.task_document_error(str(repo), se, str(task)) is not None
+    before = _state_entries(repo)
+    code, out = _run_captured(orch, monkeypatch, _loop_args(repo, task))
+    assert code == 3
+    assert "is not an active prompt document" in out
+    assert "not tracked" not in out
+    assert _state_entries(repo) == before
+
+
+def _case_insensitive(path) -> bool:
+    return os.path.exists(str(path).upper()) and os.path.exists(str(path).lower())
+
+
+def test_t7_case_variant_is_tracked(project):
+    """T7 (E, audit-4b0a5592 F-02): on a case-insensitive file system another letter case is tracked."""
+    prompt = _doc(project, "prompt", "prompt")
+    if not _case_insensitive(prompt):
+        pytest.skip("case-sensitive file system")
+    variant = project / "AI" / "Workspace" / "prompt" / prompt.name
+    assert ST.is_tracked_task(str(project), str(variant))
+
+
+def _non_regular(root, kind):
+    ws = root / "ai" / "workspace"
+    if kind == "fifo":
+        (ws / "issues").mkdir(parents=True, exist_ok=True)
+        path = ws / "issues" / f"issue-{V}-x.md"
+        os.mkfifo(path)
+    elif kind == "directory":
+        path = ws / "prompt" / f"prompt-{U}-zz.md"
+        path.mkdir(parents=True)
+    else:  # a dangling symlink
+        path = ws / "prompt" / f"prompt-{U}-gone.md"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.symlink_to(root / "missing.md")
+    return path
+
+
+def _in_thread(fn, timeout=20):
+    """Run fn in a daemon thread; fail when it does not return (a blocked FIFO open)."""
+    import threading
+    box = {}
+
+    def run():
+        try:
+            box["value"] = fn()
+        except BaseException as exc:  # noqa: BLE001 - reported by the caller
+            box["error"] = exc
+
+    thread = threading.Thread(target=run, daemon=True)
+    thread.start()
+    thread.join(timeout)
+    assert not thread.is_alive(), "the call did not return"
+    if "error" in box:
+        raise box["error"]
+    return box["value"]
+
+
+@_needs_fifo
+@pytest.mark.parametrize("kind", ["fifo", "directory", "dangling"])
+def test_t8_non_regular_documents_are_skipped(repo, se, kind):
+    """T8 (F, audit-4b0a5592 F-04): a match that is not a regular file is skipped and reported."""
+    _doc(repo, "prompt", "prompt")
+    path = _non_regular(repo, kind)
+    rel = os.path.relpath(path, repo)
+    report = _in_thread(lambda: ST.scan(str(repo), se))
+    assert f"{rel}: not a regular file; ignored" in report.warnings
+    listed = [d.path for item in report.work_items.values() for d in item.documents]
+    assert rel not in listed
+    if kind == "fifo":
+        assert V not in report.work_items
+    else:
+        assert [d.path for d in report.work_items[U].documents] == [
+            os.path.join("ai", "workspace", "prompt", f"prompt-{U}-work.md")]
+
+
+@_needs_fifo
+@pytest.mark.parametrize("kind", ["fifo", "directory"])
+def test_t8_prerun_passes_beside_a_non_regular_entry(repo, se, kind):
+    """T8 (F): the approved prompt passes the pre-run check beside a non-regular entry."""
+    _signed_off(repo)
+    prompt = _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    _non_regular(repo, kind)
+    missing = _in_thread(lambda: ST.prerun_missing(str(repo), se, U, str(prompt), prompt.read_bytes()))
+    assert missing == []
+
+
+# --- change-6d40f0dd: coverage gaps (audit-4b0a5592 F-07, F-10; work item 6 (e), (f)) ----------
+
+def test_e_repo_fixture_disables_commit_signing(repo, tmp_path_factory, monkeypatch):
+    """E (F-10): the fixture repository commits unsigned whatever the machine's configuration."""
+    assert _git(repo, "config", "--local", "--get", "commit.gpgsign").stdout.strip() == "false"
+    # a global configuration that asks for signing with a signer that cannot run
+    global_config = tmp_path_factory.mktemp("gitconfig") / "config"
+    global_config.write_text("[commit]\n\tgpgsign = true\n[gpg]\n\tprogram = /nonexistent/signer\n")
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", str(global_config))
+    (repo / "note.txt").write_text("x\n")
+    _git(repo, "add", "note.txt")
+    _git(repo, "commit", "-q", "-m", "unsigned")  # check=True: raises if the commit fails
+
+
+def test_f_free_text_task_prints_no_tracking_warning(orch, repo, se, monkeypatch):
+    """X07: a free-text loop task is untracked without the 'not tracked' warning."""
+    seen = {}
+
+    def stop(state_dir, archive_dir):
+        seen["reached"] = True
+        raise _Stop()
+
+    monkeypatch.setattr(orch, "archive_prior_logs", stop)
+    import io
+    from rich.console import Console
+    buf = io.StringIO()
+    monkeypatch.setattr(orch, "console", Console(file=buf, width=10000, highlight=False))
+    with pytest.raises(_Stop):
+        asyncio.run(orch.main_async(_loop_args(repo, "implement x")))
+    out = buf.getvalue()
+    assert seen == {"reached": True}
+    assert "not tracked" not in out
+    assert "work item" not in out
+
+
+def test_f_failed_git_add_restores_the_file(repo, se):
+    """X10: when git add fails, ai/approvals.yaml is removed again and nothing is staged."""
+    _doc(repo, "prompt", "prompt")
+    (repo / ".gitignore").write_text("ai/approvals.yaml\n")
+    _git(repo, "add", ".gitignore")
+    _git(repo, "commit", "-q", "-m", "ignore approvals")
+    code, message = A.approve(str(repo), U, "prompt", se)
+    assert code == 1
+    assert message.startswith("git failed (add --): ")
+    assert "could not be restored" not in message
+    assert not (repo / "ai" / "approvals.yaml").exists()
+    assert _git(repo, "status", "--porcelain", "--", "ai/approvals.yaml").stdout == ""
+    assert _git(repo, "diff", "--cached", "--name-only").stdout == ""
+
+
+def test_f_failure_detail_prefers_stderr(repo, se, monkeypatch):
+    """X12: with output on both streams, the failure detail is the stderr text.
+
+    git passes a hook's stdout to its own stderr, so the commit step is replaced by a
+    result that carries both streams.
+    """
+    _doc(repo, "prompt", "prompt")
+    real_run = subprocess.run
+
+    def run(cmd, *args, **kwargs):
+        if cmd[:1] == ["git"] and "commit" in cmd:
+            return subprocess.CompletedProcess(cmd, 1, stdout="on stdout\n", stderr="on stderr\n")
+        return real_run(cmd, *args, **kwargs)
+
+    monkeypatch.setattr(A.subprocess, "run", run)
+    code, message = A.approve(str(repo), U, "prompt", se)
+    assert code == 1
+    assert message == "git failed (commit -q): on stderr"
+    monkeypatch.setattr(A.subprocess, "run", real_run)
+    assert _git(repo, "status", "--porcelain", "--", "ai/approvals.yaml").stdout == ""
+
+
+def test_f_restoration_failure_is_reported(repo, se, monkeypatch):
+    """X13, X17: a failed write-back is reported after the git failure."""
+    _doc(repo, "prompt", "prompt")
+    approvals = repo / "ai" / "approvals.yaml"
+    approvals.parent.mkdir(exist_ok=True)
+    approvals.write_text(A.HEADER)
+    _git(repo, "add", "ai/approvals.yaml")
+    _git(repo, "commit", "-q", "-m", "approvals header")
+    _hook(repo, "#!/bin/sh\necho 'hook says no' >&2\nexit 1\n")
+    real = A._write_atomic
+    calls = []
+
+    def failing_restore(path, data):
+        calls.append(path)
+        if len(calls) == 2:  # the write-back of the prior bytes
+            raise OSError("disk full")
+        return real(path, data)
+
+    monkeypatch.setattr(A, "_write_atomic", failing_restore)
+    code, message = A.approve(str(repo), U, "prompt", se)
+    assert code == 1 and len(calls) == 2
+    assert message == ("git failed (commit -q): hook says no; "
+                       "ai/approvals.yaml could not be restored: disk full")
+
+
+def test_f_failed_call_leaves_other_staged_files(repo, se):
+    """X14: the index reset after a failed call names ai/approvals.yaml only."""
+    _doc(repo, "prompt", "prompt")
+    (repo / "other.txt").write_text("staged by the operator\n")
+    _git(repo, "add", "other.txt")
+    _hook(repo, "#!/bin/sh\nexit 1\n")
+    code, _ = A.approve(str(repo), U, "prompt", se)
+    assert code == 1
+    assert _git(repo, "diff", "--cached", "--name-only").stdout.split() == ["other.txt"]
+
+
+def test_f_nested_project_does_not_read_the_outer_approvals(repo, se):
+    """X18: a nested project without ai/approvals.yaml does not see the outer project's file."""
+    _doc(repo, "prompt", "prompt")
+    _commit_approval(repo, "prompt")
+    assert (U, "prompt") in ST.committed_approvals(str(repo))
+    nested = repo / "x"
+    _doc(nested, "prompt", "prompt")
+    assert ST.committed_approvals(str(nested)) == {}
+    missing = ST.prerun_missing(str(nested), se, U)
+    assert any("approval" in m for m in missing)

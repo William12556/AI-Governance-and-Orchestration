@@ -58,7 +58,7 @@ Items marked *Planned* do not yet exist.
 | ---------------------------- | ------------------------- | ------------------------ | ------------------------------------------------------------- |
 | Planner                      | Claude Desktop            | Mistral Vibe (*Planned*) | MCP-capable client with a local server (*Planned*)            |
 | Worker and reviewer (engine) | Anthropic API (live check pending) | Mistral API              | oMLX; LM Studio or other OpenAI-compatible server (*Planned*) |
-| Worker (manual)              | Claude Code               | Mistral Vibe (*Planned*) | Claude Code with oMLX                                         |
+| Worker (manual)              | Claude Code               | Mistral Vibe ([profile](ai/profiles/mistral-vibe.md); not tested) | Claude Code with oMLX                                         |
 
 The engine's worker and reviewer are each bound to a provider and a model in `ai/config.yaml` (`providers:` and `roles:`; [operations guide](ai/engine/doc/guide-engine-operations.md) §3.0), so the two roles may use different providers. The Anthropic API provider has been exercised only against a local Anthropic-compatible endpoint so far. Assigning a role to a frontier provider sends task content to that provider.
 
@@ -188,6 +188,7 @@ This framework is experimental, serving as a learning exercise in AI agent gover
 | 4.3 | 2026-10-31 | §1.0: added GTach as an example project |
 | 4.4 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors |
 | 4.5 | 2026-11-03 | Table of Contents formatted as a bulleted list |
+| 4.6 | 2026-11-14 | §2.2: manual worker with Mistral Vibe has a profile (documented, not tested) |
 
 ---
 

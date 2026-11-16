@@ -144,6 +144,7 @@ An operator following `docs/guide-orchestration.md` would set `context_window: n
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-07 | Initial report |
+| 1.1 | 2026-11-14 | Status: closed. F-01 corrected in design-ael-orchestrator v0.12; F-02 corrected in docs/guide-orchestration.md v1.8. Dispositions: report-b3a503a2 §3.6 |
 
 ---
 

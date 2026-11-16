@@ -6,18 +6,18 @@ Created: 2026 March 05
 
 ## Table of Contents
 
-[Introduction](#introduction)
-[Testing Workflow](#testing-workflow)
-[Test Types](#test-types)
-[Test Organization](#test-organization)
-[Progressive Validation Strategy](#progressive-validation-strategy)
-[Test Isolation](#test-isolation)
-[Platform Considerations](#platform-considerations)
-[Document Coupling](#document-coupling)
-[Traceability](#traceability)
-[Best Practices](#best-practices)
-[Glossary](#glossary)
-[Version History](#version-history)
+- [Introduction](#introduction)
+- [Testing Workflow](#testing-workflow)
+- [Test Types](#test-types)
+- [Test Organization](#test-organization)
+- [Progressive Validation Strategy](#progressive-validation-strategy)
+- [Test Isolation](#test-isolation)
+- [Platform Considerations](#platform-considerations)
+- [Document Coupling](#document-coupling)
+- [Traceability](#traceability)
+- [Best Practices](#best-practices)
+- [Glossary](#glossary)
+- [Version History](#version-history)
 
 ---
 
@@ -1022,6 +1022,7 @@ Planner identifies:
 | 1.4 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.5 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 1.6 | 2026-10-09 | Aligned with governance 12.3: all of tests/ is permanent; ephemeral validation scripts retired; diagnostics outside the repository; subdirectories optional; behaviour naming with UUIDs in the module docstring |
+| 1.7 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
 
 ---
 

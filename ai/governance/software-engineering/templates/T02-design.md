@@ -240,6 +240,8 @@ metadata:
   schema_type: "design"
 ```
 
+[Return to Table of Contents](#table-of-contents)
+
 ---
 
 ## Schema
@@ -772,6 +774,8 @@ properties:
           - design
 ```
 
+[Return to Table of Contents](#table-of-contents)
+
 
 ---
 
@@ -783,6 +787,7 @@ properties:
 | 1.1     | 2026-03-12 | Added element_registry section for incremental population across design tiers |
 | 1.2     | 2026-06-16 | Standardised copyright line format (template metadata default and document footer) |
 | 1.3     | 2026-11-07 | change-e4428fd5: schema_type class word |
+| 1.4 | 2026-11-14 | Layout conformance with README.md v4.5: Return to Table of Contents links added (dev/task.md work item 7a) |
 
 ---
 

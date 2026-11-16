@@ -11,23 +11,23 @@ Created: 2026 October 01
 
 ## Table of Contents
 
-[1.0 Purpose](#10-purpose)
-[2.0 Architecture](#20-architecture)
-[3.0 Configuration](#30-configuration)
-[4.0 Providers](#40-providers)
-[5.0 Manifest](#50-manifest)
-[6.0 Gates and Stage Flow](#60-gates-and-stage-flow)
-[7.0 Write Scope](#70-write-scope)
-[8.0 Stage Tracking and Approvals](#80-stage-tracking-and-approvals)
-[9.0 engine-mcp](#90-engine-mcp)
-[10.0 Terminology Migration](#100-terminology-migration)
-[11.0 Error Handling](#110-error-handling)
-[12.0 Testing](#120-testing)
-[13.0 Implementation Plan](#130-implementation-plan)
-[14.0 Open Issues](#140-open-issues)
-[15.0 Requirements Traceability](#150-requirements-traceability)
-[References](#references)
-[Version History](#version-history)
+- [1.0 Purpose](#10-purpose)
+- [2.0 Architecture](#20-architecture)
+- [3.0 Configuration](#30-configuration)
+- [4.0 Providers](#40-providers)
+- [5.0 Manifest](#50-manifest)
+- [6.0 Gates and Stage Flow](#60-gates-and-stage-flow)
+- [7.0 Write Scope](#70-write-scope)
+- [8.0 Stage Tracking and Approvals](#80-stage-tracking-and-approvals)
+- [9.0 engine-mcp](#90-engine-mcp)
+- [10.0 Terminology Migration](#100-terminology-migration)
+- [11.0 Error Handling](#110-error-handling)
+- [12.0 Testing](#120-testing)
+- [13.0 Implementation Plan](#130-implementation-plan)
+- [14.0 Open Issues](#140-open-issues)
+- [15.0 Requirements Traceability](#150-requirements-traceability)
+- [References](#references)
+- [Version History](#version-history)
 
 ---
 
@@ -138,13 +138,20 @@ class Completion:
     tool_calls: list[ToolCall]
     finish_reason: str            # "stop", "tool_calls", "length"
     usage: dict | None            # input/output tokens where reported
+    reasoning_content: str | None # reasoning text where the provider returns it
 
 class Provider(Protocol):
     async def complete(self, model: str, messages: list[dict],
-                       tools: list[dict], max_tokens: int | None) -> Completion: ...
-    async def await_ready(self, model: str, timeout: float, poll: float) -> bool: ...
-    def context_window(self, model: str) -> int | None: ...
+                       tools: list[dict] | None,
+                       max_tokens: int | None = None) -> Completion: ...
+    async def await_ready(self, model: str, timeout: float = 60.0,
+                          interval: float = 2.0,
+                          echo: Callable[[str], None] = ...) -> None: ...
+    def live_context_window(self, model: str) -> int | None: ...
+    def redact(self, text: str) -> str: ...
 ```
+
+The interface is stated as built in `providers.py` (change-541f5c58; audit-caab2052 L-19). `await_ready` polls every `interval` seconds, reports progress through `echo`, returns when the provider is ready, raises `TimeoutError` when the endpoint is not reachable within `timeout`, and raises `ProviderError` when the endpoint answers but the model is not available (for `omlx` an unlisted model is accepted). `live_context_window` is the provider's live query for tier 3 of the context-window chain (§3.0); it returns `None` where the provider has none. `redact` replaces the provider's key in error text (change-5e8aea4f). `Completion` also carries `reasoning_content: str | None`.
 
 The engine's message history stays in the current OpenAI chat format. Each provider converts at its boundary, so the loop does not branch on provider (NFR-03).
 
@@ -289,7 +296,7 @@ The engine reads approvals with `git show HEAD:./ai/approvals.yaml`, so uncommit
 
 ### 8.4 Pre-run Check
 
-For a T03 prompt task, the engine derives the work item and refuses to start when any stage before `implement` lacks evidence or a required approval, or when an approval no longer matches its stage's documents: a document changed, added or removed since approval, or an entry without `blobs`. The message lists what is missing (FR-08-05). Git runs with `--no-optional-locks`, so the check and `work_status` do not write the index (FR-08-06). A task is tracked when it exists and its resolved path is `ai/workspace/` or lies inside it, whatever its name or file type; one that is not the approved prompt is refused by the rules below (change-4b0a5592). Known limits: a symlink in `ai/workspace/` that resolves outside it, and on a case-insensitive file system a path that spells `ai/workspace` in another case, are not tracked (audit-4b0a5592 F-01, F-02; `dev/task.md` work item 5 (m)). The CLI and engine-mcp take the work-item UUID only from names starting `prompt-`, so a governance model with another task-stage prefix cannot run tracked tasks (audit-4b0a5592 F-03; design-63c98596 §10.2). A tracked task must itself be one of its work item's active evidence documents of the last stage with evidence before the loop stage, as the scan lists them (SE: `ai/workspace/prompt/prompt-<uuid>-<name>.md`, not `closed/`). The UUID comes from the task name as given; the resolved task path must equal the resolved path of one of that work item's documents. Names are matched in full (iteration 3, F2-01, F2-02). The engine reads the task file once, before the check; the blob hash of those bytes must equal the approved hash of the matched document, and the run uses only those bytes for the task text and the write scope (iteration 4, F3-02). A tracked task whose content was not read is refused (iteration 5, F4-02); otherwise the run is refused with exit 3 (change-82dbf16a iteration 2, follow-up F-02). Free-text CLI tasks are not tracked.
+For a T03 prompt task, the engine derives the work item and refuses to start when any stage before `implement` lacks evidence or a required approval, or when an approval no longer matches its stage's documents: a document changed, added or removed since approval, or an entry without `blobs`. The message lists what is missing (FR-08-05). Git runs with `--no-optional-locks`, so the check and `work_status` do not write the index (FR-08-06). A task is tracked when it exists and lies at `ai/workspace/` or inside it, as given or as resolved, whatever its name or file type; one that is not the approved prompt is refused by the rules below (change-4b0a5592). Containment is decided by file identity (`os.path.samestat` against `ai/workspace/` for the path and each of its ancestors), so a symlink in `ai/workspace/` that resolves outside it and, on a case-insensitive file system, a path that spells `ai/workspace` in another case are tracked; a task whose resolved path lies outside `ai/workspace/` is refused (change-d4f527e7; audit-4b0a5592 F-01, F-02). The letter-case behaviour is not yet confirmed on macOS; there a differently cased path to the approved prompt is expected to be tracked and then refused, because the document comparison below uses resolved path strings. An evidence document match that is not a regular file (a directory, a FIFO, a dangling symlink) is not listed by the scan and is reported as the warning `<path>: not a regular file; ignored` (change-d4f527e7; audit-4b0a5592 F-04). The CLI and engine-mcp take the work-item UUID only from names starting `prompt-`, so a governance model with another task-stage prefix cannot run tracked tasks (audit-4b0a5592 F-03; design-63c98596 §10.2). A tracked task must itself be one of its work item's active evidence documents of the last stage with evidence before the loop stage, as the scan lists them (SE: `ai/workspace/prompt/prompt-<uuid>-<name>.md`, not `closed/`). The UUID comes from the task name as given; the resolved task path must equal the resolved path of one of that work item's documents. Names are matched in full (iteration 3, F2-01, F2-02). The engine reads the task file once, before the check; the blob hash of those bytes must equal the approved hash of the matched document, and the run uses only those bytes for the task text and the write scope (iteration 4, F3-02). A tracked task whose content was not read is refused (iteration 5, F4-02); otherwise the run is refused with exit 3 (change-82dbf16a iteration 2, follow-up F-02). Free-text CLI tasks are not tracked.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -332,7 +339,7 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 
 | Condition | Behaviour |
 |---|---|
-| Missing or invalid manifest or configuration | Stop before any model call; message names file and field (NFR-04). For `ai/config.yaml`: a file that cannot be read, invalid YAML, a top level that is not a mapping, a missing `loop` or `loop.state_dir`, a `loop.max_iterations` that is not a positive integer without `--max-iterations`, an invalid timeout, a `max_tokens` that is not a positive integer, or a gate `timeout_seconds` override that is not a positive number gives `configuration error (<file>): <field>: <reason>` and exit 1 before any state is written, in reset mode too for the file and `loop` checks (change-b8c75bac). |
+| Missing or invalid manifest or configuration | Stop before any model call; message names file and field (NFR-04). For `ai/config.yaml`: a file that cannot be read, invalid YAML, a top level that is not a mapping, a missing `loop` or `loop.state_dir`, a `loop.max_iterations` that is not a positive integer without `--max-iterations`, an invalid timeout, a `max_tokens` that is not a positive integer, or a gate `timeout_seconds` override that is not a positive number gives `configuration error (<file>): <field>: <reason>` and exit 1 before any state is written, in reset mode too for the file and `loop` checks (change-b8c75bac). The same holds for YAML nested too deeply to load (`invalid YAML: nesting too deep`), for a `context.model_context_windows` that is neither null nor a mapping, and for an entry of it that is not a positive integer; a null `model_context_windows` is treated as empty (change-bae631c7). |
 | Missing API key environment variable | Stop at startup naming the variable; the value is never logged (NFR-05). |
 | Keychain lookup fails (not macOS, `security` missing, non-zero exit, timeout, output not valid text, empty item) | Stop at startup naming the provider and service; the message holds the exit code at most, never the command output (NFR-05; change-7d953510). |
 | Provider not ready within the readiness timeout | `BLOCKED.md`, as today. |
@@ -351,6 +358,9 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 | Write call in an audit run whose path or content is not a string | The `audit-report.md` check ignores non-string paths and treats non-string content as empty; it never raises (change-b8c75bac). |
 | Compile at the edit-failure or post-write check raises (other than a timeout) | Warning logged; the file is not checked; run continues. The edit-failure check runs only for a dispatched call (change-b8c75bac). |
 | Closing the MCP client raises (for example a late answer after a timeout) | Warning printed; the run's exit status is unchanged (change-5e8aea4f). |
+| A state file or `ai/approvals.yaml` is read while it is rewritten | The reader sees the previous or the new content: state files and `ai/approvals.yaml` are written to a temporary file and moved into place (change-d4f527e7; audit-caab2052 L-10). |
+| An audit archive for the work item exists | The new archive is written as `audit-<uuid>-index-<n>.md` and `audit-<uuid>-report-<n>.md` with the smallest free `n` from 2; a warning is logged; nothing is overwritten (change-d4f527e7; audit-caab2052 L-14). |
+| An MCP server fails to connect, or two servers offer a tool of the same name | Warning on the console and in the engine log; the run continues without that server, or with the tool of the server connected last (change-bae631c7; audit-caab2052 L-13). |
 | Run record (`run.json`) cannot be built or written at start or end | Warning `run record not written` logged; the run continues and its exit code is unchanged (change-b8a6c445; change-86c958dd). |
 | Run ends with an exception after the run record was started | The end record has `rc` null and `error` naming the exception type; the exception propagates (change-86c958dd). |
 | Provider error text on the completion or readiness path | A key from `api_key_env` or `api_key_keychain` is replaced by `API-KEY-REDACTED` before the text is logged, printed, written to `BLOCKED.md` or raised. Literal keys (kind `omlx` or a local `base_url`) are not secrets and are not replaced (NFR-05; change-5e8aea4f). |
@@ -365,7 +375,7 @@ Downstream projects receive the changed framework files through `bin/propagate.s
 |---|---|---|
 | Manifest | Valid and invalid fixtures; named-field errors | V-01 |
 | Providers | Message conversion both ways; ID format; stub HTTP servers for both kinds | V-03 |
-| Gates | Command gate placeholders and outcomes; syntax gate unchanged | V-02 (live) |
+| Gates | Command gate placeholders and outcomes; syntax gate results as before Phase 2 (V-02). Since change-a5bd4fe1: a syntax FAIL overrides SHIP and paths outside the project are skipped (`tests/engine/test_scope_gate_hardening.py`) | V-02 (live) |
 | Scope | Deliverable, prefix and state-dir writes allowed; others rejected and logged | V-05 |
 | Reviewer paths | `[DELIVERABLES]` block holds absolute paths | V-06 |
 | Stages | Fixture workspaces for each SE path, closed documents and anomalies | V-10 |
@@ -453,6 +463,11 @@ Each step has one change record and one prompt (abbreviated records, as for Phas
 
 | Version | Date | Description |
 |---|---|---|
+| 1.33 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
+| 1.32 | 2026-11-14 | §4.1: provider interface as built: `live_context_window`, `await_ready(..., interval, echo) -> None` raising `TimeoutError` or `ProviderError`, `redact`, `Completion.reasoning_content` (change-541f5c58; audit-caab2052 L-19) |
+| 1.31 | 2026-11-14 | §8.4: tracking by file identity, a task resolving outside `ai/workspace/` refused, non-regular evidence documents skipped; §11.0: atomic writes, audit archive names (change-d4f527e7) |
+| 1.30 | 2026-11-14 | §11.0: deeply nested configuration YAML and `context.model_context_windows` checks; MCP connection failures and duplicate tool names reported in the engine log (change-bae631c7) |
+| 1.29 | 2026-11-14 | §12.0 Gates row: "syntax gate unchanged" limited to V-02; tests of change-a5bd4fe1 named (report-0fce4169 F3) |
 | 1.28 | 2026-11-07 | §8.4: known limits of tracking and the `prompt-` prefix (audit-4b0a5592 F-01 to F-03). |
 | 1.27 | 2026-11-07 | §8.3: approvals read with `HEAD:./ai/approvals.yaml`; `approve.py` restores the file after a failed commit. §8.4: tracking by location whatever the name or file type (change-4b0a5592). |
 | 1.26 | 2026-11-06 | §4.2: context-window tiers (per-model entry before the live query); §11.0: HTTP 404 not retried, run record build failure and exception record (change-86c958dd). |

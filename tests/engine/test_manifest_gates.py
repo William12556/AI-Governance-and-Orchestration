@@ -317,8 +317,11 @@ def test_work_item_uuid(orch, task, expected):
 def _shell_function(script):
     with open(os.path.join(REPO, "bin", script)) as fh:
         lines = fh.read().splitlines()
-    start = next(i for i, l in enumerate(lines) if l.startswith("create_workspace_folders()"))
-    end = next(i for i in range(start, len(lines)) if lines[i] == "}")
+    # change-541f5c58: create_workspace_folders reads the manifest through
+    # workspace_folders_of, defined directly above it.
+    start = next(i for i, l in enumerate(lines) if l.startswith("workspace_folders_of()"))
+    create = next(i for i, l in enumerate(lines) if l.startswith("create_workspace_folders()"))
+    end = next(i for i in range(create, len(lines)) if lines[i] == "}")
     return "\n".join(lines[start:end + 1])
 
 

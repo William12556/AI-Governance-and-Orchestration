@@ -25,7 +25,7 @@ Created: 2026 June 18
 | `omlx` | Inference endpoint URL and default model |
 | `mcp_servers` | MCP server command and argument definitions |
 | `loop` | `max_iterations` (outer loop cycles), `phase_max_iterations` (inner tool-call iterations per phase), MCP error threshold, tool call cap |
-| `context` | Model directory path, context window size (or `null` to resolve from model `config.json`), warn/abort budget thresholds |
+| `context` | `context_window` (global override; `null` to use the per-model entry and then the live oMLX query), `model_context_windows` (per-model entries), warn/abort budget thresholds |
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -157,6 +157,7 @@ Setup instructions: P10.8 in `ai/governance/software-engineering/governance.md`
 | 1.5 | 2026-10-01 | State files: review-result.txt not read (change-82dbf16a iteration 2, audit-14e05e35 follow-up, F-06) |
 | 1.6 | 2026-10-23 | Overwatch command path: ai/src/overwatch.py → ai/webui/src/overwatch.py (change-14cf601f) |
 | 1.7 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
+| 1.8 | 2026-11-14 | §1.0 `context` row: context-window configuration as built; model directory path and `config.json` removed (report-53b0e016 F-02; change-d42e64a9, change-86c958dd) |
 
 ---
 

@@ -17,7 +17,9 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import locale
 import os
+import stat
 import subprocess
 import sys
 
@@ -28,6 +30,32 @@ from manifest import ManifestError, load_manifest, locate_manifest  # noqa: E402
 HEADER = ("# Operator approvals (design-14e05e35 §8.2). Written by ai/engine/src/approve.py.\n"
           "# Only committed entries count. Do not edit by hand.\n"
           "approvals:\n")
+
+
+def _write_atomic(path: str, data: bytes) -> None:
+    """
+    change-d4f527e7 (audit-caab2052 L-10): write data to a temporary file
+    beside the file and move it into place with os.replace, so a reader sees
+    the previous content or the new content. A symlink at path is written
+    through, as before. On any failure the temporary file is removed and the
+    exception re-raised.
+    """
+    target = os.path.realpath(path)
+    tmp_path = os.path.join(os.path.dirname(target), f".{os.path.basename(target)}.{os.getpid()}.tmp")
+    try:
+        with open(tmp_path, "wb") as fh:
+            fh.write(data)
+        try:  # an existing file keeps its permission bits
+            os.chmod(tmp_path, stat.S_IMODE(os.stat(target).st_mode))
+        except OSError:
+            pass
+        os.replace(tmp_path, target)
+    except BaseException:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
+        raise
 
 
 def approve(project_root: str, uuid: str, stage: str, manifest=None,
@@ -79,8 +107,8 @@ def approve(project_root: str, uuid: str, stage: str, manifest=None,
         content = current + entry
     else:
         content = HEADER + entry
-    with open(path, "w") as fh:
-        fh.write(content)
+    # Encoded as the text-mode read above decodes (the locale's encoding).
+    _write_atomic(path, content.encode(locale.getpreferredencoding(False)))
 
     rel = ST.APPROVALS_FILE
     for cmd in (["git", "-C", project_root, "add", "--", rel],
@@ -100,8 +128,7 @@ def approve(project_root: str, uuid: str, stage: str, manifest=None,
                     if os.path.lexists(path):
                         os.remove(path)
                 else:
-                    with open(path, "wb") as fh:
-                        fh.write(prior)
+                    _write_atomic(path, prior)
             except OSError as e:
                 reasons.append(str(e))
             reset = subprocess.run(["git", "-C", project_root, "reset", "-q", "--", rel],

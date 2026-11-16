@@ -179,6 +179,7 @@ The branch is pushed and not merged into `main`. No pull request was opened.
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-07 | Initial report |
+| 1.1 | 2026-11-14 | Closed with change-9377f9b9 and issue-9377f9b9. §6.0 items 1 to 3 accepted in change-9377f9b9 v1.2; item 4 done (governance 12.10), with the follow-up audit deferred to the operator (report-b3a503a2 §6.0) |
 
 ---
 

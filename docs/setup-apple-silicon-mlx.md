@@ -10,12 +10,7 @@ Created: 2026 March 05
 - [Hardware Requirements](#hardware-requirements)
 - [Software Prerequisites](#software-prerequisites)
 - [Install oMLX](#install-omlx)
-  - [DMG Installer](#dmg-installer)
-  - [pip](#pip)
 - [Download Devstral](#download-devstral)
-  - [Devstral Small 2507 Q8](#devstral-small-2507-q8)
-  - [Devstral Small 2507 BF16](#devstral-small-2507-bf16)
-  - [Devstral Small 2 (2512) 6bit](#devstral-small-2-2512-6bit)
 - [Start oMLX](#start-omlx)
 - [Configure engine](#configure-engine)
 - [Verification](#verification)
@@ -273,6 +268,7 @@ A response of `OK` confirms end-to-end connectivity.
 | 1.9 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 1.10 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 1.11 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
+| 1.12 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents lists the H2 sections only (dev/task.md work item 7a) |
 
 ---
 

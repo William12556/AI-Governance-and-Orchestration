@@ -84,6 +84,8 @@ Run from the repository root. The target project must already have an `ai/` dire
 
 The script never deletes a file. Target files absent from the source (or of a different type) are moved to `<project-root>/ai-local/` and logged in `ai-local/RELOCATED.md`, labelled `retired framework file` (safe to delete) or `project content` (governance P10.6). Declared project files (`context.md`, `task.md`, `config.yaml`, `workspace/`, `state/`, `logs/`, `dashboard-alerts.md`) are never overwritten; `context.md` and `task.md` are seeded from the templates only when absent. Use `--yes` for non-interactive runs; a major or unknown governance version additionally requires `--allow-major`. A framework file edited in the project is copied to `ai-local/` (label `local modification`) before it is overwritten. Review `ai-local/` after each run and delete what is not needed. The script refuses (exit 3, nothing applied) if `ai/` (outside `workspace/`, `state/` and `logs/`, whose contents are not checked) or `ai-local/` changes while the confirmation prompt is open, if a directory cannot be listed, if `context.md` or `task.md` is a symlink with no regular file behind it (a symlink to an existing file is preserved), or if a path differs from a declared path only by letter case. On case-insensitive file systems a framework directory with different case (e.g. `Templates/`) causes repeated relocation of its files; rename it to match.
 
+The script creates the `ai/workspace/` folders that the governance model's `manifest.yaml` declares and the target lacks. They are listed in the preview (`create       workspace/<folder>/`) and created after the confirmation, also when no framework file differs. `workspace_folders` is read as a block list or as a flow list on one line.
+
 ### 3.4 Migrate a Project from the Pre-5bcd46ad Layout
 
 A downstream project still in the old layout (`ai/ael/`, `ai/governance.md`) is migrated once before propagation:
@@ -125,6 +127,7 @@ Archives `ai/`, creates a GitHub release, and attaches the tarball as a release 
 | 0.11 | 2026-09-25 | change-5bcd46ad: layout and terminology migration (engine and governance paths; AEL → engine, Ralph Loop → loop, ael-mcp → engine-mcp) |
 | 0.12 | 2026-09-29 | §3.4 added: bin/migrate-layout.sh (moved from README); release renumbered §3.5 and its version argument shown |
 | 0.13 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
+| 0.14 | 2026-11-14 | §3.3: workspace folders listed in the preview and created after the confirmation; flow-style `workspace_folders` on one line (change-541f5c58) |
 
 ---
 

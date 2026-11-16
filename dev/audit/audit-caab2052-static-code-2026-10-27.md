@@ -6,21 +6,21 @@ Created: 2026 October 27
 
 ## Table of Contents
 
-[1.0 Summary](#10-summary)
-[2.0 Method](#20-method)
-[3.0 Scope and File Inventory](#30-scope-and-file-inventory)
-[4.0 Requirements and Design Compliance](#40-requirements-and-design-compliance)
-[5.0 Findings by Dimension](#50-findings-by-dimension)
-[6.0 Findings Register](#60-findings-register)
-[7.0 Prior-Finding Re-verification](#70-prior-finding-re-verification)
-[8.0 Test Coverage Gaps](#80-test-coverage-gaps)
-[9.0 Positive Findings](#90-positive-findings)
-[10.0 Recommended Remediation Order](#100-recommended-remediation-order)
-[11.0 Open Questions for the Operator](#110-open-questions-for-the-operator)
-[12.0 T08 Record](#120-t08-record)
-[13.0 Closure Recommendation](#130-closure-recommendation)
-[14.0 Operator Decisions](#140-operator-decisions)
-[Version History](#version-history)
+- [1.0 Summary](#10-summary)
+- [2.0 Method](#20-method)
+- [3.0 Scope and File Inventory](#30-scope-and-file-inventory)
+- [4.0 Requirements and Design Compliance](#40-requirements-and-design-compliance)
+- [5.0 Findings by Dimension](#50-findings-by-dimension)
+- [6.0 Findings Register](#60-findings-register)
+- [7.0 Prior-Finding Re-verification](#70-prior-finding-re-verification)
+- [8.0 Test Coverage Gaps](#80-test-coverage-gaps)
+- [9.0 Positive Findings](#90-positive-findings)
+- [10.0 Recommended Remediation Order](#100-recommended-remediation-order)
+- [11.0 Open Questions for the Operator](#110-open-questions-for-the-operator)
+- [12.0 T08 Record](#120-t08-record)
+- [13.0 Closure Recommendation](#130-closure-recommendation)
+- [14.0 Operator Decisions](#140-operator-decisions)
+- [Version History](#version-history)
 
 ---
 
@@ -566,14 +566,22 @@ Recorded by the planner on 2026-10-29 on the operator's decision.
 | Finding | Decision | Disposition |
 |---|---|---|
 | M-01, M-02, M-06, L-03, L-09 | Remediate | First triple, together with audit-14e05e35 L-09 (HTTP 400/401/403 not retried). M-01: a non-object argument value gets a tool error reply, from one check in `run_phase`. M-06: configurable timeouts, default 300 s per model call and 120 s per MCP call; SDK retries 0, engine retry loop retained. Follow-up audit required (P02.8.2). **Closed 2026-11-04:** change-711a57d5 verified and closed; follow-up `audit-711a57d5` found no critical or high findings; its residual findings F-01 to F-05 continue in triple 5e8aea4f |
-| M-03 | Remediate (2026-11-05) | Group 3: retire the numeric `schema_type` prefix. Templates emit the class word; the checkers accept the class word and all 14 numbered values as aliases; an unknown value is a warning. Also closes audit-eb782f83 F-04 and governance Appendix A.5 |
+| M-03 | Remediate (2026-11-05) | Group 3: retire the numeric `schema_type` prefix. Templates emit the class word; the checkers accept the class word and all 14 numbered values as aliases; an unknown value is a warning. Also closes audit-eb782f83 F-04 and governance Appendix A.5. **Closed 2026-11-07:** change-e4428fd5 verified and closed (governance 12.9); follow-up `audit-e4428fd5` found no critical or high findings; its residual findings were implemented by change-9377f9b9, closed 2026-11-14 |
 | M-04, M-05 | Remediate (2026-11-05) | Group 2: the engine writes one run record, `run.json` (task path, pid, start, end, rc), at start and in the final `finally` of `main_async`; Overwatch reads it for the engine status and the FR-02-06 prompt match; `run.json` joins the protected signal files. **Closed 2026-11-05:** change-b8a6c445 verified and closed, with L-07, L-08 and L-15; follow-up `audit-b8a6c445` found no critical or high findings; its residual findings continue in issue-86c958dd |
 | L-01, L-02, L-12 | Remediate (2026-11-05) | Group 5: fail-closed tool classification; unresolvable write paths refused; py_compile with a temporary bytecode cache, project paths only; with OQ-01 and a collection-only pass in the pytest gate. **Closed 2026-11-05:** change-a5bd4fe1 verified and closed; follow-up `audit-a5bd4fe1` found no critical or high findings; its residual findings continue in issue-b8c75bac |
-| L-04 to L-06, L-10, L-11, L-13, L-14, L-16 to L-19 | Not yet decided | Registered in `dev/task.md` by §10.0 group; decided when each group's triple is raised. L-07, L-08 and L-15 closed with group 2 |
+| L-04, L-05, L-06 | Remediate (2026-11-07) | Group 4. **Closed 2026-11-07:** change-4b0a5592 verified and closed (`404bf37`; tests `7602712`, `c2e5981`); follow-up `audit-4b0a5592` found no critical or high findings; its residual findings continue in work items 5B-2 and 6 |
+| L-11 | Remediate (2026-11-07) | Group 3, with M-03. **Closed 2026-11-07:** type checks before membership tests in `manifest.py`, `linter.py` and `protocol_checker.py` (change-e4428fd5, part C) |
+| L-10, L-14 | Remediate. Decided by the session under the one-time exemption (2026-11-14) | Work item 5B-2 (change-d4f527e7). L-10: temporary file and `os.replace` for state files, the two Overwatch outputs and `ai/approvals.yaml`. L-14: the archive takes the project root as a parameter and does not overwrite an existing archive. Follow-up audit required (P02.8.2), deferred to the operator. **Closed 2026-11-14:** change-d4f527e7 verified and closed (`98214f8`, `0a3b509`; tests `3c3b870`, `af46991`: `test_t1_write_state_is_atomic`, `test_t2_overwatch_outputs_are_atomic`, `test_t3_approve_writes_atomically`, `test_t4_audit_archive_does_not_overwrite`, `test_t4_audit_archive_uses_the_project_root`) |
+| L-13, L-16 | Remediate. Decided by the session under the one-time exemption (2026-11-14) | Work item 5B-1 (change-bae631c7). L-13: a warning for a tool name offered by two servers; connection failures and status messages through the engine logger; a run with no tools is not refused (no change of behaviour beyond the finding). L-16: the pyflakes items and the `stages.py` type are corrected; the annotation-style and remaining mypy items are not changed. Follow-up audit required (P02.8.2), deferred to the operator. **Closed 2026-11-14:** change-bae631c7 verified and closed (`f176b07`; tests `962238e`, `5c3e540`: `test_t7_duplicate_tool_name_is_reported`, `test_t8_failed_connection_is_logged`, `test_t9_scan_outside_a_repository_uses_an_empty_approvals_mapping`; ruff F clean) |
+| L-17, L-18 | Transferred (2026-11-06) | `design-63c98596` §10.2 |
+| L-19 | Amend the design. Decided by the session under the one-time exemption (2026-11-14) | Work item 5C (change-541f5c58): design-14e05e35 §4.1 states the provider interface as built. **Closed 2026-11-14:** design-14e05e35 v1.32 §4.1 (`live_context_window`, `await_ready(..., interval, echo) -> None`, `redact`, `Completion.reasoning_content`); change-541f5c58 verified and closed. A document change only for this finding |
+| §8.0 test gaps | Re-measure. Decided by the session under the one-time exemption (2026-11-14) | Work item 6 (a) (change-6d40f0dd). **Closed 2026-11-15:** re-measured in report-6d40f0dd §4.0; tests added for nine helper functions; the gaps that remain are registered in `dev/task.md` as open work |
 | OQ-01 | Decided (2026-11-05): a syntax FAIL blocks SHIP | The syntax gate stays built in; a syntax FAIL overrides SHIP as a command gate FAIL does. FR-03-04 amended (requirements-14e05e35 v1.8). Source change with group 5. Converting syntax to a declared command gate is left to the Phase 3 governance split. **Closed 2026-11-05:** implemented by change-a5bd4fe1 |
 | OQ-02 | Decided (2026-11-05): the design is authoritative | NFR-01 and CON-01 amended (requirements-0c6aedee v0.6). The CON-07 citation at `overwatch.py:828` is corrected in the group 2 triple. **Closed 2026-11-05:** citation corrected by change-b8a6c445 |
 | OQ-03 | Decided (2026-11-05): amend the baseline in place | FR-AEL-013, NFR-AEL-001, NFR-AEL-005 (requirements-1c1f4ef6 v1.4) and design-ael §3.2, §10.0 (v0.8) describe the engine as built |
 | OQ-04 | Decided (2026-11-05): remove the phrase | "the run type's own paths" removed from design-14e05e35 §7.0 (v1.19) |
+
+**Closure block (2026-11-15).** Every finding and open question of this audit has a recorded decision and outcome. No critical or high finding was raised. Groups 1 to 5 were followed by their own audits. The group 6 findings L-10, L-13, L-14 and L-16 were remediated by source changes in the session of 2026-11-14 (change-bae631c7, change-d4f527e7), so closure requires a follow-up audit (P02.8.2), which is deferred to the operator. Status: ready for follow-up audit; closure pending operator.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -589,6 +597,12 @@ Recorded by the planner on 2026-10-29 on the operator's decision.
 | 1.3 | 2026-11-05 | §14.0: operator decisions for M-03, M-04, M-05 and OQ-01 to OQ-04 |
 | 1.4 | 2026-11-05 | §14.0: remediation group 2 and the OQ-02 citation recorded as closed (change-b8a6c445, audit-b8a6c445) |
 | 1.5 | 2026-11-05 | §14.0: remediation group 5 and OQ-01 recorded as closed (change-a5bd4fe1, audit-a5bd4fe1); undecided row narrowed to the open findings |
+| 1.6 | 2026-11-14 | §14.0: M-03, L-04 to L-06 and L-11 recorded as closed (change-e4428fd5, change-4b0a5592, change-9377f9b9); decisions for L-10, L-13, L-14, L-16, L-19 and §8.0 recorded by the session under the one-time exemption (report-b3a503a2) |
+| 1.7 | 2026-11-14 | §14.0: L-13 and L-16 recorded as closed (change-bae631c7) |
+| 1.8 | 2026-11-14 | §14.0: L-10 and L-14 recorded as closed (change-d4f527e7) |
+| 1.9 | 2026-11-14 | §14.0: L-19 recorded as closed (change-541f5c58; design-14e05e35 v1.32) |
+| 1.9 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
+| 1.10 | 2026-11-15 | §14.0: §8.0 re-measurement recorded (change-6d40f0dd); closure block (ready for follow-up audit; closure pending operator) |
 
 ---
 

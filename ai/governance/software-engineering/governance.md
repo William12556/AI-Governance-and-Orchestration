@@ -1278,6 +1278,7 @@ See [workflow.md](workflow.md).
 | 12.9 | 2026-11-07 | Appendix A.5: `schema_type` class words, numbered values accepted as aliases, class inferred from the root key for active documents; P00.14.3 and T04: test status `superseded` (change-e4428fd5). Non-breaking. |
 | 12.10 | 2026-11-07 | Appendix A.5: YAML that does not parse is reported (error, or warning for a closed record); `closed/` judged below the workspace directory (change-9377f9b9). Non-breaking. |
 | 12.11 | 2026-11-11 | P10.2 .gitignore: removed ai/workspace/proposal/ and ai/workspace/proposal/closed/; added ai-local/. P10.6 layout comments aligned: proposal/ no longer marked excluded; ai-local/ marked excluded from git. Non-breaking. |
+| 12.12 | 2026-11-14 | Appendix A.5: the template schemas describe new documents; numbered `schema_type` values are valid for the checkers only (report-7e96c15c F-01). Non-breaking. |
 
 ---
 [Return to Table of Contents](#table-of-contents)
@@ -1401,6 +1402,9 @@ document's class word: `requirements`, `design`, `prompt`, `test`, `result`,
 prompts carry no governance metadata.
 
 The numbered values are retired but stay valid, so no document needs editing.
+They are valid for `linter.py` and `protocol_checker.py` only. The JSON Schema
+in each template describes a new document and lists the class word alone; the
+checkers do not apply the template schemas to existing documents.
 `linter.py` and `protocol_checker.py` resolve a document's class in this order:
 
 1. A class word.

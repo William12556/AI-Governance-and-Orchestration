@@ -12,16 +12,16 @@ Created: 2026 October 01
 
 ## Table of Contents
 
-[1.0 Hypothesis](#10-hypothesis)
-[2.0 Method](#20-method)
-[3.0 Steps and Results](#30-steps-and-results)
-[4.0 DI-01 Answer](#40-di-01-answer)
-[5.0 DI-04 Verdict](#50-di-04-verdict)
-[6.0 Rate-Limit Findings](#60-rate-limit-findings)
-[7.0 Recommended Design Changes](#70-recommended-design-changes)
-[8.0 Open Items](#80-open-items)
-[References](#references)
-[Version History](#version-history)
+- [1.0 Hypothesis](#10-hypothesis)
+- [2.0 Method](#20-method)
+- [3.0 Steps and Results](#30-steps-and-results)
+- [4.0 DI-01 Answer](#40-di-01-answer)
+- [5.0 DI-04 Verdict](#50-di-04-verdict)
+- [6.0 Rate-Limit Findings](#60-rate-limit-findings)
+- [7.0 Recommended Design Changes](#70-recommended-design-changes)
+- [8.0 Open Items](#80-open-items)
+- [References](#references)
+- [Version History](#version-history)
 
 ---
 
@@ -213,6 +213,7 @@ No change is recommended to §4.2. Its readiness rule (`models.list()` contains 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-10-01 | Initial report: DI-01 answered, DI-04 partial, rate limits, recommendations R-01 to R-04. |
+| 1.1 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
 
 ---
 

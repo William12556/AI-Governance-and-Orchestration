@@ -10,16 +10,16 @@ Created: 2026 September 25
 
 ## Table of Contents
 
-[1.0 Purpose](#10-purpose)
-[2.0 Decisions](#20-decisions)
-[3.0 Terminology](#30-terminology)
-[4.0 Target Layout](#40-target-layout)
-[5.0 Ownership Boundary](#50-ownership-boundary)
-[6.0 Backlog Disposition](#60-backlog-disposition)
-[7.0 Phases](#70-phases)
-[8.0 Open Questions](#80-open-questions)
-[References](#references)
-[Version History](#version-history)
+- [1.0 Purpose](#10-purpose)
+- [2.0 Decisions](#20-decisions)
+- [3.0 Terminology](#30-terminology)
+- [4.0 Target Layout](#40-target-layout)
+- [5.0 Ownership Boundary](#50-ownership-boundary)
+- [6.0 Backlog Disposition](#60-backlog-disposition)
+- [7.0 Phases](#70-phases)
+- [8.0 Open Questions](#80-open-questions)
+- [References](#references)
+- [Version History](#version-history)
 
 ---
 
@@ -231,6 +231,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 | 0.8 | 2026-10-01 | §4.2: ai/approvals.yaml added (design-14e05e35 DI-02, change-ee5357ec) |
 | 0.9 | 2026-10-01 | OQ-02 implemented (change-155cc014) |
 | 0.10 | 2026-10-01 | Status: Phase 2 closed |
+| 0.11 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
 
 ---
 
