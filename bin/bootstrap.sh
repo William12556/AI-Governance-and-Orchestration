@@ -62,6 +62,9 @@ echo "    Latest release: ${TAG}"
 ASSET="ai-framework-${TAG}.tar.gz"
 URL="https://github.com/${REPO}/releases/download/${TAG}/${ASSET}"
 TMPWORK="$(mktemp -d)"
+# change-f68d51c2 (audit-541f5c58 F-01): the temporary directory is removed on
+# every exit, including a failed download under set -e.
+trap 'rm -rf "${TMPWORK}"' EXIT
 TARBALL="${TMPWORK}/${ASSET}"
 
 echo "==> Downloading ${ASSET}..."
@@ -83,7 +86,13 @@ fi
 # --- Extract ----------------------------------------------------------------
 
 echo "==> Extracting to ${PROJECT_ROOT}/ai/..."
-tar -xz -C "${PROJECT_ROOT}" -f "${TARBALL}"
+# change-f68d51c2 (audit-541f5c58 F-01): a failed extraction removes the partial
+# ai/; it did not exist before this run (checked above), so no user data is lost.
+if ! tar -xz -C "${PROJECT_ROOT}" -f "${TARBALL}"; then
+    rm -rf "${PROJECT_AI}"
+    echo "Error: extraction failed; ai/ removed" >&2
+    exit 1
+fi
 
 # --- Seed project files ----------------------------------------------------
 # One governance model per project (proposal-5bcd46ad D-05).
@@ -98,6 +107,8 @@ MODEL="software-engineering"
 # line. Reads a block list ('- name' lines) and a single-line flow list
 # ('workspace_folders: [a, "b"]'); a flow list that does not close on the same
 # line is not read (change-541f5c58; audit-14e05e35 L-10).
+# change-f68d51c2 (audit-541f5c58 F-02): a block item at column 0 ('- name')
+# does not end the block; a trailing carriage return is removed from each name.
 workspace_folders_of() {
     awk '
         /^workspace_folders:[[:space:]]*\[.*\]/ {
@@ -107,6 +118,7 @@ workspace_folders_of() {
             n = split(s, a, ",")
             for (i = 1; i <= n; i++) {
                 x = a[i]
+                sub(/\r$/, "", x)
                 gsub(/^[[:space:]]+|[[:space:]]+$/, "", x)
                 gsub(/["\047]/, "", x)
                 if (x != "") print x
@@ -114,8 +126,9 @@ workspace_folders_of() {
             next
         }
         /^workspace_folders:/ { f = 1; next }
-        f && /^[^[:space:]#]/ { f = 0 }
+        f && /^[^[:space:]#-]/ { f = 0 }
         f && /^[[:space:]]*-[[:space:]]/ {
+            sub(/\r$/, "")
             sub(/^[[:space:]]*-[[:space:]]*/, "")
             sub(/[[:space:]]*#.*$/, "")
             gsub(/["\047]/, "")
