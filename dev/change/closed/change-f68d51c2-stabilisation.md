@@ -5,7 +5,7 @@ change_info:
   id: "change-f68d51c2"
   title: "Stabilisation M2: exclusive temporary files, escaped provider text, config blocks, bootstrap cleanup, YAML loader robustness, two one-liners"
   date: "2026-11-18"
-  status: "implemented"  # operator approval 2026-11-18; implemented and merged 2026-11-18 (3703cf8); verification audit open
+  status: "verified"  # operator approval 2026-11-18; implemented 2026-11-18 (3703cf8); verified 2026-11-18 (audit-f68d51c2)
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -194,6 +194,11 @@ version_history:
       - "Report deviations: D-01 (the recipe caller of load_yaml does not catch ConfigError; pre-existing traceback) deferred post-release under P02.11; D-02 and D-03 accepted. Observations: no action"
       - "Planner updates: design-14e05e35 v1.34 §11.0; design-ael-orchestrator v0.15 §4.1; guide-engine-operations v1.36 §3.0"
       - "Open: verification audit (governance P02.10.1)"
+  - version: "1.3"
+    date: "2026-11-18"
+    changes:
+      - "Verification audit audit-f68d51c2-verification-2026-11-18 (independent session, 6f2128a): FR-01 to FR-08 and T1 to T12 met; M1 to M13 killed; no regression; commit scope as specified; no critical, high, medium or low finding; F-01 info, no action. P02.11 change stop condition met"
+      - "Status verified; closed with issue-f68d51c2 and report-f68d51c2 (P00.14.4). Approver: operator, 2026-11-18"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."

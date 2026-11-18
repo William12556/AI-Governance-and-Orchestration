@@ -288,6 +288,8 @@ metadata:
 - Report D-01 remains deferred as already recorded; this audit does not change its disposition.
 - The observation in §7.0 creates no work.
 
+**Closure (2026-11-18).** Recommendation accepted. change-f68d51c2 verified and closed with issue-f68d51c2 and report-f68d51c2; F-01 no action. Status: closed. Approver: operator, 2026-11-18.
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -297,6 +299,7 @@ metadata:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-18 | Initial verification audit of change-f68d51c2 |
+| 1.1 | 2026-11-18 | §9.0: closure |
 
 ---
 

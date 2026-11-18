@@ -5,7 +5,7 @@ issue_info:
   id: "issue-f68d51c2"
   title: "Stabilisation M2: predictable temporary names, unescaped provider text, null config blocks, bootstrap cleanup, YAML loader robustness, two one-liners"
   date: "2026-11-18"
-  status: "resolved"  # change-f68d51c2 implemented 2026-11-18
+  status: "closed"  # change-f68d51c2 verified 2026-11-18
   severity: "low"
   type: "defect"
   iteration: 1
@@ -121,6 +121,9 @@ version_history:
   - version: "1.1"
     date: "2026-11-18"
     changes: ["Status resolved: change-f68d51c2 implemented and merged (3703cf8); verification audit open"]
+  - version: "1.2"
+    date: "2026-11-18"
+    changes: ["Status closed: change-f68d51c2 verified (audit-f68d51c2-verification-2026-11-18). Approver: operator, 2026-11-18"]
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
