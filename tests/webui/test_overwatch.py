@@ -800,3 +800,47 @@ def test_c_fr_02_06_hard_link_is_the_same_file(tmp_path: Path) -> None:
     assert os.path.realpath(link) != os.path.realpath(prompt)
 
     assert _fr_02_06(tmp_path, _run_json(os.getpid(), task_file=str(link))) == []
+
+
+# ---------------------------------------------------------------------------
+# change-f68d51c2 (audit-d4f527e7 F-01): exclusive temporary file
+# ---------------------------------------------------------------------------
+
+
+def _former_tmp(target: Path) -> Path:
+    """The predictable temporary name used before change-f68d51c2."""
+    return target.parent / f".{target.name}.{os.getpid()}.tmp"
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="os.symlink not available")
+def test_f68_t1_write_ignores_a_symlink_at_the_former_name(tmp_path: Path) -> None:
+    """T1 (change-f68d51c2, FR-01): an entry planted at the former temporary name is not followed."""
+    target = tmp_path / "overwatch.html"
+    victim = tmp_path / "victim.txt"
+    victim.write_text("victim\n")
+    victim.chmod(0o640)
+    os.symlink(victim, _former_tmp(target))
+    overwatch._write_text_atomic(target, "new\n")
+    assert victim.read_text() == "victim\n"
+    assert stat.S_IMODE(victim.stat().st_mode) == 0o640
+    assert not target.is_symlink() and target.is_file()
+    assert target.read_text(encoding="utf-8") == "new\n"
+
+
+def test_f68_t2_write_with_a_directory_at_the_former_name(tmp_path: Path) -> None:
+    """T2 (change-f68d51c2, FR-01): a directory at the former temporary name does not stop the write."""
+    target = tmp_path / "overwatch.html"
+    os.mkdir(_former_tmp(target))
+    overwatch._write_text_atomic(target, "new\n")
+    assert target.read_text(encoding="utf-8") == "new\n"
+
+
+def test_f68_t3_new_file_mode(tmp_path: Path) -> None:
+    """T3 (change-f68d51c2, FR-01): a new file gets 0o666 & ~umask."""
+    target = tmp_path / "overwatch.html"
+    old = os.umask(0o022)
+    try:
+        overwatch._write_text_atomic(target, "new\n")
+    finally:
+        os.umask(old)
+    assert stat.S_IMODE(target.stat().st_mode) == 0o666 & ~0o022

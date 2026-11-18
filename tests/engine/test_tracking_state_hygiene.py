@@ -215,3 +215,54 @@ def test_t5_real_unremovable_entry(orch, project):
         assert orch.reset_state(str(state)) == 1
     finally:
         state.chmod(0o755)
+
+
+# --- change-f68d51c2 (audit-d4f527e7 F-01): exclusive temporary file ---------------------------
+
+def _former_tmp(target):
+    """The predictable temporary name used before change-f68d51c2."""
+    return target.parent / f".{target.name}.{os.getpid()}.tmp"
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="os.symlink not available")
+def test_f68_t1_write_state_ignores_a_symlink_at_the_former_name(orch, project):
+    """T1 (change-f68d51c2, FR-01): an entry planted at the former temporary name is not followed."""
+    state = project / "ai" / "state"
+    target = state / "work-summary.txt"
+    victim = project / "victim.txt"
+    victim.write_text("victim\n")
+    victim.chmod(0o640)
+    os.symlink(victim, _former_tmp(target))
+    orch.write_state(str(state), "work-summary.txt", "new\n")
+    assert victim.read_text() == "victim\n"
+    assert stat.S_IMODE(victim.stat().st_mode) == 0o640
+    assert not target.is_symlink() and target.is_file()
+    assert target.read_text() == "new\n"
+
+
+def test_f68_t2_write_state_with_a_directory_at_the_former_name(orch, project):
+    """T2 (change-f68d51c2, FR-01): a directory at the former temporary name does not stop the write."""
+    state = project / "ai" / "state"
+    target = state / "work-summary.txt"
+    os.mkdir(_former_tmp(target))
+    orch.write_state(str(state), "work-summary.txt", "new\n")
+    assert target.read_text() == "new\n"
+
+
+@pytest.mark.parametrize("existing", ["absent", "symlink"])
+def test_f68_t3_write_state_new_file_mode(orch, project, existing):
+    """T3 (change-f68d51c2, FR-01): a new file, or one replacing a symlink, gets 0o666 & ~umask."""
+    state = project / "ai" / "state"
+    target = state / "review-feedback.txt"
+    if existing == "symlink":
+        outside = project / "outside.txt"
+        outside.write_text("keep\n")
+        outside.chmod(0o600)
+        os.symlink(outside, target)
+    old = os.umask(0o022)
+    try:
+        orch.write_state(str(state), "review-feedback.txt", "x\n")
+    finally:
+        os.umask(old)
+    assert not target.is_symlink()
+    assert stat.S_IMODE(target.stat().st_mode) == 0o666 & ~0o022

@@ -562,3 +562,14 @@ def test_checkers_complete_on_dev_corpus(checker):
     # change-e4428fd5 amendment 1: each checker reports 0 errors on dev/
     assert m.group(1) == "0", out.stdout
     assert out.returncode == 0
+
+
+# --- change-f68d51c2 (audit-9377f9b9-followup F-01): unconvertible scalar -----------------------
+
+def test_f68_t9_invalid_date_is_a_parse_finding(tmp_path):
+    """T9 (change-f68d51c2, FR-05): an invalid date gives the existing parse finding, no exception."""
+    lint, proto = _parse_case(tmp_path, "change/change-1a2b3c4d-x.md", "created: 2026-11-31\n")
+    assert len(lint) == 1
+    assert lint[0].severity == "ERROR"
+    assert lint[0].message.startswith("YAML block does not parse: ")
+    assert proto == []

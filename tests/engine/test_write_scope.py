@@ -176,3 +176,17 @@ def test_reviewer_gets_absolute_deliverables_block(orch, log, project):
     assert f"  - {project / 'src' / 'a.py'}" in block
     (state / "work-summary.txt").write_text("nothing\n")
     assert orch._deliverables_block_for(str(state), log) == ""
+
+
+# --- change-f68d51c2 (audit-9377f9b9-followup F-01, F-02): YAML reader robustness -----------------
+
+@pytest.mark.parametrize("block", ["created: 2026-11-31", "x: " + "[" * 5000 + "]" * 5000],
+                         ids=["date", "deep"])
+def test_f68_t9_t10_deliverable_paths_skip_an_unconvertible_block(block):
+    """T9, T10 (change-f68d51c2, FR-05): the block is skipped as a YAMLError block is."""
+    def raw(first):
+        return f"```yaml\n{first}\n```\n\n" + PROMPT.split("\n", 2)[2]
+
+    expected = S.extract_deliverable_paths(raw("key: ["))
+    assert expected == ["src/pkg/mod.py", "docs/notes.md"]
+    assert S.extract_deliverable_paths(raw(block)) == expected

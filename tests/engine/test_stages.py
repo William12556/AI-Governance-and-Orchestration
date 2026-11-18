@@ -992,3 +992,73 @@ def test_f_nested_project_does_not_read_the_outer_approvals(repo, se):
     assert ST.committed_approvals(str(nested)) == {}
     missing = ST.prerun_missing(str(nested), se, U)
     assert any("approval" in m for m in missing)
+
+
+# --- change-f68d51c2 (audit-d4f527e7 F-01): approve's exclusive temporary file -------------------
+
+def _former_tmp(target):
+    """The predictable temporary name used before change-f68d51c2."""
+    return target.parent / f".{target.name}.{os.getpid()}.tmp"
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="os.symlink not available")
+def test_f68_t1_approve_write_ignores_a_symlink_at_the_former_name(tmp_path):
+    """T1 (change-f68d51c2, FR-01): an entry planted at the former temporary name is not followed."""
+    target = tmp_path / "approvals.yaml"
+    victim = tmp_path / "victim.txt"
+    victim.write_text("victim\n")
+    victim.chmod(0o640)
+    os.symlink(victim, _former_tmp(target))
+    A._write_atomic(str(target), b"new\n")
+    assert victim.read_text() == "victim\n"
+    assert victim.stat().st_mode & 0o777 == 0o640
+    assert not target.is_symlink() and target.is_file()
+    assert target.read_bytes() == b"new\n"
+
+
+def test_f68_t2_approve_write_with_a_directory_at_the_former_name(tmp_path):
+    """T2 (change-f68d51c2, FR-01): a directory at the former temporary name does not stop the write."""
+    target = tmp_path / "approvals.yaml"
+    os.mkdir(_former_tmp(target))
+    A._write_atomic(str(target), b"new\n")
+    assert target.read_bytes() == b"new\n"
+
+
+def test_f68_t3_approve_write_new_file_mode(tmp_path):
+    """T3 (change-f68d51c2, FR-01): a new file gets 0o666 & ~umask."""
+    target = tmp_path / "approvals.yaml"
+    old = os.umask(0o022)
+    try:
+        A._write_atomic(str(target), b"new\n")
+    finally:
+        os.umask(old)
+    assert target.stat().st_mode & 0o777 == 0o666 & ~0o022
+
+
+# --- change-f68d51c2 (audit-9377f9b9-followup F-01, F-02): YAML reader robustness -----------------
+
+F68_DEEP = "[" * 5000 + "]" * 5000
+
+
+def _f68_doc(tmp_path, first_block):
+    """A document whose first YAML block is first_block and whose second carries the status."""
+    path = tmp_path / "doc.md"
+    path.write_text(f"```yaml\n{first_block}\n```\n\n```yaml\nchange_info:\n  status: approved\n```\n")
+    return str(path)
+
+
+@pytest.mark.parametrize("block", ["created: 2026-11-31", "x: " + F68_DEEP], ids=["date", "deep"])
+def test_f68_t9_t10_status_skips_an_unconvertible_block(tmp_path, block):
+    """T9, T10 (change-f68d51c2, FR-05): _status treats the block as a YAMLError block."""
+    expected = ST._status(_f68_doc(tmp_path, "key: ["), "change_info.status")
+    assert expected == "approved"
+    assert ST._status(_f68_doc(tmp_path, block), "change_info.status") == expected
+
+
+@pytest.mark.parametrize("text", [
+    "approvals:\n  - uuid: '1a2b3c4d'\n    stage: prompt\n    created: 2026-11-31\n",
+    "approvals: " + F68_DEEP + "\n",
+], ids=["date", "deep"])
+def test_f68_t9_t10_parse_approvals_fails_closed(text):
+    """T9, T10 (change-f68d51c2, FR-05): parse_approvals returns {} (no approvals)."""
+    assert ST.parse_approvals(text) == {}

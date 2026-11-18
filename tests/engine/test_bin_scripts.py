@@ -12,6 +12,7 @@ to date, so the copy has nothing to transfer.
 import os
 import shutil
 import stat
+import io
 import subprocess
 import tarfile
 
@@ -66,11 +67,48 @@ def _flow_style(manifest_path):
         assert yaml.safe_load(fh)["workspace_folders"] == items
 
 
+def _block_style(manifest_path, style):
+    """
+    Replace the manifest's workspace_folders list with the folders a and b
+    (change-f68d51c2, FR-07): 'col0' writes the items at column 0 followed by
+    another top-level key; 'crlf' writes an indented list and CRLF line ends.
+    """
+    with open(manifest_path, encoding="utf-8", newline="") as fh:
+        lines = fh.read().split("\n")
+    start = next(i for i, line in enumerate(lines) if line.startswith("workspace_folders:"))
+    end = start + 1
+    while end < len(lines) and (lines[end].startswith((" ", "\t", "#", "-")) or not lines[end].strip()):
+        end += 1
+    indent = "" if style == "col0" else "  "
+    lines[start:end] = ["workspace_folders:", f"{indent}- a", f"{indent}- b", ""]
+    newline = "\r\n" if style == "crlf" else "\n"
+    with open(manifest_path, "w", encoding="utf-8", newline="") as fh:
+        fh.write(newline.join(lines))
+    with open(manifest_path, encoding="utf-8") as fh:
+        assert yaml.safe_load(fh)["workspace_folders"] == ["a", "b"]
+
+
+def _workspace_names(project):
+    return sorted(p.name for p in (project / "ai" / "workspace").iterdir())
+
+
 # --- bootstrap.sh -------------------------------------------------------------------------------
 
 def _tarball(tmp_path, layout):
-    """A release tarball: 'new' holds the framework ai/, 'old' has no ai/engine/, 'flow' a flow list."""
+    """
+    A release tarball: 'new' holds the framework ai/, 'old' has no ai/engine/, 'flow' a flow list;
+    'col0' and 'crlf' the folder lists of _block_style; 'escape' holds ai/engine/ and a member
+    '../escaped.txt' (change-f68d51c2).
+    """
     stage = tmp_path / f"stage-{layout}"
+    archive = tmp_path / f"release-{layout}.tar.gz"
+    if layout == "escape":
+        with tarfile.open(archive, "w:gz") as tar:
+            for name in ("ai/engine/src/orchestrator.py", "../escaped.txt"):
+                info = tarfile.TarInfo(name)
+                info.size = 2
+                tar.addfile(info, io.BytesIO(b"x\n"))
+        return archive
     if layout == "old":
         (stage / "ai" / "ael").mkdir(parents=True)
         (stage / "ai" / "ael" / "config.yaml").write_text("loop: {}\n")
@@ -85,13 +123,14 @@ def _tarball(tmp_path, layout):
                 target.unlink()
         if layout == "flow":
             _flow_style(stage / MANIFEST_REL)
-    archive = tmp_path / f"release-{layout}.tar.gz"
+        elif layout in ("col0", "crlf"):
+            _block_style(stage / MANIFEST_REL, layout)
     with tarfile.open(archive, "w:gz") as tar:
         tar.add(stage / "ai", arcname="ai")
     return archive
 
 
-def _bootstrap(tmp_path, archive):
+def _bootstrap(tmp_path, archive, **extra_env):
     project = tmp_path / "project"
     project.mkdir()
     fake_bin = tmp_path / "fake-bin"
@@ -105,13 +144,16 @@ while [[ $# -gt 0 ]]; do
         *) last="$1"; shift ;;
     esac
 done
-if [[ -n "${out}" ]]; then
+if [[ -n "${out}" && -n "${FAKE_CURL_FAIL:-}" ]]; then
+    exit 22  # change-f68d51c2: a failed download
+elif [[ -n "${out}" ]]; then
     cp "${FAKE_TARBALL}" "${out}"
 else
     echo '{ "tag_name": "v9.9.9" }'
 fi
 """)
-    env = dict(os.environ, PATH=f"{fake_bin}{os.pathsep}{os.environ['PATH']}", FAKE_TARBALL=str(archive))
+    env = dict(os.environ, PATH=f"{fake_bin}{os.pathsep}{os.environ['PATH']}", FAKE_TARBALL=str(archive),
+               **extra_env)
     proc = _run(["bash", os.path.join(REPO, "bin", "bootstrap.sh"), str(project)], env=env)
     return project, proc
 
@@ -141,6 +183,36 @@ def test_t2_bootstrap_installs_and_creates_workspace_folders(tmp_path, layout):
     assert (project / "ai" / "config.yaml").is_file()
     for folder in _declared_folders():
         assert (project / "ai" / "workspace" / folder).is_dir(), folder
+
+
+def test_f68_t7_bootstrap_removes_tmpdir_after_failed_download(tmp_path):
+    """T7 (change-f68d51c2, FR-04): the EXIT trap removes the temporary directory."""
+    tmpdir = tmp_path / "tmpdir"
+    tmpdir.mkdir()
+    project, proc = _bootstrap(tmp_path, _tarball(tmp_path, "old"),
+                               FAKE_CURL_FAIL="1", TMPDIR=str(tmpdir))
+    assert proc.returncode != 0, proc.stdout + proc.stderr
+    assert list(tmpdir.iterdir()) == []
+    assert not (project / "ai").exists()
+
+
+def test_f68_t8_bootstrap_removes_partial_ai_after_failed_extraction(tmp_path):
+    """T8 (change-f68d51c2, FR-04): a failed extraction removes ai/ and the temporary directory."""
+    tmpdir = tmp_path / "tmpdir"
+    tmpdir.mkdir()
+    project, proc = _bootstrap(tmp_path, _tarball(tmp_path, "escape"), TMPDIR=str(tmpdir))
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "Error: extraction failed; ai/ removed" in proc.stderr
+    assert not (project / "ai").exists()
+    assert list(tmpdir.iterdir()) == []
+
+
+@pytest.mark.parametrize("style", ["col0", "crlf"])
+def test_f68_t12_bootstrap_reads_column_0_and_crlf_lists(tmp_path, style):
+    """T12 (change-f68d51c2, FR-07): folders a and b exactly; no name ends in a carriage return."""
+    project, proc = _bootstrap(tmp_path, _tarball(tmp_path, style))
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert _workspace_names(project) == ["a", "b"]
 
 
 # --- propagate.sh -------------------------------------------------------------------------------
@@ -230,6 +302,19 @@ def test_t5_propagate_reads_a_flow_style_list(tmp_path, framework):
     assert proc.returncode == 0, proc.stdout + proc.stderr
     for folder in folders:
         assert (project / "ai" / "workspace" / folder).is_dir(), folder
+
+
+@pytest.mark.parametrize("style", ["col0", "crlf"])
+def test_f68_t12_propagate_reads_column_0_and_crlf_lists(tmp_path, framework, style):
+    """T12 (change-f68d51c2, FR-07): folders a and b exactly; no name ends in a carriage return."""
+    root, env = framework
+    _block_style(root / MANIFEST_REL, style)
+    project, folders = _up_to_date_target(tmp_path, root)
+    assert folders == ["a", "b"]
+    shutil.rmtree(project / "ai" / "workspace")
+    proc = _propagate(root, env, project, "--yes")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert _workspace_names(project) == ["a", "b"]
 
 
 # --- migrate-layout.sh --------------------------------------------------------------------------

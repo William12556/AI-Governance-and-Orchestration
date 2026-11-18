@@ -4,6 +4,7 @@ audit-b8c75bac F-05; audit-86c958dd F-02)."""
 
 import argparse
 import asyncio
+import io
 import logging
 import os
 import re
@@ -268,3 +269,90 @@ def test_t9_scan_outside_a_repository_uses_an_empty_approvals_mapping(tmp_path, 
     report = ST.scan(str(tmp_path), M.load_manifest(M.locate_manifest()))
     assert any("not a git repository" in w for w in report.warnings)
     assert len(captured) == 1 and isinstance(captured[0], dict) and captured[0] == {}
+
+
+# --- change-f68d51c2 (audit-bae631c7 F-01 to F-03; audit-9377f9b9-followup F-01, F-02) ---------
+
+class _FlakyProvider:
+    """Provider stand-in: the first call raises an error with markup-like text, the second succeeds."""
+
+    def __init__(self):
+        self.calls = 0
+
+    async def complete(self, model, messages, tools, max_completion_tokens):
+        self.calls += 1
+        if self.calls == 1:
+            raise RuntimeError("404 Not Found for url [/v1/chat/completions]")
+        return "completion"
+
+
+def test_f68_t4_retry_line_escapes_provider_text(orch, tmp_path, capsys):
+    """T4 (change-f68d51c2, FR-02): the provider error text is printed literally, no MarkupError."""
+    provider = _FlakyProvider()
+    result = asyncio.run(orch._completion_with_retry(
+        provider, "m", [], None, logging.getLogger("engine-test-f68-retry"), str(tmp_path),
+        max_retries=2, initial_backoff=0.0))
+    assert result == "completion"
+    assert provider.calls == 2
+    assert "[/v1/chat/completions]" in _squash(capsys.readouterr().out)
+
+
+@pytest.mark.parametrize("key", ["context", "execution"])
+def test_f68_t5_null_config_block_is_empty(engine, project, key):
+    """T5 (change-f68d51c2, FR-03): a null context: or execution: block passes the check."""
+    cfg = _config()
+    cfg[key] = None
+    config = _write(project, cfg)
+    assert f"{key}: null" in config.read_text()
+    _passes(engine, project, config)
+
+
+@pytest.mark.parametrize("value", [["a"], "a"])
+@pytest.mark.parametrize("key", ["context", "execution"])
+def test_f68_t6_non_mapping_config_block_is_refused(engine, project, capsys, key, value):
+    """T6 (change-f68d51c2, FR-03): a list or string block is a configuration error; no state."""
+    cfg = _config()
+    cfg[key] = value
+    config = _write(project, cfg)
+    _refused(engine, project, capsys, config, f"{key}: must be a mapping")
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("created: 2026-11-31\n", "invalid YAML"),
+    ("x: " + "[" * 5000 + "]" * 5000 + "\n", "invalid YAML: nesting too deep"),
+], ids=["date", "deep"])
+def test_f68_t9_t10_load_yaml_raises_config_error(orch, tmp_path, text, expected):
+    """T9, T10 (change-f68d51c2, FR-05): load_yaml raises ConfigError naming the path."""
+    path = tmp_path / "recipe.yaml"
+    path.write_text(text)
+    with pytest.raises(orch.ConfigError) as exc:
+        orch.load_yaml(str(path))
+    assert str(exc.value).startswith(f"{path}: {expected}")
+
+
+def test_f68_t9_load_config_invalid_date(orch, tmp_path):
+    """T9 (change-f68d51c2, FR-05): _load_config raises ConfigError 'invalid YAML: ...'."""
+    path = tmp_path / "config.yaml"
+    path.write_text("created: 2026-11-31\nloop: {state_dir: ai/state}\n")
+    with pytest.raises(orch.ConfigError) as exc:
+        orch._load_config(str(path))
+    assert str(exc.value).startswith("invalid YAML: ")
+
+
+class _TtyInput(io.StringIO):
+    """stdin stand-in that reports a terminal."""
+
+    def isatty(self):
+        return True
+
+
+@pytest.mark.parametrize("stdin", [io.StringIO(), _TtyInput("n\n")], ids=["non-interactive", "interactive"])
+def test_f68_t11_continuation_prompt_shows_y_n(orch, project, monkeypatch, capsys, stdin):
+    """T11 (change-f68d51c2, FR-06): the continuation prompt shows '[y/N]'."""
+    monkeypatch.setattr(orch.sys, "stdin", stdin)
+    rc = asyncio.run(orch.run_loop(None, None, "w", "r", {}, {}, "task", 0, 1,
+                                   str(project / "ai" / "state"),
+                                   logging.getLogger("engine-test-f68-prompt"),
+                                   project_root=str(project), gates=[], gate_specs={}))
+    assert rc == 1
+    assert "[y/N]" in capsys.readouterr().out

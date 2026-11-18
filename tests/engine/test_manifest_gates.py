@@ -152,6 +152,18 @@ def test_t6_deeply_nested_yaml_is_reported(tmp_path):
     assert "invalid YAML: nesting too deep" in str(exc.value)
 
 
+def test_f68_t9_invalid_date_is_reported(tmp_path):
+    """T9 (change-f68d51c2, FR-05; audit-9377f9b9-followup F-01): ManifestError, no other exception."""
+    d = tmp_path / "governance" / "x"
+    d.mkdir(parents=True)
+    path = str(d / "manifest.yaml")
+    (d / "manifest.yaml").write_text("created: 2026-11-31\nmodel: {name: x, version: 1}\n")
+    with pytest.raises(M.ManifestError) as exc:
+        M.load_manifest(path)
+    assert path in str(exc.value)
+    assert "invalid YAML" in str(exc.value)
+
+
 # --- gates ----------------------------------------------------------------------
 
 def test_build_command_expands_placeholders():
