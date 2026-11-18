@@ -315,6 +315,7 @@ python ai/engine/src/orchestrator.py --mode loop \
     - Milestone-based: Upon completion of major development phases
     - Human-requested: Ad-hoc audits when compliance concerns arise
     - Baseline: After initial code generation before production deployment
+    - Verification: After implementation of a change that altered source code (P02.10.1)
     - Mode selection: Human-requested audits resolve to one of two modes — strategic (Planner) or tactical (engine audit loop) — per P02.9
   - P02.3 Audit Scope
     - Protocol compliance: All protocols
@@ -326,7 +327,7 @@ python ai/engine/src/orchestrator.py --mode loop \
   - P02.4 Audit Procedure
     - P02.4.1 Strategic-led (frontier reasoning)
       - Planner: Conducts systematic review of source code against governance requirements
-      - Planner: Documents findings with severity classification (critical, high, medium, low)
+      - Planner: Documents findings with severity classification (critical, high, medium, low, info)
       - Planner: Provides evidence for each finding (file paths, line numbers, specific violations)
       - Planner: Calculates compliance metrics (percentage, deficiency counts by severity)
     - P02.4.2 Tactical-led (engine audit loop)
@@ -355,6 +356,7 @@ python ai/engine/src/orchestrator.py --mode loop \
     - Planner: References source code audit report in issue documents
     - Planner: Issue resolution follows standard P03 → P04 → implementation workflow
     - Planner: Tracks remediation progress in audit report updates
+    - Planner: Disposes of medium, low and info findings per P02.11
   - P02.7 Audit Trail
     - Planner: Maintains chronological audit history
     - Planner: Links related audits (initial → follow-up → closure)
@@ -366,8 +368,8 @@ python ai/engine/src/orchestrator.py --mode loop \
       - Completion documented in audit report
       - Human approval obtained
     - P02.8.2 Closure Process
-      - Planner: Conducts follow-up audit after remediation completed, when remediation changed source code
-      - Human: May waive the follow-up audit when remediation changed documents only; waiver recorded in the audit report closure block
+      - Planner: Conducts a verification audit (P02.10.1) after remediation completed, when remediation changed source code
+      - Human: May waive the verification audit when remediation changed documents only; waiver recorded in the audit report closure block
       - Planner: Verifies all closure criteria satisfied
       - Planner: Documents closure status with final compliance metrics
       - Planner: Records closure date and approver
@@ -398,6 +400,33 @@ python ai/engine/src/orchestrator.py --mode loop \
       - Flag: orchestrator selects audit recipes automatically when audit-index.md is present in the state directory
       - Procedure: ai/governance/software-engineering/doc/guide-audit-loop.md
     - Both modes terminate at audit-<uuid>-<name>.md (T08) and feed remediation via P02.6 (P03)
+
+  - P02.10 Audit Classes
+    - The class states the purpose and depth of an audit; it is independent of the mode (P02.9), which states the actor
+    - T08 field audit_info.class records the class
+    - P02.10.1 Verification audit
+      - Purpose: confirm that one change meets its acceptance criteria and introduces no regression
+      - Trigger: after implementation of a change that altered source code (P02.8.2)
+      - Scope: the change's acceptance criteria and test cases; the mutations the change defines; the full test suite; commit scope against the change's affected components
+      - Excluded: exploratory mutations; probes of code the change did not alter
+      - Findings: an unmet acceptance criterion; a regression; a defect introduced on lines the change altered
+      - Observations: a pre-existing defect noticed in passing is recorded in one line under observations; it is not a finding and creates no work
+    - P02.10.2 Ad-hoc audit
+      - Purpose: find defects at any depth
+      - Trigger: human request only; never automatic
+      - Scope: P02.3; exploratory probes and additional mutations permitted
+      - Findings: triaged per P02.11
+
+  - P02.11 Triage and Stop Conditions
+    - Disposition by severity:
+      - Critical, high: remediated before audit closure (P02.6, P02.8.1)
+      - Medium: remediated before the next release
+      - Security-relevant low: treated as medium
+      - Other low: recorded in the task register (P00.20) as deferred; remediated when the affected code changes for another reason, or in a release batch
+      - Info: recorded in the task register only when an action is recommended
+      - Surviving mutation (test gap): info
+    - Change stop condition: a change closes when its verification audit reports no unmet acceptance criterion, no regression and no introduced defect of medium severity or higher; an introduced low defect is disposed of per the low rows above
+    - Remediation rounds: at most one remediation round per change; findings remaining after that round are recorded in the task register and do not hold the change open
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -1279,6 +1308,7 @@ See [workflow.md](workflow.md).
 | 12.10 | 2026-11-07 | Appendix A.5: YAML that does not parse is reported (error, or warning for a closed record); `closed/` judged below the workspace directory (change-9377f9b9). Non-breaking. |
 | 12.11 | 2026-11-11 | P10.2 .gitignore: removed ai/workspace/proposal/ and ai/workspace/proposal/closed/; added ai-local/. P10.6 layout comments aligned: proposal/ no longer marked excluded; ai-local/ marked excluded from git. Non-breaking. |
 | 12.12 | 2026-11-14 | Appendix A.5: the template schemas describe new documents; numbered `schema_type` values are valid for the checkers only (report-7e96c15c F-01). Non-breaking. |
+| 12.13 | 2026-11-18 | P02.10 audit classes (verification, ad-hoc) and P02.11 triage and stop conditions; P02.2 verification trigger; P02.4.1 info severity; P02.6 disposition per P02.11; P02.8.2 follow-up audit replaced by the verification audit; T08 1.5: optional `class`, `observations` and `info` findings. Non-breaking. |
 
 ---
 [Return to Table of Contents](#table-of-contents)

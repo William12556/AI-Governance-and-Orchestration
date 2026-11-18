@@ -25,6 +25,7 @@ audit_info:
   title: ""
   date: ""
   mode: ""  # strategic, tactical
+  class: ""  # optional: verification, ad_hoc (P02.10)
   status: ""  # open, in_progress, complete, closed
   auditor: ""  # planner, or engine model identifier
 
@@ -50,6 +51,12 @@ findings:
   low:
     - location: ""
       description: ""
+  info:  # optional
+    - location: ""
+      description: ""
+
+observations:  # optional; verification audits: pre-existing defects noticed in passing, one line each (P02.10.1)
+  - ""
 
 metrics:
   items_audited: 0
@@ -59,6 +66,7 @@ metrics:
     high: 0
     medium: 0
     low: 0
+    info: 0  # optional
 
 recommendations:
   - ""
@@ -123,6 +131,11 @@ properties:
         enum:
           - strategic
           - tactical
+      class:
+        type: string
+        enum:
+          - verification
+          - ad_hoc
       status:
         type: string
         enum:
@@ -193,6 +206,20 @@ properties:
               type: string
             description:
               type: string
+      info:
+        type: array
+        items:
+          type: object
+          properties:
+            location:
+              type: string
+            description:
+              type: string
+
+  observations:
+    type: array
+    items:
+      type: string
 
   metrics:
     type: object
@@ -211,6 +238,8 @@ properties:
           medium:
             type: integer
           low:
+            type: integer
+          info:
             type: integer
 
   recommendations:
@@ -285,6 +314,7 @@ properties:
 | 1.2 | 2026-10-01 | Terminology: Strategic Domain → planner, Tactical Domain → worker and reviewer (change-155cc014) |
 | 1.3 | 2026-11-07 | change-e4428fd5: schema_type class word |
 | 1.4 | 2026-11-14 | Layout conformance with README.md v4.5: Return to Table of Contents links added (dev/task.md work item 7a) |
+| 1.5 | 2026-11-18 | Governance 12.13: optional `audit_info.class` (verification, ad_hoc), `info` findings and count, `observations` |
 
 ---
 

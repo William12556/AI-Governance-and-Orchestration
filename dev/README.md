@@ -12,6 +12,7 @@ Created: 2026 October 23
 - [4.0 Task Register](#40-task-register)
 - [5.0 Requirements](#50-requirements)
 - [6.0 Repository Layout](#60-repository-layout)
+- [7.0 Release and Stabilisation](#70-release-and-stabilisation)
 - [Version History](#version-history)
 
 ---
@@ -87,12 +88,29 @@ Moved from governance P10.6 and corrected (governance 12.4).
 
 ---
 
+## 7.0 Release and Stabilisation
+
+1. Audits of framework changes follow governance P02.10 (audit classes) and P02.11 (triage and stop conditions). An open register row does not by itself prevent a release.
+2. A release is done when:
+   - no critical, high or medium finding is open;
+   - no security-relevant low finding is open;
+   - the full test suite passes on macOS;
+   - `linter.py` and `protocol_checker.py` report 0 errors on `dev/`.
+3. A freeze starts with each release. It ends by operator decision; it has no fixed length.
+4. During a freeze, a change is made only for a defect observed in use on a downstream test project (GTach, solax-modbus) that is of medium severity or higher, or security-relevant. Other work waits in `dev/task.md` with status `Deferred — post-release`.
+5. Releases are propagated to the downstream test projects GTach and solax-modbus.
+
+[Return to Table of Contents](#table-of-contents)
+
+---
+
 ## Version History
 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-10-23 | Initial document: dev/ rules moved out of governance.md (P11.7, P10.6 repository note) and the project instructions; task register replaces dev/todo.md and dev/backlog.md |
 | 1.1 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
+| 1.2 | 2026-11-18 | §7.0 Release and Stabilisation: release definition of done, freeze rule, downstream test projects (governance 12.13) |
 
 ---
 
