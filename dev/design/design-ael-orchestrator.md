@@ -156,7 +156,7 @@ All paths relative to `state_dir` (`ai/state/` by default, per `config.yaml`
 
 Not cleared by reset: `engine_*.LOG` and `context-budget.md`.
 
-State files written by `write_state` are written to a temporary file in the state directory and moved into place with `os.replace`, as `run.json` is; a reader sees the previous or the new content. The name itself is replaced, so a symlink at a state file name is not written through (change-d4f527e7; audit-caab2052 L-10).
+State files written by `write_state` are written to a temporary file in the state directory and moved into place with `os.replace`; a reader sees the previous or the new content. The name itself is replaced, so a symlink at a state file name is not written through (change-d4f527e7; audit-caab2052 L-10). The temporary file is created exclusively with a random name (`tempfile.mkstemp`), so an entry planted at a temporary name is never followed; an existing regular file keeps its permission bits and a new file gets 0666 masked by the umask (change-f68d51c2; audit-d4f527e7 F-01).
 
 ### 4.2 Configuration Schema
 
@@ -686,6 +686,7 @@ Carried from `requirements-1c1f4ef6-ael.md` §Open Issues, annotated against cur
 | 0.12 | 2026-11-14 | §4.1: FR-02-06 qualified as govwatch FR-02-06 (report-0fce4169 F2); §3.1, §4.2 and §5.1: the live query is tier 3 and the per-model entry tier 2 (report-53b0e016 F-01; §3.1 and §4.2 found in the unit 2 review) |
 | 0.13 | 2026-11-14 | §4.1: atomic state writes; audit archive below the project root without overwrite (change-d4f527e7) |
 | 0.14 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list; Table of Contents lists the H2 sections only (dev/task.md work item 7a) |
+| 0.15 | 2026-11-18 | §4.1: exclusive temporary files for state writes; the comparison with `run.json` removed (change-f68d51c2; audit-d4f527e7 F-01) |
 
 ---
 

@@ -5,7 +5,7 @@ change_info:
   id: "change-f68d51c2"
   title: "Stabilisation M2: exclusive temporary files, escaped provider text, config blocks, bootstrap cleanup, YAML loader robustness, two one-liners"
   date: "2026-11-18"
-  status: "approved"  # operator approval 2026-11-18
+  status: "implemented"  # operator approval 2026-11-18; implemented and merged 2026-11-18 (3703cf8); verification audit open
   priority: "medium"
   iteration: 1
   coupled_docs:
@@ -185,6 +185,15 @@ version_history:
   - version: "1.1"
     date: "2026-11-18"
     changes: ["Approved by the operator as drafted, with the planner decisions confirmed: new-file mode 0666 masked by the umask; three local write helpers; load_yaml raises ConfigError; parse_approvals fails closed; observations only, no fixes outside FR-01 to FR-08. Implementation per prompt-f68d51c2"]
+  - version: "1.2"
+    date: "2026-11-18"
+    changes:
+      - "Implemented in Claude Code cloud on branch claude/wonderful-rubin-pjutl1 from 76bac3a: engine b643021, webui c4e27b7, scripts 2a683f0, tests 92fa6d1, report and prompt move 3703cf8 (report-f68d51c2 v1.0). Merged fast-forward into main at 3703cf8. Status implemented"
+      - "Session (Linux): 858 passed, 4 skipped at baseline; 894 passed, 4 skipped after (36 new cases). Mutations M1 to M13 fail their named tests. Operator macOS suite after the merge: 898 passed"
+      - "Planner review: diff limited to the prompt scope; source read against FR-01 to FR-08; the 18 new cases of the linter, manifest, stages, bin-script and Overwatch modules re-run on Linux (pass); M12 repeated against bootstrap.sh (killed)"
+      - "Report deviations: D-01 (the recipe caller of load_yaml does not catch ConfigError; pre-existing traceback) deferred post-release under P02.11; D-02 and D-03 accepted. Observations: no action"
+      - "Planner updates: design-14e05e35 v1.34 §11.0; design-ael-orchestrator v0.15 §4.1; guide-engine-operations v1.36 §3.0"
+      - "Open: verification audit (governance P02.10.1)"
 
 metadata:
   copyright: "Copyright (c) 2026 William Watson. MIT License."
