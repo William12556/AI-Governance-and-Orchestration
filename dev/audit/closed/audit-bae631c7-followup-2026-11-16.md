@@ -408,6 +408,8 @@ P02.8.1 criteria for this audit: no critical and no high findings. The three low
 - Suggested dispositions: F-01 and F-02 as one small source fix in a later engine change, or register them in `dev/task.md`. Register F-03. F-04 and F-06 go to work item 6 if taken. F-05 needs the guide sentence at least. F-07 needs no action.
 - With this audit, the P02.8.2 follow-up for change-bae631c7 in report-b3a503a2 §6.1 is done. The closure blocks of the three parent audits can record the closure of L-13, L-16, F-05 and F-02 on the operator's approval.
 
+**Closure (2026-11-18).** Dispositions under governance P02.11 (12.13): F-01, F-02 and F-03 taken into stabilisation change M2 in `dev/task.md`; F-04, F-05 and F-06 deferred post-release in `dev/task.md`; F-07 no action. The parent audits audit-caab2052, audit-b8c75bac and audit-86c958dd are closed. Status: closed. Approver: operator, 2026-11-18.
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -417,6 +419,7 @@ P02.8.1 criteria for this audit: no critical and no high findings. The three low
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-16 | Initial follow-up audit of change-bae631c7 |
+| 1.1 | 2026-11-18 | §10.0: dispositions and closure |
 
 ---
 

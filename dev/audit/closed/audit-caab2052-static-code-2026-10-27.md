@@ -583,6 +583,8 @@ Recorded by the planner on 2026-10-29 on the operator's decision.
 
 **Closure block (2026-11-15).** Every finding and open question of this audit has a recorded decision and outcome. No critical or high finding was raised. Groups 1 to 5 were followed by their own audits. The group 6 findings L-10, L-13, L-14 and L-16 were remediated by source changes in the session of 2026-11-14 (change-bae631c7, change-d4f527e7), so closure requires a follow-up audit (P02.8.2), which is deferred to the operator. Status: ready for follow-up audit; closure pending operator.
 
+**Closure (2026-11-18).** The follow-up audits audit-bae631c7 (L-13, L-16) and audit-d4f527e7 (L-10, L-14), both of 2026-11-16, found no critical, high or medium finding and recommend closure; audit-541f5c58 confirms L-19. For L-14, the dependence on the working directory remains with L-18 (design-63c98596 §10.2). The residual findings of those audits are disposed of in `dev/task.md` under governance P02.11 (12.13); the remaining §8.0 test gaps are in `dev/task.md` row 6 (a). Status: closed. Approver: operator, 2026-11-18.
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -603,6 +605,7 @@ Recorded by the planner on 2026-10-29 on the operator's decision.
 | 1.9 | 2026-11-14 | §14.0: L-19 recorded as closed (change-541f5c58; design-14e05e35 v1.32) |
 | 1.9 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
 | 1.10 | 2026-11-15 | §14.0: §8.0 re-measurement recorded (change-6d40f0dd); closure block (ready for follow-up audit; closure pending operator) |
+| 1.11 | 2026-11-18 | §14.0: closed on the follow-up audits audit-bae631c7, audit-d4f527e7 and audit-541f5c58 |
 
 ---
 

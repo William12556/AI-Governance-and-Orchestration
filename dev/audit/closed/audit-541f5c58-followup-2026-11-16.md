@@ -440,6 +440,8 @@ metadata:
 
 - Suggested dispositions for the findings: F-01 and F-02 to a small script change registered in `dev/task.md`; F-03 to a documentation edit; F-05 to work item 8e; F-07 to work item 6 (a); F-04, F-06, F-08 no action.
 
+**Closure (2026-11-18).** Dispositions under governance P02.11 (12.13): F-01 and F-02 taken into stabilisation change M2 in `dev/task.md`; F-03 and F-07 deferred post-release in `dev/task.md`; F-05 to milestone M3 (release v0.3.0); F-04, F-06 and F-08 no action. The parent audit audit-caab2052 is closed. Status: closed. Approver: operator, 2026-11-18.
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -449,6 +451,7 @@ metadata:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-16 | Initial follow-up audit of change-541f5c58 |
+| 1.1 | 2026-11-18 | §10.0: dispositions and closure |
 
 ---
 

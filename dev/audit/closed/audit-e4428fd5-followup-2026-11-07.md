@@ -434,6 +434,8 @@ change-9377f9b9 is verified and closed with issue-9377f9b9 and report-9377f9b9 (
 
 **Closure block.** All findings of this audit are resolved or dispositioned. Findings F-01, F-02 and F-08 were remediated by a source change (change-9377f9b9), so closure requires a follow-up audit (P02.8.2), which is deferred to the operator. Status: ready for follow-up audit; closure pending operator.
 
+**Closure (2026-11-18).** The follow-up audit of change-9377f9b9 (audit-9377f9b9-followup-2026-11-07, merged 2026-11-16) found no critical or high finding; its findings F-01 to F-03 are registered in `dev/task.md`, and F-04 to F-07 need no action. Status: closed. Approver: operator, 2026-11-18.
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -445,6 +447,7 @@ change-9377f9b9 is verified and closed with issue-9377f9b9 and report-9377f9b9 (
 | 1.0 | 2026-11-07 | Initial follow-up audit of change-e4428fd5 |
 | 1.1 | 2026-11-07 | §11.0 Dispositions added by the planner |
 | 1.2 | 2026-11-14 | §11.0: outcomes of change-9377f9b9 and closure block (ready for follow-up audit; closure pending operator) |
+| 1.3 | 2026-11-18 | §11.0: closed on the follow-up audit audit-9377f9b9-followup-2026-11-07 |
 
 ---
 

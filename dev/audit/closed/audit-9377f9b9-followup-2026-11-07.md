@@ -441,6 +441,8 @@ metadata:
   - F-04 to F-07: no action required.
 - After the dispositions and the macOS run, change-9377f9b9 can be set to `verified` and issue-9377f9b9 to `closed`, and the triple can move to `closed/` (P00.14.4).
 
+**Closure (2026-11-18).** change-9377f9b9 was verified and closed on 2026-11-14. Dispositions: F-01 and F-02 registered in `dev/task.md` (YAML loader robustness) and taken into stabilisation change M2; F-03 registered in row 6 (a); F-04 to F-07 no action. Status: closed. Approver: operator, 2026-11-18.
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -450,6 +452,7 @@ metadata:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-07 | Initial follow-up audit of change-9377f9b9 |
+| 1.1 | 2026-11-18 | §10.0: closure and dispositions |
 
 ---
 

@@ -442,6 +442,8 @@ Outcomes recorded 2026-11-14 (session report-b3a503a2; approver: operator, one-t
 
 **Closure block.** All findings of this audit are resolved or dispositioned. Findings F-01, F-02 and F-04 were remediated by a source change (change-d4f527e7), and F-02 awaits confirmation on macOS, so closure requires a follow-up audit (P02.8.2), which is deferred to the operator. Status: ready for follow-up audit; closure pending operator.
 
+**Closure (2026-11-18).** The follow-up audit audit-d4f527e7 (2026-11-16) found no critical, high or medium finding and recommends closure of F-01, F-02 and F-04. F-02 is closed on the operator's macOS suite of 2026-11-16, in which `test_t7_case_variant_is_tracked` passed; the macOS loop run with a differently cased path is an optional confirmation, not a closure condition. Status: closed. Approver: operator, 2026-11-18.
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -454,6 +456,7 @@ Outcomes recorded 2026-11-14 (session report-b3a503a2; approver: operator, one-t
 | 1.1 | 2026-11-07 | §11.0 Dispositions added by the planner |
 | 1.2 | 2026-11-14 | §11.0: outcomes of F-01, F-02, F-04 and of X02 and X04 (change-d4f527e7) |
 | 1.3 | 2026-11-15 | §11.0: outcomes of F-07 and F-10 (change-6d40f0dd) and closure block (ready for follow-up audit; closure pending operator) |
+| 1.4 | 2026-11-18 | §11.0: closed on the follow-up audit audit-d4f527e7 |
 
 ---
 

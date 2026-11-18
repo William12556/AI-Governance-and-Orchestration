@@ -326,6 +326,8 @@ Outcome recorded 2026-11-14 (session report-b3a503a2; approver: operator, one-ti
 
 **Closure block.** All findings of this audit are resolved or dispositioned. Finding F-05 was remediated by a source change (change-bae631c7), so closure requires a follow-up audit (P02.8.2), which is deferred to the operator. Status: ready for follow-up audit; closure pending operator.
 
+**Closure (2026-11-18).** The follow-up audit audit-bae631c7 (2026-11-16) found no critical, high or medium finding and recommends closure of F-05. Status: closed. Approver: operator, 2026-11-18.
+
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -339,6 +341,7 @@ Outcome recorded 2026-11-14 (session report-b3a503a2; approver: operator, one-ti
 | 1.1 | 2026-11-06 | §11.0 Dispositions added by the planner (operator approval) |
 | 1.2 | 2026-11-14 | §11.0: outcome of F-05 (change-bae631c7) |
 | 1.3 | 2026-11-15 | §11.0: outcome of F-03 (change-6d40f0dd) and closure block (ready for follow-up audit; closure pending operator) |
+| 1.4 | 2026-11-18 | §11.0: closed on the follow-up audit audit-bae631c7 |
 
 ---
 

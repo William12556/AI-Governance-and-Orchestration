@@ -433,6 +433,8 @@ metadata:
 
 - Suggested dispositions for the findings: F-01 and F-02 as above; F-08 to work item 6 (a); F-03 to F-07 no action.
 
+**Closure (2026-11-18).** Dispositions under governance P02.11 (12.13): F-01 (security-relevant low) taken into stabilisation change M2 in `dev/task.md`, which also removes F-03; F-02 and F-08 deferred post-release in `dev/task.md`; F-04 recorded in the closure of audit-caab2052; F-05 to F-07 no action. The parent audits audit-caab2052, audit-86c958dd and audit-4b0a5592 are closed. Status: closed. Approver: operator, 2026-11-18.
+
 [Return to Table of Contents](#table-of-contents)
 
 ---
@@ -442,6 +444,7 @@ metadata:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-16 | Initial follow-up audit of change-d4f527e7 |
+| 1.1 | 2026-11-18 | §10.0: dispositions and closure |
 
 ---
 
