@@ -93,6 +93,10 @@ def is_git_repository(project_root: str) -> bool:
         return False
 
 
+# change-f68d51c2 (audit-9377f9b9-followup F-01, F-02): invalid YAML, a
+# scalar the constructor cannot convert, and nesting too deep
+_YAML_ERRORS = (yaml.YAMLError, ValueError, TypeError, OverflowError, RecursionError)
+
 Approvals = dict  # (uuid, stage) -> {document name: blob hash}, or None when unbound
 
 
@@ -104,7 +108,7 @@ def parse_approvals(text: str) -> Approvals:
     """
     try:
         data = yaml.safe_load(text) or {}
-    except yaml.YAMLError:
+    except _YAML_ERRORS:  # change-f68d51c2 (audit-9377f9b9-followup F-01, F-02): fail closed
         return {}
     entries = data.get("approvals") if isinstance(data, dict) else None
     out: Approvals = {}
@@ -181,7 +185,7 @@ def _status(path: str, field_path: str) -> str | None:
     for block in blocks:
         try:
             doc = yaml.safe_load(block)
-        except yaml.YAMLError:
+        except _YAML_ERRORS:  # change-f68d51c2 (audit-9377f9b9-followup F-01, F-02)
             continue
         value = doc
         for key in field_path.split("."):

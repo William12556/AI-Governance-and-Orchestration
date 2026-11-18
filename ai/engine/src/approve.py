@@ -22,6 +22,7 @@ import os
 import stat
 import subprocess
 import sys
+import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import stages as ST  # noqa: E402
@@ -41,14 +42,25 @@ def _write_atomic(path: str, data: bytes) -> None:
     exception re-raised.
     """
     target = os.path.realpath(path)
-    tmp_path = os.path.join(os.path.dirname(target), f".{os.path.basename(target)}.{os.getpid()}.tmp")
+    # change-f68d51c2 (audit-d4f527e7 F-01): the temporary file is created
+    # exclusively with mkstemp, never at a predictable name; its mode is that
+    # of an existing regular file at target, else 0o666 & ~umask.
+    fd, tmp_path = tempfile.mkstemp(dir=os.path.dirname(target),
+                                    prefix=f".{os.path.basename(target)}.", suffix=".tmp")
     try:
-        with open(tmp_path, "wb") as fh:
+        with os.fdopen(fd, "wb") as fh:
             fh.write(data)
-        try:  # an existing file keeps its permission bits
-            os.chmod(tmp_path, stat.S_IMODE(os.stat(target).st_mode))
+        try:
+            st = os.lstat(target)
         except OSError:
-            pass
+            st = None
+        if st is not None and stat.S_ISREG(st.st_mode):
+            mode = stat.S_IMODE(st.st_mode)
+        else:
+            umask = os.umask(0)
+            os.umask(umask)
+            mode = 0o666 & ~umask
+        os.chmod(tmp_path, mode)
         os.replace(tmp_path, target)
     except BaseException:
         try:

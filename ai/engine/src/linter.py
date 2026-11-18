@@ -163,6 +163,11 @@ def _get(obj: dict, dotpath: str):
     return obj
 
 
+# change-f68d51c2 (audit-9377f9b9-followup F-01): exceptions PyYAML's
+# constructors raise for scalars they cannot convert
+_YAML_VALUE_ERRORS = (ValueError, TypeError, OverflowError)
+
+
 def _parse_yaml_block(content: str) -> tuple[object | None, str | None]:
     """Parse the first YAML fenced block in markdown content.
 
@@ -184,6 +189,10 @@ def _parse_yaml_block(content: str) -> tuple[object | None, str | None]:
         return None, problem
     except RecursionError:
         return None, "nesting too deep"
+    except _YAML_VALUE_ERRORS as e:
+        # change-f68d51c2 (audit-9377f9b9-followup F-01): a scalar the
+        # constructor cannot convert (an invalid date, for one)
+        return None, (str(e).splitlines() or [type(e).__name__])[0]
 
 
 def _extract_yaml(content: str) -> Optional[dict]:

@@ -127,6 +127,11 @@ def load_manifest(path: str) -> Manifest:
         raise ManifestError(f"{path}: invalid YAML: {e}") from e
     except RecursionError as e:  # change-9377f9b9 (audit-e4428fd5 F-01)
         raise ManifestError(f"{path}: invalid YAML: nesting too deep") from e
+    except (ValueError, TypeError, OverflowError) as e:
+        # change-f68d51c2 (audit-9377f9b9-followup F-01): a scalar the
+        # constructor cannot convert (an invalid date, for one)
+        first = (str(e).splitlines() or [type(e).__name__])[0]
+        raise ManifestError(f"{path}: invalid YAML: {first}") from e
     if not isinstance(data, dict):
         raise ManifestError(f"{path}: must be a mapping")
 

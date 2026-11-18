@@ -120,6 +120,11 @@ def written_targets(tool_name: str, arguments: dict) -> list[str]:
     return written
 
 
+# change-f68d51c2 (audit-9377f9b9-followup F-01, F-02): invalid YAML, a
+# scalar the constructor cannot convert, and nesting too deep
+_YAML_ERRORS = (yaml.YAMLError, ValueError, TypeError, OverflowError, RecursionError)
+
+
 def extract_deliverable_paths(raw: str) -> list[str] | None:
     """
     deliverable.files[].path of a T03 prompt document.
@@ -132,7 +137,7 @@ def extract_deliverable_paths(raw: str) -> list[str] | None:
     for block in re.findall(r"```yaml\n(.*?)```", raw, re.DOTALL):
         try:
             doc = yaml.safe_load(block)
-        except yaml.YAMLError:
+        except _YAML_ERRORS:  # change-f68d51c2 (audit-9377f9b9-followup F-01, F-02)
             continue
         if not isinstance(doc, dict):
             continue

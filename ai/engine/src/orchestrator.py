@@ -541,8 +541,8 @@ async def _completion_with_retry(
             if attempt < max_retries:
                 console.print(
                     f"[yellow]\\[engine] completion error (attempt {attempt}/{max_retries}), "
-                    f"retrying in {backoff:.1f}s: {err_text}[/yellow]"
-                )
+                    f"retrying in {backoff:.1f}s: {escape(err_text)}[/yellow]"
+                )  # change-f68d51c2 (audit-bae631c7 F-02): provider text escaped
                 await asyncio.sleep(backoff)
                 backoff *= backoff_multiplier
             else:
@@ -627,9 +627,32 @@ def _archive_audit_artifacts(state_dir: str, task_path: str | None, log: logging
         )
 
 
+# change-f68d51c2 (audit-9377f9b9-followup F-01, F-02): exceptions PyYAML's
+# constructors raise for scalars they cannot convert (an invalid date, for one)
+_YAML_VALUE_ERRORS = (ValueError, TypeError, OverflowError)
+
+
+def _first_line(e: BaseException) -> str:
+    """Return the first line of str(e) (change-f68d51c2)."""
+    return str(e).splitlines()[0] if str(e) else type(e).__name__
+
+
 def load_yaml(path: str) -> dict:
+    """
+    Load a recipe file.
+
+    change-f68d51c2 (audit-9377f9b9-followup F-01, F-02): invalid YAML,
+    including a scalar the constructor cannot convert and nesting too deep,
+    raises ConfigError naming the path. A file that cannot be read raises
+    OSError, as before.
+    """
     with open(path) as f:
-        return yaml.safe_load(f)
+        try:
+            return yaml.safe_load(f)
+        except (yaml.YAMLError, *_YAML_VALUE_ERRORS) as e:
+            raise ConfigError(f"{path}: invalid YAML: {_first_line(e)}") from None
+        except RecursionError:
+            raise ConfigError(f"{path}: invalid YAML: nesting too deep") from None
 
 
 def _load_config(path: str) -> dict:
@@ -654,9 +677,29 @@ def _load_config(path: str) -> dict:
     except RecursionError:
         # change-bae631c7 (audit-b8c75bac F-05): deeply nested YAML
         raise ConfigError("invalid YAML: nesting too deep") from None
+    except _YAML_VALUE_ERRORS as e:
+        # change-f68d51c2 (audit-9377f9b9-followup F-01): a scalar the
+        # constructor cannot convert (an invalid date, for one)
+        raise ConfigError(f"invalid YAML: {_first_line(e)}") from None
     if not isinstance(config, dict):
         raise ConfigError("top level must be a mapping")
     return config
+
+
+def _check_config_blocks(config: dict) -> None:
+    """
+    Check the context: and execution: blocks (change-f68d51c2, audit-bae631c7 F-03).
+
+    A null block is replaced by {} in config; any other value that is not a
+    mapping raises ConfigError. Called before any state is written (NFR-04).
+    """
+    for key in ("context", "execution"):
+        value = config.get(key)
+        if value is None:
+            if key in config:
+                config[key] = {}
+        elif not isinstance(value, dict):
+            raise ConfigError(f"{key}: must be a mapping")
 
 
 def _validate_context_windows(config: dict) -> None:
@@ -732,13 +775,25 @@ def read_state(state_dir: str, filename: str) -> str:
 
 
 def _keep_mode(tmp_path: str, path: str) -> None:
-    """Give the temporary file the permission bits of an existing regular file at path."""
+    """
+    Set the permission bits of the temporary file before it replaces path.
+
+    change-f68d51c2 (audit-d4f527e7 F-01): the bits of an existing regular
+    file at path (os.lstat; a symlink or any other type counts as absent),
+    else 0o666 masked by the process umask, the mode open() gave a new file.
+    mkstemp creates the temporary file with 0o600, so the mode is always set.
+    """
     try:
         st = os.lstat(path)
-        if stat.S_ISREG(st.st_mode):
-            os.chmod(tmp_path, stat.S_IMODE(st.st_mode))
     except OSError:
-        pass
+        st = None
+    if st is not None and stat.S_ISREG(st.st_mode):
+        mode = stat.S_IMODE(st.st_mode)
+    else:
+        umask = os.umask(0)
+        os.umask(umask)
+        mode = 0o666 & ~umask
+    os.chmod(tmp_path, mode)
 
 
 def _write_atomic(path: str, content: str) -> None:
@@ -749,10 +804,16 @@ def _write_atomic(path: str, content: str) -> None:
     is replaced; a symlink at path is not followed. An existing regular file
     keeps its permission bits. On any failure the temporary file is removed
     and the exception re-raised.
+
+    change-f68d51c2 (audit-d4f527e7 F-01): the temporary file is created
+    exclusively with tempfile.mkstemp, so an entry planted at a predictable
+    name is never followed or reused; a new file gets 0o666 & ~umask.
     """
-    tmp_path = os.path.join(os.path.dirname(path), f".{os.path.basename(path)}.{os.getpid()}.tmp")
+    # change-f68d51c2 (audit-d4f527e7 F-01): exclusive, unpredictable temporary name
+    fd, tmp_path = tempfile.mkstemp(dir=os.path.dirname(path) or ".",
+                                    prefix=f".{os.path.basename(path)}.", suffix=".tmp")
     try:
-        with open(tmp_path, "w") as f:
+        with os.fdopen(fd, "w") as f:
             f.write(content)
         _keep_mode(tmp_path, path)
         os.replace(tmp_path, path)
@@ -2241,12 +2302,13 @@ async def run_loop(
                 log.info("max iterations reached, stdin is not a terminal — declining to continue")
                 console.print(
                     f"[yellow]\\[engine] Continue for another {max_iterations} iteration(s)? "
-                    f"[y/N]: N (non-interactive)[/yellow]"
-                )
+                    f"\\[y/N]: N (non-interactive)[/yellow]"
+                )  # change-f68d51c2 (audit-bae631c7 F-01): '[y/N]' escaped
                 answer = "n"
             else:
                 try:
-                    console.print(f"[yellow]\\[engine] Continue for another {max_iterations} iteration(s)? [y/N]: [/yellow]", end="")
+                    console.print(f"[yellow]\\[engine] Continue for another {max_iterations} iteration(s)? \\[y/N]: [/yellow]", end="")
+                    # change-f68d51c2 (audit-bae631c7 F-01): '[y/N]' escaped above
                     answer = input().strip().lower()
                 except (EOFError, KeyboardInterrupt):
                     answer = "n"
@@ -2805,6 +2867,9 @@ async def main_async(args: argparse.Namespace) -> int:
     # change-bae631c7 (audit-86c958dd F-02): per-model context windows, checked
     # before any state is written.
     try:
+        # change-f68d51c2 (audit-bae631c7 F-03): null blocks read as empty,
+        # other non-mappings refused, before the first read of either block
+        _check_config_blocks(config)
         _validate_context_windows(config)
     except ConfigError as e:
         console.print(f"[red]\\[engine] configuration error ({escape(args.config)}): {escape(str(e))}[/red]")
