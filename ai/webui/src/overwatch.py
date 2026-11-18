@@ -32,6 +32,7 @@ import os
 import re
 import stat
 import sys
+import tempfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -427,13 +428,26 @@ def _write_text_atomic(path: Path, content: str) -> None:
     removed and the exception re-raised for the caller's own handling.
     """
     target = Path(os.path.realpath(path))
-    tmp_path = target.with_name(f".{target.name}.{os.getpid()}.tmp")
+    # change-f68d51c2 (audit-d4f527e7 F-01): the temporary file is created
+    # exclusively with mkstemp, never at a predictable name; its mode is that
+    # of an existing regular file at target, else 0o666 & ~umask.
+    fd, tmp_name = tempfile.mkstemp(dir=str(target.parent),
+                                    prefix=f".{target.name}.", suffix=".tmp")
+    tmp_path = Path(tmp_name)
     try:
-        tmp_path.write_text(content, encoding="utf-8")
-        try:  # an existing file keeps its permission bits
-            os.chmod(tmp_path, stat.S_IMODE(target.stat().st_mode))
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(content)
+        try:
+            st = os.lstat(target)
         except OSError:
-            pass
+            st = None
+        if st is not None and stat.S_ISREG(st.st_mode):
+            mode = stat.S_IMODE(st.st_mode)
+        else:
+            umask = os.umask(0)
+            os.umask(umask)
+            mode = 0o666 & ~umask
+        os.chmod(tmp_path, mode)
         os.replace(tmp_path, target)
     except BaseException:
         try:
