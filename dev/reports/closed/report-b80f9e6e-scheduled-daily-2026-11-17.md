@@ -228,6 +228,7 @@ The table that follows (lines 25 to 27) lists `mlx_devstral_small_2_2512_6bit.md
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-17 | Initial report |
+| 1.1 | 2026-11-25 | Status: closed. F-01 recorded in dev/task.md for operator decision. F-02 corrected in docs/guide-profile-selection.md v1.10. F-03 corrected in proposal-5bcd46ad v0.12. F-04 corrected in ai/profiles/README.md v1.17 (D-16 applies to the planner) |
 
 ---
 

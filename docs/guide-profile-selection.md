@@ -18,7 +18,7 @@ Created: 2026 June 02
 
 An implementation profile maps the abstract framework roles — planner, worker and reviewer — to concrete tooling. The profile determines the inference backend, execution model, and worker/reviewer context file.
 
-Three profiles are available, defined in `ai/profiles/`:
+The complete list of profiles is in [ai/profiles/README.md](../ai/profiles/README.md#40-available-profiles). This guide compares three of them; the Mistral API, heterogeneous MLX and Mistral Vibe profiles are not covered here:
 
 | Profile file | Worker and reviewer | Execution |
 |---|---|---|
@@ -173,6 +173,7 @@ The engine profile is the only profile that supports the automated audit loop (`
 | 1.7 | 2026-10-01 | Terminology: worker/reviewer context file (audit-14e05e35 M-03, change-82dbf16a) |
 | 1.8 | 2026-11-03 | Internal links changed from Obsidian anchor syntax to GitHub heading anchors; Table of Contents formatted as a bulleted list |
 | 1.9 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents lists the H2 sections only (dev/task.md work item 7a) |
+| 1.10 | 2026-11-25 | §1.0: refers to ai/profiles/README.md §4.0 as the complete profile list (report-b80f9e6e F-02) |
 
 ---
 

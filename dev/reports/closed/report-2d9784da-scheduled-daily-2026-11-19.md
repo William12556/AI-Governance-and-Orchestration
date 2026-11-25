@@ -162,6 +162,7 @@ Suggested resolution: change `governance.md`. Either remove the milestone-based 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-19 | Initial report: scheduled nightly Markdown conflict review |
+| 1.1 | 2026-11-25 | Status: closed. F-01 corrected in guide-audit-loop.md v1.9 (both copies). F-02, F-03 and the terminology observation recorded in dev/task.md for operator decision. The dev/task.md observation corrected |
 
 ---
 

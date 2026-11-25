@@ -317,6 +317,7 @@ Warning changes against the baseline:
 | 0.9 | 2026-11-15 | Unit 6 review result; document count corrected to 58; §8.0 items 3 and 10 |
 | 1.0 | 2026-11-15 | Phase D: unit 5 closed; final counts; decisions 12 and 13; DD-05; audit closure blocks recorded; prompt-cf99f3f3 moved to `dev/prompt/closed/` |
 | 1.1 | 2026-11-16 | §4.0 unit 8: DD-05 stated as unresolved; §6.2, §7.0: operator macOS run (862 passed); §8.0: items renumbered in sequence, item 3 updated |
+| 1.2 | 2026-11-25 | Status: closed. §8.0 items 1 and 2 are in dev/task.md (row caab2052 6 (a), row _truncate_tool_result); items 3, 4, 5, 7 and 8 recorded in dev/task.md; item 6 recorded with report-b80f9e6e F-01; item 9 needs no action; item 10 is in row caab2052 6 (a); item 11 is covered by the closed-document checker row |
 
 ---
 

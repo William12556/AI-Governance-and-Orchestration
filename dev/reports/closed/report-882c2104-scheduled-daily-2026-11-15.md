@@ -128,6 +128,7 @@ Suggested resolution: `ai/governance/software-engineering/doc/guide-audit-loop.m
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-11-15 | Initial report |
+| 1.1 | 2026-11-25 | Status: closed. F-01 decided: prompt documents are exempt from the Version History requirement (dev/README.md v1.3 §2.0 item 3). F-02 resolved: both copies of guide-audit-loop.md aligned in v1.7 (2026-11-14) |
 
 ---
 

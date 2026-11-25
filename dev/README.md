@@ -31,6 +31,7 @@ and nothing in this document reaches downstream projects.
 
 1. Framework development follows `ai/governance/software-engineering/governance.md`, with `dev/` in place of `ai/workspace/`.
 2. Where this document and `governance.md` differ, this document applies to `dev/`.
+3. Prompt documents (T03) are exempt from the Version History requirement; their `iteration` field and git history record changes.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -111,6 +112,7 @@ Moved from governance P10.6 and corrected (governance 12.4).
 | 1.0 | 2026-10-23 | Initial document: dev/ rules moved out of governance.md (P11.7, P10.6 repository note) and the project instructions; task register replaces dev/todo.md and dev/backlog.md |
 | 1.1 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
 | 1.2 | 2026-11-18 | §7.0 Release and Stabilisation: release definition of done, freeze rule, downstream test projects (governance 12.13) |
+| 1.3 | 2026-11-25 | §2.0 item 3: prompt documents exempt from the Version History requirement (report-882c2104 F-01) |
 
 ---
 
