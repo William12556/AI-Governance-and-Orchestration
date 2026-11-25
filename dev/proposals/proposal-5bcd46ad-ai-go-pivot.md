@@ -2,7 +2,7 @@ Created: 2026 September 25
 
 # Proposal: AI-G&O Strategic Pivot
 
-**Status:** Accepted 2026-09-25; amended 2026-09-29 (D-16). Phase 1 implemented and verified; change-5bcd46ad closed 2026-09-29 (audit-5bcd46ad). Phase 2 implemented and verified; closed 2026-10-01 (requirements-14e05e35 §6.1, audit-14e05e35 and follow-ups, change-82dbf16a). Phase 3 not started.
+**Status:** Accepted 2026-09-25; amended 2026-09-29 (D-16) and 2026-11-25 (D-17). Phase 1 implemented and verified; change-5bcd46ad closed 2026-09-29 (audit-5bcd46ad). Phase 2 implemented and verified; closed 2026-10-01 (requirements-14e05e35 §6.1, audit-14e05e35 and follow-ups, change-82dbf16a). The former Phase 3 was withdrawn 2026-11-25 (D-17). Phase 3 (web GUI) not started.
 **UUID:** `5bcd46ad`
 **Coupled change:** `dev/change/closed/change-5bcd46ad-layout-migration.md`
 
@@ -53,6 +53,7 @@ This document records the decisions of the 2026-09-25 brainstorming session and 
 | D-14 | The migration uses one abbreviated change record (no issue or prompt document) and one independent review at the end. |
 | D-15 | ael-mcp is adapted as engine-mcp and moved into this repository. A rebuild is deferred to Phase 2. |
 | D-16 | Provider choice at every level; Anthropic and Mistral AI have equal weight, neither preferred. Planner: Claude Desktop, Mistral Vibe, or an MCP-capable client with a local open-weight model. Manual tactical profile: Claude Code or Mistral Vibe. Engine worker and reviewer: each bound separately to the Anthropic API, the Mistral API, or a local OpenAI-compatible server (oMLX; LM Studio a possible future provider, OQ-06). |
+| D-17 | The second governance model (document authoring), planned as a demonstrator, is withdrawn. A further governance model is added only when a concrete use exists. The web GUI becomes Phase 3. It has write access, which supersedes the read-only constraint (CON-07) and the static-HTML, no-server architecture of Project Overwatch for the GUI. Its requirements include an open architecture: governance-model content is taken from the manifest and not hard-coded; extensibility (a plugin concept) is decided in its design. |
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -103,7 +104,8 @@ ai/
 │       ├── doc/              guide-audit-loop.md
 │       └── seed/             context.md, task.md
 ├── profiles/
-└── src/                      overwatch.py
+├── webui/                    overwatch.py (GUI component)
+└── core/                     shared code (reserved)
 ```
 
 ### 4.2 Downstream Project
@@ -113,7 +115,8 @@ ai/
 ├── engine/                   framework-owned
 ├── governance/<name>/        framework-owned; one model
 ├── profiles/                 framework-owned
-├── src/                      framework-owned
+├── webui/                    framework-owned
+├── core/                     framework-owned
 ├── config.yaml               project-owned
 ├── context.md                project-owned
 ├── task.md                   project-owned
@@ -130,7 +133,7 @@ ai/
 
 ## 5.0 Ownership Boundary
 
-- Framework-owned: `engine/`, `governance/<name>/`, `profiles/`, `src/`. Propagation replaces these.
+- Framework-owned: `engine/`, `governance/<name>/`, `profiles/`, `webui/`, `core/`. Propagation replaces these.
 - Project-owned: all other content of `ai/`. Propagation writes these only to seed an absent file.
 - This resolves backlog §2.0 item 7.
 - Propagation still never deletes. Existing downstream projects move to the new layout once, through a migration script.
@@ -148,7 +151,7 @@ ai/
 | §2.0-3 Reserved protocols | Deferred; belong to the SE package |
 | §2.0-4 CI and primer identity check | Deferred; paths updated |
 | §2.0-5 `schema_type` prefix | Deferred |
-| §2.0-6 Split `governance.md` | Deferred to Phase 3 (OQ-03) |
+| §2.0-6 Split `governance.md` | Deferred until a second governance model exists (OQ-03, D-17) |
 | §2.0-7 Project files out of `ai/` | Resolved by [5.0 Ownership Boundary](#50-ownership-boundary) |
 | §3.0 Source and tooling fixes | Unaffected |
 | §5.0-2 REVISE → SHIP convergence | Retried in the migration's verification run |
@@ -167,10 +170,9 @@ ai/
 |---|---|---|
 | 1 | Layout and terminology migration (change-5bcd46ad) | No |
 | 2 | Engine generalisation: manifest, gates, stage flow, role-to-model binding across providers (D-16), write scope; engine-mcp rebuild | Yes |
-| 3 | Second governance model: document authoring | — |
-| 4 | Web GUI | — |
+| 3 | Web GUI | — |
 
-Phases 2 to 4 each require their own requirements and design documents.
+The former Phase 3 (second governance model: document authoring) was withdrawn (D-17). Phases 2 and 3 each require their own requirements and design documents.
 
 [Return to Table of Contents](#table-of-contents)
 
@@ -180,9 +182,9 @@ Phases 2 to 4 each require their own requirements and design documents.
 
 | ID | Question | Decide in |
 |---|---|---|
-| OQ-01 | Claude Code profiles (`claude-code`, `claude-omlx`): retain as a manual option or retire under D-03? Resolved 2026-09-29: retained; a Mistral Vibe profile is to be added (D-16; not yet in `ai/profiles/`). | Resolved |
+| OQ-01 | Claude Code profiles (`claude-code`, `claude-omlx`): retain as a manual option or retire under D-03? Resolved 2026-09-29: retained; a Mistral Vibe profile was added as `ai/profiles/mistral-vibe.md` (D-16). | Resolved |
 | OQ-02 | `governance.md` describes a Strategic Domain (Claude Desktop) and a Tactical Domain. Under D-03 and D-07 these become agent roles. The migration keeps the current terms. Resolved 2026-09-30: the terms move to agent roles in Phase 2. Strategic Domain becomes the planner; Tactical Domain becomes the worker and the reviewer; the human remains the approval gate. Implemented 2026-10-01 (change-155cc014, governance 12.0). | Resolved |
-| OQ-03 | Which parts of `governance.md` are engine-generic rather than SE-specific (backlog §2.0-6)? Resolved 2026-09-30: `governance.md` stays whole in Phase 2. The split is decided in Phase 3, when a second governance model shows which parts are shared. | Resolved |
+| OQ-03 | Which parts of `governance.md` are engine-generic rather than SE-specific (backlog §2.0-6)? Resolved 2026-09-30: `governance.md` stays whole in Phase 2. The split is decided in Phase 3, when a second governance model shows which parts are shared. Amended 2026-11-25: the split is decided when a second governance model exists (D-17). | Resolved |
 | OQ-04 | Anthropic's OpenAI SDK compatibility layer is described by Anthropic as intended for testing and ignores `strict` for tool calls [1]. Use it, or add a native Anthropic adapter to the engine? Resolved 2026-09-30: a small provider interface with two implementations, OpenAI-compatible (oMLX, Mistral API) and native Anthropic (strict tool use, prompt caching) [1]. | Resolved |
 | OQ-05 | Which client hosts an open-weight planner? The oMLX built-in chat has no MCP support. Resolved 2026-09-30: any client that accepts a custom OpenAI-compatible endpoint and MCP servers may host the planner; the choice and setup are left to the user. Options, documented only and not tested: Goose (desktop and CLI) [4], Cherry Studio and BoltAI (desktop) [8], Open WebUI (web; Streamable HTTP MCP only, stdio via mcpo) [9], Claude Code (via `ANTHROPIC_BASE_URL`, as in the `claude-omlx` profile), Codex CLI [5], OpenCode [6], Mistral Vibe [2], OpenClaw [7]. Further clients: [10]. Framework integration (profiles, setup guidance) is future work (backlog §2.0 item 11). | Resolved |
 | OQ-06 | LM Studio as an engine provider reverses its 2026-03-11 deprecation. The engine's live context-window query and readiness check are oMLX-specific. Resolved 2026-09-30: LM Studio is excluded from Phase 2 and noted as a possible future provider. | Resolved |
@@ -232,6 +234,7 @@ Phases 2 to 4 each require their own requirements and design documents.
 | 0.9 | 2026-10-01 | OQ-02 implemented (change-155cc014) |
 | 0.10 | 2026-10-01 | Status: Phase 2 closed |
 | 0.11 | 2026-11-14 | Layout conformance with README.md v4.5: Table of Contents formatted as a bulleted list (dev/task.md work item 7a) |
+| 0.12 | 2026-11-25 | D-17: former Phase 3 (document authoring) withdrawn; web GUI becomes Phase 3 with write access and an open-architecture requirement; §4.0 and §5.0 layout updated (`webui/`, `core/` replace `src/`); OQ-01 (Mistral Vibe profile present) and OQ-03 updated; §6.0 aligned; status updated |
 
 ---
 
