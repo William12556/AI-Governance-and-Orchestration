@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-G&amp;O Web GUI Prototype</title>
+<!--
+  AI-G&O Web GUI: interactive prototype (proposal-5bcd46ad, Phase 3).
+  Purpose: visualise the web GUI and experiment with workflows.
+  Not production code. It implies no technology choice for the GUI.
+  All data is simulated and held in memory; nothing is read or written.
+  Copyright (c) 2026 William Watson. MIT License.
+-->
+<style>
+/* VOICE: plain, functional tool. IDEA: an operator console for one project.
+   PICTURE: the working console itself. COLOUR/TYPE: system theme, system font.
+   LAYOUT: header, screen registry sidebar, active screen, chat panel. */
+:root{color-scheme:light dark;
+ --bg:light-dark(#ffffff,#161618);--fg:light-dark(#1d1d1f,#e8e8ea);--muted:light-dark(#6e6e73,#9a9aa0);
+ --panel:light-dark(#f5f5f7,#1f1f23);--border:light-dark(#d2d2d7,#34343a);--accent:light-dark(#0a64d8,#4c9aff);
+ --accent-fg:light-dark(#ffffff,#0b0b0c);--ok:light-dark(#1a7f37,#3fb950);--warn:light-dark(#9a6700,#d29922);
+ --err:light-dark(#cf222e,#f85149);--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;height:100vh;display:grid;grid-template-rows:46px 1fr;grid-template-columns:190px minmax(0,1fr) auto;
+ font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+header{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid var(--border);background:var(--panel)}
+header .brand{font-weight:600}
+header .proto{margin-left:auto;font-size:12px;color:var(--warn);border:1px solid var(--warn);border-radius:4px;padding:1px 7px}
+nav{border-right:1px solid var(--border);padding:8px 0;overflow:auto;background:var(--panel)}
+nav button{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;border:0;background:none;color:var(--fg);padding:8px 14px;font:inherit;cursor:pointer}
+nav button.active{background:var(--bg);color:var(--accent);font-weight:600;box-shadow:inset 3px 0 var(--accent)}
+.badge{font-size:11px;min-width:18px;text-align:center;padding:0 6px;border-radius:9px;background:var(--border);color:var(--fg)}
+.badge.hot{background:var(--warn);color:var(--accent-fg)}
+main{overflow:auto;padding:18px 22px 40px}
+aside{border-left:1px solid var(--border);width:350px;display:flex;flex-direction:column;background:var(--panel);overflow:hidden}
+aside.collapsed{width:40px}
+h1{font-size:19px;margin:0 0 12px}h2{font-size:15px;margin:22px 0 8px}
+.card{border:1px solid var(--border);border-radius:8px;padding:12px 14px;background:var(--bg)}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr))}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}
+.muted{color:var(--muted)}.small{font-size:12px}.ok{color:var(--ok)}.warnc{color:var(--warn)}.errc{color:var(--err)}
+.lbl{font-size:12px;color:var(--muted);margin-bottom:2px}.big{font-size:20px;font-weight:600;margin-bottom:4px;overflow-wrap:anywhere}
+button.b{font:inherit;padding:5px 11px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--fg);cursor:pointer;white-space:nowrap}
+button.b:hover{border-color:var(--accent)}button.p{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+button.b:disabled{opacity:.45;cursor:default}button.sm{padding:2px 8px;font-size:12px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+input,select,textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 8px;max-width:100%}
+textarea{width:100%;font-family:var(--mono);font-size:12.5px;resize:vertical}
+table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+th{font-size:12px;color:var(--muted);font-weight:600}tr.sel{background:var(--panel)}tr.click{cursor:pointer}tr.click:hover{background:var(--panel)}
+code{font-family:var(--mono);font-size:12.5px;overflow-wrap:anywhere}
+.chip{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;border:1px solid var(--border);white-space:nowrap}
+.s-done{border-color:var(--ok);color:var(--ok)}.s-await{border-color:var(--warn);color:var(--warn)}
+.s-blocked{border-color:var(--err);color:var(--err)}.s-run,.s-current{border-color:var(--accent);color:var(--accent)}
+.pipe{display:inline-flex;gap:4px;align-items:center;flex-wrap:wrap}.pipe .arrow{color:var(--muted)}
+.log{font-family:var(--mono);font-size:12px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:8px 10px;height:300px;overflow:auto;white-space:pre-wrap}
+.log .ok{color:var(--ok)}.log .err{color:var(--err)}.log .warn{color:var(--warn)}.log .dim{color:var(--muted)}.log .sep{color:var(--accent)}
+.bar{height:8px;background:var(--panel);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin:4px 0}.bar>div{height:100%;background:var(--accent)}
+.bar.w>div{background:var(--warn)}
+.diff{font-family:var(--mono);font-size:12px;white-space:pre;background:var(--panel);border-radius:6px;padding:8px 10px;overflow:auto;min-height:120px}
+.diff .add{color:var(--ok)}.diff .del{color:var(--err)}.diff .hdr{color:var(--muted)}
+.alert{padding:6px 10px;border-left:3px solid;margin:4px 0;background:var(--panel);border-radius:0 4px 4px 0}
+.alert.error{border-color:var(--err)}.alert.warn{border-color:var(--warn)}.alert.info{border-color:var(--accent)}
+.kv{display:grid;grid-template-columns:150px minmax(0,1fr);gap:8px 12px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.seg button{font:inherit;border:0;background:var(--bg);color:var(--fg);padding:5px 11px;cursor:pointer}.seg button.on{background:var(--accent);color:var(--accent-fg)}
+.tabs{display:flex;gap:2px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin-bottom:12px}
+.tabs button{font:inherit;border:0;background:none;color:var(--muted);padding:6px 12px;cursor:pointer;border-bottom:2px solid transparent}
+.tabs button.on{color:var(--accent);border-bottom-color:var(--accent)}
+pre.blk{font-family:var(--mono);font-size:12px;background:var(--panel);border-radius:6px;padding:8px 10px;white-space:pre-wrap;margin:6px 0}
+.chead{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border)}
+.cctl{padding:8px 12px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--border)}
+.cctl select{width:100%}.tools{display:flex;flex-wrap:wrap;gap:4px;align-items:center}.tools label{cursor:pointer}
+.msgs{flex:1;overflow:auto;padding:10px 12px}
+.msg{margin:0 0 10px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.user{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);margin-left:36px}
+.tool{font-family:var(--mono);font-size:11.5px;color:var(--muted);border-left:2px solid var(--border);padding-left:6px;margin:0 0 6px;white-space:normal}
+.tool.ref{border-left-color:var(--err)}
+.cin{padding:8px 12px 12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--border)}.cin .b{align-self:flex-end}
+.vbtn{writing-mode:vertical-rl;border:0;background:none;color:var(--accent);font:inherit;padding:14px 10px;cursor:pointer}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:flex-start;justify-content:center;padding-top:90px;z-index:5}
+#overlay[hidden]{display:none}.modal{width:480px;max-width:92vw;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;z-index:10;align-items:center}
+.toast{background:var(--fg);color:var(--bg);padding:7px 14px;border-radius:6px;font-size:13px;max-width:80vw}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+@media(max-width:900px){body{grid-template-columns:150px minmax(0,1fr) auto}aside{width:290px}}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">AI-G&amp;O</span>
+  <button class="b sm" data-act="go" data-id="projects" title="Switch project"><span id="proj"></span> ▾</button>
+  <span class="muted small" id="hdrModel"></span>
+  <span class="proto">Prototype · simulated data</span>
+</header>
+<nav id="nav"></nav>
+<main id="main"></main>
+<aside id="chat"></aside>
+<div id="overlay" hidden></div>
+<div id="toasts"></div>
+<script>
+{
+'use strict';
+/* ---------- helpers ---------- */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = id => document.getElementById(id);
+const hex8 = () => Math.floor(Math.random() * 2 ** 32).toString(16).padStart(8, '0');
+const hash7 = () => hex8().slice(0, 7);
+const clock = () => new Date().toTimeString().slice(0, 8);
+const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'untitled';
+
+/* ---------- governance model manifest (copy of ai/governance/software-engineering/manifest.yaml) ---------- */
+const MANIFEST = {
+  model: { name: 'software-engineering', version: '12.14' },
+  stages: [
+    { id: 'issue', owner: 'planner', evidence: { folder: 'issues', prefix: 'issue', status_field: 'issue_info.status', complete_statuses: ['open', 'investigating', 'resolved', 'verified', 'closed'] } },
+    { id: 'change', owner: 'planner', approval: true, evidence: { folder: 'change', prefix: 'change', status_field: 'change_info.status', complete_statuses: ['approved', 'implemented', 'verified'] } },
+    { id: 'prompt', owner: 'planner', approval: true, evidence: { folder: 'prompt', prefix: 'prompt' } },
+    { id: 'implement', owner: 'loop', gates: ['syntax', 'pytest', 'reviewer'], on_blocked: 'prompt' },
+    { id: 'accept', owner: 'human', approval: true }
+  ],
+  paths: {
+    full: { detect: 'issue', stages: ['issue', 'change', 'prompt', 'implement', 'accept'] },
+    change_sourced: { detect: 'change', stages: ['change', 'prompt', 'implement', 'accept'] },
+    design_sourced: { detect: 'prompt', stages: ['prompt', 'implement', 'accept'] }
+  },
+  run_types: { loop: { worker: 'loop-work.yaml', reviewer: 'loop-review.yaml' }, audit: { worker: 'recipes/audit-work.yaml', reviewer: 'recipes/audit-review.yaml' } },
+  gates: { pytest: { command: '{python} -m pytest -q {targets}', timeout_seconds: 300 } }
+};
+const STAGE = id => MANIFEST.stages.find(s => s.id === id);
+const LOOP_STAGE = MANIFEST.stages.find(s => s.owner === 'loop');
+
+const TEMPLATES = [
+  { id: 'T01-requirements', label: 'T01 Requirements', folder: 'requirements', prefix: 'requirements' },
+  { id: 'T02-design', label: 'T02 Design', folder: 'design', prefix: 'design' },
+  { id: 'T03-prompt', label: 'T03 Prompt', folder: 'prompt', prefix: 'prompt', stage: 'prompt' },
+  { id: 'T04-test', label: 'T04 Test', folder: 'test', prefix: 'test' },
+  { id: 'T05-result', label: 'T05 Result', folder: 'test/result', prefix: 'result' },
+  { id: 'T06-issue', label: 'T06 Issue', folder: 'issues', prefix: 'issue', stage: 'issue' },
+  { id: 'T07-change', label: 'T07 Change', folder: 'change', prefix: 'change', stage: 'change' },
+  { id: 'T08-audit', label: 'T08 Audit', folder: 'audit', prefix: 'audit' }
+];
+const tplForStage = st => TEMPLATES.find(t => t.stage === st);
+
+const PROVIDERS = [
+  { id: 'omlx', name: 'oMLX (local)', kind: 'openai-compatible', url: 'http://127.0.0.1:8000/v1', key: 'literal (local endpoint)', ok: true,
+    models: ['mistralai_Devstral-Small-2-24B-Instruct-2512-MLX-8Bit', 'Magistral-Small-2509-MLX-6bit'] },
+  { id: 'mistral', name: 'Mistral API', kind: 'openai-compatible', url: 'https://api.mistral.ai/v1', key: 'Keychain: ai-go-mistral', ok: true, models: ['mistral-medium-2604'] },
+  { id: 'anthropic', name: 'Anthropic API', kind: 'anthropic', url: 'https://api.anthropic.com', key: 'not configured', ok: false, models: [] }
+];
+const prov = id => PROVIDERS.find(p => p.id === id);
+
+/* user-level instance registry (option D) */
+const REGISTRY = [
+  { name: 'solax-modbus', port: 8731, pid: 41822, running: true },
+  { name: 'GTach', port: 8732, pid: 41907, running: true },
+  { name: 'e-Paper-IP-Display', port: 8733, pid: 39011, running: false }
+];
+
+/* ---------- application state (sample data) ---------- */
+const S = {
+  project: 'solax-modbus', screen: 'dashboard', chatOpen: true, selItem: 'a3f2c1d9', selAudit: null, settingsTab: 'providers', draft: null,
+  items: [
+    { uuid: 'a3f2c1d9', name: 'modbus-timeout-handling', title: 'Modbus timeout handling', path: 'full',
+      docs: { issue: { status: 'open', title: 'Modbus read timeout is not retried' }, change: { status: 'approved', title: 'Retry Modbus reads with backoff' } }, approvals: {}, loop: null },
+    { uuid: '7be01c44', name: 'register-map-refactor', title: 'Register map refactor', path: 'change_sourced',
+      docs: { change: { status: 'approved', title: 'Split the register map by inverter model' }, prompt: { title: 'Implement the register map split' } }, approvals: { change: true, prompt: true }, loop: null },
+    { uuid: '51d9e0aa', name: 'logging-levels', title: 'Configurable logging levels', path: 'design_sourced', docs: {}, approvals: {}, loop: null }
+  ],
+  tasks: [
+    { id: 'a3f2c1d9', text: 'Modbus timeout handling', status: 'Active' },
+    { id: '7be01c44', text: 'Register map refactor', status: 'Active' },
+    { id: '51d9e0aa', text: 'Configurable logging levels', status: 'Active' },
+    { id: '—', text: 'Review README after the register map split', status: 'Deferred' }
+  ],
+  audits: [
+    { id: 'audit-3e4f5a6b', cls: 'verification', target: 'change-9c1d22f0', status: 'closed', auditor: 'mistral:mistral-medium-2604',
+      findings: { H: 0, M: 1, L: 2 }, autonomy: 'hold' }
+  ],
+  engine: { status: 'idle', uuid: null, iteration: 0, log: [], gates: [], budget: 0, outcome: 'SHIP', timer: null, blocked: null, queue: [] },
+  git: { branch: 'main', ahead: 0, msg: '', sel: 'ai/context.md',
+    changes: [{ path: 'ai/context.md', st: 'M', on: true, diff: '@@ ## 2.0 Technology Stack\n- Python 3.11\n+ Python 3.11 (Homebrew)\n+ pymodbus 3.x' }],
+    log: [{ h: 'c41e9a2', m: 'docs(ai): update context.md stack section' }, { h: '8f02b7d', m: 'feat: inverter polling interval option' }] },
+  config: {
+    worker: { provider: 'omlx', model: 'mistralai_Devstral-Small-2-24B-Instruct-2512-MLX-8Bit' },
+    reviewer: { provider: 'mistral', model: 'mistral-medium-2604' },
+    loop: { max_iterations: 5, phase_max_iterations: 20, mcp_error_threshold: 3 },
+    gates: { pytest: '{python} -m pytest -q {targets}' },
+    readable: ['src/', 'tests/', 'logs/'], release: null
+  },
+  chat: { provider: 'omlx', model: 'mistralai_Devstral-Small-2-24B-Instruct-2512-MLX-8Bit',
+    tools: { read_text_file: true, list_directory: true, search: true, work_status: true },
+    msgs: [{ role: 'assistant', text: 'Planner chat. Read-only tools are enabled. Ask about the project, or have me draft text and insert it into the open document.' }] },
+  activity: [{ t: clock(), m: 'GUI started on http://127.0.0.1:8731/' }]
+};
+const item = u => S.items.find(i => i.uuid === u);
+
+/* ---------- stage derivation (manifest-driven) ---------- */
+function stageState(it, id) {
+  const st = STAGE(id);
+  if (st.owner === 'loop') return { ship: 'done', blocked: 'blocked', running: 'running' }[it.loop] || 'ready';
+  if (!st.evidence) {
+    if (it.loop !== 'ship') return 'pending';
+    return it.approvals[id] ? 'done' : 'awaiting';
+  }
+  const d = it.docs[id];
+  if (!d) return 'missing';
+  if (st.evidence.status_field && !st.evidence.complete_statuses.includes(d.status)) return 'incomplete';
+  if (st.approval && !it.approvals[id]) return 'awaiting';
+  return 'done';
+}
+function currentStage(it) {
+  for (const id of MANIFEST.paths[it.path].stages) if (stageState(it, id) !== 'done') return id;
+  return null;
+}
+const LABEL = { done: 'done', awaiting: 'awaiting approval', blocked: 'BLOCKED', running: 'running', missing: 'document missing', incomplete: 'status incomplete', ready: 'ready', pending: 'waiting' };
+const CLS = { done: 's-done', awaiting: 's-await', blocked: 's-blocked', running: 's-run' };
+const chip = (t, c = '') => `<span class="chip ${c}">${esc(t)}</span>`;
+function pipeline(it) {
+  const cur = currentStage(it);
+  return '<span class="pipe">' + MANIFEST.paths[it.path].stages.map(id => {
+    const s = stageState(it, id);
+    return chip(id + (s === 'done' ? ' ✓' : ''), CLS[s] || (id === cur ? 's-current' : ''));
+  }).join('<span class="arrow">›</span>') + '</span>';
+}
+function evidencePath(it, id) {
+  const ev = STAGE(id).evidence;
+  return ev ? `ai/workspace/${ev.folder}/${ev.prefix}-${it.uuid}-${it.name}.md` : '';
+}
+const bar = (pct) => `<div class="bar ${pct >= 80 ? 'w' : ''}"><div style="width:${Math.min(100, pct)}%"></div></div>`;
+function engineChip() {
+  const e = S.engine;
+  return { idle: chip('idle'), running: chip('running', 's-run'), ship: chip('SHIP', 's-done'), blocked: chip('BLOCKED', 's-blocked') }[e.status];
+}
+
+/* ---------- feedback ---------- */
+function toast(m) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = m;
+  $('toasts').appendChild(t); setTimeout(() => t.remove(), 3600);
+}
+function act(m) { S.activity.unshift({ t: clock(), m }); S.activity.length = Math.min(S.activity.length, 12); }
+function addChange(path, st, diff) {
+  const c = S.git.changes.find(x => x.path === path);
+  if (c) { if (diff) c.diff = diff; c.on = true; return; }
+  S.git.changes.push({ path, st, on: true, diff: diff || `+ (simulated change to ${path})` });
+}
+function modal(html) { $('overlay').innerHTML = `<div class="modal">${html}</div>`; $('overlay').hidden = false; }
+function closeModal() { $('overlay').hidden = true; $('overlay').innerHTML = ''; }
+
+/* ---------- screen registry (extension point) ---------- */
+const SCREENS = [];
+const registerScreen = s => SCREENS.push(s);
+
+/* ---------- screens ---------- */
+function alerts() {
+  const a = [];
+  if (S.engine.status === 'blocked') a.push({ l: 'error', m: `Engine BLOCKED on ${S.engine.uuid}: return to stage ${LOOP_STAGE.on_blocked}` });
+  for (const it of S.items) {
+    const cur = currentStage(it); if (!cur) continue;
+    const s = stageState(it, cur);
+    if (s === 'awaiting') a.push({ l: 'warn', m: `${it.uuid}: ${cur} awaits approval` });
+    if (s === 'missing' || s === 'incomplete') a.push({ l: 'info', m: `${it.uuid}: ${cur} ${LABEL[s]}` });
+  }
+  if (S.engine.budget >= 80) a.push({ l: 'warn', m: `Context budget at ${S.engine.budget}%` });
+  if (S.git.changes.length) a.push({ l: 'info', m: `${S.git.changes.length} uncommitted change(s)` });
+  if (S.git.ahead) a.push({ l: 'info', m: `${S.git.ahead} commit(s) not pushed` });
+  return a;
+}
+
+function vDashboard() {
+  const e = S.engine, al = alerts();
+  const rows = MANIFEST.stages.map(st => {
+    const its = S.items.filter(i => currentStage(i) === st.id);
+    const ctl = [st.approval ? 'approval' : '', st.gates ? 'gates: ' + st.gates.join(', ') : ''].filter(Boolean).join(' · ');
+    return `<tr><td>${esc(st.id)}</td><td class="muted">${esc(st.owner)}</td><td class="muted small">${esc(ctl)}</td><td>${its.map(i => `<a href="#" data-act="openItem" data-uuid="${i.uuid}"><code>${i.uuid}</code></a>`).join(' ') || '<span class="muted">—</span>'}</td></tr>`;
+  }).join('');
+  const done = S.items.filter(i => !currentStage(i));
+  return `<h1>Dashboard</h1>
+  <div class="grid">
+    <div class="card"><div class="lbl">Engine</div><div class="big">${engineChip()}</div>
+      <div class="muted small">${e.uuid ? 'prompt-' + e.uuid + ' · iteration ' + e.iteration : 'No run'}</div>
+      <div class="row" style="margin-top:8px"><button class="b sm" data-act="go" data-id="engine">Open engine</button></div></div>
+    <div class="card"><div class="lbl">Context budget</div><div class="big">${e.budget}%</div>${bar(e.budget)}<div class="muted small">warn 80% · abort 95%</div></div>
+    <div class="card"><div class="lbl">Git (${esc(S.git.branch)})</div><div class="big">${S.git.changes.length} changed</div>
+      <div class="muted small">${S.git.ahead} commit(s) not pushed</div>
+      <div class="row" style="margin-top:8px"><button class="b sm" data-act="go" data-id="git">Open git</button></div></div>
+    <div class="card"><div class="lbl">Governance model</div><div class="big">${esc(MANIFEST.model.name)}</div>
+      <div class="muted small">version ${esc(MANIFEST.model.version)} · framework v0.3.0</div></div>
+  </div>
+  <h2>Pipeline</h2>
+  <div class="card"><table><thead><tr><th>Stage</th><th>Owner</th><th>Controls</th><th>Work items at this stage</th></tr></thead>
+  <tbody>${rows}<tr><td>complete</td><td></td><td></td><td>${done.map(i => `<code>${i.uuid}</code>`).join(' ') || '<span class="muted">—</span>'}</td></tr></tbody></table>
+  <div class="note">Stages, owners, approvals and gates are read from the governance model manifest.</div></div>
+  <h2>Alerts</h2>${al.map(x => `<div class="alert ${x.l}">${esc(x.m)}</div>`).join('') || '<div class="muted">No alerts.</div>'}
+  <h2>Activity</h2><div class="card small">${S.activity.map(x => `<div><span class="muted">${x.t}</span> ${esc(x.m)}</div>`).join('')}</div>`;
+}
+
+function vItems() {
+  const rows = S.items.map(i => `<tr class="click ${S.selItem === i.uuid ? 'sel' : ''}" data-act="selItem" data-uuid="${i.uuid}">
+    <td><code>${i.uuid}</code></td><td>${esc(i.title)}</td><td class="muted">${esc(i.path)}</td><td>${pipeline(i)}</td></tr>`).join('');
+  const it = item(S.selItem);
+  return `<div class="row between"><h1>Work items</h1><button class="b p" data-act="newItem">New work item</button></div>
+  <div class="card"><table><thead><tr><th>UUID</th><th>Title</th><th>Path</th><th>Stages</th></tr></thead><tbody>${rows}</tbody></table></div>
+  ${it ? itemDetail(it) : ''}`;
+}
+function itemDetail(it) {
+  const cur = currentStage(it);
+  const rows = MANIFEST.paths[it.path].stages.map(id => {
+    const st = STAGE(id), s = stageState(it, id), isCur = id === cur, a = [];
+    if (st.evidence) a.push(`<button class="b sm" data-act="author" data-uuid="${it.uuid}" data-stage="${id}">${it.docs[id] ? 'Edit' : 'Write'} ${esc(tplForStage(id).label)}</button>`);
+    if (s === 'awaiting' && isCur) a.push(`<button class="b sm p" data-act="approve" data-uuid="${it.uuid}" data-stage="${id}">Approve</button>`);
+    if (st.owner === 'loop' && isCur && s === 'ready') a.push(`<button class="b sm p" data-act="runFor" data-uuid="${it.uuid}">Start run</button>`);
+    if (st.owner === 'loop' && (s === 'running' || s === 'blocked')) a.push(`<button class="b sm" data-act="go" data-id="engine">Open engine</button>`);
+    const ev = st.evidence ? `<code class="small">${esc(evidencePath(it, id))}</code>`
+      : st.gates ? `<span class="muted small">gates: ${esc(st.gates.join(', '))} · on BLOCKED → ${esc(st.on_blocked)}</span>`
+      : '<span class="muted small">operator acceptance</span>';
+    return `<tr><td>${esc(id)}</td><td class="muted">${esc(st.owner)}</td><td>${ev}</td><td>${chip(LABEL[s], CLS[s] || (isCur ? 's-current' : ''))}</td><td><div class="row">${a.join('')}</div></td></tr>`;
+  }).join('');
+  return `<h2>${esc(it.title)} <span class="muted small">· ${it.uuid} · path ${esc(it.path)}</span></h2>
+  <div class="card"><table><thead><tr><th>Stage</th><th>Owner</th><th>Evidence / controls</th><th>State</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+  ${cur ? `<div class="note">Current stage: <strong>${esc(cur)}</strong>. Approve calls <code>approve.py ${it.uuid} &lt;stage&gt;</code>, which records and commits the approval.</div>` : '<div class="note ok">All stages complete.</div>'}</div>`;
+}
+
+function buildMd(d) {
+  const t = TEMPLATES.find(x => x.id === d.tpl);
+  let y = `${t.prefix}_info:\n  id: ${t.prefix}-${d.uuid || d.tmp}\n  title: ${d.title}` + (d.status ? `\n  status: ${d.status}` : '');
+  if (t.id === 'T03-prompt') y += '\ndeliverable:\n  files:\n' + String(d.deliverables).split(/[,\n]/).map(s => s.trim()).filter(Boolean).map(p => `    - path: ${p}`).join('\n');
+  return `# ${d.title || 'Untitled'}\n\nCreated: 2026 11 26\n\n\`\`\`yaml\n${y}\n\`\`\`\n\n## Table of Contents\n\n- [1.0 Description](#10-description)\n- [Version History](#version-history)\n\n---\n\n## 1.0 Description\n\n${d.body || '…'}\n\n[Return to Table of Contents](#table-of-contents)\n\n---\n\n## Version History\n\n| Version | Date | Change |\n|---|---|---|\n| 0.1 | 2026-11-26 | Initial |\n\n---\n\nCopyright (c) 2026 William Watson. MIT License.\n`;
+}
+function draftPath(d) {
+  const t = TEMPLATES.find(x => x.id === d.tpl), it = d.uuid && item(d.uuid);
+  return `ai/workspace/${t.folder}/${t.prefix}-${d.uuid || d.tmp}-${it && t.stage ? it.name : slug(d.title)}.md`;
+}
+function openAuthoring(uuid, stage, body) {
+  const it = item(uuid), st = STAGE(stage), doc = it.docs[stage] || {};
+  S.draft = { tpl: tplForStage(stage).id, uuid, stage, mode: 'form', title: doc.title || it.title,
+    status: doc.status || (st.evidence.status_field ? 'draft' : ''), body: body || doc.body || '',
+    deliverables: doc.deliverables || 'src/', md: null, mdEdited: false, lint: null, tmp: hex8() };
+  S.screen = 'authoring';
+}
+function vAuthoring() {
+  const d = S.draft;
+  if (!d) return `<h1>Authoring</h1><div class="card"><div class="kv">
+    <label class="muted" for="newTpl">Template</label><select id="newTpl">${TEMPLATES.map(t => `<option value="${t.id}">${esc(t.label)}</option>`).join('')}</select>
+    <label class="muted" for="newUuid">Work item</label><select id="newUuid"><option value="">(none)</option>${S.items.map(i => `<option value="${i.uuid}">${i.uuid} · ${esc(i.title)}</option>`).join('')}</select></div>
+    <div class="row" style="margin-top:12px"><button class="b p" data-act="newDraft">Start document</button></div>
+    <div class="note">Stage templates (issue, change, prompt) need a work item. Documents can also be opened from Work items. Any file under <code>ai/</code> is editable.</div></div>`;
+  const t = TEMPLATES.find(x => x.id === d.tpl), ev = d.stage && STAGE(d.stage).evidence;
+  const form = `<div class="kv">
+    <label class="muted" for="fTitle">Title</label><input id="fTitle" data-in="draft.title" value="${esc(d.title)}">
+    ${ev && ev.status_field ? `<label class="muted">Status <span class="small">${esc(ev.status_field)}</span></label><select data-in="draft.status">${['draft', ...ev.complete_statuses].map(s => `<option ${s === d.status ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select>` : ''}
+    ${t.id === 'T03-prompt' ? `<label class="muted">Deliverables</label><input data-in="draft.deliverables" value="${esc(d.deliverables)}" placeholder="src/module.py, tests/test_module.py">` : ''}
+    <label class="muted">Description</label><textarea rows="10" data-in="draft.body">${esc(d.body)}</textarea></div>`;
+  const md = `<textarea rows="26" data-in="draft.md">${esc(d.md ?? buildMd(d))}</textarea>`;
+  const lint = d.lint ? `<h2>Linter <span class="muted small">(linter.py, simulated)</span></h2><div class="card small">${d.lint.length
+    ? d.lint.map(f => `<div class="${f.l === 'ERROR' ? 'errc' : 'warnc'}">${f.l}: ${esc(f.m)}</div>`).join('') : '<div class="ok">PASS: no findings</div>'}</div>` : '';
+  return `<div class="row between"><h1>${esc(t.label)}${d.uuid ? ' · ' + d.uuid : ''}</h1>
+    <div class="row"><div class="seg"><button data-act="mode" data-m="form" class="${d.mode === 'form' ? 'on' : ''}">Form</button><button data-act="mode" data-m="md" class="${d.mode === 'md' ? 'on' : ''}">Markdown</button></div>
+    <button class="b" data-act="lint">Run linter</button><button class="b p" data-act="save">Save</button><button class="b" data-act="closeDraft">Close</button></div></div>
+  <div class="muted small" style="margin-bottom:10px"><code>${esc(draftPath(d))}</code></div>
+  <div class="card">${d.mode === 'form' ? form : md}</div>${lint}
+  <div class="note">The form edits the fields; the markdown view shows the full document. Switching from markdown back to form reads title and status from the YAML block.</div>`;
+}
+
+function vTasks() {
+  const rows = S.tasks.map((t, i) => `<tr><td><code>${esc(t.id)}</code></td><td>${esc(t.text)}</td>
+    <td><select data-ch="taskStatus" data-i="${i}">${['Active', 'Deferred', 'Parked', 'Done'].map(s => `<option ${s === t.status ? 'selected' : ''}>${s}</option>`).join('')}</select></td></tr>`).join('');
+  return `<h1>Task register <span class="muted small">ai/task.md</span></h1>
+  <div class="card"><table><thead><tr><th>Work item</th><th>Task</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="row" style="margin-top:10px"><input id="newTask" placeholder="New task" style="flex:1"><button class="b" data-act="addTask">Add</button></div></div>`;
+}
+
+function vEngine() {
+  const e = S.engine, it = e.uuid && item(e.uuid), running = e.status === 'running';
+  const ready = S.items.filter(i => currentStage(i) === LOOP_STAGE.id && stageState(i, LOOP_STAGE.id) === 'ready');
+  const w = S.config.worker, r = S.config.reviewer;
+  const gateCols = LOOP_STAGE.gates;
+  const its = [...new Set(e.gates.map(g => g.it))];
+  const gtable = its.length ? `<table><thead><tr><th>Iteration</th>${gateCols.map(g => `<th>${esc(g)}</th>`).join('')}</tr></thead><tbody>${its.map(n =>
+    `<tr><td>${n}</td>${gateCols.map(g => { const x = e.gates.find(y => y.it === n && y.name === g); return `<td>${x ? chip(x.res, /PASS|SHIP/.test(x.res) ? 's-done' : 's-blocked') : '<span class="muted">—</span>'}</td>`; }).join('')}</tr>`).join('')}</tbody></table>` : '<div class="muted small">No gate results yet.</div>';
+  let outcome = '';
+  if (e.status === 'ship' && it) outcome = `<div class="card" style="margin-top:12px"><strong class="ok">SHIP.</strong> Stage <strong>accept</strong> awaits operator approval.
+    <div class="row" style="margin-top:8px"><button class="b p" data-act="approve" data-uuid="${it.uuid}" data-stage="accept">Approve accept</button><button class="b" data-act="go" data-id="git">Review changes in git</button></div></div>`;
+  if (e.status === 'blocked' && it) outcome = `<div class="card" style="margin-top:12px"><strong class="errc">BLOCKED.</strong> <span class="muted small">ai/state/BLOCKED.md</span><pre class="blk">${esc(e.blocked)}</pre>
+    <div class="row"><button class="b p" data-act="returnTo" data-uuid="${it.uuid}">Return to stage: ${esc(LOOP_STAGE.on_blocked)}</button></div></div>`;
+  return `<h1>Engine</h1>
+  <div class="grid">
+    <div class="card"><div class="kv">
+      <span class="muted">Status</span><span>${engineChip()}</span>
+      <span class="muted">Task</span><span>${it ? `<code>prompt-${it.uuid}</code>` : '—'}</span>
+      <span class="muted">Iteration</span><span>${e.iteration || '—'} / ${S.config.loop.max_iterations}</span>
+      <span class="muted">Worker</span><span class="small"><code>${esc(w.provider + ':' + w.model)}</code></span>
+      <span class="muted">Reviewer</span><span class="small"><code>${esc(r.provider + ':' + r.model)}</code></span></div>
+      <div class="lbl" style="margin-top:10px">Context budget ${e.budget}%</div>${bar(e.budget)}</div>
+    <div class="card"><div class="kv">
+      <label class="muted" for="runTask">Task</label><select id="runTask" ${running ? 'disabled' : ''}>${ready.map(i => `<option value="${i.uuid}">prompt-${i.uuid} · ${esc(i.title)}</option>`).join('') || '<option value="">No work item is ready</option>'}</select>
+      <span class="muted">Run type</span><span>loop <span class="muted small">(${esc(MANIFEST.run_types.loop.worker)} / ${esc(MANIFEST.run_types.loop.reviewer)})</span></span>
+      <span class="muted">Simulated outcome</span><span class="row">
+        <label><input type="radio" name="oc" value="SHIP" data-in="engine.outcome" ${e.outcome === 'SHIP' ? 'checked' : ''}> SHIP</label>
+        <label><input type="radio" name="oc" value="BLOCKED" data-in="engine.outcome" ${e.outcome === 'BLOCKED' ? 'checked' : ''}> BLOCKED</label></span></div>
+      <div class="row" style="margin-top:12px"><button class="b p" data-act="startRun" ${running || !ready.length ? 'disabled' : ''}>Start run</button>
+      <button class="b" data-act="resetEngine">Reset</button></div>
+      <div class="note">“Simulated outcome” is a prototype control only.</div></div>
+  </div>
+  ${outcome}
+  <h2>Gates</h2><div class="card">${gtable}</div>
+  <h2>Log <span class="muted small">ai/state/engine_*.LOG (streamed)</span></h2>
+  <div class="log" id="log">${e.log.map(l => `<div class="${l.cls || ''}">${esc(l.text)}</div>`).join('') || '<span class="dim">Engine idle.</span>'}</div>`;
+}
+
+function vAudits() {
+  const a = S.audits.find(x => x.id === S.selAudit);
+  const rows = S.audits.map(x => `<tr class="click ${x.id === S.selAudit ? 'sel' : ''}" data-act="selAudit" data-id="${x.id}"><td><code>${esc(x.id)}</code></td><td>${esc(x.cls)}</td><td><code>${esc(x.target)}</code></td>
+    <td>${x.status === 'running' ? chip('running', 's-run') : chip(x.status, 's-done')}</td>
+    <td>${x.findings ? `H ${x.findings.H} · M ${x.findings.M} · L ${x.findings.L}` : '—'}</td><td class="small">${esc(x.autonomy)}</td></tr>`).join('');
+  const detail = a && a.findings ? `<h2>${esc(a.id)}</h2><div class="card small">
+    <div class="kv"><span class="muted">Class</span><span>${esc(a.cls)}</span><span class="muted">Auditor</span><span><code>${esc(a.auditor)}</code></span>
+    <span class="muted">Report</span><span><code>ai/workspace/audit/${esc(a.id)}-report.md</code></span><span class="muted">Autonomy recommendation</span><span>${esc(a.autonomy)}</span></div>
+    ${a.findings.M ? '<div class="alert warn">M-01: error path of the retry loop is not covered by a test.</div>' : ''}
+    ${Array.from({ length: a.findings.L }, (_, i) => `<div class="alert info">L-0${i + 1}: documentation wording (sample finding).</div>`).join('')}</div>` : '';
+  return `<h1>Audits</h1>
+  <div class="card"><div class="row">
+    <label class="muted" for="audTarget">Target</label><select id="audTarget"><option value="project">whole project</option>${S.items.map(i => `<option value="change-${i.uuid}">work item ${i.uuid}</option>`).join('')}</select>
+    <label class="muted" for="audBy">Auditor</label><select id="audBy">${PROVIDERS.filter(p => p.ok).flatMap(p => p.models.map(m => `<option value="${p.id}:${esc(m)}">${esc(p.name)} · ${esc(m)}</option>`)).join('')}</select>
+    <button class="b p" data-act="startAudit">Start ad-hoc audit</button></div>
+    <div class="note">Runs the engine's <code>audit</code> run type (${esc(MANIFEST.run_types.audit.worker)}) as a separate session.</div></div>
+  <h2>Reports</h2><div class="card"><table><thead><tr><th>Audit</th><th>Class</th><th>Target</th><th>Status</th><th>Findings</th><th>Autonomy</th></tr></thead><tbody>${rows}</tbody></table></div>${detail}`;
+}
+
+function vGit() {
+  const g = S.git, sel = g.changes.find(c => c.path === g.sel) || g.changes[0];
+  const list = g.changes.map(c => `<tr class="click ${sel && c.path === sel.path ? 'sel' : ''}" data-act="gitSel" data-path="${esc(c.path)}">
+    <td style="width:28px"><input type="checkbox" data-ch="gitToggle" data-path="${esc(c.path)}" ${c.on ? 'checked' : ''} aria-label="Include in commit"></td>
+    <td style="width:24px"><code>${c.st}</code></td><td><code>${esc(c.path)}</code></td></tr>`).join('');
+  const diff = sel ? sel.diff.split('\n').map(l => `<div class="${l.startsWith('+') ? 'add' : l.startsWith('-') ? 'del' : 'hdr'}">${esc(l)}</div>`).join('') : '<span class="hdr">No changes.</span>';
+  const n = g.changes.filter(c => c.on).length;
+  return `<h1>Git <span class="muted small">branch ${esc(g.branch)} · ${g.ahead} ahead of origin</span></h1>
+  <div class="grid">
+    <div class="card"><div class="lbl">Changes</div><table><tbody>${list || '<tr><td class="muted">Working tree clean.</td></tr>'}</tbody></table>
+      <div style="margin-top:10px"><input data-in="git.msg" value="${esc(g.msg)}" placeholder="feat: … / docs: … / fix: …" style="width:100%"></div>
+      <div class="row" style="margin-top:8px"><button class="b p" data-act="commit" ${n ? '' : 'disabled'}>Commit ${n} file(s)</button>
+      <button class="b" data-act="push" ${g.ahead ? '' : 'disabled'}>Push ${g.ahead || ''}</button></div></div>
+    <div class="card"><div class="lbl">Diff ${sel ? '· ' + esc(sel.path) : ''}</div><div class="diff">${diff}</div></div>
+  </div>
+  <h2>Recent commits</h2><div class="card small">${g.log.slice(0, 8).map((c, i) => `<div><code>${c.h}</code> ${esc(c.m)} ${i < g.ahead ? '<span class="warnc">· not pushed</span>' : ''}</div>`).join('')}</div>`;
+}
+
+function vSettings() {
+  const tabs = [['providers', 'Providers'], ['roles', 'Roles'], ['gates', 'Gates'], ['loop', 'Loop'], ['access', 'Access'], ['release', 'Release'], ['screens', 'Screens']];
+  const c = S.config;
+  const roleSel = role => `<select data-ch="roleProvider" data-role="${role}">${PROVIDERS.map(p => `<option value="${p.id}" ${p.id === c[role].provider ? 'selected' : ''} ${p.ok ? '' : 'disabled'}>${esc(p.name)}${p.ok ? '' : ' (not configured)'}</option>`).join('')}</select>
+    <select data-in="config.${role}.model" data-cfg="1">${prov(c[role].provider).models.map(m => `<option ${m === c[role].model ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select>`;
+  const body = {
+    providers: `<table><thead><tr><th>Provider</th><th>Kind</th><th>Endpoint</th><th>Key</th><th>Status</th></tr></thead><tbody>${PROVIDERS.map(p =>
+      `<tr><td>${esc(p.name)}</td><td class="muted">${esc(p.kind)}</td><td><code>${esc(p.url)}</code></td><td class="small">${esc(p.key)}</td><td>${p.ok ? chip('ready', 's-done') : chip('not configured')}</td></tr>`).join('')}</tbody></table>`,
+    roles: `<div class="kv"><span class="muted">Worker</span><span class="row">${roleSel('worker')}</span><span class="muted">Reviewer</span><span class="row">${roleSel('reviewer')}</span>
+      <span class="muted">Planner</span><span class="muted small">The chat panel. Provider and model are chosen there.</span></div>`,
+    gates: `<div class="kv"><span class="muted">syntax</span><span class="muted small">built-in (py_compile)</span>
+      ${Object.keys(MANIFEST.gates).map(g => `<label class="muted">${esc(g)}</label><input data-in="config.gates.${g}" data-cfg="1" value="${esc(c.gates[g])}">`).join('')}
+      <span class="muted">reviewer</span><span class="muted small">bound to the reviewer role</span></div>
+      <div class="note">Gate defaults come from the manifest; values here override them under <code>gates.&lt;name&gt;</code> in ai/config.yaml.</div>`,
+    loop: `<div class="kv">${Object.keys(c.loop).map(k => `<label class="muted">${esc(k)}</label><input type="number" min="1" data-in="config.loop.${k}" data-cfg="1" value="${c.loop[k]}" style="width:100px">`).join('')}</div>`,
+    access: `<div class="lbl">Read and write</div><div><code>ai/</code></div>
+      <div class="lbl" style="margin-top:10px">Read only (outside ai/)</div>
+      ${c.readable.map((p, i) => `<div class="row" style="margin:4px 0"><code>${esc(p)}</code><button class="b sm" data-act="rmPath" data-i="${i}">Remove</button></div>`).join('')}
+      <div class="row" style="margin-top:6px"><input id="newPath" placeholder="e.g. docs/"><button class="b" data-act="addPath">Add</button></div>
+      <div class="note">Files matched by .gitignore are excluded unless listed. Only the engine writes outside ai/, within each task's write scope.</div>`,
+    release: `<div class="kv"><span class="muted">Installed</span><span>v0.3.0</span><span class="muted">Latest</span><span>${c.release ? esc(c.release.latest) + ' <span class="muted small">(sample)</span>' : '<span class="muted">not checked</span>'}</span></div>
+      <div class="row" style="margin-top:10px"><button class="b" data-act="releaseCheck">Check for release</button></div>
+      ${c.release ? `<div class="note">The GUI does not update itself. Run in a terminal:</div><pre class="blk">${esc(c.release.cmd)}</pre><button class="b sm" data-act="copy" data-text="${esc(c.release.cmd)}">Copy</button>` : ''}`,
+    screens: `<table><thead><tr><th>Screen</th><th>Label</th><th>Source</th></tr></thead><tbody>${SCREENS.map(s => `<tr><td><code>${esc(s.id)}</code></td><td>${esc(s.label)}</td><td class="muted">${esc(s.source)}</td></tr>`).join('')}</tbody></table>
+      <div class="note">The sidebar is built from this registry. A plugin would add an entry here; the plugin design is not decided.</div>`
+  }[S.settingsTab];
+  return `<h1>Settings <span class="muted small">ai/config.yaml</span></h1>
+  <div class="tabs">${tabs.map(([k, l]) => `<button data-act="tab" data-t="${k}" class="${S.settingsTab === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="card">${body}</div>`;
+}
+
+function vProjects() {
+  return `<h1>Projects</h1><div class="card"><table><thead><tr><th>Project</th><th>Address</th><th>PID</th><th>State</th><th></th></tr></thead><tbody>${REGISTRY.map(p =>
+    `<tr><td>${esc(p.name)}</td><td><code>http://127.0.0.1:${p.port}/</code></td><td class="muted">${p.pid}</td>
+    <td>${p.running ? chip('running', 's-done') : chip('not running')}</td>
+    <td>${p.name === S.project ? chip('current', 's-current') : p.running ? `<button class="b sm" data-act="pickProject" data-name="${esc(p.name)}">Open</button>` : '<span class="muted small">stale entry, removed on next scan</span>'}</td></tr>`).join('')}</tbody></table>
+  <div class="note">Each project runs its own GUI from its <code>ai/</code> folder on an automatically assigned port. Instances record themselves in a user-level registry file (name and location not decided); every instance reads it to show this list.</div></div>`;
+}
+
+registerScreen({ id: 'projects', label: 'Projects', source: 'core', render: vProjects });
+registerScreen({ id: 'dashboard', label: 'Dashboard', source: 'core', render: vDashboard, badge: () => { const n = alerts().filter(a => a.l !== 'info').length; return n ? [n, true] : null; } });
+registerScreen({ id: 'items', label: 'Work items', source: 'core', render: vItems, badge: () => { const n = S.items.filter(i => { const c = currentStage(i); return c && stageState(i, c) === 'awaiting'; }).length; return n ? [n, true] : null; } });
+registerScreen({ id: 'authoring', label: 'Authoring', source: 'core', render: vAuthoring, badge: () => S.draft ? ['1', false] : null });
+registerScreen({ id: 'tasks', label: 'Task register', source: 'core', render: vTasks });
+registerScreen({ id: 'engine', label: 'Engine', source: 'core', render: vEngine, badge: () => ({ running: ['●', false], blocked: ['!', true], ship: ['✓', false] })[S.engine.status] || null });
+registerScreen({ id: 'audits', label: 'Audits', source: 'core', render: vAudits });
+registerScreen({ id: 'git', label: 'Git', source: 'core', render: vGit, badge: () => S.git.changes.length ? [S.git.changes.length, false] : null });
+registerScreen({ id: 'settings', label: 'Settings', source: 'core', render: vSettings });
+
+/* ---------- chat ---------- */
+function msgHtml(m, i) {
+  if (m.role === 'user') return `<div class="msg user">${esc(m.text)}</div>`;
+  return `<div class="msg">${(m.tools || []).map(t => `<div class="tool ${t.refused ? 'ref' : ''}">${esc(t.call)} → ${esc(t.res)}</div>`).join('')}${esc(m.text)}
+    ${m.insert ? `<div class="row" style="margin-top:6px"><button class="b sm" data-act="insert" data-i="${i}">Insert into document</button></div>` : ''}</div>`;
+}
+function renderChat() {
+  const c = S.chat, el = $('chat');
+  el.className = S.chatOpen ? '' : 'collapsed';
+  if (!S.chatOpen) { el.innerHTML = '<button class="vbtn" data-act="chatToggle">Chat ‹</button>'; return; }
+  const p = prov(c.provider);
+  el.innerHTML = `<div class="chead"><strong>Chat</strong><button class="b sm" data-act="chatToggle">Hide ›</button></div>
+  <div class="cctl"><select data-ch="chatProvider" aria-label="Provider">${PROVIDERS.map(x => `<option value="${x.id}" ${x.id === c.provider ? 'selected' : ''} ${x.ok ? '' : 'disabled'}>${esc(x.name)}${x.ok ? '' : ' (not configured)'}</option>`).join('')}</select>
+  <select data-in="chat.model" aria-label="Model">${p.models.map(m => `<option ${m === c.model ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select>
+  <div class="tools">${Object.keys(c.tools).map(k => `<label class="chip"><input type="checkbox" data-in="chat.tools.${k}" ${c.tools[k] ? 'checked' : ''}> ${esc(k)}</label>`).join('')}<span class="muted small">read-only</span></div></div>
+  <div class="msgs" id="msgs">${c.msgs.map(msgHtml).join('')}</div>
+  <div class="cin"><textarea id="chatIn" rows="3" placeholder="Ask the planner. Enter sends, Shift+Enter adds a line."></textarea><button class="b p" data-act="chatSend">Send</button></div>`;
+  const ms = $('msgs'); ms.scrollTop = ms.scrollHeight;
+}
+function chatReply(text) {
+  const t = text.toLowerCase(), on = S.chat.tools, m = { role: 'assistant', tools: [], text: '' };
+  const draft = 'Retry each Modbus read up to three times with exponential backoff (0.5 s, 1 s, 2 s). Log every retry at WARNING and raise ModbusTimeoutError after the final attempt.';
+  if (/\b(write|create|save|edit|delete|commit)\b/.test(t)) {
+    m.tools.push({ call: 'write_file(ai/workspace/…)', res: 'refused: chat tools are read-only', refused: true });
+    m.text = 'I cannot write files from the chat. Here is a draft you can insert into the open document:\n\n' + draft; m.insert = draft;
+  } else if (/status|stage|progress|work item/.test(t) && on.work_status) {
+    const sum = S.items.map(i => `${i.uuid}: ${currentStage(i) || 'complete'}`).join('\n');
+    m.tools.push({ call: 'work_status()', res: `${S.items.length} work items` });
+    m.text = 'Current stages:\n' + sum;
+  } else if (on.read_text_file) {
+    m.tools.push({ call: 'read_text_file(ai/task.md)', res: `${S.tasks.length} rows` });
+    m.text = '(simulated reply) The register has ' + S.tasks.filter(x => x.status === 'Active').length + ' active tasks. Suggested description for the open item:\n\n' + draft; m.insert = draft;
+  } else m.text = '(simulated reply, no tools enabled)\n\n' + draft, m.insert = draft;
+  return m;
+}
+
+/* ---------- engine simulation ---------- */
+function runScript(uuid, outcome) {
+  const w = S.config.worker, r = S.config.reviewer, L = [];
+  const add = (text, cls = '', extra = {}) => L.push(Object.assign({ text, cls }, extra));
+  const gate = (it, name, res, note, cls) => add(`[gate] ${name.padEnd(8)} ${res}${note ? '  ' + note : ''}`, cls, { gate: { it, name, res } });
+  add(`${clock()} engine start  mode=loop  task=ai/workspace/prompt/prompt-${uuid}-${item(uuid).name}.md`, 'dim');
+  add(`worker   = ${w.provider}:${w.model}`, 'dim'); add(`reviewer = ${r.provider}:${r.model}`, 'dim');
+  add('pre-run check: prompt approval matches committed content', 'ok');
+  add('── iteration 1 ──', 'sep', { iter: 1 });
+  add('[worker] read_text_file ai/state/task.md'); add('[worker] read_text_file src/solax/registers.py', '', { budget: 22 });
+  add('[worker] edit_file src/solax/registers.py   (write scope: deliverable)');
+  add('[worker] write_file tests/test_registers.py   (write scope: writable path tests/)', '', { budget: 34 });
+  add('[worker] write ai/state/work-summary.txt');
+  gate(1, 'syntax', 'PASS', '', 'ok'); gate(1, 'pytest', 'FAIL', '1 failed, 11 passed', 'err');
+  add('[reviewer] read work-summary.txt, review-input', '', { budget: 41 });
+  gate(1, 'reviewer', 'REVISE', 'test_split_by_model fails for X1-Hybrid', 'warn');
+  add('── iteration 2 ──', 'sep', { iter: 2 });
+  add('[worker] read_text_file ai/state/review-feedback.txt', '', { budget: 53 });
+  if (outcome === 'SHIP') {
+    add('[worker] edit_file src/solax/registers.py'); add('[worker] write ai/state/work-summary.txt', '', { budget: 61 });
+    gate(2, 'syntax', 'PASS', '', 'ok'); gate(2, 'pytest', 'PASS', '12 passed', 'ok');
+    add('[reviewer] review complete', '', { budget: 66 }); gate(2, 'reviewer', 'SHIP', '', 'ok');
+    add(`${clock()} SHIP: awaiting operator approval of stage accept`, 'ok', { end: 'SHIP' });
+  } else {
+    for (let i = 1; i <= S.config.loop.mcp_error_threshold; i++)
+      add(`[worker] write_file src/solax/models/x1.py → refused: outside write scope (${i}/${S.config.loop.mcp_error_threshold})`, 'err', { budget: 53 + i * 4 });
+    add('mcp_error_threshold reached: BLOCKED.md written', 'err');
+    add(`${clock()} BLOCKED: return to stage ${LOOP_STAGE.on_blocked} (manifest on_blocked)`, 'err', { end: 'BLOCKED' });
+  }
+  return L;
+}
+function startRun(uuid) {
+  const it = item(uuid); if (!it) return;
+  const e = S.engine;
+  Object.assign(e, { status: 'running', uuid, iteration: 0, log: [], gates: [], budget: 5, blocked: null, queue: runScript(uuid, e.outcome) });
+  it.loop = 'running'; act(`Engine run started for prompt-${uuid}`);
+  S.screen = 'engine'; render();
+  e.timer = setInterval(tick, 320);
+}
+function tick() {
+  const e = S.engine, l = e.queue.shift();
+  if (!l) return;
+  e.log.push(l);
+  if (l.iter) e.iteration = l.iter;
+  if (l.gate) e.gates.push(l.gate);
+  if (l.budget) e.budget = l.budget;
+  if (l.end) finishRun(l.end);
+  if (S.screen === 'engine' || S.screen === 'dashboard') renderMain();
+  renderNav();
+}
+function finishRun(res) {
+  const e = S.engine, it = item(e.uuid);
+  clearInterval(e.timer); e.timer = null;
+  if (res === 'SHIP') {
+    e.status = 'ship'; it.loop = 'ship';
+    addChange('src/solax/registers.py', 'M', '@@ def register_map(model):\n-    return REGISTERS\n+    return REGISTERS_BY_MODEL.get(model, REGISTERS_DEFAULT)');
+    addChange('tests/test_registers.py', 'A', '+def test_split_by_model():\n+    assert register_map("X1-Hybrid")');
+    act(`SHIP for ${e.uuid}: accept awaits approval`);
+  } else {
+    e.status = 'blocked'; it.loop = 'blocked';
+    e.blocked = `# BLOCKED\n\nReason: ${S.config.loop.mcp_error_threshold} consecutive refused writes.\nTool: write_file src/solax/models/x1.py\nThe path is outside the task's write scope.\nReturn to stage: ${LOOP_STAGE.on_blocked}`;
+    act(`BLOCKED for ${e.uuid}`); toast('Run BLOCKED. See ai/state/BLOCKED.md');
+  }
+}
+function resetEngine() {
+  const e = S.engine;
+  if (e.timer) clearInterval(e.timer);
+  if (e.uuid && e.status === 'running') item(e.uuid).loop = null;
+  Object.assign(e, { status: 'idle', uuid: null, iteration: 0, log: [], gates: [], budget: 0, timer: null, blocked: null, queue: [] });
+  act('Engine state reset (orchestrator.py --mode reset)'); toast('orchestrator.py --mode reset');
+}
+
+/* ---------- actions ---------- */
+const ACT = {
+  go: d => { S.screen = d.id; },
+  openItem: d => { S.selItem = d.uuid; S.screen = 'items'; },
+  selItem: d => { S.selItem = d.uuid; },
+  chatToggle: () => { S.chatOpen = !S.chatOpen; renderChat(); },
+  pickProject: d => { const p = REGISTRY.find(x => x.name === d.name); S.project = d.name; toast(`The real GUI opens http://127.0.0.1:${p.port}/ (sample data unchanged)`); },
+  newItem: () => modal(`<h2 style="margin-top:0">New work item</h2><div class="kv">
+      <label class="muted" for="niTitle">Title</label><input id="niTitle" placeholder="Short title">
+      <label class="muted" for="niPath">Path</label><select id="niPath">${Object.entries(MANIFEST.paths).map(([k, v]) => `<option value="${k}">${esc(k)} (${esc(v.stages.join(' → '))})</option>`).join('')}</select></div>
+      <div class="row" style="margin-top:14px;justify-content:flex-end"><button class="b" data-act="closeModal">Cancel</button><button class="b p" data-act="createItem">Create</button></div>`),
+  closeModal: () => closeModal(),
+  createItem: () => {
+    const title = $('niTitle').value.trim(); if (!title) { toast('Enter a title'); return false; }
+    const path = $('niPath').value, uuid = hex8();
+    S.items.push({ uuid, name: slug(title), title, path, docs: {}, approvals: {}, loop: null });
+    S.tasks.push({ id: uuid, text: title, status: 'Active' }); addChange('ai/task.md', 'M', `+| ${uuid} | ${title} | Active |`);
+    S.selItem = uuid; closeModal(); act(`Work item ${uuid} created (${path})`);
+    openAuthoring(uuid, MANIFEST.paths[path].detect);
+  },
+  approve: d => {
+    const it = item(d.uuid); it.approvals[d.stage] = true;
+    S.git.log.unshift({ h: hash7(), m: `chore(approve): ${d.uuid} ${d.stage}` }); S.git.ahead++;
+    if (d.stage === 'accept') { const t = S.tasks.find(x => x.id === d.uuid); if (t) t.status = 'Done'; addChange('ai/task.md', 'M', `-| ${d.uuid} | ${it.title} | Active |\n+| ${d.uuid} | ${it.title} | Done |`); S.engine.status = 'idle'; }
+    act(`Approved ${d.stage} for ${d.uuid}`); toast(`approve.py ${d.uuid} ${d.stage}: recorded and committed`);
+  },
+  author: d => openAuthoring(d.uuid, d.stage),
+  runFor: d => { S.screen = 'engine'; render(); const s = $('runTask'); if (s) s.value = d.uuid; return false; },
+  startRun: () => { const v = $('runTask').value; if (v) startRun(v); return false; },
+  resetEngine: () => resetEngine(),
+  returnTo: d => {
+    const it = item(d.uuid), back = LOOP_STAGE.on_blocked;
+    it.loop = null; it.approvals[back] = false; S.engine.status = 'idle'; S.engine.blocked = null;
+    act(`${d.uuid} returned to stage ${back}`);
+    openAuthoring(d.uuid, back, 'Revise the deliverables: the worker needs src/solax/models/x1.py in its write scope.');
+  },
+  newDraft: () => {
+    const tpl = $('newTpl').value, uuid = $('newUuid').value, t = TEMPLATES.find(x => x.id === tpl);
+    if (t.stage) { if (!uuid) { toast(`${t.label} needs a work item`); return false; } openAuthoring(uuid, t.stage); return; }
+    S.draft = { tpl, uuid: uuid || null, stage: null, mode: 'form', title: '', status: '', body: '', deliverables: '', md: null, mdEdited: false, lint: null, tmp: hex8() };
+  },
+  mode: d => {
+    const x = S.draft;
+    if (d.m === 'md' && x.mode !== 'md') { x.md = buildMd(x); x.mdEdited = false; }
+    if (d.m === 'form' && x.mode === 'md' && x.mdEdited) {
+      const ti = x.md.match(/^\s*title:\s*(.+)$/m), st = x.md.match(/^\s*status:\s*(.+)$/m);
+      if (ti) x.title = ti[1].trim(); if (st) x.status = st[1].trim();
+      toast('Title and status read from the YAML block');
+    }
+    x.mode = d.m;
+  },
+  lint: () => {
+    const x = S.draft, f = [], ev = x.stage && STAGE(x.stage).evidence, md = x.mode === 'md' ? x.md : buildMd(x);
+    if (!x.title.trim()) f.push({ l: 'ERROR', m: 'title is empty' });
+    if (ev && ev.status_field && !ev.complete_statuses.includes(x.status)) f.push({ l: 'WARNING', m: `${ev.status_field} is "${x.status}": the stage stays incomplete` });
+    if (!/## Version History/.test(md)) f.push({ l: 'ERROR', m: 'missing section: Version History' });
+    if (!/Copyright \(c\)/.test(md)) f.push({ l: 'ERROR', m: 'missing copyright line' });
+    x.lint = f;
+  },
+  save: () => {
+    ACT.lint(); const x = S.draft;
+    if (x.lint.some(f => f.l === 'ERROR')) { toast('Linter errors: not saved'); return; }
+    const it = x.uuid && item(x.uuid), p = draftPath(x);
+    addChange(p, it && it.docs[x.stage] ? 'M' : 'A', (x.mode === 'md' ? x.md : buildMd(x)).split('\n').slice(0, 14).map(l => '+' + l).join('\n'));
+    if (it && x.stage) {
+      it.docs[x.stage] = { title: x.title, status: x.status, body: x.body, deliverables: x.deliverables };
+      if (STAGE(x.stage).approval && it.approvals[x.stage]) { it.approvals[x.stage] = false; toast('Document changed: its approval was reset'); }
+      S.selItem = it.uuid; S.screen = 'items';
+    }
+    act(`Saved ${p}`); S.draft = null;
+  },
+  closeDraft: () => { S.draft = null; },
+  addTask: () => { const v = $('newTask').value.trim(); if (!v) return false; S.tasks.push({ id: '—', text: v, status: 'Active' }); addChange('ai/task.md', 'M', `+| — | ${v} | Active |`); },
+  selAudit: d => { S.selAudit = d.id; },
+  startAudit: () => {
+    const a = { id: 'audit-' + hex8(), cls: 'ad-hoc', target: $('audTarget').value, status: 'running', auditor: $('audBy').value, findings: null, autonomy: '—' };
+    S.audits.unshift(a); act(`Ad-hoc audit ${a.id} started`);
+    setTimeout(() => {
+      a.status = 'complete'; a.findings = { H: 0, M: Math.round(Math.random()), L: 1 + Math.floor(Math.random() * 3) };
+      a.autonomy = a.findings.M ? 'hold' : 'recommend promotion (human confirms)';
+      addChange(`ai/workspace/audit/${a.id}-report.md`, 'A', `+# Audit ${a.id}\n+Findings: H ${a.findings.H} · M ${a.findings.M} · L ${a.findings.L}`);
+      act(`Audit ${a.id} complete`); toast(`Audit ${a.id} complete`); render();
+    }, 2500);
+  },
+  gitSel: d => { S.git.sel = d.path; },
+  commit: () => {
+    const g = S.git, sel = g.changes.filter(c => c.on);
+    if (!g.msg.trim()) { toast('Enter a commit message'); return false; }
+    g.log.unshift({ h: hash7(), m: g.msg.trim() }); g.ahead++;
+    g.changes = g.changes.filter(c => !c.on); act(`Committed ${sel.length} file(s): ${g.msg.trim()}`); g.msg = '';
+  },
+  push: () => { const n = S.git.ahead; S.git.ahead = 0; act(`Pushed ${n} commit(s) to origin/${S.git.branch}`); toast(`Pushed ${n} commit(s) to origin/${S.git.branch}`); },
+  tab: d => { S.settingsTab = d.t; },
+  addPath: () => { const v = $('newPath').value.trim(); if (!v) return false; S.config.readable.push(v); cfgChanged(); },
+  rmPath: d => { S.config.readable.splice(+d.i, 1); cfgChanged(); },
+  releaseCheck: () => { S.config.release = { latest: 'v0.3.1', cmd: 'curl -fsSL https://raw.githubusercontent.com/William12556/AI-Governance-and-Orchestration/main/bin/bootstrap.sh | bash -s -- .' }; },
+  copy: d => { try { navigator.clipboard.writeText(d.text).then(() => toast('Copied'), () => toast('Copy refused by the browser')); } catch (_) { toast('Copy refused by the browser'); } return false; },
+  chatSend: () => {
+    const el = $('chatIn'), v = el.value.trim(); if (!v) return false;
+    S.chat.msgs.push({ role: 'user', text: v }); renderChat();
+    setTimeout(() => { S.chat.msgs.push(chatReply(v)); renderChat(); }, 600);
+    return false;
+  },
+  insert: d => {
+    const m = S.chat.msgs[+d.i];
+    if (!S.draft) { toast('Open a document in Authoring first'); return false; }
+    if (S.draft.mode === 'md') { S.draft.md += '\n' + m.insert + '\n'; S.draft.mdEdited = true; }
+    else S.draft.body = (S.draft.body ? S.draft.body + '\n\n' : '') + m.insert;
+    S.screen = 'authoring'; toast('Inserted into the open document');
+  }
+};
+function cfgChanged() {
+  const c = S.config;
+  addChange('ai/config.yaml', 'M', `@@ roles\n+  worker:   ${c.worker.provider}:${c.worker.model}\n+  reviewer: ${c.reviewer.provider}:${c.reviewer.model}\n@@ loop\n+  max_iterations: ${c.loop.max_iterations}\n@@ webui.readable_paths\n+  ${c.readable.join(', ')}`);
+  renderNav();
+}
+const CH = {
+  chatProvider: el => { S.chat.provider = el.value; S.chat.model = prov(el.value).models[0]; renderChat(); },
+  roleProvider: el => { const r = el.dataset.role; S.config[r].provider = el.value; S.config[r].model = prov(el.value).models[0]; cfgChanged(); renderMain(); },
+  taskStatus: el => { const t = S.tasks[+el.dataset.i]; t.status = el.value; addChange('ai/task.md', 'M', `+| ${t.id} | ${t.text} | ${t.status} |`); renderNav(); },
+  gitToggle: el => { const c = S.git.changes.find(x => x.path === el.dataset.path); c.on = el.checked; renderMain(); }
+};
+function setPath(path, v) {
+  const ks = path.split('.'); let o = S;
+  for (let i = 0; i < ks.length - 1; i++) o = o[ks[i]];
+  const k = ks[ks.length - 1];
+  o[k] = typeof o[k] === 'number' ? Number(v) : v;
+}
+
+/* ---------- rendering ---------- */
+function renderNav() {
+  $('nav').innerHTML = SCREENS.map(s => {
+    const b = s.badge && s.badge();
+    return `<button data-act="go" data-id="${s.id}" class="${S.screen === s.id ? 'active' : ''}"><span>${esc(s.label)}</span>${b ? `<span class="badge ${b[1] ? 'hot' : ''}">${esc(b[0])}</span>` : ''}</button>`;
+  }).join('');
+  $('proj').textContent = S.project;
+  $('hdrModel').textContent = `${MANIFEST.model.name} ${MANIFEST.model.version}`;
+}
+function renderMain() {
+  const s = SCREENS.find(x => x.id === S.screen) || SCREENS[1];
+  $('main').innerHTML = s.render();
+  const lg = $('log'); if (lg) lg.scrollTop = lg.scrollHeight;
+}
+function render() { renderNav(); renderMain(); }
+
+/* ---------- events (delegated) ---------- */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  if (el.tagName === 'A') e.preventDefault();
+  if (el !== e.target && e.target.closest('input,select,textarea,label')) return;
+  const r = ACT[el.dataset.act](el.dataset, el);
+  if (r === false || el.dataset.act === 'chatToggle') return;
+  render();
+});
+const onField = e => {
+  const el = e.target;
+  if (el.dataset.in) {
+    if (el.type === 'radio' && !el.checked) return;
+    setPath(el.dataset.in, el.type === 'checkbox' ? el.checked : el.value);
+    if (el.dataset.in === 'draft.md') S.draft.mdEdited = true;
+  }
+};
+document.addEventListener('input', onField);
+document.addEventListener('change', e => {
+  onField(e);
+  const el = e.target;
+  if (el.dataset.cfg) cfgChanged();
+  if (el.dataset.ch) CH[el.dataset.ch](el);
+});
+document.addEventListener('keydown', e => {
+  if (e.target.id === 'chatIn' && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ACT.chatSend(); }
+  if (e.key === 'Escape' && !$('overlay').hidden) closeModal();
+});
+$('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') closeModal(); });
+
+render(); renderChat();
+}
+</script>
+</body>
+</html>
