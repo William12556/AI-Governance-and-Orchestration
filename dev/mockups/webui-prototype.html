@@ -26,7 +26,7 @@ body{margin:0;height:100vh;display:grid;grid-template-rows:46px 1fr;grid-templat
  font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--fg)}
 header{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid var(--border);background:var(--panel)}
 header .brand{font-weight:600}
-header .proto{margin-left:auto;font-size:12px;color:var(--warn);border:1px solid var(--warn);border-radius:4px;padding:1px 7px}
+header .proto{font-size:12px;color:var(--warn);border:1px solid var(--warn);border-radius:4px;padding:1px 7px}
 nav{border-right:1px solid var(--border);padding:8px 0;overflow:auto;background:var(--panel)}
 nav button{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;border:0;background:none;color:var(--fg);padding:8px 14px;font:inherit;cursor:pointer}
 nav button.active{background:var(--bg);color:var(--accent);font-weight:600;box-shadow:inset 3px 0 var(--accent)}
@@ -84,16 +84,52 @@ pre.blk{font-family:var(--mono);font-size:12px;background:var(--panel);border-ra
 #toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;z-index:10;align-items:center}
 .toast{background:var(--fg);color:var(--bg);padding:7px 14px;border-radius:6px;font-size:13px;max-width:80vw}
 .note{font-size:12px;color:var(--muted);margin-top:8px}
+.tscroll{max-height:340px;overflow:auto}.tscroll thead th{position:sticky;top:0;background:var(--bg);z-index:1}
+/* layout: side by side (default grid) or over/under (body.stack) */
+.hdrR{margin-left:auto;display:flex;gap:6px;align-items:center}
+.seg.sm button{font-size:12px;padding:2px 9px}
+#split{display:none}
+.cses{display:flex;flex-direction:column;gap:6px;padding:10px 12px;overflow:auto;border-bottom:1px solid var(--border);max-height:30%;flex:none}
+.sess{display:flex;flex-direction:column;gap:2px}
+.sess button{font:inherit;font-size:12.5px;text-align:left;border:0;border-radius:5px;background:none;color:var(--fg);padding:4px 6px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sess button.on{background:var(--bg);color:var(--accent);font-weight:600}
+.sess .when{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.cmain{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0}
+.cbar{display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--border);font-size:12.5px}
+.drawer{display:flex;flex-direction:column;gap:6px;padding:10px 12px;overflow:auto;background:var(--panel);border-bottom:1px solid var(--border);max-height:45%;flex:none}
+.prow{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:5px;cursor:pointer;font-size:12.5px}
+.prow.on{background:var(--bg);color:var(--accent);font-weight:600}.prow .dot{width:7px;height:7px;border-radius:50%;border:1px solid var(--muted);flex:none}
+.prow.on .dot{background:var(--accent);border-color:var(--accent)}.prow .tag{margin-left:auto;font-size:11px;color:var(--muted);font-weight:400}
+.samp{display:grid;grid-template-columns:minmax(0,1fr) 90px;gap:4px 8px;align-items:center;font-size:12.5px}.samp input{width:90px;padding:3px 6px}
+.composer{border-top:1px solid var(--border);padding:8px 12px 10px;display:flex;flex-direction:column;gap:6px}
+.ctool{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.ctool select{font-size:12.5px;padding:3px 6px;max-width:260px}
+.ring{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--muted);margin-left:auto}
+.macts{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}.macts button{font:inherit;font-size:11.5px;border:1px solid var(--border);background:var(--bg);color:var(--muted);border-radius:5px;padding:1px 7px;cursor:pointer}
+.msg.user .macts button{background:transparent;color:var(--accent-fg);border-color:var(--accent-fg)}
+details.think{font-size:12px;color:var(--muted);margin-bottom:6px}details.think summary{cursor:pointer}
+.mstat{font-size:11px;color:var(--muted);margin-top:4px}
+body.stack{grid-template-columns:190px minmax(0,1fr);grid-template-rows:46px minmax(0,1fr) auto}
+body.stack nav{grid-row:2;grid-column:1}
+body.stack main{grid-row:2;grid-column:2}
+body.stack aside{grid-row:3;grid-column:1/-1;width:auto;height:var(--ch,340px);border-left:0;display:grid;grid-template-columns:190px minmax(0,1fr) auto;grid-template-rows:6px minmax(0,1fr)}
+body.stack aside.collapsed{height:36px;display:block}
+body.stack #split{display:block;grid-column:1/-1;cursor:row-resize;background:var(--border)}
+body.stack .cses{max-height:none;border-bottom:0;border-right:1px solid var(--border)}
+body.stack .drawer{max-height:none;width:290px;border-bottom:0;border-left:1px solid var(--border);grid-row:2;grid-column:3}
+body.stack .msgs .msg{max-width:860px}
+body.stack .vbtn{writing-mode:horizontal-tb;padding:8px 12px}
+.uuid{font-family:var(--mono);font-weight:700;color:var(--accent)}
+td .uuid{font-size:12.5px}h2 .uuid{font-size:15px}
+.stale{color:var(--warn)}
 @media(max-width:900px){body{grid-template-columns:150px minmax(0,1fr) auto}aside{width:290px}}
 </style>
 </head>
 <body>
 <header>
-  <span class="brand">AI-G&amp;O</span>
-  <span id="proj"></span>
-  <span class="muted small" id="hdrAddr"></span>
-  <span class="muted small" id="hdrModel"></span>
+  <span class="brand">AI-G&amp;O</span><span class="muted">·</span><span id="hdrModel"></span><span class="muted">·</span><span>project <strong id="proj"></strong></span>
   <span class="proto">Prototype · simulated data</span>
+  <span class="hdrR"><span class="muted small" id="hdrAddr"></span>
+  <span class="seg sm" id="layoutSeg"><button data-act="layout" data-l="stack">Over/under</button><button data-act="layout" data-l="side">Side by side</button></span></span>
 </header>
 <nav id="nav"></nav>
 <main id="main"></main>
@@ -153,19 +189,35 @@ const PROVIDERS = [
 const prov = id => PROVIDERS.find(p => p.id === id);
 
 /* ---------- application state (sample data) ---------- */
+const ago_ = hours => Date.now() - hours * 3600e3;
 const S = {
-  project: 'solax-modbus', screen: 'dashboard', chatOpen: true, selItem: 'a3f2c1d9', selAudit: null, settingsTab: 'providers', draft: null,
+  project: 'solax-modbus', screen: 'dashboard', chatOpen: true, layout: 'stack', itemSearch: '', showClosed: false, selItem: 'a3f2c1d9', selAudit: null, settingsTab: 'providers', draft: null,
   items: [
     { uuid: 'a3f2c1d9', name: 'modbus-timeout-handling', title: 'Modbus timeout handling', path: 'full',
-      docs: { issue: { status: 'open', title: 'Modbus read timeout is not retried' }, change: { status: 'approved', title: 'Retry Modbus reads with backoff' } }, approvals: {}, loop: null },
+      docs: { issue: { status: 'open', title: 'Modbus read timeout is not retried' }, change: { status: 'approved', title: 'Retry Modbus reads with backoff' } }, approvals: {}, loop: null,
+      updated: ago_(2), runs: [], related: ['ai/workspace/requirements/requirements-1a2b3c4d-modbus-client.md'] },
     { uuid: '7be01c44', name: 'register-map-refactor', title: 'Register map refactor', path: 'change_sourced',
-      docs: { change: { status: 'approved', title: 'Split the register map by inverter model' }, prompt: { title: 'Implement the register map split' } }, approvals: { change: true, prompt: true }, loop: null },
-    { uuid: '51d9e0aa', name: 'logging-levels', title: 'Configurable logging levels', path: 'design_sourced', docs: {}, approvals: {}, loop: null }
+      docs: { change: { status: 'approved', title: 'Split the register map by inverter model' }, prompt: { title: 'Implement the register map split' } }, approvals: { change: true, prompt: true }, loop: null,
+      updated: ago_(24), runs: [{ when: ago_(72), outcome: 'BLOCKED', iterations: 3 }], related: ['ai/workspace/design/design-5c6d7e8f-register-map.md'] },
+    { uuid: '51d9e0aa', name: 'logging-levels', title: 'Configurable logging levels', path: 'design_sourced', docs: {}, approvals: {}, loop: null, updated: ago_(216), runs: [], related: [] },
+    { uuid: 'c08e7b21', name: 'battery-soc-polling', title: 'Battery SOC polling', path: 'full',
+      docs: { issue: { status: 'open', title: 'Battery SOC reads are stale' }, change: { status: 'approved', title: 'Poll SOC on its own interval' } }, approvals: {}, loop: null, updated: ago_(4), runs: [], related: [] },
+    { uuid: 'e4a19f35', name: 'mqtt-topic-naming', title: 'MQTT topic naming', path: 'full',
+      docs: { issue: { status: 'draft', title: 'MQTT topics mix naming styles' } }, approvals: {}, loop: null, updated: ago_(0.5), runs: [], related: [] },
+    { uuid: '9d27c6b0', name: 'firmware-version-check', title: 'Inverter firmware version check', path: 'change_sourced',
+      docs: { change: { status: 'approved', title: 'Read and log the firmware version at startup' }, prompt: { title: 'Implement the firmware version check' } }, approvals: { change: true }, loop: null, updated: ago_(48), runs: [], related: [] },
+    { uuid: 'f1e2d3c4', name: 'serial-port-autodetect', title: 'Serial port auto-detect', path: 'design_sourced',
+      docs: { prompt: { title: 'Detect the inverter serial port' } }, approvals: { prompt: true, accept: true }, loop: 'ship',
+      updated: ago_(288), runs: [{ when: ago_(290), outcome: 'SHIP', iterations: 2 }], related: ['ai/workspace/design/design-0a9b8c7d-serial-transport.md'] }
   ],
+  itemFilter: 'all',
   tasks: [
     { id: 'a3f2c1d9', text: 'Modbus timeout handling', status: 'Active' },
     { id: '7be01c44', text: 'Register map refactor', status: 'Active' },
     { id: '51d9e0aa', text: 'Configurable logging levels', status: 'Active' },
+    { id: 'c08e7b21', text: 'Battery SOC polling', status: 'Active' },
+    { id: 'e4a19f35', text: 'MQTT topic naming', status: 'Active' },
+    { id: '9d27c6b0', text: 'Inverter firmware version check', status: 'Active' },
     { id: '—', text: 'Review README after the register map split', status: 'Deferred' }
   ],
   audits: [
@@ -184,9 +236,25 @@ const S = {
     readable: ['src/', 'tests/', 'logs/'], release: null,
     webui: { port: 8731 }
   },
-  chat: { provider: 'omlx', model: 'mistralai_Devstral-Small-2-24B-Instruct-2512-MLX-8Bit',
+  chat: { provider: 'omlx', model: 'mistralai_Devstral-Small-2-24B-Instruct-2512-MLX-8Bit', session: 'project', search: '',
+    drawer: true, drawerTab: 'profile', reasoning: 'auto', maxToolRounds: 10,
     tools: { read_text_file: true, list_directory: true, search: true, work_status: true },
-    msgs: [{ role: 'assistant', text: 'Planner chat. Read-only tools are enabled. Ask about the project, or have me draft text and insert it into the open document.' }] },
+    profiles: [
+      { name: 'System Default', kind: 'default' },
+      { name: 'planner', kind: 'model', origin: 'software-engineering',
+        prompt: 'You are the planner for this project under the software-engineering governance model (primer.md). Work on one work item at a time. Propose document changes as diffs for the operator to accept. Never approve a stage.',
+        params: { temperature: 0.3, max_tokens: 8192 } },
+      { name: 'concise review', kind: 'project', prompt: 'Review the open document. List defects only, most severe first.', params: { temperature: 0.2, max_tokens: 2048 } }
+    ],
+    edit: null,
+    sessions: {
+      project: { title: 'Project (general)', profile: 'planner', custom: {}, customPrompt: '', used: Date.now() - 20 * 60e3,
+        msgs: [{ role: 'assistant', text: 'Project session. Read-only tools are enabled. Ask about the project, or have me draft text and insert it into the open document.' }] },
+      a3f2c1d9: { title: 'a3f2c1d9 Modbus timeout handling', profile: 'planner', custom: {}, customPrompt: '', used: Date.now() - 2 * 3600e3,
+        msgs: [{ role: 'user', text: 'Summarise the issue for a3f2c1d9.' },
+          { role: 'assistant', think: 'The issue document states the symptom; the change document proposes retries.', tools: [{ call: 'read_text_file(ai/workspace/issues/issue-a3f2c1d9-modbus-timeout-handling.md)', res: '1 document' }],
+            text: 'Modbus reads that time out are not retried; the poll cycle then reports stale values.', stat: '1.8k prompt tok · 42 gen tok · 38 tok/s · 1.4 s' }] }
+    } },
   activity: [{ t: clock(), m: 'GUI started on http://127.0.0.1:8731/' }]
 };
 const item = u => S.items.find(i => i.uuid === u);
@@ -291,12 +359,48 @@ function vDashboard() {
   <h2>Activity</h2><div class="card small">${S.activity.map(x => `<div><span class="muted">${x.t}</span> ${esc(x.m)}</div>`).join('')}</div>`;
 }
 
+function ago(t) {
+  const m = Math.round((Date.now() - t) / 60e3);
+  return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`;
+}
+const touch = it => { it.updated = Date.now(); };
+function nextAction(it) {
+  const cur = currentStage(it); if (!cur) return ['', 'complete'];
+  const s = stageState(it, cur);
+  return {
+    awaiting: ['operator', `approve ${cur}`], missing: ['planner', `write ${cur}`], incomplete: ['planner', `complete ${cur} status`],
+    ready: ['operator', 'start run'], running: ['engine', 'running'], blocked: ['operator', `return to ${STAGE(cur).on_blocked}`]
+  }[s] || ['', s];
+}
+function sessionInfo(uuid) {
+  const ss = S.chat.sessions[uuid];
+  return ss ? `${ss.msgs.length} msgs · ${ago(ss.used)}` : '—';
+}
 function vItems() {
-  const rows = S.items.map(i => `<tr class="click ${S.selItem === i.uuid ? 'sel' : ''}" data-act="selItem" data-uuid="${i.uuid}">
-    <td><code>${i.uuid}</code></td><td>${esc(i.title)}</td><td class="muted">${esc(i.path)}</td><td>${pipeline(i)}</td></tr>`).join('');
+  const groups = [...MANIFEST.stages.map(s => s.id), null];
+  const rank = i => groups.indexOf(currentStage(i));
+  const q = S.itemSearch.trim().toLowerCase();
+  const rows = S.items
+    .filter(i => S.itemFilter === 'all' || S.itemFilter === String(currentStage(i)))
+    .filter(i => S.showClosed || currentStage(i) || S.itemFilter === 'null')
+    .filter(i => !q || i.uuid.includes(q) || i.title.toLowerCase().includes(q))
+    .sort((a, b) => rank(a) - rank(b) || b.updated - a.updated)
+    .map(i => {
+      const [who, what] = nextAction(i), stale = currentStage(i) && Date.now() - i.updated > 7 * 864e5;
+      return `<tr class="click ${S.selItem === i.uuid ? 'sel' : ''}" data-act="selItem" data-uuid="${i.uuid}">
+      <td><span class="uuid">${i.uuid}</span></td><td>${esc(i.title)}</td><td>${pipeline(i)}</td>
+      <td>${who ? `<span class="muted small">${esc(who)}:</span> ` : ''}${esc(what)}</td>
+      <td class="small muted">${esc(sessionInfo(i.uuid))}</td><td class="small ${stale ? 'stale' : 'muted'}">${esc(ago(i.updated))}</td></tr>`;
+    }).join('') || '<tr><td colspan="6" class="muted">No matching work items.</td></tr>';
+  const opts = groups.map(g => { const n = S.items.filter(i => currentStage(i) === g).length; return `<option value="${esc(String(g))}" ${S.itemFilter === String(g) ? 'selected' : ''}>${esc(g || 'complete')} (${n})</option>`; }).join('');
   const it = item(S.selItem);
-  return `<div class="row between"><h1>Work items</h1><button class="b p" data-act="newItem">New work item</button></div>
-  <div class="card"><table><thead><tr><th>UUID</th><th>Title</th><th>Path</th><th>Stages</th></tr></thead><tbody>${rows}</tbody></table></div>
+  return `<div class="row between"><h1>Work items</h1><div class="row">
+    <input id="itemSearch" data-in="itemSearch" data-live="1" value="${esc(S.itemSearch)}" placeholder="Search UUID or title" style="width:190px">
+    <label class="muted small" for="itemFilter">Stage</label><select id="itemFilter" data-ch="itemFilter"><option value="all">all (${S.items.length})</option>${opts}</select>
+    <label class="small"><input type="checkbox" data-ch="showClosed" ${S.showClosed ? 'checked' : ''}> Show closed</label>
+    <button class="b p" data-act="newItem">New work item</button></div></div>
+  <div class="card tscroll"><table><thead><tr><th>UUID</th><th>Title</th><th>Stages</th><th>Next action</th><th>Planner session</th><th>Last activity</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="note">Sorted by current stage in manifest order, then by last activity. Closed (complete) items are hidden unless shown. Last activity over 7 days is highlighted.</div>
   ${it ? itemDetail(it) : ''}`;
 }
 function itemDetail(it) {
@@ -312,9 +416,21 @@ function itemDetail(it) {
       : '<span class="muted small">operator acceptance</span>';
     return `<tr><td>${esc(id)}</td><td class="muted">${esc(st.owner)}</td><td>${ev}</td><td>${chip(LABEL[s], CLS[s] || (isCur ? 's-current' : ''))}</td><td><div class="row">${a.join('')}</div></td></tr>`;
   }).join('');
-  return `<h2>${esc(it.title)} <span class="muted small">· ${it.uuid} · path ${esc(it.path)}</span></h2>
+  const docs = MANIFEST.paths[it.path].stages.filter(id => STAGE(id).evidence && it.docs[id]).map(id =>
+    `<div class="row between"><code class="small">${esc(evidencePath(it, id))}</code><button class="b sm" data-act="author" data-uuid="${it.uuid}" data-stage="${id}">Open</button></div>`).join('');
+  const rel = it.related.map(p => `<div class="row between"><code class="small">${esc(p)}</code><button class="b sm" data-act="openRelated" data-path="${esc(p)}">Open</button></div>`).join('');
+  const aud = S.audits.filter(a => a.target.endsWith(it.uuid)).map(a => `<div class="row between"><code class="small">ai/workspace/audit/${esc(a.id)}-report.md</code><button class="b sm" data-act="selAudit" data-id="${esc(a.id)}" data-go="audits">Open</button></div>`).join('');
+  const runs = it.runs.length ? `<table><thead><tr><th>When</th><th>Outcome</th><th>Iterations</th></tr></thead><tbody>${it.runs.map(r =>
+    `<tr><td class="small">${esc(ago(r.when))}</td><td>${chip(r.outcome, r.outcome === 'SHIP' ? 's-done' : 's-blocked')}</td><td>${r.iterations}</td></tr>`).join('')}</tbody></table>` : '<div class="muted small">No engine runs.</div>';
+  return `<h2>Details: <span class="uuid">${it.uuid}</span> ${esc(it.title)} <span class="muted small">· path ${esc(it.path)}</span></h2>
   <div class="card"><table><thead><tr><th>Stage</th><th>Owner</th><th>Evidence / controls</th><th>State</th><th></th></tr></thead><tbody>${rows}</tbody></table>
-  ${cur ? `<div class="note">Current stage: <strong>${esc(cur)}</strong>. Approve calls <code>approve.py ${it.uuid} &lt;stage&gt;</code>, which records and commits the approval.</div>` : '<div class="note ok">All stages complete.</div>'}</div>`;
+  ${cur ? `<div class="note">Current stage: <strong>${esc(cur)}</strong>. Approve calls <code>approve.py ${it.uuid} &lt;stage&gt;</code>, which records and commits the approval.</div>` : '<div class="note ok">All stages complete.</div>'}</div>
+  <div class="grid" style="margin-top:12px">
+    <div class="card"><div class="lbl">Documents</div>${docs || '<div class="muted small">No stage documents yet.</div>'}
+      <div class="lbl" style="margin-top:8px">Related</div>${rel || '<div class="muted small">None.</div>'}
+      <div class="lbl" style="margin-top:8px">Audit reports</div>${aud || '<div class="muted small">None.</div>'}</div>
+    <div class="card"><div class="lbl">Engine runs</div>${runs}</div>
+  </div>`;
 }
 
 function buildMd(d) {
@@ -486,27 +602,92 @@ registerScreen({ id: 'git', label: 'Git', source: 'core', render: vGit, badge: (
 registerScreen({ id: 'settings', label: 'Settings', source: 'core', render: vSettings });
 
 /* ---------- chat ---------- */
+const SAMPLING = {
+  omlx: [['temperature', 0.1], ['max_tokens', 1], ['top_p', 0.05], ['top_k', 1], ['min_p', 0.01], ['repetition_penalty', 0.05], ['presence_penalty', 0.05]],
+  mistral: [['temperature', 0.1], ['max_tokens', 1], ['top_p', 0.05], ['presence_penalty', 0.05]],
+  anthropic: [['temperature', 0.1], ['max_tokens', 1], ['top_p', 0.05], ['top_k', 1]]
+};
+const CTX = { 'mistralai_Devstral-Small-2-24B-Instruct-2512-MLX-8Bit': 131072, 'Magistral-Small-2509-MLX-6bit': 40960, 'mistral-medium-2604': 131072 };
+const curSess = () => S.chat.sessions[S.chat.session];
+const profileOf = name => S.chat.profiles.find(p => p.name === name);
 function msgHtml(m, i) {
-  if (m.role === 'user') return `<div class="msg user">${esc(m.text)}</div>`;
-  return `<div class="msg">${(m.tools || []).map(t => `<div class="tool ${t.refused ? 'ref' : ''}">${esc(t.call)} → ${esc(t.res)}</div>`).join('')}${esc(m.text)}
-    ${m.insert ? `<div class="row" style="margin-top:6px"><button class="b sm" data-act="insert" data-i="${i}">Insert into document</button></div>` : ''}</div>`;
+  if (m.role === 'user') return `<div class="msg user">${esc(m.text)}<div class="macts"><button data-act="msgEdit" data-i="${i}">Edit</button><button data-act="msgDel" data-i="${i}">Delete</button></div></div>`;
+  return `<div class="msg">${m.think ? `<details class="think"><summary>Thought for ${m.thinkS || 2} s</summary>${esc(m.think)}</details>` : ''}${(m.tools || []).map(t => `<div class="tool ${t.refused ? 'ref' : ''}">${esc(t.call)} → ${esc(t.res)}</div>`).join('')}${esc(m.text)}
+    ${m.stat ? `<div class="mstat">${esc(m.stat)}</div>` : ''}
+    <div class="macts"><button data-act="msgCopy" data-i="${i}">Copy</button><button data-act="msgRegen" data-i="${i}">Regenerate</button><button data-act="msgDel" data-i="${i}">Delete</button>${m.insert ? `<button data-act="insert" data-i="${i}">Insert into document</button>` : ''}</div></div>`;
+}
+function ctxUse(sess) {
+  const p = profileOf(sess.profile), chars = sess.msgs.reduce((n, m) => n + (m.text || '').length + (m.think || '').length, 0) + ((p && p.prompt) || sess.customPrompt || '').length + 6000;
+  const tok = Math.round(chars / 4), win = CTX[S.chat.model] || 32768;
+  return { tok, pct: Math.max(1, Math.round(100 * tok / win)) };
+}
+function drawerHtml() {
+  const c = S.chat, sess = curSess(), tab = c.drawerTab;
+  const tabs = `<div class="row between"><div class="seg sm"><button data-act="dtab" data-t="profile" class="${tab === 'profile' ? 'on' : ''}">Profile</button><button data-act="dtab" data-t="chat" class="${tab === 'chat' ? 'on' : ''}">Chat</button></div><button class="b sm" data-act="drawer">Close</button></div>`;
+  if (tab === 'chat') return tabs + `<div class="lbl">Tools (read-only)</div>
+    <div class="tools">${Object.keys(c.tools).map(k => `<label class="chip"><input type="checkbox" data-in="chat.tools.${k}" ${c.tools[k] ? 'checked' : ''}> ${esc(k)}</label>`).join('')}</div>
+    <div class="samp" style="margin-top:6px"><label>Max tool rounds</label><input type="number" min="1" max="100" data-in="chat.maxToolRounds" value="${c.maxToolRounds}"></div>
+    <div class="note">Write tools are never offered to the chat. Edits are proposed and applied by the GUI after you accept them.</div>`;
+  const sel = sess.profile, p = profileOf(sel);
+  const mode = sel === '__custom__' ? 'custom' : p.kind;
+  if (!c.edit || c.edit.name !== sel) c.edit = { name: sel, prompt: p ? p.prompt || '' : '', params: Object.assign({}, p && p.params), dirty: false };
+  const rows = c.profiles.map(x => `<div class="prow ${x.name === sel ? 'on' : ''}" data-act="pickProfile" data-n="${esc(x.name)}"><span class="dot"></span>${esc(x.name)}
+      <span class="tag">${x.kind === 'default' ? 'model settings' : x.kind === 'model' ? 'governance model' : 'project'}</span>
+      ${x.kind === 'project' ? `<button class="b sm" data-act="delProfile" data-n="${esc(x.name)}" title="Delete profile">✕</button>` : ''}</div>`).join('')
+    + `<div class="prow ${sel === '__custom__' ? 'on' : ''}" data-act="pickProfile" data-n="__custom__"><span class="dot"></span>Custom Parameters<span class="tag">this session</span></div>`;
+  const fields = SAMPLING[c.provider] || [];
+  const val = k => mode === 'custom' ? sess.custom[k] : c.edit.params[k];
+  const samp = fields.map(([k, step]) => `<label>${esc(k)}</label>${mode === 'default' ? '<span class="muted small">model default</span>'
+    : `<input type="number" step="${step}" data-pf="${k}" value="${val(k) ?? ''}" placeholder="default" ${mode === 'model' ? 'disabled' : ''}>`}`).join('');
+  const prompt = mode === 'custom' ? sess.customPrompt : c.edit.prompt;
+  return tabs + `<div class="lbl">Profiles</div>${rows}
+    <button class="b sm" data-act="addProfile" style="align-self:flex-start">+ Add profile</button>
+    <div class="lbl">Prompt content</div>
+    <textarea rows="5" data-pp="1" ${mode === 'default' || mode === 'model' ? 'disabled' : ''} placeholder="${mode === 'default' ? 'No system prompt' : 'Instructions for this session'}">${esc(prompt)}</textarea>
+    <div class="lbl">Sampling <span class="small">(${esc(prov(c.provider).name)})</span></div><div class="samp">${samp}</div>
+    <div class="note">${{ default: 'Uses the model or provider defaults.', model: 'Shipped with the governance model; read-only. Add a profile to customise a copy.', project: 'Blank fields use the model default. Save writes ai/chat/profiles.yaml.', custom: 'Applies to this session only.' }[mode]}${c.provider === 'mistral' ? ' Mistral field list not yet verified.' : ''}</div>
+    ${mode === 'project' ? `<button class="b sm p" data-act="saveProfile" ${c.edit.dirty ? '' : 'disabled'} style="align-self:flex-start">Save</button>` : ''}`;
 }
 function renderChat() {
-  const c = S.chat, el = $('chat');
+  const c = S.chat, el = $('chat'), stack = S.layout === 'stack';
+  document.body.classList.toggle('stack', stack);
+  document.querySelectorAll('#layoutSeg button').forEach(b => b.classList.toggle('on', b.dataset.l === S.layout));
   el.className = S.chatOpen ? '' : 'collapsed';
-  if (!S.chatOpen) { el.innerHTML = '<button class="vbtn" data-act="chatToggle">Chat ‹</button>'; return; }
-  const p = prov(c.provider);
-  el.innerHTML = `<div class="chead"><strong>Chat</strong><button class="b sm" data-act="chatToggle">Hide ›</button></div>
-  <div class="cctl"><select data-ch="chatProvider" aria-label="Provider">${PROVIDERS.map(x => `<option value="${x.id}" ${x.id === c.provider ? 'selected' : ''} ${x.ok ? '' : 'disabled'}>${esc(x.name)}${x.ok ? '' : ' (not configured)'}</option>`).join('')}</select>
-  <select data-in="chat.model" aria-label="Model">${p.models.map(m => `<option ${m === c.model ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select>
-  <div class="tools">${Object.keys(c.tools).map(k => `<label class="chip"><input type="checkbox" data-in="chat.tools.${k}" ${c.tools[k] ? 'checked' : ''}> ${esc(k)}</label>`).join('')}<span class="muted small">read-only</span></div></div>
-  <div class="msgs" id="msgs">${c.msgs.map(msgHtml).join('')}</div>
-  <div class="cin"><textarea id="chatIn" rows="3" placeholder="Ask the planner. Enter sends, Shift+Enter adds a line."></textarea><button class="b p" data-act="chatSend">Send</button></div>`;
+  if (!S.chatOpen) { el.innerHTML = `<button class="vbtn" data-act="chatToggle">${stack ? 'Chat ▴' : 'Chat ‹'}</button>`; return; }
+  const sess = curSess(), q = c.search.trim().toLowerCase(), u = ctxUse(sess);
+  const list = Object.entries(c.sessions).filter(([, s]) => !q || s.title.toLowerCase().includes(q)).sort((a, b) => b[1].used - a[1].used)
+    .map(([k, s]) => `<button class="${k === c.session ? 'on' : ''}" data-act="session" data-s="${esc(k)}" title="${esc(s.title)}">${esc(s.title)}<span class="when">${esc(ago(s.used))} · ${s.msgs.length} msgs</span></button>`).join('')
+    || '<span class="muted small">No sessions match.</span>';
+  const models = PROVIDERS.map(p => `<optgroup label="${esc(p.name)}${p.ok ? '' : ' (not configured)'}">${p.models.map(m => `<option value="${p.id}|${esc(m)}" ${p.id === c.provider && m === c.model ? 'selected' : ''}>${esc(m)}</option>`).join('')}</optgroup>`).join('');
+  const profs = c.profiles.map(p => `<option ${p.name === sess.profile ? 'selected' : ''}>${esc(p.name)}</option>`).join('') + `<option value="__custom__" ${sess.profile === '__custom__' ? 'selected' : ''}>Custom Parameters</option>`;
+  const r = 7, circ = 2 * Math.PI * r;
+  el.innerHTML = `<div id="split" title="Drag to resize"></div>
+  <div class="cses">
+    <div class="row between"><strong>Sessions</strong><button class="b sm" data-act="chatToggle">${stack ? 'Hide ▾' : 'Hide ›'}</button></div>
+    <button class="b sm" data-act="newSession" style="align-self:flex-start">+ New session</button>
+    <input id="sessSearch" data-in="chat.search" data-live="chat" value="${esc(c.search)}" placeholder="Search sessions">
+    <div class="sess">${list}</div>
+  </div>
+  <div class="cmain">
+    <div class="cbar"><strong>${esc(sess.title)}</strong><span class="muted">· profile ${esc(sess.profile === '__custom__' ? 'Custom Parameters' : sess.profile)}</span>
+      <span style="margin-left:auto"></span><button class="b sm" data-act="drawer">${c.drawer ? 'Hide settings' : 'Settings'}</button></div>
+    ${c.drawer && !stack ? `<div class="drawer">${drawerHtml()}</div>` : ''}
+    <div class="msgs" id="msgs">${sess.msgs.map(msgHtml).join('')}</div>
+    <div class="composer"><textarea id="chatIn" rows="2" placeholder="Ask the planner. Enter sends, Shift+Enter adds a line."></textarea>
+      <div class="ctool">
+        <select data-ch="chatModel" aria-label="Model" title="Model">${models}</select>
+        <select data-ch="chatProfile" aria-label="Profile" title="Profile">${profs}</select>
+        <select data-in="chat.reasoning" aria-label="Reasoning" title="Reasoning">${['auto', 'off', 'low', 'medium', 'high'].map(x => `<option value="${x}" ${x === c.reasoning ? 'selected' : ''}>Reasoning: ${x}</option>`).join('')}</select>
+        <span class="ring" title="${u.tok} of ${CTX[c.model] || 32768} tokens"><svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="${r}" fill="none" stroke="var(--border)" stroke-width="2.5"/><circle cx="9" cy="9" r="${r}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="${(circ * u.pct / 100).toFixed(1)} ${circ.toFixed(1)}" transform="rotate(-90 9 9)"/></svg>${(u.tok / 1000).toFixed(1)}k · ${u.pct}%</span>
+        <button class="b p sm" data-act="chatSend">Send</button></div></div>
+  </div>
+  ${c.drawer && stack ? `<div class="drawer">${drawerHtml()}</div>` : ''}`;
   const ms = $('msgs'); ms.scrollTop = ms.scrollHeight;
 }
 function chatReply(text) {
   const t = text.toLowerCase(), on = S.chat.tools, m = { role: 'assistant', tools: [], text: '' };
   const draft = 'Retry each Modbus read up to three times with exponential backoff (0.5 s, 1 s, 2 s). Log every retry at WARNING and raise ModbusTimeoutError after the final attempt.';
+  if (S.chat.reasoning !== 'off') { m.think = 'Check the open work item and the task register before answering. (simulated reasoning)'; m.thinkS = 1 + Math.floor(Math.random() * 4); }
   if (/\b(write|create|save|edit|delete|commit)\b/.test(t)) {
     m.tools.push({ call: 'write_file(ai/workspace/…)', res: 'refused: chat tools are read-only', refused: true });
     m.text = 'I cannot write files from the chat. Here is a draft you can insert into the open document:\n\n' + draft; m.insert = draft;
@@ -518,6 +699,8 @@ function chatReply(text) {
     m.tools.push({ call: 'read_text_file(ai/task.md)', res: `${S.tasks.length} rows` });
     m.text = '(simulated reply) The register has ' + S.tasks.filter(x => x.status === 'Active').length + ' active tasks. Suggested description for the open item:\n\n' + draft; m.insert = draft;
   } else m.text = '(simulated reply, no tools enabled)\n\n' + draft, m.insert = draft;
+  const g = 40 + Math.floor(Math.random() * 120), tps = 30 + Math.floor(Math.random() * 15);
+  m.stat = `${ctxUse(curSess()).tok} prompt tok · ${g} gen tok · ${tps} tok/s · ${(g / tps + 0.4).toFixed(1)} s`;
   return m;
 }
 
@@ -556,7 +739,7 @@ function startRun(uuid) {
   const it = item(uuid); if (!it) return;
   const e = S.engine;
   Object.assign(e, { status: 'running', uuid, iteration: 0, log: [], gates: [], budget: 5, blocked: null, queue: runScript(uuid, e.outcome) });
-  it.loop = 'running'; act(`Engine run started for prompt-${uuid}`);
+  it.loop = 'running'; touch(it); act(`Engine run started for prompt-${uuid}`);
   S.screen = 'engine'; render();
   e.timer = setInterval(tick, 320);
 }
@@ -574,6 +757,7 @@ function tick() {
 function finishRun(res) {
   const e = S.engine, it = item(e.uuid);
   clearInterval(e.timer); e.timer = null;
+  touch(it); it.runs.unshift({ when: Date.now(), outcome: res, iterations: e.iteration });
   if (res === 'SHIP') {
     e.status = 'ship'; it.loop = 'ship';
     addChange('src/solax/registers.py', 'M', '@@ def register_map(model):\n-    return REGISTERS\n+    return REGISTERS_BY_MODEL.get(model, REGISTERS_DEFAULT)');
@@ -599,6 +783,31 @@ const ACT = {
   openItem: d => { S.selItem = d.uuid; S.screen = 'items'; },
   selItem: d => { S.selItem = d.uuid; },
   chatToggle: () => { S.chatOpen = !S.chatOpen; renderChat(); },
+  layout: d => { S.layout = d.l; renderChat(); },
+  session: d => { S.chat.session = d.s; S.chat.edit = null; renderChat(); return false; },
+  newSession: () => { const k = 's' + hex8().slice(0, 6), n = Object.keys(S.chat.sessions).length + 1;
+    S.chat.sessions[k] = { title: `Session ${n}`, profile: 'planner', custom: {}, customPrompt: '', used: Date.now(), msgs: [] }; S.chat.session = k; S.chat.edit = null; renderChat(); return false; },
+  drawer: () => { S.chat.drawer = !S.chat.drawer; renderChat(); return false; },
+  dtab: d => { S.chat.drawerTab = d.t; renderChat(); return false; },
+  pickProfile: d => { curSess().profile = d.n; S.chat.edit = null; renderChat(); return false; },
+  delProfile: d => { S.chat.profiles = S.chat.profiles.filter(p => p.name !== d.n);
+    Object.values(S.chat.sessions).forEach(s => { if (s.profile === d.n) s.profile = 'planner'; }); S.chat.edit = null;
+    addChange('ai/chat/profiles.yaml', 'M', `- name: ${d.n}`); renderChat(); renderNav(); return false; },
+  addProfile: () => { modal(`<h2 style="margin-top:0">Add profile</h2><div class="kv"><label class="muted" for="npName">Name</label><input id="npName" placeholder="Profile name"></div>
+      <div class="note">Starts as a copy of the current profile's prompt and sampling values.</div>
+      <div class="row" style="margin-top:14px;justify-content:flex-end"><button class="b" data-act="closeModal">Cancel</button><button class="b p" data-act="createProfile">Add</button></div>`); return false; },
+  createProfile: () => { const n = $('npName').value.trim(); if (!n || profileOf(n) || n === '__custom__') { toast('Enter a new, unique name'); return false; }
+    const src = S.chat.edit || { prompt: '', params: {} };
+    S.chat.profiles.push({ name: n, kind: 'project', prompt: src.prompt, params: Object.assign({}, src.params) });
+    curSess().profile = n; S.chat.edit = null; closeModal(); addChange('ai/chat/profiles.yaml', 'M', `+- name: ${n}`); renderChat(); renderNav(); return false; },
+  saveProfile: () => { const e = S.chat.edit, p = profileOf(e.name); p.prompt = e.prompt; p.params = Object.assign({}, e.params); e.dirty = false;
+    addChange('ai/chat/profiles.yaml', 'M', `@@ ${p.name}\n+  prompt: ${p.prompt.slice(0, 60)}…\n+  params: ${JSON.stringify(p.params)}`); toast(`Profile "${p.name}" saved`); renderChat(); renderNav(); return false; },
+  msgCopy: d => { const m = curSess().msgs[+d.i]; try { navigator.clipboard.writeText(m.text).then(() => toast('Copied'), () => toast('Copy refused by the browser')); } catch (_) { toast('Copy refused by the browser'); } return false; },
+  msgDel: d => { curSess().msgs.splice(+d.i, 1); renderChat(); return false; },
+  msgEdit: d => { const ms = curSess().msgs, t = ms[+d.i].text; ms.splice(+d.i); renderChat(); $('chatIn').value = t; $('chatIn').focus(); return false; },
+  msgRegen: d => { const ms = curSess().msgs, i = +d.i; let u = i - 1; while (u >= 0 && ms[u].role !== 'user') u--;
+    ms[i] = chatReply(u >= 0 ? ms[u].text : ''); renderChat(); return false; },
+  openRelated: d => { toast(`Opens ${d.path} in Authoring (defined in block 3)`); return false; },
   newItem: () => modal(`<h2 style="margin-top:0">New work item</h2><div class="kv">
       <label class="muted" for="niTitle">Title</label><input id="niTitle" placeholder="Short title">
       <label class="muted" for="niPath">Path</label><select id="niPath">${Object.entries(MANIFEST.paths).map(([k, v]) => `<option value="${k}">${esc(k)} (${esc(v.stages.join(' → '))})</option>`).join('')}</select></div>
@@ -607,13 +816,13 @@ const ACT = {
   createItem: () => {
     const title = $('niTitle').value.trim(); if (!title) { toast('Enter a title'); return false; }
     const path = $('niPath').value, uuid = hex8();
-    S.items.push({ uuid, name: slug(title), title, path, docs: {}, approvals: {}, loop: null });
+    S.items.push({ uuid, name: slug(title), title, path, docs: {}, approvals: {}, loop: null, updated: Date.now(), runs: [], related: [] });
     S.tasks.push({ id: uuid, text: title, status: 'Active' }); addChange('ai/task.md', 'M', `+| ${uuid} | ${title} | Active |`);
     S.selItem = uuid; closeModal(); act(`Work item ${uuid} created (${path})`);
     openAuthoring(uuid, MANIFEST.paths[path].detect);
   },
   approve: d => {
-    const it = item(d.uuid); it.approvals[d.stage] = true;
+    const it = item(d.uuid); it.approvals[d.stage] = true; touch(it);
     S.git.log.unshift({ h: hash7(), m: `chore(approve): ${d.uuid} ${d.stage}` }); S.git.ahead++;
     if (d.stage === 'accept') { const t = S.tasks.find(x => x.id === d.uuid); if (t) t.status = 'Done'; addChange('ai/task.md', 'M', `-| ${d.uuid} | ${it.title} | Active |\n+| ${d.uuid} | ${it.title} | Done |`); S.engine.status = 'idle'; }
     act(`Approved ${d.stage} for ${d.uuid}`); toast(`approve.py ${d.uuid} ${d.stage}: recorded and committed`);
@@ -624,7 +833,7 @@ const ACT = {
   resetEngine: () => resetEngine(),
   returnTo: d => {
     const it = item(d.uuid), back = LOOP_STAGE.on_blocked;
-    it.loop = null; it.approvals[back] = false; S.engine.status = 'idle'; S.engine.blocked = null;
+    it.loop = null; it.approvals[back] = false; touch(it); S.engine.status = 'idle'; S.engine.blocked = null;
     act(`${d.uuid} returned to stage ${back}`);
     openAuthoring(d.uuid, back, 'Revise the deliverables: the worker needs src/solax/models/x1.py in its write scope.');
   },
@@ -657,7 +866,7 @@ const ACT = {
     const it = x.uuid && item(x.uuid), p = draftPath(x);
     addChange(p, it && it.docs[x.stage] ? 'M' : 'A', (x.mode === 'md' ? x.md : buildMd(x)).split('\n').slice(0, 14).map(l => '+' + l).join('\n'));
     if (it && x.stage) {
-      it.docs[x.stage] = { title: x.title, status: x.status, body: x.body, deliverables: x.deliverables };
+      touch(it); it.docs[x.stage] = { title: x.title, status: x.status, body: x.body, deliverables: x.deliverables };
       if (STAGE(x.stage).approval && it.approvals[x.stage]) { it.approvals[x.stage] = false; toast('Document changed: its approval was reset'); }
       S.selItem = it.uuid; S.screen = 'items';
     }
@@ -665,7 +874,7 @@ const ACT = {
   },
   closeDraft: () => { S.draft = null; },
   addTask: () => { const v = $('newTask').value.trim(); if (!v) return false; S.tasks.push({ id: '—', text: v, status: 'Active' }); addChange('ai/task.md', 'M', `+| — | ${v} | Active |`); },
-  selAudit: d => { S.selAudit = d.id; },
+  selAudit: d => { S.selAudit = d.id; if (d.go) S.screen = d.go; },
   startAudit: () => {
     const a = { id: 'audit-' + hex8(), cls: 'ad-hoc', target: $('audTarget').value, status: 'running', auditor: $('audBy').value, findings: null, autonomy: '—' };
     S.audits.unshift(a); act(`Ad-hoc audit ${a.id} started`);
@@ -691,12 +900,13 @@ const ACT = {
   copy: d => { try { navigator.clipboard.writeText(d.text).then(() => toast('Copied'), () => toast('Copy refused by the browser')); } catch (_) { toast('Copy refused by the browser'); } return false; },
   chatSend: () => {
     const el = $('chatIn'), v = el.value.trim(); if (!v) return false;
-    S.chat.msgs.push({ role: 'user', text: v }); renderChat();
-    setTimeout(() => { S.chat.msgs.push(chatReply(v)); renderChat(); }, 600);
+    const s = curSess();
+    s.msgs.push({ role: 'user', text: v }); s.used = Date.now(); renderChat();
+    setTimeout(() => { s.msgs.push(chatReply(v)); renderChat(); renderNav(); if (S.screen === 'items') renderMain(); }, 600);
     return false;
   },
   insert: d => {
-    const m = S.chat.msgs[+d.i];
+    const m = curSess().msgs[+d.i];
     if (!S.draft) { toast('Open a document in Authoring first'); return false; }
     if (S.draft.mode === 'md') { S.draft.md += '\n' + m.insert + '\n'; S.draft.mdEdited = true; }
     else S.draft.body = (S.draft.body ? S.draft.body + '\n\n' : '') + m.insert;
@@ -709,7 +919,10 @@ function cfgChanged() {
   renderNav();
 }
 const CH = {
-  chatProvider: el => { S.chat.provider = el.value; S.chat.model = prov(el.value).models[0]; renderChat(); },
+  showClosed: el => { S.showClosed = el.checked; renderMain(); },
+  itemFilter: el => { S.itemFilter = el.value; renderMain(); },
+  chatModel: el => { const [pv, m] = el.value.split('|'); if (!prov(pv).ok) return; S.chat.provider = pv; S.chat.model = m; renderChat(); },
+  chatProfile: el => { curSess().profile = el.value; S.chat.edit = null; renderChat(); },
   roleProvider: el => { const r = el.dataset.role; S.config[r].provider = el.value; S.config[r].model = prov(el.value).models[0]; cfgChanged(); renderMain(); },
   taskStatus: el => { const t = S.tasks[+el.dataset.i]; t.status = el.value; addChange('ai/task.md', 'M', `+| ${t.id} | ${t.text} | ${t.status} |`); renderNav(); },
   gitToggle: el => { const c = S.git.changes.find(x => x.path === el.dataset.path); c.on = el.checked; renderMain(); }
@@ -745,15 +958,26 @@ document.addEventListener('click', e => {
   if (el.tagName === 'A') e.preventDefault();
   if (el !== e.target && e.target.closest('input,select,textarea,label')) return;
   const r = ACT[el.dataset.act](el.dataset, el);
-  if (r === false || el.dataset.act === 'chatToggle') return;
+  if (r === false || ['chatToggle', 'layout', 'session'].includes(el.dataset.act)) return;
   render();
 });
 const onField = e => {
   const el = e.target;
+  if (el.dataset.pf || el.dataset.pp) {
+    const sess = curSess(), custom = sess.profile === '__custom__', ed = S.chat.edit;
+    if (el.dataset.pp) { if (custom) sess.customPrompt = el.value; else ed.prompt = el.value; }
+    else { const v = el.value === '' ? undefined : Number(el.value); if (custom) sess.custom[el.dataset.pf] = v; else ed.params[el.dataset.pf] = v; }
+    if (!custom && !ed.dirty && e.type === 'input') { ed.dirty = true; const b = document.querySelector('[data-act="saveProfile"]'); if (b) b.disabled = false; }
+    return;
+  }
   if (el.dataset.in) {
     if (el.type === 'radio' && !el.checked) return;
     setPath(el.dataset.in, el.type === 'checkbox' ? el.checked : el.value);
     if (el.dataset.in === 'draft.md') S.draft.mdEdited = true;
+    if (el.dataset.live && e.type === 'input') {
+      const id = el.id, pos = el.selectionStart; el.dataset.live === 'chat' ? renderChat() : renderMain();
+      const n = $(id); if (n) { n.focus(); n.setSelectionRange(pos, pos); }
+    }
   }
 };
 document.addEventListener('input', onField);
@@ -768,6 +992,15 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && !$('overlay').hidden) closeModal();
 });
 $('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') closeModal(); });
+document.addEventListener('pointerdown', e => {
+  if (e.target.id !== 'split') return;
+  e.preventDefault();
+  const y0 = e.clientY, h0 = $('chat').offsetHeight;
+  const move = ev => document.body.style.setProperty('--ch', Math.max(140, Math.min(window.innerHeight - 180, h0 + y0 - ev.clientY)) + 'px');
+  const up = () => { document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); };
+  document.addEventListener('pointermove', move);
+  document.addEventListener('pointerup', up);
+});
 
 render(); renderChat();
 }
