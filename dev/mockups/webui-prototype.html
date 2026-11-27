@@ -90,7 +90,8 @@ pre.blk{font-family:var(--mono);font-size:12px;background:var(--panel);border-ra
 <body>
 <header>
   <span class="brand">AI-G&amp;O</span>
-  <button class="b sm" data-act="go" data-id="projects" title="Switch project"><span id="proj"></span> ▾</button>
+  <span id="proj"></span>
+  <span class="muted small" id="hdrAddr"></span>
   <span class="muted small" id="hdrModel"></span>
   <span class="proto">Prototype · simulated data</span>
 </header>
@@ -151,13 +152,6 @@ const PROVIDERS = [
 ];
 const prov = id => PROVIDERS.find(p => p.id === id);
 
-/* user-level instance registry (option D) */
-const REGISTRY = [
-  { name: 'solax-modbus', port: 8731, pid: 41822, running: true },
-  { name: 'GTach', port: 8732, pid: 41907, running: true },
-  { name: 'e-Paper-IP-Display', port: 8733, pid: 39011, running: false }
-];
-
 /* ---------- application state (sample data) ---------- */
 const S = {
   project: 'solax-modbus', screen: 'dashboard', chatOpen: true, selItem: 'a3f2c1d9', selAudit: null, settingsTab: 'providers', draft: null,
@@ -187,7 +181,8 @@ const S = {
     reviewer: { provider: 'mistral', model: 'mistral-medium-2604' },
     loop: { max_iterations: 5, phase_max_iterations: 20, mcp_error_threshold: 3 },
     gates: { pytest: '{python} -m pytest -q {targets}' },
-    readable: ['src/', 'tests/', 'logs/'], release: null
+    readable: ['src/', 'tests/', 'logs/'], release: null,
+    webui: { port: 8731 }
   },
   chat: { provider: 'omlx', model: 'mistralai_Devstral-Small-2-24B-Instruct-2512-MLX-8Bit',
     tools: { read_text_file: true, list_directory: true, search: true, work_status: true },
@@ -447,7 +442,7 @@ function vGit() {
 }
 
 function vSettings() {
-  const tabs = [['providers', 'Providers'], ['roles', 'Roles'], ['gates', 'Gates'], ['loop', 'Loop'], ['access', 'Access'], ['release', 'Release'], ['screens', 'Screens']];
+  const tabs = [['providers', 'Providers'], ['roles', 'Roles'], ['gates', 'Gates'], ['loop', 'Loop'], ['access', 'Access'], ['webui', 'Web GUI'], ['release', 'Release'], ['screens', 'Screens']];
   const c = S.config;
   const roleSel = role => `<select data-ch="roleProvider" data-role="${role}">${PROVIDERS.map(p => `<option value="${p.id}" ${p.id === c[role].provider ? 'selected' : ''} ${p.ok ? '' : 'disabled'}>${esc(p.name)}${p.ok ? '' : ' (not configured)'}</option>`).join('')}</select>
     <select data-in="config.${role}.model" data-cfg="1">${prov(c[role].provider).models.map(m => `<option ${m === c[role].model ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select>`;
@@ -466,6 +461,11 @@ function vSettings() {
       ${c.readable.map((p, i) => `<div class="row" style="margin:4px 0"><code>${esc(p)}</code><button class="b sm" data-act="rmPath" data-i="${i}">Remove</button></div>`).join('')}
       <div class="row" style="margin-top:6px"><input id="newPath" placeholder="e.g. docs/"><button class="b" data-act="addPath">Add</button></div>
       <div class="note">Files matched by .gitignore are excluded unless listed. Only the engine writes outside ai/, within each task's write scope.</div>`,
+    webui: `<div class="kv"><label class="muted">Port</label><input type="number" min="1024" max="65535" data-in="config.webui.port" data-cfg="1" value="${c.webui.port}" style="width:100px">
+      <span class="muted">Address</span><span><code>http://127.0.0.1:${c.webui.port}/</code> <span class="muted small">(localhost only)</span></span>
+      <span class="muted">Start</span><span><code>ai/webui/start</code> <span class="muted small">(runs in the foreground, opens the browser)</span></span>
+      <span class="muted">Stop</span><span>Ctrl-C in that terminal</span></div>
+      <div class="note">If the port is taken, the next free port is used and the address is printed at startup. One GUI per project; no project switching. Engine runs are separate processes: they keep running when the GUI stops, and the GUI loads the current run state when it starts again.</div>`,
     release: `<div class="kv"><span class="muted">Installed</span><span>v0.3.0</span><span class="muted">Latest</span><span>${c.release ? esc(c.release.latest) + ' <span class="muted small">(sample)</span>' : '<span class="muted">not checked</span>'}</span></div>
       <div class="row" style="margin-top:10px"><button class="b" data-act="releaseCheck">Check for release</button></div>
       ${c.release ? `<div class="note">The GUI does not update itself. Run in a terminal:</div><pre class="blk">${esc(c.release.cmd)}</pre><button class="b sm" data-act="copy" data-text="${esc(c.release.cmd)}">Copy</button>` : ''}`,
@@ -476,15 +476,6 @@ function vSettings() {
   <div class="tabs">${tabs.map(([k, l]) => `<button data-act="tab" data-t="${k}" class="${S.settingsTab === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="card">${body}</div>`;
 }
 
-function vProjects() {
-  return `<h1>Projects</h1><div class="card"><table><thead><tr><th>Project</th><th>Address</th><th>PID</th><th>State</th><th></th></tr></thead><tbody>${REGISTRY.map(p =>
-    `<tr><td>${esc(p.name)}</td><td><code>http://127.0.0.1:${p.port}/</code></td><td class="muted">${p.pid}</td>
-    <td>${p.running ? chip('running', 's-done') : chip('not running')}</td>
-    <td>${p.name === S.project ? chip('current', 's-current') : p.running ? `<button class="b sm" data-act="pickProject" data-name="${esc(p.name)}">Open</button>` : '<span class="muted small">stale entry, removed on next scan</span>'}</td></tr>`).join('')}</tbody></table>
-  <div class="note">Each project runs its own GUI from its <code>ai/</code> folder on an automatically assigned port. Instances record themselves in a user-level registry file (name and location not decided); every instance reads it to show this list.</div></div>`;
-}
-
-registerScreen({ id: 'projects', label: 'Projects', source: 'core', render: vProjects });
 registerScreen({ id: 'dashboard', label: 'Dashboard', source: 'core', render: vDashboard, badge: () => { const n = alerts().filter(a => a.l !== 'info').length; return n ? [n, true] : null; } });
 registerScreen({ id: 'items', label: 'Work items', source: 'core', render: vItems, badge: () => { const n = S.items.filter(i => { const c = currentStage(i); return c && stageState(i, c) === 'awaiting'; }).length; return n ? [n, true] : null; } });
 registerScreen({ id: 'authoring', label: 'Authoring', source: 'core', render: vAuthoring, badge: () => S.draft ? ['1', false] : null });
@@ -608,7 +599,6 @@ const ACT = {
   openItem: d => { S.selItem = d.uuid; S.screen = 'items'; },
   selItem: d => { S.selItem = d.uuid; },
   chatToggle: () => { S.chatOpen = !S.chatOpen; renderChat(); },
-  pickProject: d => { const p = REGISTRY.find(x => x.name === d.name); S.project = d.name; toast(`The real GUI opens http://127.0.0.1:${p.port}/ (sample data unchanged)`); },
   newItem: () => modal(`<h2 style="margin-top:0">New work item</h2><div class="kv">
       <label class="muted" for="niTitle">Title</label><input id="niTitle" placeholder="Short title">
       <label class="muted" for="niPath">Path</label><select id="niPath">${Object.entries(MANIFEST.paths).map(([k, v]) => `<option value="${k}">${esc(k)} (${esc(v.stages.join(' → '))})</option>`).join('')}</select></div>
@@ -738,10 +728,11 @@ function renderNav() {
     return `<button data-act="go" data-id="${s.id}" class="${S.screen === s.id ? 'active' : ''}"><span>${esc(s.label)}</span>${b ? `<span class="badge ${b[1] ? 'hot' : ''}">${esc(b[0])}</span>` : ''}</button>`;
   }).join('');
   $('proj').textContent = S.project;
+  $('hdrAddr').textContent = `127.0.0.1:${S.config.webui.port}`;
   $('hdrModel').textContent = `${MANIFEST.model.name} ${MANIFEST.model.version}`;
 }
 function renderMain() {
-  const s = SCREENS.find(x => x.id === S.screen) || SCREENS[1];
+  const s = SCREENS.find(x => x.id === S.screen) || SCREENS[0];
   $('main').innerHTML = s.render();
   const lg = $('log'); if (lg) lg.scrollTop = lg.scrollHeight;
 }
